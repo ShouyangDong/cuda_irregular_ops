@@ -3,9 +3,10 @@ from ctypes import CDLL, c_void_p, c_double, c_int
 import subprocess
 import glob
 import os
+import math
 import ctypes
 import argparse
-import torch
+
 from multi_head_attention import MultiHeadAttention
 
 def run_compilation(so_name, file_name):
@@ -23,19 +24,28 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+def ref_program(q, k, v, causal=False):
+    import torch
+    import torch.nn.functional as F
+    score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
+    if causal:
+        mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
+        mask = mask.masked_fill(mask==1, torch.finfo(q.dtype).min)
+        mask = mask.to(q.device, q.dtype)
+        score = score + mask
+    attn = F.softmax(score, dim=-1)
+    output = torch.matmul(attn, v)
+    return o
+
 
 if __name__ == "__main__":
     name = "multiHeadAttentionForward"
-    # Make dummy data.
-    B = 3
-    N_t = 16
-    N_s = 20
-    E = 384
-    num_heads = 8
-    attn_mask = None
-    query = torch.randn(B, N_t, E)
-    key = torch.randn(B, N_s, E)
-    value = torch.randn(B, N_s, E)
+    causal = False
+    shape = [64, 2048, 12, 256]
+    dtype = "float32"
+    query = torch.randn(shape, dtype)
+    key = torch.randn(shape, dtype)
+    value = torch.randn(shape, dtype)
 
     file_name = "mha.cpp"
     so_name = "mha.so"
