@@ -6,6 +6,7 @@ import os
 import ctypes
 import argparse
 import torch
+from multi_head_attention import MultiHeadAttention
 
 def run_compilation(so_name, file_name):
     try:
@@ -22,14 +23,22 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
-def ref_program(x):
-    return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-12)
 
 if __name__ == "__main__":
-    name = "rms_norm"
-    shape = [8192, 8192]
-    file_name = "rms_norm.cpp"
-    so_name = "rms_norm.so"
+    name = "multiHeadAttentionForward"
+    # Make dummy data.
+    B = 3
+    N_t = 16
+    N_s = 20
+    E = 384
+    num_heads = 8
+    attn_mask = None
+    query = torch.randn(B, N_t, E)
+    key = torch.randn(B, N_s, E)
+    value = torch.randn(B, N_s, E)
+
+    file_name = "mha.cpp"
+    so_name = "mha.so"
     
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
@@ -38,12 +47,14 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float)
     ]
     function.restype = None
     # 创建输入数组
     dtype = "float32"
-    input_array = np.random.uniform(size=shape).astype(dtype)
-    expected_output = ref_program(torch.from_numpy(input_array))
+    attn = MultiHeadAttention(E, num_heads)
+    attn_value, attn_weights = attn(query, key, value, attn_mask)
 
     # 创建输出数组
     output_array = np.zeros_like(input_array)

@@ -1,0 +1,16 @@
+extern "C" __mlu_global__ void rms_norm_kernel(float* A, float* B) {
+    __nram_float local_A[8192];
+    __nram_float A_square[8192];
+    __nram_float sum[128];
+    for (int i = 0; i < 8192; i++) {
+        __memcpy(local_A, A + i * 8192, 8192 * 4, GDRAM2NRAM);
+        __bang_mul(A_square, local_A, local_A, 8192);
+        __bang_sumpool(sum, A_square, 8192, 1);
+        __bang_div(sum, sum, 8192, 128);
+        __bang_add(sum, sum, 1e-5f, 128);
+        __bang_sqrt(sum, sum, 128);
+        __bang_sqrt(sum, 1, sum, 128);
+        __bang_mul_const(local_A, local_A, sum[0], 8192);
+        __memcpy(B + i * 8192, local_A, 8192 * 4,  NRAM2GDRAM);
+    }
+}
