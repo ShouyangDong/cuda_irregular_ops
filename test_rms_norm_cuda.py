@@ -10,7 +10,7 @@ import torch
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-o", so_name, file_name],
+            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -23,13 +23,13 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 def ref_program(x):
-    return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-12)
+    return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)
 
 if __name__ == "__main__":
     name = "rms_norm"
     shape = [8192, 8192]
-    file_name = "rms_norm.cpp"
-    so_name = "rms_norm.so"
+    file_name = "rms_norm.cu"
+    so_name = "rms_norm_cuda.so"
     
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))

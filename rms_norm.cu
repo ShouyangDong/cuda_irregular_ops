@@ -1,43 +1,53 @@
-#include <tl_templates/gemm.h>
-#include <tl_templates/copy.h>
-#include <tl_templates/reduce.h>
-#include <tl_templates/threadblock_swizzle.h>
+#include <cuda_runtime.h>
+#include "stdio.h"
 
-extern "C" __global__ void __launch_bounds__(128) main_kernel(float* __restrict__ A, float* __restrict__ B) {
-  extern __shared__ uchar buf_dyn_shmem[];
-  float A_local[64];
-  float A_powsum[1];
-  #pragma unroll
-  for (int i = 0; i < 16; ++i) {
-    *(float4*)(((float*)buf_dyn_shmem) + (((i * 512) + (((int)threadIdx.x) * 4)) + 128)) = *(float4*)(A + (((((int)blockIdx.x) * 8192) + (i * 512)) + (((int)threadIdx.x) * 4)));
-  }
-  __syncthreads();
-  #pragma unroll
-  for (int i_1 = 0; i_1 < 16; ++i_1) {
-    float4 __1;
-      float4 v_ = *(float4*)(((float*)buf_dyn_shmem) + (((i_1 * 512) + (((int)threadIdx.x) * 4)) + 128));
-      __1.x = (v_.x*v_.x);
-      __1.y = (v_.y*v_.y);
-      __1.z = (v_.z*v_.z);
-      __1.w = (v_.w*v_.w);
-    *(float4*)(A_local + (i_1 * 4)) = __1;
-  }
-  A_powsum[0] = 0.000000e+00f;
-  #pragma unroll
-  for (int rv = 0; rv < 64; ++rv) {
-    A_powsum[0] = (A_powsum[0] + A_local[(((rv & 15) * 4) + (rv >> 4))]);
-  }
-  __syncthreads();
-  A_powsum[0] = tl::AllReduce<tl::SumOp, 128, 1>::run(A_powsum[0], (&(((float*)buf_dyn_shmem)[0])));
-  A_powsum[0] = ((1.000000e+00f / sqrtf((A_powsum[0] * 1.220703e-04f))) + 1.000000e-12f);
-  __syncthreads();
-  #pragma unroll
-  for (int i_2 = 0; i_2 < 64; ++i_2) {
-    ((float*)buf_dyn_shmem)[(((i_2 * 128) + ((int)threadIdx.x)) + 128)] = (((float*)buf_dyn_shmem)[(((i_2 * 128) + ((int)threadIdx.x)) + 128)] * A_powsum[0]);
-  }
-  __syncthreads();
-  #pragma unroll
-  for (int i_3 = 0; i_3 < 16; ++i_3) {
-    *(float4*)(B + (((((int)blockIdx.x) * 8192) + (i_3 * 512)) + (((int)threadIdx.x) * 4))) = *(float4*)(((float*)buf_dyn_shmem) + (((i_3 * 512) + (((int)threadIdx.x) * 4)) + 128));
-  }
+
+__global__ void cuda_rms_norm(float* A, float* B, int size) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    float eps = 1e-5f;
+    
+    if (idx < size) {
+        // Calculate sum
+        float sum = 0.0;
+        for (int j = 0; j < size; j++) {
+            sum += A[idx * size + j] * A[idx * size + j];
+        }
+
+        // Calculate mean
+        float mean = sum / size;
+
+        // Calculate scale
+        float scale = 1.0 / sqrt(mean + eps);
+
+        // Normalize and store in B
+        for (int j = 0; j < size; j++) {
+            B[idx * size + j] = A[idx * size + j] * scale;
+        }
+    }
+}
+
+
+extern "C" void rms_norm_kernel(float* A, float* B) {
+    // Allocate memory on the device
+    float *d_A, *d_B;
+    int size = 8192;
+    int num_elements = size * size;
+    cudaMalloc(&d_A, num_elements * sizeof(float));
+    cudaMalloc(&d_B, num_elements * sizeof(float));
+
+    // Copy data from host to device
+    cudaMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Define grid and block dimensions
+    int block_size = 256;
+    int num_blocks = (size + block_size - 1) / block_size;
+
+    // Launch kernel
+    cuda_rms_norm<<<num_blocks, block_size>>>(d_A, d_B, size);
+
+    // Copy the result back to host
+    cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
+    // Free device memory
+    cudaFree(d_A);
+    cudaFree(d_B);
 }
