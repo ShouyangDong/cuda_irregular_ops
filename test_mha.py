@@ -6,8 +6,8 @@ import os
 import math
 import ctypes
 import argparse
-
-from multi_head_attention import MultiHeadAttention
+import torch
+import torch.nn.functional as F
 
 def run_compilation(so_name, file_name):
     try:
@@ -25,8 +25,6 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 def ref_program(q, k, v, causal=False):
-    import torch
-    import torch.nn.functional as F
     score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
     if causal:
         mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
@@ -35,17 +33,18 @@ def ref_program(q, k, v, causal=False):
         score = score + mask
     attn = F.softmax(score, dim=-1)
     output = torch.matmul(attn, v)
-    return o
+    return output
 
 
 if __name__ == "__main__":
     name = "multiHeadAttentionForward"
     causal = False
     shape = [64, 2048, 12, 256]
-    dtype = "float32"
-    query = torch.randn(shape, dtype)
-    key = torch.randn(shape, dtype)
-    value = torch.randn(shape, dtype)
+    dtype = torch.float32
+
+    query = torch.randn(shape).to(dtype)
+    key = torch.randn(shape).to(dtype)
+    value = torch.randn(shape).to(dtype)
 
     file_name = "mha.cpp"
     so_name = "mha.so"
@@ -62,9 +61,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # 创建输入数组
-    dtype = "float32"
-    attn = MultiHeadAttention(E, num_heads)
-    attn_value, attn_weights = attn(query, key, value, attn_mask)
+    expected_output = ref_program(query, key, value)
 
     # 创建输出数组
     output_array = np.zeros_like(input_array)
