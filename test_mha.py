@@ -64,13 +64,14 @@ if __name__ == "__main__":
     expected_output = ref_program(query, key, value)
 
     # 创建输出数组
-    output_array = np.zeros_like(input_array)
-
+    output_array = np.zeros_like(query.numpy())
     # 将输入数组和输出数组转换为C指针类型
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_q = query.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_k = key.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_v = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(input_ptr, output_ptr)
+    function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr)
     # 验证结果
 
     np.testing.assert_allclose(
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     import time 
     t1 = time.time()
     for i in range(20):
-        function(input_ptr, output_ptr)    
+        function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr)   
     t2 = time.time()
     cost = (t2 - t1) / 20.0 * 1e3
     print("[INFO]*******cost: ", cost)
