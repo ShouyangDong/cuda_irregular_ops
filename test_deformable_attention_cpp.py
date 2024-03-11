@@ -1,0 +1,134 @@
+import torch
+import torch.nn.functional as F
+import numpy as np
+from ctypes import CDLL, c_void_p, c_double, c_int
+import os
+import ctypes
+import subprocess
+def run_compilation(so_name, file_name):
+    try:
+        output = subprocess.run(
+            ["g++", "-shared", "-fPIC", "-o", so_name, file_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
+            timeout=15,
+        )
+        return True, output
+    except subprocess.CalledProcessError as e:
+        return False, e.output
+
+
+@torch.no_grad()
+def deformable_attention_pytorch(
+    value, value_spatial_shapes, sampling_locations, attention_weights
+):
+    """Pytorch implementation of deformable attention from
+    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py"""
+    # for debug and test only,
+    # need to use cuda version instead
+    N_, S_, M_, D_ = value.shape
+    _, Lq_, M_, L_, P_, _ = sampling_locations.shape
+    value_list = value.split([H_ * W_ for H_, W_ in value_spatial_shapes], dim=1)
+    sampling_grids = 2 * sampling_locations - 1
+    sampling_value_list = []
+    for lid_, (H_, W_) in enumerate(value_spatial_shapes):
+        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_, D_, H_, W_
+        value_l_ = (
+            value_list[lid_].flatten(2).transpose(1, 2).reshape(N_ * M_, D_, H_, W_)
+        )
+        # N_, Lq_, M_, P_, 2 -> N_, M_, Lq_, P_, 2 -> N_*M_, Lq_, P_, 2
+        sampling_grid_l_ = sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        # N_*M_, D_, Lq_, P_
+        sampling_value_l_ = F.grid_sample(
+            value_l_,
+            sampling_grid_l_,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=False,
+        )
+        sampling_value_list.append(sampling_value_l_)
+    # (N_, Lq_, M_, L_, P_) -> (N_, M_, Lq_, L_, P_) -> (N_, M_, 1, Lq_, L_*P_)
+    attention_weights = attention_weights.transpose(1, 2).reshape(
+        N_ * M_, 1, Lq_, L_ * P_
+    )
+    output = (
+        (torch.stack(sampling_value_list, dim=-2).flatten(-2) * attention_weights)
+        .sum(-1)
+        .view(N_, M_ * D_, Lq_)
+    )
+    return output.transpose(1, 2).contiguous()
+
+
+
+if __name__ == "__main__":
+    N, M, D = (
+        1,
+        8,
+        256,
+    )  # batch size, number of heads, depth
+    Lq, L, P = (
+        100,
+        4,
+        4,
+    )  # query length, levels, points to sample. models/deformable_detr.py says 100 length query for COCO.
+    shapes = torch.as_tensor(
+        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
+    )
+    level_start_index = torch.cat(
+        (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
+    )
+    S = sum([(H * W).item() for H, W in shapes])
+
+    value = torch.rand(N, S, M, D) * 0.01
+    sampling_locations = torch.rand(N, Lq, M, L, P, 2)
+    attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
+    )
+    # Check for correctness
+    torch_da = deformable_attention_pytorch(
+        value, shapes, sampling_locations, attention_weights
+    )
+    print(torch_da.shape)
+    name = "deformable_attention"
+    file_name = "deformable_attention.cpp"
+    so_name = "deformable_attention.so"
+    
+    success, output = run_compilation(so_name, file_name)
+    lib = CDLL(os.path.join(os.getcwd(), so_name))
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float)
+    ]
+    function.restype = None
+
+    # 创建输出数组
+    output_array = np.zeros(shape=[1, 100,2048]).astype("float32")
+
+    # 将输入数组和输出数组转换为C指针类型
+    value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    shapes_ptr = shapes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    attention_weights_ptr = attention_weights.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(value_ptr, shapes_ptr, sampling_locations_ptr, attention_weights_ptr, output_ptr)
+    # 验证结果
+    np.testing.assert_allclose(
+        output_array,
+        torch_da.numpy(),
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
+    print("验证通过！")
