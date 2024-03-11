@@ -5,7 +5,6 @@ import glob
 import os
 import ctypes
 import argparse
-import torch
 
 def run_compilation(so_name, file_name):
     try:
@@ -27,7 +26,7 @@ def ref_program(x, gamma, beta, eps=1e-5):
     std = np.std(x, axis=-1, keepdims=True)
     x_normalized = (x - mean) / (std + eps)
     out = gamma * x_normalized + beta
-    return out, mean
+    return out
 
 
 
@@ -45,7 +44,6 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float)
     ]
     function.restype = None
@@ -54,10 +52,9 @@ if __name__ == "__main__":
     input_array = np.random.uniform(size=shape).astype(dtype)
     gamma_array = np.random.uniform(size=shape[-1:]).astype(dtype)
     beta_array = np.random.uniform(size=shape[-1:]).astype(dtype)
-    expected_output, mean = ref_program(input_array, gamma_array, beta_array)
+    expected_output = ref_program(input_array, gamma_array, beta_array)
 
     # 创建输出数组
-    tmp = np.zeros(shape=[2, 4, 1])
     output_array = np.zeros_like(input_array)
 
     # 将输入数组和输出数组转换为C指针类型
@@ -65,24 +62,14 @@ if __name__ == "__main__":
     gamma_ptr = gamma_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    tmp_ptr = tmp.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
     print("[IFNO]launch start!")
-    function(input_ptr, gamma_ptr, beta_ptr, output_ptr, tmp_ptr)
+    function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
     # 验证结果
 
-    # np.testing.assert_allclose(
-    #     output_array,
-    #     expected_output,
-    #     rtol=1e-03,
-    #     atol=1e-03,
-    #     equal_nan=True,
-    #     err_msg="",
-    #     verbose=True,
-    # )
     np.testing.assert_allclose(
-        tmp,
-        mean,
+        output_array,
+        expected_output,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
