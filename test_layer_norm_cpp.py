@@ -63,7 +63,6 @@ if __name__ == "__main__":
     beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    print("[IFNO]launch start!")
     function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
     # 验证结果
 
@@ -77,10 +76,10 @@ if __name__ == "__main__":
         verbose=True,
     )
     print("验证通过！")
-    # import time 
-    # t1 = time.time()
-    # for i in range(20):
-    #     function(input_ptr, gamma_ptr, beta_ptr, output_ptr)  
-    # t2 = time.time()
-    # cost = (t2 - t1) / 20.0 * 1e3
-    # print("[INFO]*******cost: ", cost)
+    import time 
+    t1 = time.time()
+    for i in range(20):
+        function(input_ptr, gamma_ptr, beta_ptr, output_ptr)  
+    t2 = time.time()
+    cost = (t2 - t1) / 20.0 * 1e3
+    print("[INFO]*******cost: ", cost)
