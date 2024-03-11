@@ -66,10 +66,3 @@ if __name__ == "__main__":
     )
 
     print("验证通过！")
-    import time 
-    t1 = time.time()
-    for i in range(20):
-        function(input_ptr, output_ptr)    
-    t2 = time.time()
-    cost = (t2 - t1) / 20.0 * 1e3
-    print("[INFO]*******cost: ", cost)
