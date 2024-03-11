@@ -1,27 +1,54 @@
 #include <cmath>
-
+#include <stdio.h>
 extern "C" void layer_norm_kernel(
-    float* input,
-    float* output,
-    float epsilon) 
+    float* input, // shape=[2, 4, 8]
+    float* gamma, // shape=[8]
+    float* beta,  // shape=[8]
+    float* output, // shape=[2, 4, 8]
+    float* tmp)
 {
-    float mean = 0.0;
-    float variance = 0.0;
-    // Calculate mean
-    for (int i_mean = 0; i_mean < size; i_mean++) {
-        mean += input[i];
-    }
-    mean /= size;
 
-    // Calculate variance
-    for (int i_var = 0; i_var < size; i++) {
-        variance += pow(input[i_var] - mean, 2);
-    }
-    variance /= size;
+    // float diff[8];
+    printf("kernel start!");
+    for (int i_bs = 0; i_bs < 2; i_bs++) {
+        for (int i_seq = 0; i_seq < 4; i_seq) {
+            float mean = 0.0;
+            float variance = 0.0;
+            // Calculate mean
+            for (int i_mean = 0; i_mean < 8; i_mean++) {
+                mean += input[i_bs * 4 * 8 + i_seq * 8 + i_mean];
+            }
+            mean /= 8;
+            tmp[i_bs * 4 + i_seq] = mean;
+    //         // // Calculate variance
+    //         // for (int i_diff = 0; i_diff < 8; i_diff++) {
+    //         //     diff[i_diff] = input[i_bs * 4 * 8 + i_seq * 8 + i_diff] - mean;
+    //         // }
 
-    // Normalize input
-    // for (int i = 0; i < input.size(); i++) {
-    for (int i_norm = 0; i_norm < size; i_norm++) {
-        input[i] = (input[i] - mean) / sqrt(variance + epsilon);
+    //         // for (int i_pow = 0; i_pow < 8; i_pow++) {
+    //         //     diff[i_pow] = diff[i_pow] * diff[i_pow];
+    //         // }
+    //         // for (int i_var = 0; i_var < 8; i_var++) {
+    //         //     variance += diff[i_var];
+    //         // }
+    //         // variance /= 8;
+
+    //         // // Normalize input
+    //         // for (int i_norm = 0; i_norm < 8; i_norm++) {
+    //         //     diff[i_norm] = (input[i_bs * 4 * 8 + i_seq * 8 + i_norm] - mean);
+    //         // }
+
+    //         // for (int i_mul = 0; i_mul < 8; i_mul++) {
+    //         //     diff[i_mul] = diff[i_mul] * gamma[i_mul];
+    //         // }
+
+    //         // for (int i_div = 0; i_div < 8; i_div++) {
+    //         //     diff[i_div] = diff[i_div] / (variance + 1e-5f);
+    //         // }
+
+    //         // for (int i_bet = 0; i_bet < 8; i_bet++) {
+    //         //     output[i_bs * 4 * 8 + i_seq * 8 + i_bet] = diff[i_bet] + beta[i_bet];
+    //         // }
+        }
     }
 }
