@@ -5,6 +5,7 @@ from ctypes import CDLL, c_void_p, c_double, c_int
 import os
 import ctypes
 import subprocess
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -111,7 +112,7 @@ if __name__ == "__main__":
     function.restype = None
 
     # 创建输出数组
-    output_array = np.zeros(shape=[1, 100,2048]).astype("float32")
+    output_array = np.zeros(shape=[1, 100, 2048]).astype("float32")
 
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))

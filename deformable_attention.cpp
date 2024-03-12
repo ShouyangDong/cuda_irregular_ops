@@ -1,10 +1,21 @@
+#include <math.h>
+#include <float.h>
+#include <cstdio>
 extern "C" void deformable_attention_kernel(
     float* value_,
     int* value_spatial_shapes_,
-    float* sampling_locations,
+    float* sampling_locations_,
     float* attention_weights_,
-    float* output_,
+    float* output_
 ) {
+  float attention_sum[2048];
+  float value_offset[1];
+  float height_width[2];
+  float xy[2];
+  float xy_grid[16];
+  int xy_rounded[32];
+  float corner_values[8192];
+
   for (int j = 0; j < 100; ++j) {
     for (int i_d = 0; i_d < 256; ++i_d) {
       for (int i_m = 0; i_m < 8; ++i_m) {
