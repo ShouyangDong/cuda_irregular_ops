@@ -1,4 +1,6 @@
-extern "C" __global__ void __launch_bounds__(64) deformable_attention_tvmscript_gpu_kernel(float* __restrict__ attention_weights_, float* __restrict__ output_, float* __restrict__ sampling_locations_, float* __restrict__ value_, int* __restrict__ value_level_start_index_, int* __restrict__ value_spatial_shapes_) {
+#include <cuda_runtime.h>
+
+__global__ void __launch_bounds__(64) cuda_deformable_attention(float* __restrict__ attention_weights_, float* __restrict__ output_, float* __restrict__ sampling_locations_, float* __restrict__ value_, int* __restrict__ value_level_start_index_, int* __restrict__ value_spatial_shapes_) {
   float attention_sum[2];
   int height_width[2];
   float xy[2];
@@ -64,4 +66,51 @@ extern "C" __global__ void __launch_bounds__(64) deformable_attention_tvmscript_
   for (int ii_d_10 = 0; ii_d_10 < 4; ++ii_d_10) {
     output_[((((((int)blockIdx.x) * 2048) + (((int)blockIdx.z) * 256)) + (((int)threadIdx.x) * 4)) + ii_d_10)] = attention_sum[ii_d_10];
   }
+}
+
+
+extern "C" void deformable_attention_kernel(
+  float* value, 
+  int* value_spatial_shapes,
+  int* level_start_index,
+  float* sampling_locations,
+  float* attention_weights,
+  float* output) {
+    // Allocate memory on the device
+    float *d_value, *d_sampling_locations, *d_attention_weights, *d_output;
+    int *d_value_spatial_shapes, *d_value_level_start_index;
+    int n = 1;
+    int l = 4;
+    int lq = 100;
+    int s = 13101;
+    int m = 8;
+    int d = 256;
+    int p = 4;
+
+    cudaMalloc(&d_value, n * s * m * d * sizeof(float));
+    cudaMalloc(&d_value_spatial_shapes, l * 2 * sizeof(int));
+    cudaMalloc(&d_sampling_locations, n * lq * m * l * p * 2 * sizeof(float));
+    cudaMalloc(&d_attention_weights, n * lq * m * l * p * sizeof(float));
+    cudaMalloc(&d_output, n * lq * m * d * sizeof(float));
+    cudaMalloc(&d_value_level_start_index, 4 * sizeof(int));
+    // Copy data from host to device
+    cudaMemcpy(d_value, value, n * s * m * d * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_value_spatial_shapes, value_spatial_shapes, l * 2 * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_sampling_locations, sampling_locations, n * lq * m * l * p * 2 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_attention_weights, attention_weights, n * lq * m * l * p * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_value_level_start_index, level_start_index, 4 * sizeof(float), cudaMemcpyHostToDevice);
+    // Define grid and block dimensions
+    dim3 block(100, 1, 8);
+    // Launch kernel
+    cuda_deformable_attention<<<block, 64>>>(d_attention_weights, d_output, d_sampling_locations, d_value, d_value_level_start_index, d_value_spatial_shapes);
+
+    // Copy the result back to host
+    cudaMemcpy(output, d_output, n * lq * m * d * sizeof(float), cudaMemcpyDeviceToHost);
+    // Free device memory
+    cudaFree(d_value);
+    cudaFree(d_value_spatial_shapes);
+    cudaFree(d_sampling_locations);
+    cudaFree(d_attention_weights);
+    cudaFree(d_output);
+    cudaFree(d_value_level_start_index);
 }
