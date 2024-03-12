@@ -93,7 +93,7 @@ if __name__ == "__main__":
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights
     )
-    print(torch_da.shape)
+
     name = "deformable_attention"
     file_name = "deformable_attention.cpp"
     so_name = "deformable_attention.so"
@@ -112,11 +112,18 @@ if __name__ == "__main__":
     function.restype = None
 
     # 创建输出数组
-    output_array = np.zeros(shape=[1, 100, 2048]).astype("float32")
+    output_array = np.zeros(
+            (
+                value.shape[0],
+                sampling_locations.shape[1],
+                value.shape[2] * value.shape[3],
+            ),
+            "float32",
+        )
 
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    shapes_ptr = shapes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
     sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     attention_weights_ptr = attention_weights.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
