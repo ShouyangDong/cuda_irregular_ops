@@ -3,7 +3,7 @@
 #include <tl_templates/reduce.h>
 #include <tl_templates/threadblock_swizzle.h>
 
-extern "C" __global__ void __launch_bounds__(128) main_kernel(half_t* __restrict__ K, half_t* __restrict__ Output, half_t* __restrict__ Q, half_t* __restrict__ V) {
+__global__ void __launch_bounds__(128) mha_kernel(half_t* __restrict__ K, half_t* __restrict__ Output, half_t* __restrict__ Q, half_t* __restrict__ V) {
   extern __shared__ uchar buf_dyn_shmem[];
   float acc_o[128];
   float logsum[2];
@@ -178,4 +178,39 @@ extern "C" __global__ void __launch_bounds__(128) main_kernel(half_t* __restrict
     ((half2*)(&(__1.x)))->y = (half_t)(v_.y);
     *(uint1*)(Output + ((((((((((int)blockIdx.z) * 6291456) + (((int)blockIdx.x) * 196608)) + ((((int)threadIdx.x) >> 5) * 49152)) + ((i_29 & 1) * 24576)) + (((((int)threadIdx.x) & 31) >> 2) * 3072)) + (((int)blockIdx.y) * 256)) + ((i_29 >> 1) * 8)) + ((((int)threadIdx.x) & 3) * 2))) = __1;
   }
+}
+
+
+extern "C" void multiHeadAttentionForward(
+  float *Q,
+  float *K,
+  float *V,
+  float *output
+) {
+  //dim: [batch, seq_len, heads, dim]
+  int batch = 64;
+  int seq_len = 2048;
+  int heads = 12;
+  int dim = 256;
+  float *d_Q， *d_K, *d_V, *d_output;
+  cudaMalloc(&d_Q, batch * seq_len * heads * dim * sizeof(float));
+  cudaMalloc(&d_K, batch * seq_len * heads * dim * sizeof(float));
+  cudaMalloc(&d_V, batch * seq_len * heads * dim * sizeof(float));
+  cudaMalloc(&d_output, batch * seq_len * heads * dim * sizeof(float));
+
+  // Copy data from host to device
+  cudaMemcpy(d_Q, Q, batch * seq_len * heads * dim * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_K, K, batch * seq_len * heads * dim * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_V, V, batch * seq_len * heads * dim * sizeof(float), cudaMemcpyHostToDevice);
+
+  mha_kernel<<<128>>mha_kernel(d_K, d_output, d_Q, d_V);
+
+  // Copy the result back to host
+  cudaMemcpy(output, d_output, batch * seq_len * heads * dim * sizeof(float), cudaMemcpyDeviceToHost);
+  
+  // Free device memory
+  cudaFree(d_Q);
+  cudaFree(d_K);
+  cudaFree(d_V);
+  cudaFree(d_output);
 }
