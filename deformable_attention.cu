@@ -1,7 +1,7 @@
 #include <cuda_runtime.h>
 
 __global__ void __launch_bounds__(64) cuda_deformable_attention(float* __restrict__ attention_weights_, float* __restrict__ output_, float* __restrict__ sampling_locations_, float* __restrict__ value_, int* __restrict__ value_level_start_index_, int* __restrict__ value_spatial_shapes_) {
-  float attention_sum[2];
+  float attention_sum[4];
   int height_width[2];
   float xy[2];
   float xy_grid[2];
@@ -89,16 +89,18 @@ extern "C" void deformable_attention_kernel(
 
     cudaMalloc(&d_value, n * s * m * d * sizeof(float));
     cudaMalloc(&d_value_spatial_shapes, l * 2 * sizeof(int));
+    cudaMalloc(&d_value_level_start_index, l * sizeof(int));
     cudaMalloc(&d_sampling_locations, n * lq * m * l * p * 2 * sizeof(float));
     cudaMalloc(&d_attention_weights, n * lq * m * l * p * sizeof(float));
     cudaMalloc(&d_output, n * lq * m * d * sizeof(float));
-    cudaMalloc(&d_value_level_start_index, 4 * sizeof(int));
+    
     // Copy data from host to device
     cudaMemcpy(d_value, value, n * s * m * d * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_value_spatial_shapes, value_spatial_shapes, l * 2 * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_value_level_start_index, level_start_index, l * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_sampling_locations, sampling_locations, n * lq * m * l * p * 2 * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_attention_weights, attention_weights, n * lq * m * l * p * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_value_level_start_index, level_start_index, 4 * sizeof(float), cudaMemcpyHostToDevice);
+
     // Define grid and block dimensions
     dim3 block(100, 1, 8);
     // Launch kernel
@@ -106,11 +108,12 @@ extern "C" void deformable_attention_kernel(
 
     // Copy the result back to host
     cudaMemcpy(output, d_output, n * lq * m * d * sizeof(float), cudaMemcpyDeviceToHost);
+
     // Free device memory
     cudaFree(d_value);
     cudaFree(d_value_spatial_shapes);
+    cudaFree(d_value_level_start_index);
     cudaFree(d_sampling_locations);
     cudaFree(d_attention_weights);
     cudaFree(d_output);
-    cudaFree(d_value_level_start_index);
 }
