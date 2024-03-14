@@ -28,8 +28,9 @@ extern "C" void rms_norm_kernel(float* A, float* B) {
     // Allocate memory on the device
     int size = 8192;
     int num_elements = size * size;
-    float* d_A = (float*)malloc(num_elements * sizeof(float));
-    float* d_B = (float*)malloc(num_elements * sizeof(float));
+    float *d_A, *d_B;
+    cnrtMalloc(&d_A, num_elements * sizeof(float));
+    cnrtMalloc(&d_B, num_elements * sizeof(float));
 
     // Copy data from host to device
     cnrtMemcpy(d_A, A, num_elements * sizeof(float), cnrtMemcpyHostToDev);

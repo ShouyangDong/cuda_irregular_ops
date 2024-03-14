@@ -27,10 +27,14 @@ extern "C" void layer_norm_kernel(float* input, float* gamma, float* beta, float
     int num_elements = batch_size * seq_length * d_model;
 
     // Allocate memory on the device
-    float* d_input = (float*)malloc(num_elements * sizeof(float));
-    float* d_gamma = (float*)malloc(d_model * sizeof(float));
-    float* d_beta = (float*)malloc(d_model * sizeof(float));
-    float* d_output = (float*)malloc(num_elements * sizeof(float));
+    float* d_input;
+    cnrtMalloc(&d_input, num_elements * sizeof(float));
+    float* d_gamma;
+    cnrtMalloc(&d_gamma, d_model * sizeof(float));
+    float* d_beta;
+    cnrtMalloc(&d_beta, d_model * sizeof(float));
+    float* d_output;
+    cnrtMalloc(&d_output, num_elements * sizeof(float));
 
     // Copy data from host to device
     cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
