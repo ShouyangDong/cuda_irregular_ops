@@ -26,14 +26,13 @@ extern "C" void rms_norm_kernel(float* A, float* B) {
     cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
     // Allocate memory on the device
-    float *d_A, *d_B;
     int size = 8192;
     int num_elements = size * size;
     float* d_A = (float*)malloc(num_elements * sizeof(float));
     float* d_B = (float*)malloc(num_elements * sizeof(float));
 
     // Copy data from host to device
-    cnrtMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
+    cnrtMemcpy(d_A, A, num_elements * sizeof(float), cnrtMemcpyHostToDev);
 
     // Define the function type
 
@@ -41,7 +40,7 @@ extern "C" void rms_norm_kernel(float* A, float* B) {
     mlu_rms_norm<<<dim, ktype, queue>>>(d_A, d_B);
 
     // Copy the result back to host
-    cnrtMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
+    cnrtMemcpy(B, d_B, num_elements * sizeof(float), cnrtMemcpyDevToHost);
 
     // Free device memory
     cnrtFree(d_A);

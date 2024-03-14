@@ -1,0 +1,56 @@
+#include <bang.h>
+
+__mlu_global__ void bang_layer_norm(float* A, float* B) {
+    __nram_float local_A[8192];
+    __nram_float A_square[8192];
+    __nram_float sum[128];
+    for (int i = 0; i < 512; i++) {
+        __memcpy(local_A, A + (clusterId * 2048 + coreId * 512 + i) * 8192, 8192 * 4, GDRAM2NRAM);
+        __bang_mul(A_square, local_A, local_A, 8192);
+        __bang_sumpool(sum, A_square, 8192, 1);
+        __bang_div(sum, sum, 8192, 128);
+        __bang_add(sum, sum, 1e-5f, 128);
+        __bang_sqrt(sum, sum, 128);
+        __bang_sqrt(sum, 1, sum, 128);
+        __bang_mul_const(local_A, local_A, sum[0], 8192);
+        __memcpy(B + (clusterId * 2048 + coreId * 512 + i) * 8192, local_A, 8192 * 4,  NRAM2GDRAM);
+    }
+}
+
+extern "C" void layer_norm_kernel(float* input, float* gamma, float* beta, float* output) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+    int batch_size = 2;
+    int seq_length = 4;
+    int d_model = 8;
+    int num_elements = batch_size * seq_length * d_model;
+
+    // Allocate memory on the device
+    float* d_input = (float*)malloc(num_elements * sizeof(float));
+    float* d_gamma = (float*)malloc(d_model * sizeof(float));
+    float* d_beta = (float*)malloc(d_model * sizeof(float));
+    float* d_output = (float*)malloc(num_elements * sizeof(float));
+
+    // Copy data from host to device
+    cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_gamma, gamma, d_model * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_beta, beta, d_model * sizeof(float), cnrtMemcpyHostToDev);
+
+
+    // Define the function type
+    cnrtDim3_t dim = {1, 4, 4};
+    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+    // Launch kernel
+    mlu_layer_norm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
+
+    // Copy the result back to host
+    cnrtMemcpy(output, d_output, num_elements * sizeof(float), cnrtMemcpyDevToHost);
+
+    // Free device memory
+    cnrtFree(d_input);
+    cnrtFree(d_gamma);
+    cnrtFree(d_beta);
+    cnrtFree(d_output);
+}
