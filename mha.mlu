@@ -1,6 +1,6 @@
-#include <cstdio>
-#include <cmath>
-extern "C" void multiHeadAttentionForward_kernel(
+#include <bang.h>
+
+__mlu_global__ void mlu_multiHeadAttentionForward(
     float* Q, //[batch, seq_len, heads, dim] 
     float* K, //[batch, seq_len, heads, dim]
     float* V, //[batch, seq_len, heads, dim]
@@ -53,4 +53,54 @@ extern "C" void multiHeadAttentionForward_kernel(
             }
         }
     }
+}
+
+
+extern "C" multiHeadAttentionForward_kernel(
+    float* Q,
+    float* K,
+    float* V,
+    float* output
+) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+
+    int batch = 64;
+    int seq_len = 2048;
+    int heads = 12;
+    int dim = 256;
+
+    // Allocate memory on the device
+    int num_elements = batch * seq_len * heads * dim;
+    float* d_Q;
+    cnrtMalloc(&d_Q, num_elements * sizeof(float));
+    float* d_K;
+    cnrtMalloc(&d_K, num_elements * sizeof(float));
+    float* d_V;
+    cnrtMalloc(&d_V, num_elements * sizeof(float));
+    float* d_output;
+    cnrtMalloc(&d_output, num_elements * sizeof(float));
+
+    // Allocate memory on the device
+    cnrtMemcpy(d_Q, Q, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_K, K, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_V, V, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+
+
+    // Define the function type
+    cnrtDim3_t dim = {1, 4, 4};
+    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+    // Launch kernel
+    mlu_multiHeadAttentionForward<<<dim, ktype, queue>>>(d_Q, d_K, d_V, d_output);
+
+    // Copy the result back to host
+    cnrtMemcpy(output, d_output, num_elements * sizeof(float), cnrtMemcpyDevToHost);
+
+    // Free device memory
+    cnrtFree(d_Q);
+    cnrtFree(d_K);
+    cnrtFree(d_V);
+    cnrtFree(d_output);
 }
