@@ -10,7 +10,7 @@ import torch
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -28,8 +28,8 @@ def ref_program(x):
 if __name__ == "__main__":
     name = "rms_norm"
     shape = [8192, 8192]
-    file_name = "rms_norm.cu"
-    so_name = "rms_norm_cuda.so"
+    file_name = "rms_norm.mlu"
+    so_name = "rms_norm_bang.so"
     
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
@@ -66,10 +66,3 @@ if __name__ == "__main__":
     )
 
     print("验证通过！")
-    import time 
-    t1 = time.time()
-    for i in range(20):
-        function(input_ptr, output_ptr)    
-    t2 = time.time()
-    cost = (t2 - t1) / 20.0 * 1e3
-    print("[INFO]*******cost: ", cost)

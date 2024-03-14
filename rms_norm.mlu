@@ -1,9 +1,11 @@
-extern "C" __mlu_global__ void bang_rms_norm(float* A, float* B, int size) {
+#include <bang.h>
+
+__mlu_global__ void bang_rms_norm(float* A, float* B) {
     __nram_float local_A[8192];
     __nram_float A_square[8192];
     __nram_float sum[128];
-    for (int i = 0; i < 8192; i++) {
-        __memcpy(local_A, A + i * 8192, 8192 * 4, GDRAM2NRAM);
+    for (int i = 0; i < 512; i++) {
+        __memcpy(local_A, A + (clusterId * 2048 + coreId * 512 + i) * 8192, 8192 * 4, GDRAM2NRAM);
         __bang_mul(A_square, local_A, local_A, 8192);
         __bang_sumpool(sum, A_square, 8192, 1);
         __bang_div(sum, sum, 8192, 128);
@@ -11,30 +13,37 @@ extern "C" __mlu_global__ void bang_rms_norm(float* A, float* B, int size) {
         __bang_sqrt(sum, sum, 128);
         __bang_sqrt(sum, 1, sum, 128);
         __bang_mul_const(local_A, local_A, sum[0], 8192);
-        __memcpy(B + i * 8192, local_A, 8192 * 4,  NRAM2GDRAM);
+        __memcpy(B + (clusterId * 2048 + coreId * 512 + i) * 8192, local_A, 8192 * 4,  NRAM2GDRAM);
     }
 }
 
 extern "C" void rms_norm_kernel(float* A, float* B) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+
+    cnrtDim3_t dim = {1, 4, 4};
+    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
     // Allocate memory on the device
     float *d_A, *d_B;
     int size = 8192;
     int num_elements = size * size;
-    mluMalloc(&d_A, num_elements * sizeof(float));
-    mluMalloc(&d_B, num_elements * sizeof(float));
+    float* d_A = (float*)malloc(num_elements * sizeof(float));
+    float* d_B = (float*)malloc(num_elements * sizeof(float));
 
     // Copy data from host to device
-    cudaMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
+    cnrtMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
 
     // Define the function type
 
     // Launch kernel
-    mlu_rms_norm<<<>>>(d_A, d_B, size);
+    mlu_rms_norm<<<dim, ktype, queue>>>(d_A, d_B);
 
     // Copy the result back to host
-    mluMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
+    cnrtMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
 
     // Free device memory
-    mluFree(d_A);
-    mluFree(d_B);
+    cnrtFree(d_A);
+    cnrtFree(d_B);
 }
