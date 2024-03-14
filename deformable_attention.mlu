@@ -15,6 +15,7 @@ __mlu_global__ void mlu_deformable_attention(
   int xy_rounded[32];
   float corner_values[8192];
   __nram_float attention_sum[2048];
+  __nram_float corner_values[8192];
   if (coreId < 4) {
     for (int j = 0; j < 25; ++j) {
     __nram_set_float(attention_sum, 0, 2048);
@@ -43,14 +44,16 @@ __mlu_global__ void mlu_deformable_attention(
         }
         for (int i_m_2 = 0; i_m_2 < 8; ++i_m_2) {
           if ((((((int*)xy_rounded)[i_m_2] < 0) || (((int*)height_width)[0] <= ((int*)xy_rounded)[i_m_2])) || (((int*)xy_rounded)[(i_m_2 + 16)] < 0)) || (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_2 + 16)])) {
-            for (int i_d_1 = 0; i_d_1 < 256; ++i_d_1) {
-              ((float*)corner_values)[((i_m_2 * 256) + i_d_1)] = 0.000000e+00f;
-            }
+            //for (int i_d_1 = 0; i_d_1 < 256; ++i_d_1) {
+            //  ((float*)corner_values)[((i_m_2 * 256) + i_d_1)] = 0.000000e+00f;
+            //}
+            __nram_set_float(corner_values + i_m_2 * 256, 0, 256);
           } else {
-            for (int i_d_2 = 0; i_d_2 < 256; ++i_d_2) {
-              int cse_var_7 = (i_m_2 * 256);
-              ((float*)corner_values)[(cse_var_7 + i_d_2)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[i_m_2] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_2 + 16)] * 2048)) + cse_var_7) + i_d_2)];
-            }
+            // for (int i_d_2 = 0; i_d_2 < 256; ++i_d_2) {
+            //  int cse_var_7 = (i_m_2 * 256);
+            //  ((float*)corner_values)[(cse_var_7 + i_d_2)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[i_m_2] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_2 + 16)] * 2048)) + cse_var_7) + i_d_2)];
+            //}
+            
           }
         }
         for (int i_m_3 = 0; i_m_3 < 8; ++i_m_3) {
