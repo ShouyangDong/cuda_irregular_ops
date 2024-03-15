@@ -15,14 +15,17 @@ __mlu_global__ void mlu_multiHeadAttentionForward(
         if (coreId < 4) {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 2048; j++) {
-                    for (int m = 0; m < 12; m++) {
-                        for (int n = 0; n < 12; n++) {
-                            score[m * 12 + n] = 0.0;
-                            for (int p = 0; p < 256; p++) {
-                                score[m * 12 + n] += Q[(clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256 + m * 256 + p] * K[(clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256 + n * 256 + p];
-                            }
-                        }
-                    }
+                    __nram__ float local_Q[12 * 256];
+                    __nram__ float local_K[12 * 256];
+                    __nram__ float local_K_trans[12 * 256];
+                    __wram__ float local_K_wram[12 * 256];
+                    __memcpy(local_Q, Q + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2NRAM);
+                    __memcpy(local_K, K + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2NRAM);
+
+                    // Transpose local_K
+                    __bang_transpose(local_K_trans, local_K, 12, 256);
+                    __memcpy(local_K_wram, local_K_trans, 256 * 12 *  4, NRAM2WRAM);
+                    __bang_mlp(score, local_Q, local_K_wram, 12, 12);
 
                     // score
                     __bang_div(score, score, sqrt(256), 12 * 12);
@@ -38,7 +41,7 @@ __mlu_global__ void mlu_multiHeadAttentionForward(
                     // The final Matmul
                     __wram__ float local_V[12 * 256];
                     __nram__ float local_output[12 * 256];
-                    __memcpy(local_V, V + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2NRAM);
+                    __memcpy(local_V, V + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2WRAM);
                     __bang_mlp(local_output, score, local_V, 12, 256);
                     __memcpy(output + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, local_output, 12 * 256 * 4, NRAM2GDRAM);
                 }
