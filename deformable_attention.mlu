@@ -14,8 +14,8 @@ __mlu_global__ void mlu_deformable_attention(
   float xy_grid[16];
   int xy_rounded[32];
   float corner_values[8192];
-  __nram_float attention_sum[2048];
-  __nram_float corner_values[8192];
+  __nram__ float attention_sum[2048];
+  __nram__ float corner_values[8192];
   if (coreId < 4) {
     for (int j = 0; j < 25; ++j) {
     __bang_write_zero(attention_sum, 0, 2048);

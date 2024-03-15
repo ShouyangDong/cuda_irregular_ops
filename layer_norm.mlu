@@ -6,10 +6,10 @@ __mlu_global__ void mlu_layer_norm(
     float* beta, 
     float* output
 ) {
-    __nram_float diff[8];
-    __nram_float local_input[8];
-    __nram_float local_gamma[8];
-    __nram_float local_beta[8];
+    __nram__ float diff[8];
+    __nram__ float local_input[8];
+    __nram__ float local_gamma[8];
+    __nram__ float local_beta[8];
     __memcpy(local_gamma, gamma, 8, GDRAM2NRAM);
     __memcpy(local_beta, beta, 8, GDRAM2NRAM);
 

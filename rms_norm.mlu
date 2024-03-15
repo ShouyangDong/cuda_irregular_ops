@@ -1,9 +1,9 @@
 #include <bang.h>
 
 __mlu_global__ void bang_rms_norm(float* A, float* B) {
-    __nram_float local_A[8192];
-    __nram_float A_square[8192];
-    __nram_float sum[128];
+    __nram__ float local_A[8192];
+    __nram__ float A_square[8192];
+    __nram__ float sum[128];
     for (int i = 0; i < 512; i++) {
         __memcpy(local_A, A + (clusterId * 2048 + coreId * 512 + i) * 8192, 8192 * 4, GDRAM2NRAM);
         __bang_mul(A_square, local_A, local_A, 8192);
