@@ -7,13 +7,13 @@ __mlu_global__ void mlu_deformable_attention(
     float* attention_weights_,
     float* output_
 ) {
-  float attention_sum[2048];
-  float value_offset[1];
-  float height_width[2];
-  float xy[2];
-  float xy_grid[16];
-  int xy_rounded[32];
-  float corner_values[8192];
+  __nram__ float attention_sum[2048];
+  __nram__ float value_offset[1];
+  __nram__ float height_width[2];
+  __nram__ float xy[2];
+  __nram__ float xy_grid[16];
+  __nram__ int xy_rounded[32];
+  __nram__ float corner_values[8192];
   __nram__ float attention_sum[2048];
   __nram__ float corner_values[8192];
   if (coreId < 4) {
