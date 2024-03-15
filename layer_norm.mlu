@@ -7,6 +7,8 @@ __mlu_global__ void mlu_layer_norm(
     float* output
 ) {
     __nram__ float diff[8];
+    __nram__ float mean[8];
+    __nram__ float variance[8];
     __nram__ float local_input[8];
     __nram__ float local_gamma[8];
     __nram__ float local_beta[8];
@@ -15,27 +17,21 @@ __mlu_global__ void mlu_layer_norm(
 
     if (clusterId  < 2) {
         if (coreId < 4) {
-            float mean = 0.0;
-            float variance = 0.0;
             __memcpy(local_input, input + clusterId * 4 * 8 + coreId * 8, 32, GDRAM2NRAM);
-            // Calculate mean
-            for (int i_mean = 0; i_mean < 8; i_mean++) {
-                mean += local_input[i_mean];
-            }
-            mean /= 8;
+            __bang_sumpool(mean, local_input, 1, 1, 8, 1, 8, 1, 1, 1);
+            __bang_mul(mean, mean, 1.0/8, 8);
+
             // Calculate variance
-            __bang_sub_const(diff, local_input, mean, 8);
+            __bang_sub(diff, local_input, mean, 8);
             __bang_mul(diff, diff, diff, 8);
 
-            for (int i_var = 0; i_var < 8; i_var++) {
-                variance += diff[i_var];
-            }
-            variance = sqrt(variance / 8);
+            __bang_sumpool(variance, diff, 1, 1, 8, 1, 8, 1, 1, 1);
+            variance[0] = sqrt(variance[0] / 8);
 
             // Normalize input
-            __bang_sub_const(diff, local_input, mean, 8);
+            __bang_sub(diff, local_input, mean, 8);
             __bang_mul(diff, diff, gamma, 8);
-            __bang_div(diff, diff, variance + 1e-5f, 8);
+            __bang_div(diff, diff, variance[0] + 1e-5f, 8);
             __bang_add(diff, diff, beta, 8);
             __memcpy(output + clusterId * 4 * 8 + coreId * 8, diff, 32, NRAM2GDRAM);
         }

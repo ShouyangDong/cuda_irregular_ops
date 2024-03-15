@@ -7,7 +7,7 @@ __mlu_global__ void bang_rms_norm(float* A, float* B) {
     for (int i = 0; i < 512; i++) {
         __memcpy(local_A, A + (clusterId * 2048 + coreId * 512 + i) * 8192, 8192 * 4, GDRAM2NRAM);
         __bang_mul(A_square, local_A, local_A, 8192);
-        __bang_sumpool(sum, A_square, 8192, 1);
+        __bang_sumpool(sum, A_square, 1, 1, 8192, 1, 8192, 1, 1);
         __bang_div(sum, sum, 8192, 128);
         __bang_add(sum, sum, 1e-5f, 128);
         __bang_sqrt(sum, sum, 128);
