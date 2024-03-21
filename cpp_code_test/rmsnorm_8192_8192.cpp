@@ -1,6 +1,4 @@
-#include <float.h>
-#include <math.h>
-#include <stdio.h>
+
 
 extern "C" void rms_norm_kernel(float* A, float* B) {
   float eps = 1e-5f;

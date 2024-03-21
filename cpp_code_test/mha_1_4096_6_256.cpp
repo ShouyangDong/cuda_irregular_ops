@@ -1,5 +1,4 @@
-#include <cmath>
-#include <cstdio>
+
 extern "C" void multiHeadAttentionForward_kernel(
     float* Q,      //[batch, seq_len, heads, dim]
     float* K,      //[batch, seq_len, heads, dim]

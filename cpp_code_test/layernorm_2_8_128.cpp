@@ -1,6 +1,4 @@
-#include <stdio.h>
 
-#include <cmath>
 extern "C" void layer_norm_kernel(float* input,   // shape=[2, 8, 128]
                                   float* gamma,   // shape=[128]
                                   float* beta,    // shape=[128]

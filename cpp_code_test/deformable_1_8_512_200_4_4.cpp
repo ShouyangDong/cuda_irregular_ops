@@ -1,7 +1,4 @@
-#include <float.h>
-#include <math.h>
 
-#include <cstdio>
 extern "C" void deformable_attention_kernel(float* value_,
                                             int* value_spatial_shapes_,
                                             float* sampling_locations_,

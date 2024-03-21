@@ -19,7 +19,7 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob("./../cpp_code_test/*.cpp")
+files = glob.glob("./cpp_code_test/*.cpp")
 counter = 0
 for file_name in files:
     base_name = os.path.basename(file_name)
@@ -39,7 +39,7 @@ for file_name in files:
         f.close()
 
     so_name = base_name.replace("cpp", "so")
-    so_name = os.path.join("./../cpp_code_test/", so_name)
+    so_name = os.path.join("./cpp_code_test/", so_name)
 
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
