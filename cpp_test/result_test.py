@@ -3,28 +3,17 @@ import glob
 import os
 
 
-def run_test(file_name, test_file, conversion=False):
+def run_test(file_name, test_file):
     try:
-        if conversion:
-            output = subprocess.run(
-                ["python", test_file, "--file", file_name, "--conversion"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                encoding="utf-8",
-                check=True,
-                text=True,
-                timeout=40,
-            )
-        else:
-            output = subprocess.run(
-                ["python", test_file, "--file", file_name],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                encoding="utf-8",
-                check=True,
-                text=True,
-                timeout=40,
-            )           
+        output = subprocess.run(
+            ["python", test_file, "--file", file_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
+            timeout=40,
+        )           
         return True, output
     except subprocess.TimeoutExpired:
         return False, "timeout"
@@ -40,13 +29,13 @@ if __name__ == "__main__":
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":
-            success, output = run_test(file, "./test/cpp_kernel_test/test_unary.py", conversion=True)
+            success, output = run_test(file, "./cpp_test/test_deformable_attention_cpp.py")
         elif name == "layernorm":
-            success, output = run_test(file, "./test/cpp_kernel_test/test_binary.py", conversion=True)
+            success, output = run_test(file, "./cpp_test/test_layer_norm_cpp.py")
         elif name == "mha":
-            success, output = run_test(file, "./test/cpp_kernel_test/test_pool.py", conversion=True)
+            success, output = run_test(file, "./cpp_test/test_mha.py")
         elif name == "rmsnorm":
-            success, output = run_test(file, "./test/cpp_kernel_test/test_softmax.py", conversion=True)
+            success, output = run_test(file, "./cpp_test/test_rms_norm_cpp.py")
 
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
@@ -57,4 +46,4 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************CUDA 2 CPP test successfule rate: ",  counter / len(files))
+    print("[INFO]*******************CPP test successfule rate: ",  counter / len(files))

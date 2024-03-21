@@ -52,4 +52,4 @@ for file_name in files:
 
 print(counter)
 print(len(files))
-print("[INFO]*******************CUDA 2 C Compilation rate: ",  counter / len(files))
+print("[INFO]*******************CPP Compilation rate: ",  counter / len(files))

@@ -36,10 +36,23 @@ if __name__ == "__main__":
     name = "rms_norm"
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    file_name = args.file
-    so_name = args.file.replace(".cpp", ".so")
 
+    so_name = args.file.replace(".cpp", ".so")
+    with open(args.file, "r") as f:
+        code = f.read()
+        f.close()
+
+    with open("./macro/cpp_macro.txt", "r") as f:
+        macro = f.read()
+        f.close()
+    code = macro + code
+
+    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    with open(file_name, mode="w") as f:
+        f.write(code)
+        f.close()
     success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
