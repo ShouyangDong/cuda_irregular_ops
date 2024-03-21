@@ -95,3 +95,4 @@ if __name__ == "__main__":
     t2 = time.time()
     cost = (t2 - t1) / 20.0 * 1e3
     print("[INFO]*******cost: ", cost)
+    result = subprocess.run(["rm", so_name])
