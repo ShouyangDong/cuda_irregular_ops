@@ -37,17 +37,22 @@ def ref_program(q, k, v, causal=False):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
     name = "multiHeadAttentionForward"
     causal = False
-    shape = [64, 2048, 12, 256]
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
     dtype = torch.float32
 
     query = torch.randn(shape).to(dtype)
     key = torch.randn(shape).to(dtype)
     value = torch.randn(shape).to(dtype)
 
-    file_name = "mha.cpp"
-    so_name = "mha.so"
+    file_name = args.file
+    so_name = args.file.replace(".cpp", ".so")
     
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
