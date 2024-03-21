@@ -31,11 +31,15 @@ def ref_program(x, gamma, beta, eps=1e-5):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
     name = "layer_norm"
-    shape = [2, 4, 8]
-    file_name = "layer_norm.cpp"
-    so_name = "layer_norm.so"
-    
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
+    file_name = args.file
+    so_name = args.file.replace(".cpp", ".so")
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
