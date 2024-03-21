@@ -1,13 +1,12 @@
-#include <math.h>
 #include <float.h>
+#include <math.h>
+
 #include <cstdio>
-extern "C" void deformable_attention_kernel(
-    float* value_,
-    int* value_spatial_shapes_,
-    float* sampling_locations_,
-    float* attention_weights_,
-    float* output_
-) {
+extern "C" void deformable_attention_kernel(float* value_,
+                                            int* value_spatial_shapes_,
+                                            float* sampling_locations_,
+                                            float* attention_weights_,
+                                            float* output_) {
   float attention_sum[2048];
   float value_offset[1];
   float height_width[2];
@@ -26,7 +25,10 @@ extern "C" void deformable_attention_kernel(
       ((int*)value_offset)[0] = 0;
       for (int ii = 0; ii < i; ++ii) {
         int cse_var_1 = (ii * 2);
-        ((int*)value_offset)[0] = (((int*)value_offset)[0] + (((int*)value_spatial_shapes_)[cse_var_1] * ((int*)value_spatial_shapes_)[(cse_var_1 + 1)]));
+        ((int*)value_offset)[0] =
+            (((int*)value_offset)[0] +
+             (((int*)value_spatial_shapes_)[cse_var_1] *
+              ((int*)value_spatial_shapes_)[(cse_var_1 + 1)]));
       }
       for (int k = 0; k < 4; ++k) {
         for (int i_m_1 = 0; i_m_1 < 8; ++i_m_1) {
@@ -35,61 +37,110 @@ extern "C" void deformable_attention_kernel(
           int cse_var_3 = (i * 2);
           int cse_var_2 = ((((j * 256) + (i_m_1 * 32)) + (i * 8)) + (k * 2));
           ((int*)height_width)[0] = ((int*)value_spatial_shapes_)[cse_var_3];
-          ((int*)height_width)[1] = ((int*)value_spatial_shapes_)[(cse_var_3 + 1)];
+          ((int*)height_width)[1] =
+              ((int*)value_spatial_shapes_)[(cse_var_3 + 1)];
           ((float*)xy)[1] = ((float*)sampling_locations_)[cse_var_2];
           ((float*)xy)[0] = ((float*)sampling_locations_)[(cse_var_2 + 1)];
-          ((float*)xy_grid)[i_m_1] = ((((float*)xy)[0] * ((float)((int*)height_width)[0])) - 5.000000e-01f);
-          ((float*)xy_grid)[cse_var_5] = ((((float*)xy)[1] * ((float)((int*)height_width)[1])) - 5.000000e-01f);
+          ((float*)xy_grid)[i_m_1] =
+              ((((float*)xy)[0] * ((float)((int*)height_width)[0])) -
+               5.000000e-01f);
+          ((float*)xy_grid)[cse_var_5] =
+              ((((float*)xy)[1] * ((float)((int*)height_width)[1])) -
+               5.000000e-01f);
           ((int*)xy_rounded)[i_m_1] = ((int)floorf(((float*)xy_grid)[i_m_1]));
           ((int*)xy_rounded)[cse_var_5] = (((int*)xy_rounded)[i_m_1] + 1);
-          ((int*)xy_rounded)[cse_var_4] = ((int)floorf(((float*)xy_grid)[cse_var_5]));
-          ((int*)xy_rounded)[(i_m_1 + 24)] = (((int*)xy_rounded)[cse_var_4] + 1);
+          ((int*)xy_rounded)[cse_var_4] =
+              ((int)floorf(((float*)xy_grid)[cse_var_5]));
+          ((int*)xy_rounded)[(i_m_1 + 24)] =
+              (((int*)xy_rounded)[cse_var_4] + 1);
         }
         for (int i_m_2 = 0; i_m_2 < 8; ++i_m_2) {
-          if ((((((int*)xy_rounded)[i_m_2] < 0) || (((int*)height_width)[0] <= ((int*)xy_rounded)[i_m_2])) || (((int*)xy_rounded)[(i_m_2 + 16)] < 0)) || (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_2 + 16)])) {
+          if ((((((int*)xy_rounded)[i_m_2] < 0) ||
+                (((int*)height_width)[0] <= ((int*)xy_rounded)[i_m_2])) ||
+               (((int*)xy_rounded)[(i_m_2 + 16)] < 0)) ||
+              (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_2 + 16)])) {
             for (int i_d_1 = 0; i_d_1 < 256; ++i_d_1) {
               ((float*)corner_values)[((i_m_2 * 256) + i_d_1)] = 0.000000e+00f;
             }
           } else {
             for (int i_d_2 = 0; i_d_2 < 256; ++i_d_2) {
               int cse_var_7 = (i_m_2 * 256);
-              ((float*)corner_values)[(cse_var_7 + i_d_2)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[i_m_2] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_2 + 16)] * 2048)) + cse_var_7) + i_d_2)];
+              ((float*)corner_values)[(cse_var_7 + i_d_2)] = ((float*)value_)[(
+                  ((((((int*)value_offset)[0] * 2048) +
+                     ((((int*)xy_rounded)[i_m_2] * ((int*)height_width)[1]) *
+                      2048)) +
+                    (((int*)xy_rounded)[(i_m_2 + 16)] * 2048)) +
+                   cse_var_7) +
+                  i_d_2)];
             }
           }
         }
         for (int i_m_3 = 0; i_m_3 < 8; ++i_m_3) {
-          if ((((((int*)xy_rounded)[i_m_3] < 0) || (((int*)height_width)[0] <= ((int*)xy_rounded)[i_m_3])) || (((int*)xy_rounded)[(i_m_3 + 24)] < 0)) || (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_3 + 24)])) {
+          if ((((((int*)xy_rounded)[i_m_3] < 0) ||
+                (((int*)height_width)[0] <= ((int*)xy_rounded)[i_m_3])) ||
+               (((int*)xy_rounded)[(i_m_3 + 24)] < 0)) ||
+              (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_3 + 24)])) {
             for (int i_d_3 = 0; i_d_3 < 256; ++i_d_3) {
-              ((float*)corner_values)[(((i_m_3 * 256) + i_d_3) + 2048)] = 0.000000e+00f;
+              ((float*)corner_values)[(((i_m_3 * 256) + i_d_3) + 2048)] =
+                  0.000000e+00f;
             }
           } else {
             for (int i_d_4 = 0; i_d_4 < 256; ++i_d_4) {
               int cse_var_9 = (i_m_3 * 256);
-              ((float*)corner_values)[((cse_var_9 + i_d_4) + 2048)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[i_m_3] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_3 + 24)] * 2048)) + cse_var_9) + i_d_4)];
+              ((float*)corner_values)[((cse_var_9 + i_d_4) + 2048)] = ((
+                  float*)value_)[(((((((int*)value_offset)[0] * 2048) +
+                                     ((((int*)xy_rounded)[i_m_3] *
+                                       ((int*)height_width)[1]) *
+                                      2048)) +
+                                    (((int*)xy_rounded)[(i_m_3 + 24)] * 2048)) +
+                                   cse_var_9) +
+                                  i_d_4)];
             }
           }
         }
         for (int i_m_4 = 0; i_m_4 < 8; ++i_m_4) {
-          if ((((((int*)xy_rounded)[(i_m_4 + 8)] < 0) || (((int*)height_width)[0] <= ((int*)xy_rounded)[(i_m_4 + 8)])) || (((int*)xy_rounded)[(i_m_4 + 16)] < 0)) || (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_4 + 16)])) {
+          if ((((((int*)xy_rounded)[(i_m_4 + 8)] < 0) ||
+                (((int*)height_width)[0] <= ((int*)xy_rounded)[(i_m_4 + 8)])) ||
+               (((int*)xy_rounded)[(i_m_4 + 16)] < 0)) ||
+              (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_4 + 16)])) {
             for (int i_d_5 = 0; i_d_5 < 256; ++i_d_5) {
-              ((float*)corner_values)[(((i_m_4 * 256) + i_d_5) + 4096)] = 0.000000e+00f;
+              ((float*)corner_values)[(((i_m_4 * 256) + i_d_5) + 4096)] =
+                  0.000000e+00f;
             }
           } else {
             for (int i_d_6 = 0; i_d_6 < 256; ++i_d_6) {
               int cse_var_12 = (i_m_4 * 256);
-              ((float*)corner_values)[((cse_var_12 + i_d_6) + 4096)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[(i_m_4 + 8)] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_4 + 16)] * 2048)) + cse_var_12) + i_d_6)];
+              ((float*)corner_values)[((cse_var_12 + i_d_6) + 4096)] = ((
+                  float*)value_)[(((((((int*)value_offset)[0] * 2048) +
+                                     ((((int*)xy_rounded)[(i_m_4 + 8)] *
+                                       ((int*)height_width)[1]) *
+                                      2048)) +
+                                    (((int*)xy_rounded)[(i_m_4 + 16)] * 2048)) +
+                                   cse_var_12) +
+                                  i_d_6)];
             }
           }
         }
         for (int i_m_5 = 0; i_m_5 < 8; ++i_m_5) {
-          if ((((((int*)xy_rounded)[(i_m_5 + 8)] < 0) || (((int*)height_width)[0] <= ((int*)xy_rounded)[(i_m_5 + 8)])) || (((int*)xy_rounded)[(i_m_5 + 24)] < 0)) || (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_5 + 24)])) {
+          if ((((((int*)xy_rounded)[(i_m_5 + 8)] < 0) ||
+                (((int*)height_width)[0] <= ((int*)xy_rounded)[(i_m_5 + 8)])) ||
+               (((int*)xy_rounded)[(i_m_5 + 24)] < 0)) ||
+              (((int*)height_width)[1] <= ((int*)xy_rounded)[(i_m_5 + 24)])) {
             for (int i_d_7 = 0; i_d_7 < 256; ++i_d_7) {
-              ((float*)corner_values)[(((i_m_5 * 256) + i_d_7) + 6144)] = 0.000000e+00f;
+              ((float*)corner_values)[(((i_m_5 * 256) + i_d_7) + 6144)] =
+                  0.000000e+00f;
             }
           } else {
             for (int i_d_8 = 0; i_d_8 < 256; ++i_d_8) {
               int cse_var_15 = (i_m_5 * 256);
-              ((float*)corner_values)[((cse_var_15 + i_d_8) + 6144)] = ((float*)value_)[(((((((int*)value_offset)[0] * 2048) + ((((int*)xy_rounded)[(i_m_5 + 8)] * ((int*)height_width)[1]) * 2048)) + (((int*)xy_rounded)[(i_m_5 + 24)] * 2048)) + cse_var_15) + i_d_8)];
+              ((float*)corner_values)[((cse_var_15 + i_d_8) + 6144)] = ((
+                  float*)value_)[(((((((int*)value_offset)[0] * 2048) +
+                                     ((((int*)xy_rounded)[(i_m_5 + 8)] *
+                                       ((int*)height_width)[1]) *
+                                      2048)) +
+                                    (((int*)xy_rounded)[(i_m_5 + 24)] * 2048)) +
+                                   cse_var_15) +
+                                  i_d_8)];
             }
           }
         }
@@ -99,13 +150,37 @@ extern "C" void deformable_attention_kernel(
             int cse_var_18 = (i_m_6 + 24);
             int cse_var_17 = (i_m_6 + 16);
             int cse_var_16 = ((i_m_6 * 256) + i_d_9);
-            ((float*)attention_sum)[cse_var_16] = (((float*)attention_sum)[cse_var_16] + ((((((((float*)corner_values)[cse_var_16] * (((float)((int*)xy_rounded)[cse_var_19]) - ((float*)xy_grid)[i_m_6])) * (((float)((int*)xy_rounded)[cse_var_18]) - ((float*)xy_grid)[cse_var_19])) + ((((float*)corner_values)[(cse_var_16 + 4096)] * (((float*)xy_grid)[i_m_6] - ((float)((int*)xy_rounded)[i_m_6]))) * (((float)((int*)xy_rounded)[cse_var_18]) - ((float*)xy_grid)[cse_var_19]))) + ((((float*)corner_values)[(cse_var_16 + 2048)] * (((float)((int*)xy_rounded)[cse_var_19]) - ((float*)xy_grid)[i_m_6])) * (((float*)xy_grid)[cse_var_19] - ((float)((int*)xy_rounded)[cse_var_17])))) + ((((float*)corner_values)[(cse_var_16 + 6144)] * (((float*)xy_grid)[i_m_6] - ((float)((int*)xy_rounded)[i_m_6]))) * (((float*)xy_grid)[cse_var_19] - ((float)((int*)xy_rounded)[cse_var_17])))) * ((float*)attention_weights_)[((((j * 128) + (i_m_6 * 16)) + (i * 4)) + k)]));
+            ((float*)attention_sum)[cse_var_16] =
+                (((float*)attention_sum)[cse_var_16] +
+                 ((((((((float*)corner_values)[cse_var_16] *
+                       (((float)((int*)xy_rounded)[cse_var_19]) -
+                        ((float*)xy_grid)[i_m_6])) *
+                      (((float)((int*)xy_rounded)[cse_var_18]) -
+                       ((float*)xy_grid)[cse_var_19])) +
+                     ((((float*)corner_values)[(cse_var_16 + 4096)] *
+                       (((float*)xy_grid)[i_m_6] -
+                        ((float)((int*)xy_rounded)[i_m_6]))) *
+                      (((float)((int*)xy_rounded)[cse_var_18]) -
+                       ((float*)xy_grid)[cse_var_19]))) +
+                    ((((float*)corner_values)[(cse_var_16 + 2048)] *
+                      (((float)((int*)xy_rounded)[cse_var_19]) -
+                       ((float*)xy_grid)[i_m_6])) *
+                     (((float*)xy_grid)[cse_var_19] -
+                      ((float)((int*)xy_rounded)[cse_var_17])))) +
+                   ((((float*)corner_values)[(cse_var_16 + 6144)] *
+                     (((float*)xy_grid)[i_m_6] -
+                      ((float)((int*)xy_rounded)[i_m_6]))) *
+                    (((float*)xy_grid)[cse_var_19] -
+                     ((float)((int*)xy_rounded)[cse_var_17])))) *
+                  ((float*)attention_weights_)[(
+                      (((j * 128) + (i_m_6 * 16)) + (i * 4)) + k)]));
           }
         }
         for (int i_m_7 = 0; i_m_7 < 8; ++i_m_7) {
           for (int i_d_10 = 0; i_d_10 < 256; ++i_d_10) {
             int cse_var_20 = (i_m_7 * 256);
-            ((float*)output_)[(((j * 2048) + cse_var_20) + i_d_10)] = ((float*)attention_sum)[(cse_var_20 + i_d_10)];
+            ((float*)output_)[(((j * 2048) + cse_var_20) + i_d_10)] =
+                ((float*)attention_sum)[(cse_var_20 + i_d_10)];
           }
         }
       }
