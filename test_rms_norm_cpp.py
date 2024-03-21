@@ -26,10 +26,15 @@ def ref_program(x):
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
     name = "rms_norm"
-    shape = [8192, 8192]
-    file_name = "rms_norm.cpp"
-    so_name = "rms_norm.so"
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
+    file_name = args.file
+    so_name = args.file.replace(".cpp", ".so")
     
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
