@@ -6,6 +6,7 @@ import os
 import ctypes
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -21,13 +22,13 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(x, gamma, beta, eps=1e-5):
     mean = np.mean(x, axis=-1, keepdims=True)
     std = np.std(x, axis=-1, keepdims=True)
     x_normalized = (x - mean) / (std + eps)
     out = gamma * x_normalized + beta
     return out
-
 
 
 if __name__ == "__main__":
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float)
+        ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
     # 创建输入数组
@@ -80,10 +81,11 @@ if __name__ == "__main__":
         verbose=True,
     )
     print("验证通过！")
-    import time 
+    import time
+
     t1 = time.time()
     for i in range(20):
-        function(input_ptr, gamma_ptr, beta_ptr, output_ptr)  
+        function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
     t2 = time.time()
     cost = (t2 - t1) / 20.0 * 1e3
     print("[INFO]*******cost: ", cost)

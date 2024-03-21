@@ -6,6 +6,7 @@ import os
 import ctypes
 import subprocess
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -63,7 +64,6 @@ def deformable_attention_pytorch(
     return output.transpose(1, 2).contiguous()
 
 
-
 if __name__ == "__main__":
     N, M, D = (
         1,
@@ -86,9 +86,7 @@ if __name__ == "__main__":
     value = torch.rand(N, S, M, D) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2)
     attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
-        -2, keepdim=True
-    )
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
     # Check for correctness
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights
@@ -97,7 +95,7 @@ if __name__ == "__main__":
     name = "deformable_attention"
     file_name = "deformable_attention.mlu"
     so_name = "deformable_attention_mlu.so"
-    
+
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
@@ -108,29 +106,42 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_int),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float)
+        ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
 
     # 创建输出数组
     output_array = np.zeros(
-            (
-                value.shape[0],
-                sampling_locations.shape[1],
-                value.shape[2] * value.shape[3],
-            ),
-            "float32",
-        )
+        (
+            value.shape[0],
+            sampling_locations.shape[1],
+            value.shape[2] * value.shape[3],
+        ),
+        "float32",
+    )
 
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
-    level_start_index_ptr = level_start_index.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
-    sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    attention_weights_ptr = attention_weights.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    level_start_index_ptr = (
+        level_start_index.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    )
+    sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    attention_weights_ptr = attention_weights.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(value_ptr, shapes_ptr, level_start_index_ptr, sampling_locations_ptr, attention_weights_ptr, output_ptr)
+    function(
+        value_ptr,
+        shapes_ptr,
+        level_start_index_ptr,
+        sampling_locations_ptr,
+        attention_weights_ptr,
+        output_ptr,
+    )
     # 验证结果
     np.testing.assert_allclose(
         output_array,

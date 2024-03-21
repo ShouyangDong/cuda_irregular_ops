@@ -7,6 +7,7 @@ import ctypes
 import argparse
 import torch
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -22,8 +23,10 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(x):
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -35,7 +38,7 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     file_name = args.file
     so_name = args.file.replace(".cpp", ".so")
-    
+
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
@@ -71,10 +74,11 @@ if __name__ == "__main__":
     )
 
     print("验证通过！")
-    import time 
+    import time
+
     t1 = time.time()
     for i in range(20):
-        function(input_ptr, output_ptr)    
+        function(input_ptr, output_ptr)
     t2 = time.time()
     cost = (t2 - t1) / 20.0 * 1e3
     print("[INFO]*******cost: ", cost)

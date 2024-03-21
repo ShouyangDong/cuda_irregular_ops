@@ -7,6 +7,7 @@ import ctypes
 import argparse
 import torch
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -22,15 +23,17 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(x):
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)
+
 
 if __name__ == "__main__":
     name = "rms_norm"
     shape = [8192, 8192]
     file_name = "rms_norm.mlu"
     so_name = "rms_norm_bang.so"
-    
+
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")

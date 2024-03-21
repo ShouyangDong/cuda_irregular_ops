@@ -6,6 +6,7 @@ import os
 import ctypes
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -21,6 +22,7 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(x, gamma, beta, eps=1e-5):
     mean = np.mean(x, axis=-1, keepdims=True)
     std = np.std(x, axis=-1, keepdims=True)
@@ -29,13 +31,12 @@ def ref_program(x, gamma, beta, eps=1e-5):
     return out
 
 
-
 if __name__ == "__main__":
     name = "layer_norm"
     shape = [2, 4, 8]
     file_name = "layer_norm.cu"
     so_name = "layer_norm_gpu.so"
-    
+
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float)
+        ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
     # 创建输入数组

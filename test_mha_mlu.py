@@ -9,6 +9,7 @@ import argparse
 import torch
 import torch.nn.functional as F
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -24,11 +25,12 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(q, k, v, causal=False):
     score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
     if causal:
         mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
-        mask = mask.masked_fill(mask==1, torch.finfo(q.dtype).min)
+        mask = mask.masked_fill(mask == 1, torch.finfo(q.dtype).min)
         mask = mask.to(q.device, q.dtype)
         score = score + mask
     attn = F.softmax(score, dim=-1)
@@ -48,7 +50,7 @@ if __name__ == "__main__":
 
     file_name = "mha.mlu"
     so_name = "mha_mlu.so"
-    
+
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
@@ -57,7 +59,7 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float)
+        ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
     # 创建输入数组
