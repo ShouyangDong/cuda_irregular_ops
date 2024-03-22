@@ -11,7 +11,7 @@ __mlu_global__ void mlu_rms_norm(float* A, float* B) {
         __bang_div(sum, sum, 8192, 128);
         __bang_add_const(sum, sum, 1e-5f, 128);
         __bang_sqrt(sum, sum, 128);
-        __bang_sqrt(sum, 1, sum, 128);
+        __bang_recip(sum, sum, 128);
         __bang_mul_const(local_A, local_A, sum[0], 8192);
         __memcpy(B + (clusterId * 2048 + coreId * 512 + i) * 8192, local_A, 8192 * 4,  NRAM2GDRAM);
     }

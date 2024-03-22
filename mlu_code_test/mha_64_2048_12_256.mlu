@@ -9,7 +9,6 @@ __mlu_global__ void mlu_multiHeadAttentionForward(
     __nram__ float score[12 * 12];
     __nram__ float dinominator[12];
     __nram__ float dinominator_temp[12];
-    __nram__ float addition[12];
     // The dimension 64, 2048, 12, 256
     if (clusterId < 4) {
         if (coreId < 4) {
@@ -36,7 +35,8 @@ __mlu_global__ void mlu_multiHeadAttentionForward(
                         __bang_write_zero(dinominator, 12);
                         __bang_sumpool(dinominator, score + j_sf * 12, 1, 1, 12, 1, 12, 1, 1);
                         __memset_nram(dinominator_temp, 12, dinominator[0]);
-                        __bang_div(score + j_sf * 12, score + j_sf * 12, dinominator_temp, addition, 12);
+                        __bang_recip(dinominator_temp, dinominator_temp, 12);
+                        __bang_mul(score + j_sf * 12, score + j_sf * 12, dinominator_temp, 12);
                     }
                     // The final Matmul
                     __wram__ float local_V[12 * 256];
@@ -51,7 +51,7 @@ __mlu_global__ void mlu_multiHeadAttentionForward(
 }
 
 
-extern "C" multiHeadAttentionForward_kernel(
+extern "C" void multiHeadAttentionForward_kernel(
     float* Q,
     float* K,
     float* V,
