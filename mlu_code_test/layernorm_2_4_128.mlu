@@ -1,39 +1,37 @@
-
-
 __mlu_global__ void mlu_layer_norm(
     float* input, 
     float* gamma, 
     float* beta, 
     float* output
 ) {
-    __nram__ float diff[32];
-    __nram__ float mean[32];
-    __nram__ float variance[32];
-    __nram__ float local_input[32];
-    __nram__ float local_gamma[32];
-    __nram__ float local_beta[32];
-    __memcpy(local_gamma, gamma, 128, GDRAM2NRAM);
-    __memcpy(local_beta, beta, 128, GDRAM2NRAM);
+    __nram__ float diff[128];
+    __nram__ float mean[128];
+    __nram__ float variance[128];
+    __nram__ float local_input[128];
+    __nram__ float local_gamma[128];
+    __nram__ float local_beta[128];
+    __memcpy(local_gamma, gamma, 512, GDRAM2NRAM);
+    __memcpy(local_beta, beta, 512, GDRAM2NRAM);
 
     if (clusterId  < 2) {
         if (coreId < 4) {
-            __memcpy(local_input, input + clusterId * 4 * 32 + coreId * 32, 128, GDRAM2NRAM);
-            __bang_sumpool(mean, local_input, 1, 1, 32, 1, 32, 1, 1);
-            __bang_mul_const(mean, mean, 1.0/32, 32);
+            __memcpy(local_input, input + clusterId * 4 * 128 + coreId * 128, 512, GDRAM2NRAM);
+            __bang_sumpool(mean, local_input, 1, 1, 128, 1, 128, 1, 1);
+            __bang_mul_const(mean, mean, 1.0/128, 128);
 
             // Calculate variance
-            __bang_sub(diff, local_input, mean, 32);
-            __bang_mul(diff, diff, diff, 32);
+            __bang_sub(diff, local_input, mean, 128);
+            __bang_mul(diff, diff, diff, 128);
 
-            __bang_sumpool(variance, diff, 1, 1, 32, 1, 32, 1, 1);
-            variance[0] = sqrt(variance[0] / 32);
+            __bang_sumpool(variance, diff, 1, 1, 128, 1, 128, 1, 1);
+            variance[0] = sqrt(variance[0] / 128);
 
             // Normalize input
-            __bang_sub(diff, local_input, mean, 32);
-            __bang_mul(diff, diff, gamma, 32);
-            __bang_mul_const(diff, diff, 1.0/(variance[0] + 1e-5f), 32);
-            __bang_add(diff, diff, beta, 32);
-            __memcpy(output + clusterId * 4 * 32 + coreId * 32, diff, 128, NRAM2GDRAM);
+            __bang_sub(diff, local_input, mean, 128);
+            __bang_mul(diff, diff, gamma, 128);
+            __bang_mul_const(diff, diff, 1.0/(variance[0] + 1e-5f), 128);
+            __bang_add(diff, diff, beta, 128);
+            __memcpy(output + clusterId * 4 * 128 + coreId * 128, diff, 512, NRAM2GDRAM);
         }
     }
 }
@@ -44,7 +42,7 @@ extern "C" void layer_norm_kernel(float* input, float* gamma, float* beta, float
     cnrtQueueCreate(&queue);
     int batch_size = 2;
     int seq_length = 4;
-    int d_model = 32;
+    int d_model = 128;
     int num_elements = batch_size * seq_length * d_model;
 
     // Allocate memory on the device
