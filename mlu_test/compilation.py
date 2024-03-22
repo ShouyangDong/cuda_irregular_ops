@@ -6,7 +6,7 @@ import glob
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["cncc", "-shared", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "-fPIC", "--bang-mlu-arch=mtp_592", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",

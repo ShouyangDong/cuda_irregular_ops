@@ -64,10 +64,10 @@ extern "C" multiHeadAttentionForward_kernel(
     int batch = 64;
     int seq_len = 2048;
     int heads = 12;
-    int dim = 256;
+    int final_dim = 256;
 
     // Allocate memory on the device
-    int num_elements = batch * seq_len * heads * dim;
+    int num_elements = batch * seq_len * heads * final_dim;
     float* d_Q;
     cnrtMalloc((void**)(&d_Q), num_elements * sizeof(float));
     float* d_K;
