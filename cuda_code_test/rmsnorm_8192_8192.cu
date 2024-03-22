@@ -2,26 +2,26 @@
 #include "stdio.h"
 
 
-__global__ void cuda_rms_norm(float* A, float* B, int size) {
+__global__ void cuda_rms_norm(float* A, float* B) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     float eps = 1e-5f;
     
-    if (idx < size) {
+    if (idx < 8192) {
         // Calculate sum
         float sum = 0.0;
-        for (int j = 0; j < size; j++) {
-            sum += A[idx * size + j] * A[idx * size + j];
+        for (int j = 0; j < 8192; j++) {
+            sum += A[idx * 8192 + j] * A[idx * 8192 + j];
         }
 
         // Calculate mean
-        float mean = sum / size;
+        float mean = sum / 8192;
 
         // Calculate scale
         float scale = 1.0 / sqrt(mean + eps);
 
         // Normalize and store in B
-        for (int j = 0; j < size; j++) {
-            B[idx * size + j] = A[idx * size + j] * scale;
+        for (int j = 0; j < 8192; j++) {
+            B[idx * 8192 + j] = A[idx * 8192 + j] * scale;
         }
     }
 }
