@@ -1,4 +1,4 @@
-#include <bang.h>
+
 
 __mlu_global__ void bang_rms_norm(float* A, float* B) {
     __nram__ float local_A[8192];
