@@ -21,20 +21,20 @@ def run_test(file_name, test_file):
         return False, e.output
 
 if __name__ == "__main__":
-    files = glob.glob("./cpp_code_test/*.cpp")
+    files = glob.glob("./mlu_code_test/*.mlu")
     counter = 0
 
     for file in tqdm(files):
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":
-            success, output = run_test(file, "./cpp_test/test_deformable_attention_cpp.py")
+            success, output = run_test(file, "./mlu_test/test_deformable_attention_mlu.py")
         elif name == "layernorm":
-            success, output = run_test(file, "./cpp_test/test_layer_norm_cpp.py")
+            success, output = run_test(file, "./mlu_test/test_layer_norm_mlu.py")
         elif name == "mha":
-            success, output = run_test(file, "./cpp_test/test_mha.py")
+            success, output = run_test(file, "./mlu_test/test_mha_mlu.py")
         elif name == "rmsnorm":
-            success, output = run_test(file, "./cpp_test/test_rms_norm_cpp.py")
+            success, output = run_test(file, "./mlu_test/test_rms_norm_mlu.py")
 
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
@@ -45,4 +45,4 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************CPP test successfule rate: ",  counter / len(files))
+    print("[INFO]*******************MLU test successfule rate: ",  counter / len(files))
