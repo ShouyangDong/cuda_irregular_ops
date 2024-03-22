@@ -1,2 +1,2 @@
 # cuda_irregular_ops
-irregular tensor operators implemented in CUDA C
+irregular tensor operators implemented in CUDA C、C、 BANG C
