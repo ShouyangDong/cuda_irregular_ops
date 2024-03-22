@@ -69,13 +69,13 @@ extern "C" multiHeadAttentionForward_kernel(
     // Allocate memory on the device
     int num_elements = batch * seq_len * heads * dim;
     float* d_Q;
-    cnrtMalloc(&d_Q, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_Q), num_elements * sizeof(float));
     float* d_K;
-    cnrtMalloc(&d_K, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_K), num_elements * sizeof(float));
     float* d_V;
-    cnrtMalloc(&d_V, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_V), num_elements * sizeof(float));
     float* d_output;
-    cnrtMalloc(&d_output, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_output), num_elements * sizeof(float));
 
     // Allocate memory on the device
     cnrtMemcpy(d_Q, Q, num_elements * sizeof(float), cnrtMemcpyHostToDev);

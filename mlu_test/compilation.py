@@ -23,7 +23,7 @@ files = glob.glob("./mlu_code_test/*.mlu")
 counter = 0
 for file_name in files:
     base_name = os.path.basename(file_name)
-    so_name = base_name.replace("cu", "so")
+    so_name = base_name.replace("mlu", "so")
     so_name = os.path.join("./mlu_code_test/", so_name)
 
     with open(file_name, "r") as f:

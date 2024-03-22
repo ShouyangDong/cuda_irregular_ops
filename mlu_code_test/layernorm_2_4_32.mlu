@@ -49,13 +49,13 @@ extern "C" void layer_norm_kernel(float* input, float* gamma, float* beta, float
 
     // Allocate memory on the device
     float* d_input;
-    cnrtMalloc(&d_input, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_input), num_elements * sizeof(float));
     float* d_gamma;
-    cnrtMalloc(&d_gamma, d_model * sizeof(float));
+    cnrtMalloc((void**)(&d_gamma), d_model * sizeof(float));
     float* d_beta;
-    cnrtMalloc(&d_beta, d_model * sizeof(float));
+    cnrtMalloc((void**)(&d_beta), d_model * sizeof(float));
     float* d_output;
-    cnrtMalloc(&d_output, num_elements * sizeof(float));
+    cnrtMalloc((void**)(&d_output), num_elements * sizeof(float));
 
     // Copy data from host to device
     cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
