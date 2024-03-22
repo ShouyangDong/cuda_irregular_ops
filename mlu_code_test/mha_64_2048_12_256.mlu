@@ -1,4 +1,4 @@
-#include <bang.h>
+
 
 __mlu_global__ void mlu_multiHeadAttentionForward(
     float* Q, //[batch, seq_len, heads, dim] 
