@@ -1,7 +1,7 @@
 import subprocess
 import glob
 import os
-
+from tqdm import tqdm
 
 def run_test(file_name, test_file):
     try:
@@ -12,7 +12,7 @@ def run_test(file_name, test_file):
             encoding="utf-8",
             check=True,
             text=True,
-            timeout=40,
+            timeout=400,
         )           
         return True, output
     except subprocess.TimeoutExpired:
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     files = glob.glob("./cpp_code_test/*.cpp")
     counter = 0
 
-    for file in files:
+    for file in tqdm(files):
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":

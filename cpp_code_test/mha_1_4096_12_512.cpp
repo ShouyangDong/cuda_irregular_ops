@@ -6,8 +6,8 @@ extern "C" void multiHeadAttentionForward_kernel(
     float* output  //[batch, seq_len, heads, dim]
 ) {
   float score[12 * 12];
-  // The dimension 64, 4096, 12, 512
-  for (int i = 0; i < 64; i++) {
+  // The dimension 1, 4096, 12, 512
+  for (int i = 0; i < 1; i++) {
     for (int j = 0; j < 4096; j++) {
       for (int m = 0; m < 12; m++) {
         for (int n = 0; n < 12; n++) {

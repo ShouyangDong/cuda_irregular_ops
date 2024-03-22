@@ -6,16 +6,16 @@ extern "C" void multiHeadAttentionForward_kernel(
     float* output  //[batch, seq_len, heads, dim]
 ) {
   float score[12 * 12];
-  // The dimension 64, 4096, 12, 512
+  // The dimension 64, 2048, 12, 512
   for (int i = 0; i < 64; i++) {
-    for (int j = 0; j < 4096; j++) {
+    for (int j = 0; j < 2048; j++) {
       for (int m = 0; m < 12; m++) {
         for (int n = 0; n < 12; n++) {
           score[m * 12 + n] = 0.0;
           for (int p = 0; p < 512; p++) {
             score[m * 12 + n] +=
-                Q[i * 4096 * 12 * 512 + j * 12 * 512 + m * 512 + p] *
-                K[i * 4096 * 12 * 512 + j * 12 * 512 + n * 512 + p];
+                Q[i * 2048 * 12 * 512 + j * 12 * 512 + m * 512 + p] *
+                K[i * 2048 * 12 * 512 + j * 12 * 512 + n * 512 + p];
           }
         }
       }
@@ -45,11 +45,11 @@ extern "C" void multiHeadAttentionForward_kernel(
       // The final Matmul
       for (int m_fl = 0; m_fl < 12; ++m_fl) {
         for (int n_fl = 0; n_fl < 512; ++n_fl) {
-          output[i * 4096 * 12 * 512 + j * 12 * 512 + m_fl * 512 + n_fl] = 0.0;
+          output[i * 2048 * 12 * 512 + j * 12 * 512 + m_fl * 512 + n_fl] = 0.0;
           for (int k_fl = 0; k_fl < 12; ++k_fl) {
-            output[i * 4096 * 12 * 512 + j * 12 * 512 + m_fl * 512 + n_fl] +=
+            output[i * 2048 * 12 * 512 + j * 12 * 512 + m_fl * 512 + n_fl] +=
                 score[m_fl * 12 + k_fl] *
-                V[i * 4096 * 12 * 512 + j * 12 * 512 + k_fl * 512 + n_fl];
+                V[i * 2048 * 12 * 512 + j * 12 * 512 + k_fl * 512 + n_fl];
           }
         }
       }
