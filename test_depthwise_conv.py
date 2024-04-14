@@ -70,4 +70,4 @@ np.testing.assert_allclose(
     err_msg="",
     verbose=True,
 )
-print("Successful")
+print("验证通过！")

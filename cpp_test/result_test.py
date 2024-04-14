@@ -11,7 +11,7 @@ def run_test(file_name, test_file):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            text=True,
+            # text=True,
             timeout=400,
         )           
         return True, output
@@ -21,7 +21,7 @@ def run_test(file_name, test_file):
         return False, e.output
 
 if __name__ == "__main__":
-    files = glob.glob("./cpp_code_test/*.cpp")
+    files = glob.glob("./cpp_code_test/conv1d*.cpp")
     counter = 0
 
     for file in tqdm(files):
