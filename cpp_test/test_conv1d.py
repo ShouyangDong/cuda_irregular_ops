@@ -28,11 +28,14 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Define the input array and kernel
     input_array = np.random.uniform(size=[shape[1]]).astype("float32")
-    kernel = np.random.uniform(size=[3]).astype("float32")
-
+    # kernel = np.random.uniform(size=[3]).astype("float32")
+    # print(kernel)
+    # input_array = np.array([1.0, 2.0, 1.0, 3.0, 0.0, 1.0, 2.0]).astype(np.float32)
+    kernel = np.array([0.5, 1.0, 0.5]).astype(np.float32)
+    print(shape[1])
     # Calculate the output size
     output_size = shape[0]
-
+    print(output_size)
     # Create an empty output array
     output_ctypes = np.zeros(output_size, dtype=np.float32)
 
