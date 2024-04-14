@@ -2,6 +2,7 @@ import numpy as np
 import ctypes
 import subprocess
 import os
+import argparse
 
 def run_compilation(so_name, file_name):
     try:
@@ -21,6 +22,7 @@ def run_compilation(so_name, file_name):
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):
     return np.matmul(A, B)
+
 
 # Generate random matrices for testing
 batch_size = 3

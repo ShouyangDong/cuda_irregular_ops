@@ -35,6 +35,12 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cpp_test/test_mha.py")
         elif name == "rmsnorm":
             success, output = run_test(file, "./cpp_test/test_rms_norm_cpp.py")
+        elif name == "bmm":
+            success, output = run_test(file, "./cpp_test/test_bmm.py")
+        elif name == "conv1d":
+            success, output = run_test(file, "./cpp_test/test_conv1d.py")
+        elif name == "gemv":
+            success, output = run_test(file, "./cpp_test/test_gemv.py")
 
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
