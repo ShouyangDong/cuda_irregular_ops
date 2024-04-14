@@ -1,6 +1,6 @@
 #include <iostream>
 
-void depthwise_convolution(float *output, float *input, float *kernel){
+extern "C" void depthwiseconv_kernel(float *output, float *input, float *kernel){
     int input_channels = 3;
     int input_height = 5;
     int input_width = 5;

@@ -44,13 +44,13 @@ for c in range(input_channels):
             output_np[c, i, j] = np.sum(input_tensor[c, i:i+kernel_size, j:j+kernel_size] * kernel[c])
 
     
-file_name = "conv_1d.cpp"
-so_name = "conv_1d.so"
+file_name = "depthwiseconv.cpp"
+so_name = "depthwiseconv.so"
 # Load the shared library with the batch matrix multiplication function
 success, output = run_compilation(so_name, file_name)
 # # os.remove(file_name)
 lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-function = getattr(lib, "conv_1d_kernel")
+function = getattr(lib, "depthwiseconv_kernel")
 # 定义函数参数和返回类型
 function.argtypes = [
     ctypes.POINTER(ctypes.c_float),
