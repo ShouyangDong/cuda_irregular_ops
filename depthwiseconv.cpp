@@ -1,20 +1,18 @@
-#include <iostream>
-
 extern "C" void depthwiseconv_kernel(float *output, float *input, float *kernel){
-    int input_channels = 3;
-    int input_height = 5;
-    int input_width = 5;
+    int in_depth = 3;
+    int input_height = 6;
+    int input_width = 6;
     int kernel_size = 3;
     int output_height = input_height - kernel_size + 1;
     int output_width = input_width - kernel_size + 1;
 
-    for (int c = 0; c < input_channels; c++) {
-        for (int i = 0; i < output_height; i++) {
-            for (int j = 0; j < output_width; j++) {
-                output[c*output_height*output_width + i*output_width + j] = 0;
-                for (int m = 0; m < kernel_size; m++) {
-                    for (int n = 0; n < kernel_size; n++) {
-                        output[c*output_height*output_width + i*output_width + j] += input[c*input_height*input_width + (i+m)*input_width + (j+n)] * kernel[m*kernel_size + n];
+    for (int c = 0; c < in_depth; ++c) {
+        for (int i = 0; i < output_height; ++i) {
+            for (int j = 0; j < output_width; ++j) {
+                output[i * output_width *  in_depth + j * in_depth + c] = 0.0;
+                for (int fi = 0; fi < kernel_size; ++fi) {
+                    for (int fj = 0; fj < kernel_size; ++fj) {
+                        output[i * output_width *  in_depth + j * in_depth + c] += input[(i + fi)* in_depth * input_width + (j + fj) * in_depth + c] * kernel[fi * kernel_size * kernel_size + fj * kernel_size + c];;
                     }
                 }
             }
