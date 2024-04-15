@@ -12,12 +12,39 @@ def run_compilation(so_name, file_name):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            # text=True,
+            text=True,
             timeout=15,
         )
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
+def depthwise_conv2d(input, w):
+    """Two-dimensional depthwise convolution.
+
+    Uses SAME padding with 0s, a stride of 1 and no dilation. A single output
+    channel is used per input channel (channel_multiplier=1).
+
+    input: input array with shape (height, width, in_depth)
+    w: filter array with shape (fd, fd, in_depth)
+
+    Returns a result with shape (height, width, in_depth).
+    """
+    height, width, in_depth = input.shape
+    output_height = height - w.shape[0] + 1
+    output_width = width - w.shape[1] + 1
+    output = np.zeros((output_height, output_width, in_depth))
+    for c in range(in_depth):
+        # For each input channel separately, apply its corresponsing filter
+        # to the input.
+        for i in range(output_height):
+            for j in range(output_width):
+                for fi in range(w.shape[0]):
+                    for fj in range(w.shape[1]):
+                        w_element = w[fi, fj, c]
+                        output[i, j, c] += (
+                            input[i + fi, j + fj, c] * w_element)
+    return output
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -26,26 +53,28 @@ if __name__ == "__main__":
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Define the input array and kernel
-    input_array = np.random.uniform(size=[shape[1]]).astype("float32")
-    # kernel = np.random.uniform(size=[3]).astype("float32")
-    # print(kernel)
-    # input_array = np.array([1.0, 2.0, 1.0, 3.0, 0.0, 1.0, 2.0]).astype(np.float32)
-    kernel = np.array([0.5, 1.0, 0.5]).astype(np.float32)
-    # Calculate the output size
-    output_size = shape[0]
-    # Create an empty output array
-    output_ctypes = np.zeros(output_size, dtype=np.float32)
+    input_height, kernel_size,  input_channels = shape[0], shape[1], shape[2]
+    # Define the input tensor, kernel, and parameters
+    input_tensor = np.random.rand(input_height, input_height, input_channels).astype(np.float32)
+    kernel = np.random.rand(kernel_size, kernel_size, input_channels).astype(np.float32)
+
+
+    # Calculate the output tensor shape
+    output_height = input_height - kernel_size + 1
+    output_width = input_height - kernel_size + 1
+
+    # Create an empty output tensor
+    output_ctypes = np.zeros((output_height, output_width, input_channels), dtype=np.float32)
 
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_tensor.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-
     # Calculate the result using numpy for comparison
-    output_np = np.convolve(input_array, kernel, mode='valid')
+    output_np = depthwise_conv2d(input_tensor, kernel).astype("float32")
 
-    # Load the shared library with the batch matrix multiplication function
+        
+    # Load the shared library with the depthwise convolution function
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
@@ -64,7 +93,7 @@ if __name__ == "__main__":
     os.remove(file_name)
     # # os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, "conv_1d_kernel")
+    function = getattr(lib, "depthwiseconv_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),

@@ -41,6 +41,8 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cpp_test/test_conv1d.py")
         elif name == "gemv":
             success, output = run_test(file, "./cpp_test/test_gemv.py")
+        elif name == "depthwiseconv":
+            success, output = run_test(file, "./cpp_test/test_depthwise_conv.py")
 
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
