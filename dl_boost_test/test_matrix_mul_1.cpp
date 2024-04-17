@@ -23,21 +23,22 @@ void multiply(int32_t mat1[][N], int32_t mat2[][N], int32_t res[][N]) {
 
 void multiply_w_fma(int32_t mat1[][N], int32_t mat2[][N], int32_t res[][N]) {
     __m128i A,B,C, value;
-    int i, j, k;
-    for (i = 0; i < N; i++)
+    for (int i = 0; i < N; i++)
     {
-        for (j = 0; j < N; j += 4)
+        for (int j = 0; j < N; j += 4)
         {
             res[i][j] = 0;
             C =  _mm_load_si128((__m128i*)&res[i][j]);
-            for (k = 0; k < N; k+=8)
-
+	    printf("values = %lld\n",C[0]);
+            for (int k = 0; k < N; k+=4) {
                 A =  _mm_load_si128((__m128i*)&mat1[i][k]);
                 B =  _mm_load_si128((__m128i*)&mat1[k][j]);
-
-                value = _mm_dpbusd_epi32(C, B, A);
-        }
-        _mm_store_si128((__m128i*)&result[i][j],value);
+                
+                value = _mm_dpbusd_epi32(A, B, C);
+		printf("values = %lld\n",value[0]);
+            }
+        _mm_store_si128((__m128i*)&res[i][j],value);
+       }
     }
 }
 
