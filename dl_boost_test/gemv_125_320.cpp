@@ -4,9 +4,9 @@ extern "C" void gemv_kernel(float *y, float *A, float *x) {
     uint32_t arr_src[4];
     for (int i = 0; i < 125; i++) {
         uint32_t sum = 0;
-        for (int local_s = 0; local_s < 8; local_s++) {
+        for (int local_s = 0; local_s < 20; local_s++) {
             for (int local_i = 0; local_i < 16; local_i++) {
-                arr_a[local_i] = (uint8_t)A[i * 128 + (local_s * 16 + local_i)];
+                arr_a[local_i] = (uint8_t)A[i * 320 + (local_s * 16 + local_i)];
                 arr_b[local_i] = (uint8_t)B[local_s * 16 + local_i];
             }
             for (int i_src =0; i_src<NUM_32B_INT_IN_M6; i_src++){

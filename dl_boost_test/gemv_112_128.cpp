@@ -2,7 +2,7 @@ extern "C" void gemv_kernel(float *y, float *A, float *x) {
     uint8_t arr_a[16];
     uint8_t arr_b[16];
     uint32_t arr_src[4];
-    for (int i = 0; i < 125; i++) {
+    for (int i = 0; i < 112; i++) {
         uint32_t sum = 0;
         for (int local_s = 0; local_s < 8; local_s++) {
             for (int local_i = 0; local_i < 16; local_i++) {
