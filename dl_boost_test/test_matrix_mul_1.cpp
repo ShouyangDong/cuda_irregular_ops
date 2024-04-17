@@ -2,6 +2,7 @@
 #include <immintrin.h>
 #include <ctype.h>
 #define N 4
+#define NUM_32B_INT_IN_M128 (sizeof(__m128i)/sizeof(int32_t))
 
 // This function multiplies mat1[][] and mat2[][],
 // and stores the result in res[][]
@@ -21,24 +22,35 @@ void multiply(int32_t mat1[][N], int32_t mat2[][N], int32_t res[][N]) {
     }
 }
 
+
+void print128_num_32(__m128i var) {
+    int32_t *val = (int32_t*) &var;
+	for(int i = 0; i < NUM_32B_INT_IN_M128; i++)
+		printf("%u ",val[1]);
+	printf("\n");
+}
+
+
 void multiply_w_fma(int32_t mat1[][N], int32_t mat2[][N], int32_t res[][N]) {
     __m128i A,B,C, value;
-    for (int i = 0; i < N; i++)
-    {
-        for (int j = 0; j < N; j += 4)
-        {
+
+    for (int i = 0; i < N; i++){
+       for (int j = 0; j < N; j++){
             res[i][j] = 0;
-            C =  _mm_load_si128((__m128i*)&res[i][j]);
-	    printf("values = %lld\n",C[0]);
+            C =  _mm_loadu_si128((__m128i*)&res[i][j]);
+	    print128_num_32(C);
             for (int k = 0; k < N; k+=4) {
-                A =  _mm_load_si128((__m128i*)&mat1[i][k]);
-                B =  _mm_load_si128((__m128i*)&mat1[k][j]);
-                
-                value = _mm_dpbusd_epi32(A, B, C);
-		printf("values = %lld\n",value[0]);
-            }
-        _mm_store_si128((__m128i*)&res[i][j],value);
-       }
+                A =  _mm_load_si128((__m128i*)&(mat1[i][k]));
+		print128_num_32(A);
+                B =  _mm_load_si128((__m128i*)&(mat2[j][k]));
+                value = _mm_dpbusd_epi32(C, A, B);
+		//print128_num_32(C);
+		printf("-----------\n");
+		print128_num_32(value);
+
+          }
+            _mm_storeu_si128((__m128i*)&res[i][j], value);
+        }
     }
 }
 
@@ -58,7 +70,7 @@ int main(){
     int i, j;
 
     multiply(mat1, mat2, res);
-    multiply(mat1, mat2, res_w_fma);
+    multiply_w_fma(mat1, mat2, res_w_fma);
 
     printf("\nResult matrix is \n");
     for (i = 0; i < N; i++)
