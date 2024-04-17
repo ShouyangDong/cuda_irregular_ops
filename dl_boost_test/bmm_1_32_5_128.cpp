@@ -1,0 +1,15 @@
+extern "C" void bmm_kernel(float *result, float *A, float *B) {
+    for (int i = 0; i < 1; i++) {
+        for (int j = 0; j < 32; j++) {
+
+
+
+            for (int k = 0; k < 128; k++) {
+                result[i * 32 * 128 + j * 128 + k] = 0;
+                for (int l = 0; l < 5; l++) {
+                    result[i * 32 * 128 + j * 128 + k] += A[i * 32 * 5 + j * 5 + l] * B[i * 5 * 128 + l * 128 + k];
+                }
+            }
+        }
+    }
+}
