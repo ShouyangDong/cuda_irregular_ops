@@ -1,5 +1,5 @@
 extern "C" void bmm_kernel(float *result, float *A, float *B) {
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 32; j++) {
             for (int k = 0; k < 128; k++) {
                 result[i * 32 * 128 + j * 128 + k] = 0;
