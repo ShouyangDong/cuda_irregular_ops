@@ -8,12 +8,12 @@
 
 #define NUM_8B_INT_IN_M128  (sizeof(__m128i)/sizeof(uint8_t))
 #define NUM_16B_INT_IN_M128 (sizeof(__m128i)/sizeof(uint16_t))
-#define NUM_32B_INT_IN_M128 (sizeof(__m128i)/sizeof(uint32_t))
+#define 4 (sizeof(__m128i)/sizeof(uint32_t))
 
 
 void print128_num_32(__m128i var) {
     uint32_t *val = (uint32_t*) &var;
-	for(int i = 0; i < NUM_32B_INT_IN_M128; i++)
+	for(int i = 0; i < 4; i++)
 		printf("%u ",val[1]);
 	printf("\n");
 }
@@ -32,7 +32,7 @@ void print128_num_8(__m128i var){
 	printf("\n");
 }
 
-void foo(uint8_t src_A[NUM_8B_INT_IN_M128], uint8_t src_B[NUM_8B_INT_IN_M128], uint32_t src_C[NUM_32B_INT_IN_M128]){
+void foo(uint8_t src_A[NUM_8B_INT_IN_M128], uint8_t src_B[NUM_8B_INT_IN_M128], uint32_t src_C[4]){
     __m128i A,B,src,result;
     A = _mm_loadu_si128((__m128i*)&src_A);
     print128_num_8(A);

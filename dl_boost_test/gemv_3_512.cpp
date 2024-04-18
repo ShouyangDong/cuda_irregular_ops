@@ -9,7 +9,7 @@ extern "C" void gemv_kernel(float *y, float *A, float *x) {
                 arr_a[local_i] = (uint8_t)A[i * 512 + (local_s * 16 + local_i)];
                 arr_b[local_i] = (uint8_t)x[local_s * 16 + local_i];
             }
-            for (int i_src =0; i_src<NUM_32B_INT_IN_M6; i_src++){
+            for (int i_src =0; i_src<4; i_src++){
                 arr_src[i_src] = (uint32_t)0;
             }
             
@@ -18,7 +18,7 @@ extern "C" void gemv_kernel(float *y, float *A, float *x) {
             __m128i src = _mm_loadu_si128((__m128i*)&arr_src);
             __m128i local_result =  _mm_dpbusds_epi32(src, A, B);
             uint32_t *val = (uint32_t*) &local_result;
-            for(int i = 0; i < NUM_32B_INT_IN_M128; i++){
+            for(int i = 0; i < 4; i++){
                 sum += val[1];
             }
         }

@@ -2,7 +2,7 @@
 #include <immintrin.h>
 #include <ctype.h>
 #define N 4
-#define NUM_32B_INT_IN_M128 (sizeof(__m128i)/sizeof(int32_t))
+#define 4 (sizeof(__m128i)/sizeof(int32_t))
 
 // This function multiplies mat1[][] and mat2[][],
 // and stores the result in res[][]
@@ -25,7 +25,7 @@ void multiply(int32_t mat1[][N], int32_t mat2[][N], int32_t res[][N]) {
 
 void print128_num_32(__m128i var) {
     int32_t *val = (int32_t*) &var;
-	for(int i = 0; i < NUM_32B_INT_IN_M128; i++)
+	for(int i = 0; i < 4; i++)
 		printf("%u ",val[1]);
 	printf("\n");
 }

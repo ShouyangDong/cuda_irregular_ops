@@ -17,7 +17,7 @@ void bmm_kernel(float *result, float *A, float *B) {
                         arr_a[local_i] = (uint8_t)A[i * 4 * 128 + j * 128 + local_s * 16 + local_i];
                         arr_b[local_i] = (uint8_t)B[i * 128 * 128 + (local_s * 16 + local_i) * 128 + k];
                     }
-                    for (int i_src =0; i_src<NUM_32B_INT_IN_M6; i_src++){
+                    for (int i_src =0; i_src<4; i_src++){
                         arr_src[i_src] = (uint32_t)0;
                     }
                 
@@ -26,7 +26,7 @@ void bmm_kernel(float *result, float *A, float *B) {
                 __m6i src = _mm_loadu_si6((__m6i*)&arr_src);
                 __m6i local_result =  _mm_dpbusds_epi32(src, A, B);
                 uint32_t *val = (uint32_t*) &local_result;
-                for(int i = 0; i < NUM_32B_INT_IN_M6; i++){
+                for(int i = 0; i < 4; i++){
                  sum += val[1];
 		        }    
             }

@@ -7,7 +7,7 @@ import argparse
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-o", so_name, file_name],
+            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-I/projs/AE/dongshouyang/cuda_irregular_ops/dl_boost_test", "-O3", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -48,11 +48,11 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open("./macro/cpp_macro.txt", "r") as f:
+    with open("./macro/dl_boost_macro.txt", "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
-    
+    print(code)    
     file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
     with open(file_name, mode="w") as f:
         f.write(code)

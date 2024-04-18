@@ -12,14 +12,14 @@ void foo(int a, int b, int c){
 
 	uint8_t arr_a[NUM_8B_INT_IN_M128];
 	uint8_t arr_b[NUM_8B_INT_IN_M128];
-	uint32_t arr_src[NUM_32B_INT_IN_M128];
+	uint32_t arr_src[4];
 
     for (int i=0; i<NUM_8B_INT_IN_M128; i++){
         arr_a[i] = (uint8_t)a;
         arr_b[i] = (uint8_t)b;
 	}
 
-    for (int i=0; i<NUM_32B_INT_IN_M128; i++){
+    for (int i=0; i<4; i++){
         arr_src[i] = c;
 	}
 	A = _mm_loadu_si128((__m128i*)&arr_a);
