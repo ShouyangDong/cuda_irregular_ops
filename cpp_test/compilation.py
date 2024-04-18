@@ -32,7 +32,6 @@ for file_name in files:
         macro = f.read()
 
     code = macro + code
-    print(code)
     file_name = file_name.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
     with open(file_name, mode="w") as f:
         f.write(code)
