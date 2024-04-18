@@ -65,8 +65,8 @@ extern "C" void multiHeadAttentionForward_kernel(
         for (int n_fl = 0; n_fl < 512; ++n_fl) {
             uint32_t sum = 0;
             for (int local_i = 0; local_i < 16; local_i++) {
-                arr_a[local_i] = (uint8_t)score[i * 2048 *16 * 512 + j *16 * 512 + m * 512 + local_i];
-                arr_b[local_i] = (uint8_t)V[i * 2048 *16 * 512 + j *16 * 512 + k_fl * 512 + local_i];
+                arr_a[local_i] = (uint8_t)score[m_fl * 16 + local_i];
+                arr_b[local_i] = (uint8_t)V[i * 2048 * 16 * 512 + j *16 * 512 + local_i * 512 + n_fl];
             }
             for (int i_src =0; i_src<4; i_src++){
                 arr_src[i_src] = (uint32_t)0;
@@ -80,7 +80,6 @@ extern "C" void multiHeadAttentionForward_kernel(
             for(int i = 0; i < 4; i++){
                 sum += val[1];
             }
-          }
           output[i * 2048 *16 * 512 + j *16 * 512 + m_fl * 512 + n_fl] = float(sum); 
         }
       }

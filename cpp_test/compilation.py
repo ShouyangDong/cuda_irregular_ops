@@ -19,7 +19,7 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob("./dl_boost_test/gemv*.cpp")
+files = glob.glob("./dl_boost_test/*.cpp")
 counter = 0
 for file_name in files:
     base_name = os.path.basename(file_name)
