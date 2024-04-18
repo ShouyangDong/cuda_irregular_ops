@@ -11,12 +11,12 @@ import torch
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-o", so_name, file_name],
+            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            text=True,
+            # text=True,
             timeout=15,
         )
         return True, output

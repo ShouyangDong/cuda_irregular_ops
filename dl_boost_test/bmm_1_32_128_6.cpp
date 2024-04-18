@@ -1,10 +1,6 @@
-#include <stdio.h>
-#include <immintrin.h>
-#include <time.h>
-#include <stdint.h>
-#include "common.h"
 
-void bmm_kernel(float *result, float *A, float *B) {
+
+extern "C"  void bmm_kernel(float *result, float *A, float *B) {
     uint8_t arr_a[16];
     uint8_t arr_b[16];
     uint32_t arr_src[4];

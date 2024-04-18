@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <immintrin.h>
-#include <time.h>
-#include <stdint.h>
-#include "common.h"
+
 
 #define MAXRAND 10
 

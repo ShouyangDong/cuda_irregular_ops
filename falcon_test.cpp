@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <immintrin.h>
-#include <time.h>
-#include <stdint.h>
-#include "common.h"
+
 
 void bmm_kernel(float *result, float *A, float *B) {
     uint8_t arr_a[16];

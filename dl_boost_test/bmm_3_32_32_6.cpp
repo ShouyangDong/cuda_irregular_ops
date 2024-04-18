@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <immintrin.h>
-#include <time.h>
-#include <stdint.h>
-#include "common.h"
+
 
 void bmm_kernel(float *result, float *A, float *B) {
     uint8_t arr_a[16];
@@ -35,29 +31,3 @@ void bmm_kernel(float *result, float *A, float *B) {
         }
     }
 }
-
-int main() {
-    float A[3072];  // Replace with appropriate size and initialization
-    float B[576];  // Replace with appropriate size and initialization
-    float result[576];  // Replace with appropriate size
-    // Call the batch matrix multiplication kernel
-    for (int i =0; i < 3072; i++){
-       A[i] = 2;
-    }
-    for (int i = 0; i < 576; i++){
-      B[i]= 1;
-    }
-
-    bmm_kernel(result, A, B);
-    // Print the result or perform further processing
-    for (int i = 0; i < 576; i++) {
-        printf("%f ", result[i]);
-    }
-    printf("\n");
-
-    return 0;
-}
-
-
-
-
