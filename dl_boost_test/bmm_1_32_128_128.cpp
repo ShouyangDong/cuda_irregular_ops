@@ -17,9 +17,9 @@ extern "C" void bmm_kernel(float *result, float *A, float *B) {
                         arr_src[i_src] = (uint32_t)0;
                     }
                 
-                __128i A = _mm_loadu_si6((__128i*)&arr_a);
-                __128i B = _mm_loadu_si6((__128i*)&arr_b);
-                __128i src = _mm_loadu_si6((__128i*)&arr_src);
+                __128i A = _mm_loadu_si128((__128i*)&arr_a);
+                __128i B = _mm_loadu_si128((__128i*)&arr_b);
+                __128i src = _mm_loadu_si128((__128i*)&arr_src);
                 __128i local_result =  _mm_dpbusds_epi32(src, A, B);
                 uint32_t *val = (uint32_t*) &local_result;
                 for(int i = 0; i < 4; i++){

@@ -86,4 +86,3 @@ extern "C" void multiHeadAttentionForward_kernel(
       }
     }
   }
-}
