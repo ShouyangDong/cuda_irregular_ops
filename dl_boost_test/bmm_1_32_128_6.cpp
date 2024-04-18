@@ -17,10 +17,10 @@ extern "C"  void bmm_kernel(float *result, float *A, float *B) {
                         arr_src[i_src] = (uint32_t)0;
                     }
                 
-                __m6i A = _mm_loadu_si6((__m6i*)&arr_a);
-                __m6i B = _mm_loadu_si6((__m6i*)&arr_b);
-                __m6i src = _mm_loadu_si6((__m6i*)&arr_src);
-                __m6i local_result =  _mm_dpbusds_epi32(src, A, B);
+               __m128i A = _mm_loadu_si6((__m6i*)&arr_a);
+               __m128i B = _mm_loadu_si6((__m6i*)&arr_b);
+               __m128i src = _mm_loadu_si6((__m6i*)&arr_src);
+               __m128i local_result =  _mm_dpbusds_epi32(src, A, B);
                 uint32_t *val = (uint32_t*) &local_result;
                 for(int i = 0; i < 4; i++){
                  sum += val[1];
