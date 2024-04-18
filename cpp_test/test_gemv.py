@@ -7,7 +7,7 @@ import argparse
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-I/projs/AE/dongshouyang/cuda_irregular_ops/dl_boost_test", "-O3", so_name, file_name],
+            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -59,6 +59,7 @@ if __name__ == "__main__":
         f.close()
     # Load the shared library with the batch matrix multiplication function
     success, output = run_compilation(so_name, file_name)
+    print(output)
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, "gemv_kernel")
