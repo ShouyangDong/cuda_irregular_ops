@@ -32,28 +32,6 @@ extern "C" void bmm_kernel(float *result, float *A, float *B) {
     }
 }
 
-int main() {
-    float A[1536];  // Replace with appropriate size and initialization
-    float B[2304];  // Replace with appropriate size and initialization
-    float result[72];  // Replace with appropriate size
-    // Call the batch matrix multiplication kernel
-    for (int i =0; i < 1536; i++){
-       A[i] = 2;
-    }
-    for (int i = 0; i < 2304; i++){
-      B[i]= 1;
-    }
-
-    bmm_kernel(result, A, B);
-    // Print the result or perform further processing
-    for (int i = 0; i < 72; i++) {
-        printf("%f ", result[i]);
-    }
-    printf("\n");
-
-    return 0;
-}
-
 
 
 
