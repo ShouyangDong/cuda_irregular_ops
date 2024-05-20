@@ -1,0 +1,54 @@
+void matmul(float *A, float *B, float *C) {
+    __nram__ float A_nram[32 * 512];
+    __wram__ float B_wram[512 * 512];
+    __nram__ float C_nram[32 * 512];
+    if (clusterId < 4) {
+        if (coreId < 4) {
+            __memcpy(A_nram, A + (clusterId * 4 + coreId) * 32 * 512, 32 * 512 * 4, GDRAM2NRAM);
+            __memcpy(B_wram, B, 512 * 512 * 4, GDRAM2WRAM);
+            __bang_mlp(C_nram, A_nram, B_wram, 32, 512);
+            __memcpy(C + (clusterId * 4 + coreId) * 32 * 512, C_nram, 32 * 512 * 4, NRAM2GDRAM);
+	    }
+    }
+}
+
+
+extern "C" void matmul_kernel(float* A, float* B, float* C) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+    int m = 512;
+    int n = 512;
+    int k = 512;
+    int num_A = m * n;
+    int num_B = n * k;
+    int num_C = m * k;
+
+    // Allocate memory on the device
+    float* d_A;
+    cnrtMalloc((void**)(&d_A), num_A * sizeof(float));
+    float* d_B;
+    cnrtMalloc((void**)(&d_B), num_B * sizeof(float));
+    float* d_C;
+    cnrtMalloc((void**)(&d_C), num_C * sizeof(float));
+
+    // Copy data from host to device
+    cnrtMemcpy(d_A, A, num_A * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_B, B, num_B * sizeof(float), cnrtMemcpyHostToDev);
+
+
+    // Define the function type
+    cnrtDim3_t dim = {1, 4, 4};
+    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+    // Launch kernel
+    matmul<<<dim, ktype, queue>>>(d_A, d_B, d_C);
+
+    // Copy the result back to host
+    cnrtMemcpy(C, d_C, num_C * sizeof(float), cnrtMemcpyDevToHost);
+
+    // Free device memory
+    cnrtFree(d_A);
+    cnrtFree(d_B);
+    cnrtFree(d_C);
+}
