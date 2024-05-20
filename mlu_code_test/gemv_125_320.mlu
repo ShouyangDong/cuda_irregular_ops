@@ -1,0 +1,51 @@
+void gemv(float *y, float *A, float *B) {
+    __nram__ float local_A[320];
+    __nram__ float local_B[320]
+    for (int i = 0; i < 125; i++) {
+        __memcpy(local_A, A + i * 320, 320 * 4, GDRAM2NRAM);
+        __memcpy(local_B, B, 320 * 4, GDRAM2NRAM);
+        __bang_mul(local_A, local_A, local_B, 320);
+        __bang_sumpool(local_A, local_A, 1, 1, 320, 1, 320, 1, 1);
+        y[i] = local_A[0];
+    }
+}
+
+
+extern "C" void gemv_kernel(float* A, float* B, float* C) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+    int m = 125;
+    int n = 320;
+    int num_A = m * n;
+    int num_B = n;
+    int num_C = m;
+
+    // Allocate memory on the device
+    float* d_A;
+    cnrtMalloc((void**)(&d_A), num_A * sizeof(float));
+    float* d_B;
+    cnrtMalloc((void**)(&d_B), num_B * sizeof(float));
+    float* d_C;
+    cnrtMalloc((void**)(&d_C), num_C * sizeof(float));
+
+    // Copy data from host to device
+    cnrtMemcpy(d_A, A, num_A * sizeof(float), cnrtMemcpyHostToDev);
+    cnrtMemcpy(d_B, B, num_B * sizeof(float), cnrtMemcpyHostToDev);
+
+
+    // Define the function type
+    cnrtDim3_t dim = {1, 1, 1};
+    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_BLOCK;
+
+    // Launch kernel
+    matmul<<<dim, ktype, queue>>>(d_A, d_B, d_C);
+
+    // Copy the result back to host
+    cnrtMemcpy(C, d_C, num_C * sizeof(float), cnrtMemcpyDevToHost);
+
+    // Free device memory
+    cnrtFree(d_A);
+    cnrtFree(d_B);
+    cnrtFree(d_C);
+}
