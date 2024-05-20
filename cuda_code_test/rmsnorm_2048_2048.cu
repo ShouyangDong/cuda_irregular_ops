@@ -1,5 +1,3 @@
-
-
 __global__ void cuda_rms_norm(float* A, float* B) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   float eps = 1e-5f;
