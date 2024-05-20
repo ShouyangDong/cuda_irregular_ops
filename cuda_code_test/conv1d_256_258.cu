@@ -15,7 +15,7 @@ __global__ void conv1d_kernel(float *input, float *kernel, float *output) {
 }
 
 
-void conv1d(float *input, float *kernel, float *output) {
+extern "C" void conv1d(float *input, float *kernel, float *output) {
     int input_size = 258;
     int kernel_size = 3;
     float *d_input, *d_kernel, *d_output;
