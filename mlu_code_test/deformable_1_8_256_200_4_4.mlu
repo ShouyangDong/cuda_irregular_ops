@@ -1,5 +1,3 @@
-
-
 __mlu_global__ void mlu_deformable_attention(
     float* value_,
     int* value_spatial_shapes_,
