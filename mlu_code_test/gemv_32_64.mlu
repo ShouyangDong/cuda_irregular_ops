@@ -1,4 +1,4 @@
-void gemv(float *y, float *A, float *B) {
+__mlu_global__ void gemv(float *y, float *A, float *B) {
     __nram__ float local_A[64];
     __nram__ float local_B[64]
     for (int i = 0; i < 32; i++) {

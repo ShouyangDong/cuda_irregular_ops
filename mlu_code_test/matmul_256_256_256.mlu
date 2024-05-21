@@ -1,4 +1,4 @@
-void matmul(float *A, float *B, float *C) {
+__mlu_global__ void matmul(float *A, float *B, float *C) {
     __nram__ float A_nram[16 * 256];
     __wram__ float B_wram[256 * 256];
     __nram__ float C_nram[16 * 256];
