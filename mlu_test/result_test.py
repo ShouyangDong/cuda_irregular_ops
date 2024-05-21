@@ -35,6 +35,12 @@ if __name__ == "__main__":
             success, output = run_test(file, "./mlu_test/test_mha_mlu.py")
         elif name == "rmsnorm":
             success, output = run_test(file, "./mlu_test/test_rms_norm_mlu.py")
+        elif name == "gemm":
+            success, output = run_test(file, "./mlu_test/test_gemm.py")
+        elif name == "gemv":
+            success, output = run_test(file, "./mlu_test/test_gemv.py")
+        elif name == "bmm":
+            success, output = run_test(file, "./mlu_test/test_bmm.py")
 
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
