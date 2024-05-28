@@ -29,6 +29,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
+    name = base_name.split("_")[0]
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
@@ -41,7 +42,6 @@ if __name__ == "__main__":
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    file_name = "add.cpp"
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()

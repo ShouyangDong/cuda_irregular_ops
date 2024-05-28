@@ -51,6 +51,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
+    name = base_name.split("_")[0]
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     input_height, kernel_size,  input_channels = shape[0], shape[1], shape[2]
