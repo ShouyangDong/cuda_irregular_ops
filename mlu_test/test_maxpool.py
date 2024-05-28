@@ -56,16 +56,15 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shape]
     kernel_stride = base_name.split("_")[5:-1]
     kernel_stride = [int(intg) for intg in kernel_stride]
-
     dtype = base_name.split("_")[-1].replace(".mlu", "")
+
+    input_array = generate_data(shape, dtype)
+    # Calculate the result using numpy for comparison
+    output_np = maxpool_np(input_array, kernel_stride)
+    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    data = generate_data(shape, dtype)
-    # Calculate the result using numpy for comparison
-    output = maxpool_np(data, kernel_stride)
-
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Load the shared library with the avgpool function
     so_name = args.file.replace(".mlu", ".so")
     with open(args.file, "r") as f:
@@ -90,14 +89,13 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr)
+    function(output_ptr, input_ptr)
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
+        output_array,
         output_np,
         rtol=1e-03,
         atol=1e-03,

@@ -97,7 +97,7 @@ if __name__ == "__main__":
     function(output_ptr, input_ptr)
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
+        output_array,
         output_np,
         rtol=1e-03,
         atol=1e-03,
