@@ -13,7 +13,7 @@ import torch.nn.functional as F
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            ["g++", "-shared", "-fPIC", "-O3", file_name, "-o", so_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
