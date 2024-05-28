@@ -85,7 +85,7 @@ if __name__ == "__main__":
     os.remove(file_name)
     # # os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, "conv1d")
+    function = getattr(lib, "avgpool")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
