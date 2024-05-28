@@ -30,10 +30,12 @@ def ref_program(x):
 
 if __name__ == "__main__":
     name = "rms_norm"
-    shape = [8192, 8192]
-    file_name = "rms_norm.mlu"
-    so_name = "rms_norm_bang.so"
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
