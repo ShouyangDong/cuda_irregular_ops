@@ -35,20 +35,20 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cpp_test/test_mha.py")
         elif name == "rmsnorm":
             success, output = run_test(file, "./cpp_test/test_rms_norm_cpp.py")
+        elif name == "gemm":
+            success, output = run_test(file, "./cpp_test/test_gemm.py")
+        elif name == "gemv":
+            success, output = run_test(file, "./cpp_test/test_gemv.py")
         elif name == "bmm":
             success, output = run_test(file, "./cpp_test/test_bmm.py")
         elif name == "conv1d":
             success, output = run_test(file, "./cpp_test/test_conv1d.py")
-        elif name == "gemv":
-            success, output = run_test(file, "./cpp_test/test_gemv.py")
-        elif name == "depthwiseconv":
-            success, output = run_test(file, "./cpp_test/test_depthwise_conv.py")
-        elif name == "gemm":
-            success, output = run_test(file, "./cpp_test/test_gemm.py")
         elif name == "conv2d":
             success, output = run_test(file, "./cpp_test/test_conv2d.py")
         elif name == "conv2dNCHW":
             success, output = run_test(file, "./cpp_test/test_conv2dNCHW.py")
+        elif name == "depthwiseconv":
+            success, output = run_test(file, "./cpp_test/test_depthwise_conv.py")
         elif name == "add":
             success, output = run_test(file, "./cpp_test/test_add.py")
         elif name == "sign":

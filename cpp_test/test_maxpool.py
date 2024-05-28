@@ -19,39 +19,60 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
+def maxpool_np(data, kernel_stride):
+    """max pooling with numpy
+    data : numpy.array
+        input array
+
+    kernel : list or tuple
+        The kernel of avgpool
+
+    stride : list or tuple
+        The stride of avgpool
+    """
+    batch, dh, dw, dc = data.shape
+    kh, kw, sh, sw = kernel_stride
+    ch = (dh - kh) // sh + 1
+    cw = (dw - kw) // sw + 1
+    ret = np.zeros((batch, ch, cw, dc))
+    for i in range(ch):
+        for j in range(cw):
+            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
+            ret[:, i, j, :] = np.max(mask, axis=(1, 2))
+    return ret
+
+def generate_data(shape, dtype):
+    return np.random.uniform(size=shape).astype(dtype)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
-    shapes = base_name.split(".")[0]
-    shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Define the input array and kernel
-    input_array = np.random.uniform(size=[shape[1]]).astype("float32")
-    # kernel = np.random.uniform(size=[3]).astype("float32")
-    # print(kernel)
-    # input_array = np.array([1.0, 2.0, 1.0, 3.0, 0.0, 1.0, 2.0]).astype(np.float32)
-    kernel = np.array([0.5, 1.0, 0.5]).astype(np.float32)
-    # Calculate the output size
-    output_size = shape[0]
-    # Create an empty output array
-    output_ctypes = np.zeros(output_size, dtype=np.float32)
 
+    name = base_name.split("_")[0]
+    shape = base_name.split("_")[1:5]
+    shape = [int(intg) for intg in shape]
+    kernel_stride = base_name.split("_")[5:-1]
+    kernel_stride = [int(intg) for intg in kernel_stride]
+
+    dtype = base_name.split("_")[-1].replace(".cpp", "")
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-
+    data = generate_data(shape, dtype)
     # Calculate the result using numpy for comparison
-    output_np = np.convolve(input_array, kernel, mode='valid')
+    output = maxpool_np(data, kernel_stride)
 
-    # Load the shared library with the batch matrix multiplication function
+    # Load the shared library with the avgpool function
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
 
-    with open("./macro/dl_boost_macro.txt", "r") as f:
+    with open("./macro/cpp_macro.txt", "r") as f:
         macro = f.read()
         f.close()
     code = macro + code

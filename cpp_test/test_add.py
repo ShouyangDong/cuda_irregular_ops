@@ -19,6 +19,11 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+# Define the add function using numpy
+def add(A, B):
+    return np.add(A, B)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
@@ -26,32 +31,23 @@ if __name__ == "__main__":
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Define the input array and kernel
-    input_array = np.random.uniform(size=[shape[1]]).astype("float32")
-    # kernel = np.random.uniform(size=[3]).astype("float32")
-    # print(kernel)
-    # input_array = np.array([1.0, 2.0, 1.0, 3.0, 0.0, 1.0, 2.0]).astype(np.float32)
-    kernel = np.array([0.5, 1.0, 0.5]).astype(np.float32)
-    # Calculate the output size
-    output_size = shape[0]
-    # Create an empty output array
-    output_ctypes = np.zeros(output_size, dtype=np.float32)
+    # Generate random matrices for testing
+    A = np.random.rand(shape).astype("float32")
+    B = np.random.rand(shape).astype("float32")
 
-    # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # Perform add using numpy
+    result_np = add(A, B)
 
-    # Calculate the result using numpy for comparison
-    output_np = np.convolve(input_array, kernel, mode='valid')
-
-    # Load the shared library with the batch matrix multiplication function
+    # Convert the matrices to contiguous memory for ctypes
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    file_name = "add.cpp"
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
 
-    with open("./macro/dl_boost_macro.txt", "r") as f:
+    with open("./macro/cuda_macro.txt", "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
@@ -60,6 +56,8 @@ if __name__ == "__main__":
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
+
+    # Load the shared library with the add function
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     # # os.remove(file_name)
@@ -73,11 +71,13 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr)
+    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    function(output_ptr, A_ptr, B_ptr)
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
-        output_np,
+        result_ctypes,
+        result_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
