@@ -28,10 +28,13 @@ def ref_program(x):
     return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * x**3)))
 
 if __name__ == "__main__":
-    name = "rms_norm"
-    shape = [8192, 8192]
-    file_name = "rms_norm.cu"
-    so_name = "rms_norm_cuda.so"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    name = "gelu"
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
 
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
