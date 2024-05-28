@@ -5,6 +5,7 @@ import glob
 import os
 import ctypes
 import argparse
+import torch
 
 
 def run_compilation(so_name, file_name):
@@ -23,14 +24,20 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
+def ref_program(x):
+    return np.sign(x)
+
 if __name__ == "__main__":
-    name = "transpose"
-    shape = [8192, 8192]
-    file_name = "8192_8192_transpose.cpp"
-    so_name = "8192_8192_transpose.so"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    name = "sign"
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
 
     success, output = run_compilation(so_name, file_name)
-    lib = CDLL(so_name)
+    lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
@@ -41,7 +48,7 @@ if __name__ == "__main__":
     # 创建输入数组
     dtype = "float32"
     input_array = np.random.uniform(size=shape).astype(dtype)
-    expected_output = np.transpose(input_array)
+    expected_output = ref_program(input_array)
 
     # 创建输出数组
     output_array = np.zeros_like(input_array)
@@ -64,11 +71,3 @@ if __name__ == "__main__":
     )
 
     print("验证通过！")
-    import time
-
-    t1 = time.time()
-    for i in range(20):
-        function(input_ptr, output_ptr)
-    t2 = time.time()
-    cost = (t2 - t1) / 20.0 * 1e3
-    print("[INFO]*******cost: ", cost)
