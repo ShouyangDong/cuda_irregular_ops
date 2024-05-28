@@ -1,7 +1,0 @@
-extern "C" __mlu_global__ void sigmoid_kernel0(half* input0, half* active_sigmoid_10) {
-  __nram__ half input0_local_nram[2];
-  __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)clusterId) * 8) + (((int)coreId) * 2)))), 4, GDRAM2NRAM);
-  __bang_active_sigmoid(((half *)input0_local_nram + (0)), ((half *)input0_local_nram + (0)), 2);
-  __memcpy(((half *)active_sigmoid_10 + (((((int)clusterId) * 8) + (((int)coreId) * 2)))), ((half *)input0_local_nram + (0)), 4, NRAM2GDRAM);
-}
-

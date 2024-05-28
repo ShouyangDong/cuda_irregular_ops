@@ -1,9 +1,0 @@
-extern "C" __mlu_global__ void sumpool_kernel0(half* input0, half* sumpool_6) {
-  __nram__ half input0_local_nram[86208];
-  for (int yy_outer = 0; yy_outer < 4; ++yy_outer) {
-    __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)coreId) * 235200) + (yy_outer * 53760)))), 147840, GDRAM2NRAM);
-    __bang_sumpool(((half *)input0_local_nram + (73920)), ((half *)input0_local_nram + (0)), 192, 11, 35, 5, 5, 2, 2);
-    __memcpy(((half *)sumpool_6 + (((((int)coreId) * 49152) + (yy_outer * 12288)))), ((half *)input0_local_nram + (73920)), 24576, NRAM2GDRAM);
-  }
-}
-

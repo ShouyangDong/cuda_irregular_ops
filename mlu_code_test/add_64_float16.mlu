@@ -1,8 +1,0 @@
-extern "C" __mlu_global__ void add_kernel0(half* lhs, half* rhs, half* add_120) {
-  __nram__ half lhs_local_nram[8];
-  __memcpy(((half *)lhs_local_nram + (0)), ((half *)lhs + (((((int)clusterId) * 16) + (((int)coreId) * 4)))), 8, GDRAM2NRAM);
-  __memcpy(((half *)lhs_local_nram + (4)), ((half *)rhs + (((((int)clusterId) * 16) + (((int)coreId) * 4)))), 8, GDRAM2NRAM);
-  __bang_add(((half *)lhs_local_nram + (0)), ((half *)lhs_local_nram + (0)), ((half *)lhs_local_nram + (4)), 4);
-  __memcpy(((half *)add_120 + (((((int)clusterId) * 16) + (((int)coreId) * 4)))), ((half *)lhs_local_nram + (0)), 8, NRAM2GDRAM);
-}
-
