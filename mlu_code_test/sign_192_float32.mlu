@@ -1,0 +1,7 @@
+extern "C" __mlu_global__ void sign_kernel0(float* input0, float* active_sign_56) {
+  __nram__ float input0_local_nram[12];
+  __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 48) + (((int)coreId) * 12)))), 48, GDRAM2NRAM);
+  __bang_active_sign(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 12);
+  __memcpy(((float *)active_sign_56 + (((((int)clusterId) * 48) + (((int)coreId) * 12)))), ((float *)input0_local_nram + (0)), 48, NRAM2GDRAM);
+}
+

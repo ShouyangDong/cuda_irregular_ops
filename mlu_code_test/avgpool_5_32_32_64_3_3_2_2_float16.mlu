@@ -1,0 +1,15 @@
+extern "C" __mlu_global__ void avgpool_kernel0(half* input0, half* avgpool_11) {
+  __nram__ half input0_local_nram[75904];
+  for (int bb_inner = 0; bb_inner < 2; ++bb_inner) {
+    if (((((int)coreId) * 2) + bb_inner) < 5) {
+      __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)coreId) * 131072) + (bb_inner * 65536)))), 3968, GDRAM2NRAM,3968, 4096, 30);
+    }
+    if (((((int)coreId) * 2) + bb_inner) < 5) {
+      __bang_avgpool(((half *)input0_local_nram + (61504)), ((half *)input0_local_nram + (0)), 64, 31, 31, 3, 3, 2, 2);
+    }
+    if (((((int)coreId) * 2) + bb_inner) < 5) {
+      __memcpy(((half *)avgpool_11 + (((((int)coreId) * 28800) + (bb_inner * 14400)))), ((half *)input0_local_nram + (61504)), 28800, NRAM2GDRAM);
+    }
+  }
+}
+

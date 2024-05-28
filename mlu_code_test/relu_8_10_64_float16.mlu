@@ -1,0 +1,9 @@
+extern "C" __mlu_global__ void relu_kernel0(half* input0, half* active_relu_189) {
+  __nram__ half input0_local_nram[640];
+  if ((clusterId * 4 + coreId) < 8) {
+    __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 1280, GDRAM2NRAM);
+    __bang_active_relu(((half *)input0_local_nram + (0)), ((half *)input0_local_nram + (0)), 640);
+    __memcpy(((half *)active_relu_189 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((half *)input0_local_nram + (0)), 1280, NRAM2GDRAM);
+  }
+}
+

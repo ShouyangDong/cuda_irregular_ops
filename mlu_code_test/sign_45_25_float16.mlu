@@ -1,0 +1,15 @@
+extern "C" __mlu_global__ void sign_kernel0(half* input0, half* active_sign_132) {
+  __nram__ half input0_local_nram[25];
+  for (int i0_outer_outer_outer = 0; i0_outer_outer_outer < 3; ++i0_outer_outer_outer) {
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
+      __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) + (((int)coreId) * 25)))), 50, GDRAM2NRAM);
+    }
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
+      __bang_active_sign(((half *)input0_local_nram + (0)), ((half *)input0_local_nram + (0)), 25);
+    }
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
+      __memcpy(((half *)active_sign_132 + ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) + (((int)coreId) * 25)))), ((half *)input0_local_nram + (0)), 50, NRAM2GDRAM);
+    }
+  }
+}
+

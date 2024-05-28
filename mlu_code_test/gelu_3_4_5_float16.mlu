@@ -1,0 +1,13 @@
+extern "C" __mlu_global__ void gelu_kernel0(half* input0, half* active_gelup_155) {
+  __nram__ half input0_local_nram[5];
+  if (((int)clusterId) < 3) {
+    __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)clusterId) * 20) + (((int)coreId) * 5)))), 10, GDRAM2NRAM);
+  }
+  if (((int)clusterId) < 3) {
+    __bang_active_gelup(((half *)input0_local_nram + (0)), ((half *)input0_local_nram + (0)), 5);
+  }
+  if (((int)clusterId) < 3) {
+    __memcpy(((half *)active_gelup_155 + (((((int)clusterId) * 20) + (((int)coreId) * 5)))), ((half *)input0_local_nram + (0)), 10, NRAM2GDRAM);
+  }
+}
+

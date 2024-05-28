@@ -1,0 +1,9 @@
+extern "C" __mlu_global__ void minpool_kernel0(half* input0, half* minpool_34) {
+  __nram__ half input0_local_nram[35712];
+  for (int yy_outer = 0; yy_outer < 11; ++yy_outer) {
+    __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)coreId) * 235200) + (yy_outer * 20160)))), 67200, GDRAM2NRAM);
+    __bang_minpool(((half *)input0_local_nram + (33600)), ((half *)input0_local_nram + (0)), 192, 5, 35, 5, 5, 3, 3);
+    __memcpy(((half *)minpool_34 + (((((int)coreId) * 23232) + (yy_outer * 2112)))), ((half *)input0_local_nram + (33600)), 4224, NRAM2GDRAM);
+  }
+}
+

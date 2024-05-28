@@ -1,0 +1,9 @@
+extern "C" __mlu_global__ void maxpool_kernel0(half* input0, half* maxpool_7) {
+  __nram__ half input0_local_nram[55936];
+  for (int yy_outer = 0; yy_outer < 13; ++yy_outer) {
+    __memcpy(((half *)input0_local_nram + (0)), ((half *)input0 + (((((int)coreId) * 401408) + (yy_outer * 28672)))), 14080, GDRAM2NRAM,14080, 14336, 6);
+    __bang_maxpool(((half *)input0_local_nram + (49280)), ((half *)input0_local_nram + (0)), 128, 7, 55, 5, 5, 2, 2);
+    __memcpy(((half *)maxpool_7 + (((((int)coreId) * 86528) + (yy_outer * 6656)))), ((half *)input0_local_nram + (49280)), 13312, NRAM2GDRAM);
+  }
+}
+
