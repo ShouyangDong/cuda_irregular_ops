@@ -33,8 +33,8 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
-    A = np.random.rand(shape).astype("float32")
-    B = np.random.rand(shape).astype("float32")
+    A = np.random.rand(*shape).astype("float32")
+    B = np.random.rand(*shape).astype("float32")
 
     # Perform add using numpy
     result_np = add(A, B)
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    result_ctypes = np.zeros(shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     function(output_ptr, A_ptr, B_ptr)
     # Check if the results match
