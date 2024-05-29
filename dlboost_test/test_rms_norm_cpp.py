@@ -42,7 +42,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open("./macro/dl_boost_macro.txt", "r") as f:
+    with open("./macro/dlboost_macro.txt", "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
