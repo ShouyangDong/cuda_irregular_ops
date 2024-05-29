@@ -69,7 +69,7 @@ if __name__ == "__main__":
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Load the shared library with the avgpool function
-    so_name = args.file.replace(".cu", ".so")
+    so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
