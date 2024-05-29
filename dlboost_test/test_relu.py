@@ -73,7 +73,6 @@ if __name__ == "__main__":
     # 调用C函数
     function(input_ptr, output_ptr)
     # 验证结果
-
     np.testing.assert_allclose(
         output_array,
         expected_output,
@@ -85,3 +84,4 @@ if __name__ == "__main__":
     )
 
     print("验证通过！")
+    result = subprocess.run(["rm", so_name])

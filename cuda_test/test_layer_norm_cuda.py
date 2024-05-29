@@ -80,3 +80,4 @@ if __name__ == "__main__":
         verbose=True,
     )
     print("验证通过！")
+    result = subprocess.run(["rm", so_name])
