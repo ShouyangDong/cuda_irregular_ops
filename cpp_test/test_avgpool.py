@@ -51,13 +51,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
 
-    name = base_name.split("_")[0]
-    shape = base_name.split("_")[1:5]
+    name = base_name.split(".")[0].split("_")[0]
+    shape = base_name.split(".")[0].split("_")[1:5]
     shape = [int(intg) for intg in shape]
-    kernel_stride = base_name.split("_")[5:-1]
+    kernel_stride = base_name.split(".")[0].split("_")[5:]
     kernel_stride = [int(intg) for intg in kernel_stride]
 
-    dtype = base_name.split("_")[-1].replace(".cpp", "")
+    dtype = "float32"
     input_array = generate_data(shape, dtype)
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))

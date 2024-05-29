@@ -99,9 +99,9 @@ if __name__ == "__main__":
     kernel_shape = base_name.split("_")[5:9]
     kernel_shape = [int(intg) for intg in kernel_shape]
     stride_h = stride_w = int(base_name.split("_")[9])
-    pad = int(base_name.split("_")[10])
-    dtype = base_name.split("_")[-2].replace(".cu", "")
-    wtype = base_name.split("_")[-1].replace(".cu", "")
+    pad = int(base_name.split(".")[0].split("_")[10])
+    dtype = "float32"
+    wtype = "float32"
 
     # generate data
     data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
