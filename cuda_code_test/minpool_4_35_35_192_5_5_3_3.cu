@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(1024) minpool_kernel(float* __restrict__ A, float* __restrict__ pool_min) {
+__global__ void __launch_bounds__(1024) minpool_kernel(float* __restrict__ A, float* __restrict__ pool_min) {
   float pool_min_local[1];
   pool_min_local[0] = 3.402823e+38f;
   for (int rv0 = 0; rv0 < 5; ++rv0) {

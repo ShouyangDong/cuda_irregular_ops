@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(80) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_exp) {
+__global__ void __launch_bounds__(80) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_exp) {
   if (threadIdx.x < 80) {
       
       float maxVal = A[threadIdx.x * 64];

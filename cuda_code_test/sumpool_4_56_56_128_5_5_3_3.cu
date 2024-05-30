@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(1024) sumpool_kernel(float* __restrict__ A, float* __restrict__ pool_avg) {
+__global__ void __launch_bounds__(1024) sumpool_kernel(float* __restrict__ A, float* __restrict__ pool_avg) {
   float pool_sum[1];
   pool_sum[0] = 0.000000e+00f;
   for (int rv0 = 0; rv0 < 5; ++rv0) {

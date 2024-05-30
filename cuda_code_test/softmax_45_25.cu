@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(45) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_norm) {
+__global__ void __launch_bounds__(45) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_norm) {
   if (threadIdx.x < 45) {
     int rowStart = threadIdx.x * 25;
     

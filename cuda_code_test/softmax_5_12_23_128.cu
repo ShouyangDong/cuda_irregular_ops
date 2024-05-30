@@ -1,5 +1,5 @@
 
-extern "C" __global__ void __launch_bounds__(1024) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_exp) {
+__global__ void __launch_bounds__(1024) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_exp) {
   int idx = blockIdx.x * 1024 + threadIdx.x;
   if (idx < 1380) {
 

@@ -1,4 +1,4 @@
-extern "C" __global__ void conv_kernel(float* input, float* kernel, float* output) {
+__global__ void conv_kernel(float* input, float* kernel, float* output) {
     int batch_size = 32;
     int input_height = 8;
     int input_width = 8;

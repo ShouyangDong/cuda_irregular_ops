@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(1024) maxpool_kernel(float* __restrict__ A, float* __restrict__ pool_max) {
+__global__ void __launch_bounds__(1024) maxpool_kernel(float* __restrict__ A, float* __restrict__ pool_max) {
   float pool_max_local[1];
   pool_max_local[0] = -3.402823e+38f;
   for (int rv0 = 0; rv0 < 5; ++rv0) {

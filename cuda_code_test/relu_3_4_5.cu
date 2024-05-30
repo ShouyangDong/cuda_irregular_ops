@@ -1,4 +1,4 @@
-extern "C" __global__ void __launch_bounds__(60) relu(float* __restrict__ A, float* __restrict__ compute) {
+__global__ void __launch_bounds__(60) relu(float* __restrict__ A, float* __restrict__ compute) {
   compute[((int)threadIdx.x)] = max(A[((int)threadIdx.x)], 0.000000e+00f);
 }
 
