@@ -58,8 +58,6 @@ if __name__ == "__main__":
     # Define the input tensor, kernel, and parameters
     input_tensor = np.random.rand(input_height, input_height, input_channels).astype(np.float32)
     kernel = np.random.rand(kernel_size, kernel_size, input_channels).astype(np.float32)
-
-
     # Calculate the output tensor shape
     output_height = input_height - kernel_size + 1
     output_width = input_height - kernel_size + 1
@@ -74,7 +72,6 @@ if __name__ == "__main__":
     # Calculate the result using numpy for comparison
     output_np = depthwise_conv2d(input_tensor, kernel).astype("float32")
 
-        
     # Load the shared library with the depthwise convolution function
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
