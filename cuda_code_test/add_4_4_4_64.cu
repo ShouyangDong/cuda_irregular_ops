@@ -14,12 +14,12 @@ extern "C" void add_kernel(float *C, float *A, float *B, int size) {
   cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy(d_B, B, size * sizeof(float), cudaMemcpyHostToDevice);
 
-  dim3 blockSize(128, 128);
-  dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
+  dim3 blockSize(1024);
+  dim3 numBlocks((size + 1024 - 1) / 1024);
 
   add<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
-  cudaMemcpy(C, d_C, m * n * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
 
   cudaFree(d_A);
   cudaFree(d_B);
