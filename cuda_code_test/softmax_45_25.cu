@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(45) softmax_kernel(float* __restrict__ A, float* __restrict__ T_softmax_norm) {
+__global__ void __launch_bounds__(45) softmax(float* __restrict__ A, float* __restrict__ T_softmax_norm) {
   if (threadIdx.x < 45) {
     int rowStart = threadIdx.x * 25;
     
@@ -19,4 +19,23 @@ __global__ void __launch_bounds__(45) softmax_kernel(float* __restrict__ A, floa
         T_softmax_norm[rowStart + i] /= denom;
     }
   }
+}
+
+extern "C" void softmax_kernel(float *C, float *A, int size) {
+  float *d_A, *d_C;
+
+  cudaMalloc(&d_A, size * sizeof(float));
+  cudaMalloc(&d_C, size * sizeof(float));
+
+  cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
+
+  dim3 blockSize(1024);
+  dim3 numBlocks((size + 1024 - 1) / 1024);
+
+  softmax<<<numBlocks, blockSize>>>(d_A, d_C);
+
+  cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
+
+  cudaFree(d_A);
+  cudaFree(d_C);
 }
