@@ -30,3 +30,7 @@ __global__ void conv_kernel(float* input, float* kernel, float* output) {
         }
     }
 }
+
+extern "C" conv_kernel(float* output, float* input, float*  kernel) {
+    
+}

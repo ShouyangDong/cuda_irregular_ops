@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(1024) minpool_kernel(float* __restrict__ A, float* __restrict__ pool_min) {
+__global__ void __launch_bounds__(1024) kernel(float* __restrict__ A, float* __restrict__ pool_min) {
   float pool_min_local[1];
   pool_min_local[0] = 3.402823e+38f;
   for (int rv0 = 0; rv0 < 5; ++rv0) {
@@ -11,4 +11,26 @@ __global__ void __launch_bounds__(1024) minpool_kernel(float* __restrict__ A, fl
   if (((int)threadIdx.x) < 64) {
     pool_min[((int)threadIdx.x)] = pool_min_local[0];
   }
+}
+
+extern "C" void minpool_kernel(float *output, float *input, int input_size, int kernel_size, int stride) {
+    int input_size = 128;
+    int kernel_size = 3;
+    float *d_input, *d_output;
+
+    cudaMalloc(&d_input, input_size * sizeof(float));
+    cudaMalloc(&d_output, input_size * sizeof(float));
+
+    cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
+
+    dim3 blockSize(128);
+    dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
+
+    minpool<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+
+    cudaMemcpy(output, d_output, input_size * sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_input);
+    cudaFree(d_output);
 }
