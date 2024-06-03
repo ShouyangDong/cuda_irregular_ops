@@ -24,11 +24,10 @@ __global__ void cuda_rms_norm(float* A, float* B) {
   }
 }
 
-extern "C" void rms_norm_kernel(float* A, float* B) {
+extern "C" void rms_norm_kernel(float* A, float* B, int size1, int size2) {
   // Allocate memory on the device
   float *d_A, *d_B;
-  int size = 8192;
-  int num_elements = size * size;
+  int num_elements = size1 * size2;
   cudaMalloc(&d_A, num_elements * sizeof(float));
   cudaMalloc(&d_B, num_elements * sizeof(float));
 
@@ -37,7 +36,7 @@ extern "C" void rms_norm_kernel(float* A, float* B) {
 
   // Define grid and block dimensions
   int block_size = 256;
-  int num_blocks = (size + block_size - 1) / block_size;
+  int num_blocks = (size1 + block_size - 1) / block_size;
 
   // Launch kernel
   cuda_rms_norm<<<num_blocks, block_size>>>(d_A, d_B);
