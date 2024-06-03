@@ -9,23 +9,22 @@ __global__ void __launch_bounds__(1024) maxpool(float* __restrict__ A, float* __
   pool_max[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = pool_max_local[0];
 }
 
-extern "C" void maxpool_kernel(float *output, float *input, int input_size, int kernel_size, int stride) {
-    int input_size = 128;
-    int kernel_size = 3;
+extern "C" void maxpool_kernel(float *output, float *input, int batch_size, int channels, int input_size, int kernel_size, int stride) {
     float *d_input, *d_output;
-
+    int output_H = (H - kernel_size) / stride + 1;
+    int input_size = batch_size * kernel_size * kernel_size * channels;
+    int output_size = batch_size * output_H * output_H * channels;
     cudaMalloc(&d_input, input_size * sizeof(float));
-    cudaMalloc(&d_output, input_size * sizeof(float));
+    cudaMalloc(&d_output, output_size * sizeof(float));
 
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
 
     dim3 blockSize(128);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
-    maxpool<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+    maxpool<<<numBlocks, blockSize>>>(d_input, d_output);
 
-    cudaMemcpy(output, d_output, input_size * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, d_output, output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(d_input);
     cudaFree(d_output);
