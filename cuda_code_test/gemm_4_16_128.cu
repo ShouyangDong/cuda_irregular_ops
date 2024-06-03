@@ -11,11 +11,7 @@ __global__ void gemm_kernel(float *A, float *B, float *C) {
     }
 }
 
-extern "C" void gemm(float *C, float *A, float *B) {
-    int m = 4;
-    int n = 128;
-    int k = 16;
-
+extern "C" void gemm(float *C, float *A, float *B, int m, int k, int n) {
     float *d_A, *d_B, *d_C;
 
     cudaMalloc(&d_A, m * k * sizeof(float));

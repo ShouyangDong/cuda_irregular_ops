@@ -9,7 +9,7 @@ __global__ void gemv(float *y, float *A, float *x) {
     }
 }
 
-extern "C" void gemv_kernel(float *y, float *A, float *x, float *y) {
+extern "C" void gemv_kernel(float *y, float *A, float *x, float *y, int m, int n) {
     int m = 112;
     int n = 224;
     float *d_A, *d_x, *d_y;

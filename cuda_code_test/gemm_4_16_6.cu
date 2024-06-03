@@ -11,7 +11,7 @@ __global__ void gemm_kernel(float *A, float *B, float *C) {
     }
 }
 
-extern "C" void gemm(float *C, float *A, float *B) {
+extern "C" void gemm(float *C, float *A, float *B, int m, int k, int n) {
     int m = 4;
     int n = 6;
     int k = 16;
