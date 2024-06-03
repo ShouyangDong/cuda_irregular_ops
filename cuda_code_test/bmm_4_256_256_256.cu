@@ -1,4 +1,4 @@
-__global__ void batch_gemm_kernel(float *A, float *B, float *C) {
+__global__ void bmm(float *A, float *B, float *C) {
     int batch_idx = blockIdx.z;
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     int col = blockIdx.y * blockDim.y + threadIdx.y;
@@ -12,12 +12,7 @@ __global__ void batch_gemm_kernel(float *A, float *B, float *C) {
     }
 }
 
-extern "C" void batch_gemm(float *C, float *A, float *B) {
-    int b = 4;
-    int m = 256;
-    int n = 256;
-    int k = 256;
-
+extern "C" void bmm_kernel(float *C, float *A, float *B, int b, int m, int k, int n) {
     float *d_A, *d_B, *d_C;
 
     cudaMalloc(&d_A, m * k * sizeof(float));
@@ -30,7 +25,7 @@ extern "C" void batch_gemm(float *C, float *A, float *B) {
     dim3 blockSize(256, 256);
     dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
 
-    batch_gemm_kernel<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+    bmm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
     cudaMemcpy(C, d_C, m * n * sizeof(float), cudaMemcpyDeviceToHost);
 
