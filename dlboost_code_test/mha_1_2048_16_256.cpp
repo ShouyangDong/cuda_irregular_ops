@@ -31,7 +31,7 @@ extern "C" void multiHeadAttentionForward_kernel(
             __m128i local_result =  _mm_dpbusds_epi32(src, A, B);
             uint32_t *val = (uint32_t*) &local_result;
             for(int i = 0; i < 4; i++){
-                sum += val[1];
+                sum += val[i];
             }
         }
         score[m *16 + n] = float(sum); 
@@ -78,7 +78,7 @@ extern "C" void multiHeadAttentionForward_kernel(
             __m128i local_result =  _mm_dpbusds_epi32(src, A, B);
             uint32_t *val = (uint32_t*) &local_result;
             for(int i = 0; i < 4; i++){
-                sum += val[1];
+                sum += val[i];
             }
           output[i * 2048 *16 * 256 + j *16 * 256 + m_fl * 256 + n_fl] = float(sum); 
         }

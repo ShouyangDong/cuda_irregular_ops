@@ -20,7 +20,7 @@ extern "C" void gemm_kernel(float *result, float *A, float *B) {
                 __m128i local_result =  _mm_dpbusds_epi32(src, A, B);
                 uint32_t *val = (uint32_t*) &local_result;
                 for(int i = 0; i < 4; i++){
-                    sum += val[1];
+                    sum += val[i];
                 }    
             }
             result[j * 128 + k] = float(sum); 
