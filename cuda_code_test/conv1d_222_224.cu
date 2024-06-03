@@ -1,4 +1,4 @@
-__global__ void conv1d_kernel(float *input, float *kernel, float *output) {
+__global__ void conv1d(float *input, float *kernel, float *output) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int output_idx = idx + 3 / 2;
 
@@ -15,7 +15,7 @@ __global__ void conv1d_kernel(float *input, float *kernel, float *output) {
 }
 
 
-extern "C" void conv1d(float *input, float *kernel, float *output) {
+extern "C" void conv1d_kernel(float *output, float *input, float *kernel, int input_size, int kernel_size) {
     int input_size = 224;
     int kernel_size = 3;
     float *d_input, *d_kernel, *d_output;
@@ -30,7 +30,7 @@ extern "C" void conv1d(float *input, float *kernel, float *output) {
     dim3 blockSize(224);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
-    conv1d_kernel<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+    conv1d<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
     cudaMemcpy(output, d_output, input_size * sizeof(float), cudaMemcpyDeviceToHost);
 
