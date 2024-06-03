@@ -1,4 +1,4 @@
-__global__ void conv_kernel(float* input, float* kernel, float* output) {
+__global__ void conv2d(float* input, float* kernel, float* output) {
     int batch_size = 16;
     int input_height = 8;
     int input_width = 8;
@@ -29,4 +29,33 @@ __global__ void conv_kernel(float* input, float* kernel, float* output) {
             }
         }
     }
+}
+
+
+extern "C" void conv2d_kernel(float *output, float *input, float *kernel, 
+                                int batch_size, int input_height, int input_channels,
+                                int output_channels, int kernel_height, int stride) {
+    int output_height = (input_height - kernel_height) / stride + 1;
+    int input_size = batch_size * input_height * input_height * channels;
+    int kernel_size = intput_channels * output_channels * kernel_height * kernel_height;
+    int output_size = batch_size * output_height * output_height * output_channels;
+    float *d_input, *d_kernel, *d_output;
+
+    cudaMalloc(&d_input, input_size * sizeof(float));
+    cudaMalloc(&d_kernel, kernel_size * sizeof(float));
+    cudaMalloc(&d_output, output_size * sizeof(float));
+
+    cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
+
+    dim3 blockSize(7);
+    dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
+
+    conv2d<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+
+    cudaMemcpy(output, d_output, output_size * sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_input);
+    cudaFree(d_kernel);
+    cudaFree(d_output);
 }
