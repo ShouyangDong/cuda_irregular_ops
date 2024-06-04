@@ -139,13 +139,13 @@ if __name__ == "__main__":
     # Convert the matrices to contiguous memory for ctypes
     input_ptr = data_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     kernel_ptr = kernel_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    result_ctypes = np.zeros(*result_cpu.shape(), dtype=np.float32)
+    result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
     function(output_ptr, input_ptr, kernel_ptr)
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
+        result_ctypes,
         output_np,
         rtol=1e-03,
         atol=1e-03,
