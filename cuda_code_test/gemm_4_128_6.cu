@@ -1,4 +1,4 @@
-__global__ void gemm_kernel(float *A, float *B, float *C) {
+__global__ void gemm(float *A, float *B, float *C) {
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     int col = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -11,7 +11,7 @@ __global__ void gemm_kernel(float *A, float *B, float *C) {
     }
 }
 
-extern "C" void gemm(float *C, float *A, float *B, int m, int k, int n) {
+extern "C" void gemm_kernel(float *C, float *A, float *B, int m, int k, int n) {
     float *d_A, *d_B, *d_C;
 
     cudaMalloc(&d_A, m * k * sizeof(float));
@@ -24,7 +24,7 @@ extern "C" void gemm(float *C, float *A, float *B, int m, int k, int n) {
     dim3 blockSize(128, 128);
     dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
 
-    gemm_kernel<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+    gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
     cudaMemcpy(C, d_C, m * n * sizeof(float), cudaMemcpyDeviceToHost);
 

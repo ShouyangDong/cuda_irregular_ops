@@ -19,7 +19,7 @@ __global__ void depthwise_convolution(float* input, float* filter, float* output
 }
 
 
-extern "C" void depthwise_conv(float *input, float *kernel, float *output, int input_size, int kernel_size, int depth) {
+extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output, int input_size, int kernel_size, int depth) {
     float *d_input, *d_kernel, *d_output;
 
     cudaMalloc(&d_input, input_size * depth * sizeof(float));
@@ -32,7 +32,7 @@ extern "C" void depthwise_conv(float *input, float *kernel, float *output, int i
     dim3 blockSize(128);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
-    depthwise_conv_kernel<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output, input_size, kernel_size, depth);
+    depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output, input_size, kernel_size, depth);
 
     cudaMemcpy(output, d_output, input_size * depth * sizeof(float), cudaMemcpyDeviceToHost);
 
