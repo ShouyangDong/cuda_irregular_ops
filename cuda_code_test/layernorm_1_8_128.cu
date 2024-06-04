@@ -1,4 +1,4 @@
-__global__ void cuda_layer_norm(float* A, float* gamma, float* beta, float* B) {
+__global__ void layernorm(float* A, float* gamma, float* beta, float* B) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < 8) {
     float mean = 0.0;
@@ -41,13 +41,10 @@ __global__ void cuda_layer_norm(float* A, float* gamma, float* beta, float* B) {
   }
 }
 
-extern "C" void layer_norm_kernel(float* A, float* gamma, float* beta,
+extern "C" void layernorm_kernel(float* A, float* gamma, float* beta,
                                   float* B, int batch_size, int seq_length, int d_model) {
   // Allocate memory on the device
   float *d_A, *d_B, *d_gamma, *d_beta;
-  int batch_size = 1;
-  int seq_length = 8;
-  int d_model = 128;
   int num_elements = batch_size * seq_length * d_model;
   cudaMalloc(&d_A, num_elements * sizeof(float));
   cudaMalloc(&d_B, num_elements * sizeof(float));
@@ -64,7 +61,7 @@ extern "C" void layer_norm_kernel(float* A, float* gamma, float* beta,
   int num_blocks = (batch_size * seq_length + block_size - 1) / block_size;
 
   // Launch kernel
-  cuda_layer_norm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
+  layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
 
   // Copy the result back to host
   cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
