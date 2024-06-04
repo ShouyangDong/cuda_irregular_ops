@@ -142,7 +142,7 @@ if __name__ == "__main__":
     result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr)
+    function(input_ptr, kernel_ptr, output_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,
