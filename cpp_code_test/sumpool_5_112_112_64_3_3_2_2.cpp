@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 
 extern "C"  void sumpool_kernel(float *x, float *output) {
     int N = 5;

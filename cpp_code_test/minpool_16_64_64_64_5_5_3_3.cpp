@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <cfloat>
-
 extern "C"  void minpool_kernel(float* x, float* output) {
     int N = 16;
     int H = 64;

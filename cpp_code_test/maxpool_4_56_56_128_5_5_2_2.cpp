@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <cfloat>
-
 extern "C"  void maxpool_kernel(float *x, float *output) {
     int N = 4;
     int H = 56;
