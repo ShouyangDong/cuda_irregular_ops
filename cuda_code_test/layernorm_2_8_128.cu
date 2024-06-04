@@ -45,9 +45,6 @@ extern "C" void layernorm_kernel(float* A, float* gamma, float* beta,
                                   float* B, int batch_size, int seq_length, int d_model) {
   // Allocate memory on the device
   float *d_A, *d_B, *d_gamma, *d_beta;
-  int batch_size = 2;
-  int seq_length = 8;
-  int d_model = 128;
   int num_elements = batch_size * seq_length * d_model;
   cudaMalloc(&d_A, num_elements * sizeof(float));
   cudaMalloc(&d_B, num_elements * sizeof(float));
