@@ -1,5 +1,5 @@
 
-extern "C" float signf(float input){
+float signf(float input){
     if (input > 0) {
         return 1;
     } else if (input < 0) {

@@ -1,5 +1,5 @@
 
-extern "C" float reluf(float input) {
+float reluf(float input) {
     return input > 0 ? input : 0;
 }
 extern "C" void relu_kernel(float* input, float* output) {
