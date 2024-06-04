@@ -19,9 +19,13 @@ __global__ void depthwise_convolution(float* input, float* filter, float* output
 }
 
 
-extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output, int input_size, int kernel_size, int depth) {
+extern "C" void depthwiseconv_kernel(float* input, float* filter, float* output, int input_height, int kernel_size, int input_channels) {
     float *d_input, *d_kernel, *d_output;
-
+    int input_size = input_height * input_height * input_channels;
+    int output_height = input_height - kernel_size + 1
+    int output_width = input_height - kernel_size + 1
+    int kernel_size = kernel_size * kernel_size * input_channels;
+    int output_size = output_height * output_width * input_channels
     cudaMalloc(&d_input, input_size * depth * sizeof(float));
     cudaMalloc(&d_kernel, kernel_size * depth * sizeof(float));
     cudaMalloc(&d_output, input_size * depth * sizeof(float));
