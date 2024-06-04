@@ -25,7 +25,7 @@ def run_compilation(so_name, file_name):
 
 
 def ref_program(x):
-    return lambda x: 0.5 * x * (1 + special.erf(x / np.sqrt(2)))
+    return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

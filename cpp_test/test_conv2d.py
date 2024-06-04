@@ -146,7 +146,7 @@ if __name__ == "__main__":
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,
-        output_np,
+        result_cpu,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
