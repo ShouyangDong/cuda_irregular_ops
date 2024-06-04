@@ -36,7 +36,7 @@ extern "C" void conv2d_kernel(float *output, float *input, float *kernel,
                                 int batch_size, int input_height, int input_channels,
                                 int output_channels, int kernel_height, int stride) {
     int output_height = (input_height - kernel_height) / stride + 1;
-    int input_size = batch_size * input_height * input_height * channels;
+    int input_size = batch_size * input_height * input_height * input_channels;
     int kernel_size = intput_channels * output_channels * kernel_height * kernel_height;
     int output_size = batch_size * output_height * output_height * output_channels;
     float *d_input, *d_kernel, *d_output;
