@@ -1,13 +1,13 @@
 #include <stdio.h>
 
-extern "C" void conv_kernel(float* input, float* kernel, float* output) {
-    int batch_size = 16;
+extern "C" void conv2d_kernel(float* input, float* kernel, float* output) {
+    int batch_size = 32;
     int input_height = 8;
     int input_width = 8;
-    int input_channels = 128;
+    int input_channels = 64;
     int kernel_height = 2;
     int kernel_width = 2;
-    int output_channels = 64;
+    int output_channels = 128;
     int stride = 3;
     int padding = 0;
     int output_height = (input_height - kernel_height) / stride + 1;
