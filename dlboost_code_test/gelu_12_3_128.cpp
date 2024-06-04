@@ -2,7 +2,7 @@
 float geluf(float x) {
     return 0.5 * x * (1 + tanh(sqrt(2 / M_PI) * (x + 0.044715 * pow(x, 3))));
 }
-extern "C" void gelu_kernel(float *input, float *output) {
+extern "C" void gelu_kernel(float *output, float *input) {
     for (int i = 0; i < 12; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 128; k++) {
