@@ -12,7 +12,7 @@ __global__ void bmm(float *A, float *B, float *C) {
     }
 }
 
-extern "C" void bmm_kernel(float *C, float *A, float *B, int b int m, int k, int n) {
+extern "C" void bmm_kernel(float *C, float *A, float *B, int b, int m, int k, int n) {
     float *d_A, *d_B, *d_C;
 
     cudaMalloc(&d_A, m * k * sizeof(float));
