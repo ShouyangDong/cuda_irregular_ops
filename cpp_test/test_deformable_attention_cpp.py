@@ -92,7 +92,6 @@ if __name__ == "__main__":
         value, shapes, sampling_locations, attention_weights
     )
 
-    name = "deformable_attention"
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
