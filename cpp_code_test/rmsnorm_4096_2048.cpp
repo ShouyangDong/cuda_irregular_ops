@@ -1,6 +1,6 @@
 
 
-extern "C" void rms_norm_kernel(float* A, float* B) {
+extern "C" void rmsnorm_kernel(float* A, float* B) {
   float eps = 1e-5f;
 
   for (int i = 0; i < 4096; i++) {

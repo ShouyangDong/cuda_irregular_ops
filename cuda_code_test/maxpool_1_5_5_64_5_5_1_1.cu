@@ -26,7 +26,7 @@ extern "C" void maxpool_kernel(float *output, float *input, int batch_size, int 
     dim3 blockSize(128);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
-    avgpool<<<numBlocks, blockSize>>>(d_input, d_output);
+    maxpool<<<numBlocks, blockSize>>>(d_input, d_output);
 
     cudaMemcpy(output, d_output, output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
