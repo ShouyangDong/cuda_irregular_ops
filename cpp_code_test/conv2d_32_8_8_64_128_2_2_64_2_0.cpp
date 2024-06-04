@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 extern "C" void conv2d_kernel(float* input, float* kernel, float* output) {
     int batch_size = 32;

@@ -1,4 +1,3 @@
-#include <stdio.h>
 
 extern "C" void conv1d_kernel(float *output, float *input, float *kernel) {
     for (int i = 0; i < 44; i++) {
