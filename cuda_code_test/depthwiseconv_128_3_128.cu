@@ -1,4 +1,4 @@
-__global__ void depthwise_convolution(float* input, float* filter, float* output, int input_height, int input_width, int filter_size, int output_height, int output_width) {
+__global__ void depthwise_convolution(float* input, float* filter, float* output) {
     int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
     int tid_y = blockIdx.y * blockDim.y + threadIdx.y;
     
@@ -36,7 +36,7 @@ extern "C" void depthwiseconv_kernel(float* input, float* filter, float* output,
     dim3 blockSize(128);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
-    depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output, input_size, kernel_size, depth);
+    depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
     cudaMemcpy(output, d_output, input_size * depth * sizeof(float), cudaMemcpyDeviceToHost);
 
