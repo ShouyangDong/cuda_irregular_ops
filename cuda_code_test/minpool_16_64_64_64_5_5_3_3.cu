@@ -9,9 +9,9 @@ __global__ void __launch_bounds__(1024) minpool(float* __restrict__ A, float* __
   pool_min[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = pool_min_local[0];
 }
 
-extern "C" void minpool_kernel(float *output, float *input, int batch_size, int channels, int input_size, int kernel_size, int stride) {
+extern "C" void minpool_kernel(float *output, float *input, int batch_size, int channels, int input_H, int kernel_size, int stride) {
     float *d_input, *d_output;
-    int output_H = (H - kernel_size) / stride + 1;
+    int output_H = (input_H - kernel_size) / stride + 1;
     int input_size = batch_size * kernel_size * kernel_size * channels;
     int output_size = batch_size * output_H * output_H * channels;
     cudaMalloc(&d_input, input_size * sizeof(float));

@@ -13,7 +13,7 @@ __global__ void __launch_bounds__(1024) sumpool(float* __restrict__ A, float* __
   }
 }
 
-extern "C" void sumpool_kernel(float *output, float *input, int batch_size, int channels, int input_size, int kernel_size, int stride) {
+extern "C" void sumpool_kernel(float *output, float *input, int batch_size, int channels, int input_H, int kernel_size, int stride) {
     float *d_input, *d_output;
     int output_H = (H - kernel_size) / stride + 1;
     int input_size = batch_size * kernel_size * kernel_size * channels;
