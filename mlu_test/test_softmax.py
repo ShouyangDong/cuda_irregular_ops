@@ -71,7 +71,7 @@ if __name__ == "__main__":
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(input_ptr, output_ptr)
+    function(output_ptr, input_ptr)
     # 验证结果
 
     np.testing.assert_allclose(
