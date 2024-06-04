@@ -24,7 +24,7 @@ extern "C" void depthwiseconv_kernel(float* input, float* filter, float* output,
     int output_height = input_height - kernel_size + 1;
     int output_width = input_height - kernel_size + 1;
     int kernel_size = kernel_size * kernel_size * input_channels;
-    int output_size = output_height * output_width * input_channels
+    int output_size = output_height * output_width * input_channels;
     cudaMalloc(&d_input, input_size * sizeof(float));
     cudaMalloc(&d_kernel, kernel_size * sizeof(float));
     cudaMalloc(&d_output, output_size * sizeof(float));
