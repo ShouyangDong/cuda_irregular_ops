@@ -130,7 +130,7 @@ __global__ void __launch_bounds__(64)
   }
 }
 
-extern "C" void deformable_attention_kernel(
+extern "C" void deformable_kernel(
     float* value, int* value_spatial_shapes, int* level_start_index,
     float* sampling_locations, float* attention_weights, float* output) {
   // Allocate memory on the device

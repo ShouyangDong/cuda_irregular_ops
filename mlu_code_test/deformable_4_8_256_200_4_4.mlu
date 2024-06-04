@@ -98,7 +98,7 @@ __mlu_global__ void mlu_deformable_attention(
     }
 }
 
-extern "C" void deformable_attention_kernel(
+extern "C" void deformable_kernel(
   float* value, 
   int* value_spatial_shapes,
   float* sampling_locations,
