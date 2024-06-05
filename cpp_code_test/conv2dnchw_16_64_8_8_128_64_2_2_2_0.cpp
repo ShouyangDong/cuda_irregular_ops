@@ -14,17 +14,19 @@ extern "C" void conv2dnchw_kernel(float* input, float* kernel, float* output) {
 
     for (int bs = 0; bs < batch_size; bs++) {
         for (int oc = 0; oc < output_channels; oc++) {
-            for (int ic = 0; ic < input_channels; ic++) {
-                for (int oh = 0; oh < output_height; oh++) {
-                    for (int ow = 0; ow < output_width; ow++) {
+            for (int oh = 0; oh < output_height; oh++) {
+                for (int ow = 0; ow < output_width; ow++) {
+                    float sum = 0.0;
+                    for (int ic = 0; ic < input_channels; ic++) {
                         for (int kh = 0; kh < kernel_height; kh++) {
                             for (int kw = 0; kw < kernel_width; kw++) {
                                 int ih = oh * stride + kh;
                                 int iw = ow * stride + kw;
-                                output[bs * output_channels * output_height * output_width + oc * output_height * output_width + oh * output_width + ow] += input[bs * input_channels * input_height * input_width + ic * input_height * input_width + ih * input_width + iw] * kernel[oc * kernel_height * kernel_width * input_channels + ic * kernel_height * kernel_width + kh * kernel_width + kw];
+                                sum += input[bs * input_channels * input_height * input_width + ic * input_height * input_width + ih * input_width + iw] * kernel[oc * kernel_height * kernel_width * input_channels + ic * kernel_height * kernel_width + kh * kernel_width + kw];
                             }
                         }
                     }
+                    output[bs * output_channels * output_height * output_width + oc * output_height * output_width + oh * output_width + ow] = sum;
                 }
             }
         }
