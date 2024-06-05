@@ -11,7 +11,7 @@ def run_test(file_name, test_file):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            # text=True,
+            text=True,
             timeout=400,
         )           
         return True, output
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             success, output = run_test(file, "./dlboost_test/test_conv1d.py")
         elif name == "conv2d":
             success, output = run_test(file, "./dlboost_test/test_conv2d.py")
-        elif name == "conv2dNCHW":
+        elif name == "conv2dnchw":
             success, output = run_test(file, "./dlboost_test/test_conv2dNCHW.py")
         elif name == "depthwiseconv":
             success, output = run_test(file, "./dlboost_test/test_depthwise_conv.py")

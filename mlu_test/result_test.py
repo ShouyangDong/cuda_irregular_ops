@@ -45,8 +45,8 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cuda_test/test_conv1d.py")
         elif name == "conv2d":
             success, output = run_test(file, "./cuda_test/test_conv2d.py")
-        elif name = "conv2dNCHW":
-            success, output = run_test(file, "./cuda_test/test_conv2d.py")
+        elif name = "conv2dnchw":
+            success, output = run_test(file, "./cuda_test/test_conv2dNCHW.py")
         elif name == "depthwiseconv":
             success, output = run_test(file, "./cuda_test/test_depthwiseconv.py")
         elif name == "add":

@@ -19,70 +19,35 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
-def get_im2col_indices(images_shape, filter_shape, padding, stride):
-    """Get index for shape"""
-    batch_size, channels, height, width = images_shape
-    filter_height, filter_width = filter_shape
-    pad_h, pad_w = padding
-    stride_h, stride_w = stride
-    out_height = int((height + np.sum(pad_h) - filter_height) / stride_h + 1)
-    out_width = int((width + np.sum(pad_w) - filter_width) / stride_w + 1)
-
-    i0 = np.repeat(np.arange(filter_height), filter_width)
-    i0 = np.tile(i0, channels)
-    i1 = stride_h * np.repeat(np.arange(out_height), out_width)
-    j0 = np.tile(np.arange(filter_width), filter_height * channels)
-    j1 = stride_w * np.tile(np.arange(out_width), out_height)
-    i = i0.reshape(-1, 1) + i1.reshape(1, -1)
-    j = j0.reshape(-1, 1) + j1.reshape(1, -1)
-
-    k = np.repeat(np.arange(channels), filter_height * filter_width).reshape(-1, 1)
-    return (k, i, j)
-
-
-def image_to_column(images, filter_shape, stride, pad):
-    """Transpose the input for conv"""
-    filter_height, filter_width = filter_shape
-    pad_h, pad_w = cpu_pad(pad)
-    images_padded = np.pad(images, ((0, 0), (0, 0), pad_h, pad_w), mode="constant")
-    k, i, j = get_im2col_indices(images.shape, filter_shape, (pad_h, pad_w), stride)
-    cols = images_padded[:, k, i, j]
-    channels = images.shape[1]
-    cols = cols.transpose(1, 2, 0).reshape(filter_height * filter_width * channels, -1)
-    return cols
+def cpu_conv(input_tensor, kernel, stride, pad=0):
+    # 获取输入张量和卷积核的维度
+    N, C, H, W = input_tensor.shape
+    out_channels, in_channels, kernel_height, kernel_width = kernel.shape
+    
+    # 计算输出张量的空间维度
+    out_height = (H - kernel_height) // stride + 1
+    out_width = (W - kernel_width) // stride + 1
+    
+    # 初始化输出张量
+    output_tensor = np.zeros((N, out_channels, out_height, out_width))
+    
+    # 执行卷积操作
+    for n in range(N):
+        for out_channel in range(out_channels):
+            for in_channel in range(in_channels):
+                for i in range(0, out_height):
+                    for j in range(0, out_width):
+                        h_start = i * stride
+                        h_end = h_start + kernel_height
+                        w_start = j * stride
+                        w_end = w_start + kernel_width
+                        output_tensor[n, out_channel, i, j] += np.sum(
+                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end] * kernel[out_channel, in_channel]
+                        )
+    
+    return output_tensor
 
 
-def cpu_pad(padding=None):
-    """Get the pad param"""
-    pad_h = 0
-    pad_w = 0
-    if isinstance(padding, (list, tuple)):
-        if len(padding) == 2:
-            pad_h = padding[0]
-            pad_w = padding[1]
-        elif len(padding) == 1:
-            pad_h = pad_w = padding[0]
-    elif isinstance(padding, int):
-        pad_h = pad_w = padding
-    return (pad_h, pad_h), (pad_w, pad_w)
-
-
-def cpu_conv(data, kernel, stride_w, stride_h, pad=None):
-    """Conv op in cpu"""
-    batch_size, input_height, input_width, input_channel = data.shape
-    output_channel, kernel_height, kernel_width, _ = kernel.shape
-    pad_h, pad_w = cpu_pad(pad)
-    out_height = int((input_height + np.sum(pad_h) - kernel_height) / stride_h + 1)
-    out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
-    data = data.transpose(0, 3, 1, 2)
-    kernel = kernel.transpose(0, 3, 1, 2)
-    X_col = image_to_column(
-        data, (kernel_height, kernel_width), (stride_h, stride_w), pad
-    )
-    W_col = kernel.reshape((output_channel, -1))
-    output = W_col.dot(X_col)
-    output = output.reshape(output_channel, out_height, out_width, batch_size)
-    return output.transpose(3, 1, 2, 0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -98,7 +63,7 @@ if __name__ == "__main__":
 
     kernel_shape = base_name.split("_")[5:9]
     kernel_shape = [int(intg) for intg in kernel_shape]
-    stride_h = stride_w = int(base_name.split("_")[9])
+    stride_h = stride_w = int(base_nam.split(".")[0].split("_")[9])
     pad = int(base_name.split(".")[0].split("_")[10])
     dtype = "float32"
     wtype = "float32"
@@ -107,7 +72,7 @@ if __name__ == "__main__":
     data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
     kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
     # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)  
+    result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)  
     
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".mlu", ".so")
@@ -128,7 +93,7 @@ if __name__ == "__main__":
     os.remove(file_name)
 
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, "conv2dNCHW")
+    function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
@@ -136,8 +101,13 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
     ]
     function.restype = None
+    # Convert the matrices to contiguous memory for ctypes
+    input_ptr = data_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
+    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr)
+    function(input_ptr, kernel_ptr, output_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         output_ctypes,
