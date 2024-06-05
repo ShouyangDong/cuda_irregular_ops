@@ -16,8 +16,8 @@ extern "C" void conv2dnchw_kernel(float* input, float* kernel, float* output) {
         for (int oc = 0; oc < output_channels; oc++) {
             for (int oh = 0; oh < output_height; oh++) {
                 for (int ow = 0; ow < output_width; ow++) {
+                    float sum = 0.0;
                     for (int ic = 0; ic < input_channels; ic++) {
-                        float sum = 0.0;
                         for (int kh = 0; kh < kernel_height; kh++) {
                             for (int kw = 0; kw < kernel_width; kw++) {
                                 int ih = oh * stride + kh;
