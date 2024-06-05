@@ -31,7 +31,7 @@ extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   cudaMemcpy(d_A, A, size1 * size2 * sizeof(float), cudaMemcpyHostToDevice);
 
   dim3 blockSize(12);
-  dim3 numBlocks((size + 12 - 1) / 12);
+  dim3 numBlocks((size1 + 12 - 1) / 12);
 
   softmax<<<numBlocks, blockSize>>>(d_A, d_C);
 
