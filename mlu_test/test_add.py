@@ -32,8 +32,8 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
-    A = np.random.rand(shape).astype("float32")
-    B = np.random.rand(shape).astype("float32")
+    A = np.random.rand(*shape).astype("float32")
+    B = np.random.rand(*shape).astype("float32")
 
     # Perform add using numpy
     result_np = add(A, B)
