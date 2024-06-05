@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # Define the input matrix A and vector x
     A = np.random.rand(shape[0], shape[1]).astype(np.float32)
     x = np.random.rand(shape[1], shape[2]).astype(np.float32)
-
+    name = base_name.split("_")[0]
     # Create an empty vector y
     y_ctypes = np.zeros((shape[0], shape[2]), dtype=np.float32)
 

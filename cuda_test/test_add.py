@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Generate random matrices for testing
     A = np.random.rand(*shape).astype("float32")
     B = np.random.rand(*shape).astype("float32")
-
+    name = base_name.split("_")[0]
     # Perform add using numpy
     result_np = add(A, B)
 

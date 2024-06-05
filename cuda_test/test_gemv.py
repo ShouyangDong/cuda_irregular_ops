@@ -25,6 +25,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
+    name = base_name.split("_")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     # Define the input matrix A and vector x
