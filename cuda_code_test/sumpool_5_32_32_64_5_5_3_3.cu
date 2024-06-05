@@ -24,7 +24,7 @@ extern "C" void sumpool_kernel(float *output, float *input, int batch_size, int 
 
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(128);
+    dim3 blockSize(1024);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
     sumpool<<<numBlocks, blockSize>>>(d_input, d_output);
