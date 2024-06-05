@@ -10,8 +10,8 @@ extern "C" void sigmoid_kernel(float *C, float *A, int size) {
 
   cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
 
-  dim3 blockSize(1024);
-  dim3 numBlocks((size + 1024 - 1) / 1024);
+  dim3 blockSize(640);
+  dim3 numBlocks((size + 640 - 1) / 640);
 
   sigmoid<<<numBlocks, blockSize>>>(d_A, d_C);
 

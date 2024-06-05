@@ -57,7 +57,7 @@ extern "C" void layernorm_kernel(float* A, float* gamma, float* beta,
   cudaMemcpy(d_beta, beta, d_model * sizeof(float), cudaMemcpyHostToDevice);
 
   // Define grid and block dimensions
-  int block_size = 256;
+  int block_size = 8;
   int num_blocks = (batch_size * seq_length + block_size - 1) / block_size;
 
   // Launch kernel

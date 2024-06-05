@@ -35,7 +35,7 @@ extern "C" void rmsnorm_kernel(float* A, float* B, int size_1, int size_2) {
   cudaMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
 
   // Define grid and block dimensions
-  int block_size = 256;
+  int block_size = 1024;
   int num_blocks = (size_1 + block_size - 1) / block_size;
 
   // Launch kernel

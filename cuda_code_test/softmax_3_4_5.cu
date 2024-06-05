@@ -22,20 +22,20 @@ __global__ void __launch_bounds__(12) softmax(float* __restrict__ A, float* __re
   }
 }
 
-extern "C" void softmax_kernel(float *C, float *A, int size) {
+extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   float *d_A, *d_C;
 
-  cudaMalloc(&d_A, size * sizeof(float));
-  cudaMalloc(&d_C, size * sizeof(float));
+  cudaMalloc(&d_A, size1 * size2 * sizeof(float));
+  cudaMalloc(&d_C, size1 * size2 * sizeof(float));
 
-  cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_A, A, size1 * size2 * sizeof(float), cudaMemcpyHostToDevice);
 
-  dim3 blockSize(1024);
-  dim3 numBlocks((size + 1024 - 1) / 1024);
+  dim3 blockSize(12);
+  dim3 numBlocks((size + 12 - 1) / 12);
 
   softmax<<<numBlocks, blockSize>>>(d_A, d_C);
 
-  cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(C, d_C, size1 * size2 * sizeof(float), cudaMemcpyDeviceToHost);
 
   cudaFree(d_A);
   cudaFree(d_C);

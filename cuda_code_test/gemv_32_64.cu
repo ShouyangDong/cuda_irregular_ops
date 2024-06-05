@@ -19,7 +19,7 @@ extern "C" void gemv_kernel(float *y, float *A, float *x, int m, int n) {
     cudaMemcpy(d_A, A, m * n * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_x, x, n * sizeof(float), cudaMemcpyHostToDevice);
 
-    int blockSize = 256;
+    int blockSize = 32;
     int numBlocks = (m + blockSize - 1) / blockSize;
 
     gemv<<<numBlocks, blockSize>>>(d_A, d_x, d_y);
