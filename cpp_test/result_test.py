@@ -45,7 +45,7 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cpp_test/test_conv1d.py")
         elif name == "conv2d":
             success, output = run_test(file, "./cpp_test/test_conv2d.py")
-        elif name == "conv2dNCHW":
+        elif name == "conv2dnchw":
             success, output = run_test(file, "./cpp_test/test_conv2dNCHW.py")
         elif name == "depthwiseconv":
             success, output = run_test(file, "./cpp_test/test_depthwise_conv.py")
@@ -69,10 +69,11 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cpp_test/test_gelu.py")
         elif name == "softmax":
             success, output = run_test(file, "./cpp_test/test_softmax.py")
-
+        else:
+            raise RuntimeError("This file is not tested.")
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
-
+        
         elif isinstance(output, str):
             print(base_name)
             print(output)
