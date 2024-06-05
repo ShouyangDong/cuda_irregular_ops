@@ -35,10 +35,10 @@ __global__ void multi_head_attention(
 
 extern "C" void mha_kernel(const float* queries, const float* keys, const float* values, float* output, int batch_size, int seq_len, int num_heads, int head_dim) {
     int size = batch_size * seq_len * num_heads * head_dim;
-    float *d_queries, *d_keys, *d_value, *d_output;
+    float *d_queries, *d_keys, *d_values, *d_output;
     cudaMalloc(&d_queries, size * sizeof(float));
     cudaMalloc(&d_keys, size * sizeof(float));
-    cudaMalloc(&d_value, size * sizeof(float));
+    cudaMalloc(&d_values, size * sizeof(float));
     cudaMalloc(&d_output, size * sizeof(float));
     cudaMemcpy(&d_queries, queries, size * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(&d_keys, keys, size * sizeof(float), cudaMemcpyHostToDevice);
