@@ -1,5 +1,3 @@
-#include <cuda_runtime.h>
-
 __global__ void __launch_bounds__(64)
     cuda_deformable_attention(float* __restrict__ attention_weights_,
                               float* __restrict__ output_,
