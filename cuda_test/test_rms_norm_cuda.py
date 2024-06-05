@@ -36,7 +36,20 @@ if __name__ == "__main__":
     name = "rmsnorm"
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
+    so_name = args.file.replace(".cu", ".so")
+    with open(args.file, "r") as f:
+        code = f.read()
+        f.close()
 
+    with open("./macro/cuda_macro.txt", "r") as f:
+        macro = f.read()
+        f.close()
+    code = macro + code
+
+    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    with open(file_name, mode="w") as f:
+        f.write(code)
+        f.close()
     success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")

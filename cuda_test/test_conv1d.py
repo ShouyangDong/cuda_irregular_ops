@@ -33,7 +33,7 @@ if __name__ == "__main__":
     output_size = shape[0]
     # Create an empty output array
     output_ctypes = np.zeros(output_size, dtype=np.float32)
-
+    name = base_name.split("_")[0]
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
