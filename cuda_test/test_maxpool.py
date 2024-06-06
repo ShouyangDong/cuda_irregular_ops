@@ -90,10 +90,15 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr)
+    function(output_ptr, input_ptr, shape[0], shape[3], shape[1], kernel_stride[0], kernel_stride[2])
     # Check if the results match
     np.testing.assert_allclose(
         output_array,
