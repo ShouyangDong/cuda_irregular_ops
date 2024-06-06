@@ -36,7 +36,7 @@ extern "C" void rmsnorm_kernel(float* A, float* B, int size_1, int size_2) {
 
   // Define grid and block dimensions
   int block_size = 1024;
-  int num_blocks = (size_1 + block_size - 1) / block_size;
+  int num_blocks = 256;
 
   // Launch kernel
   rmsnorm<<<num_blocks, block_size>>>(d_A, d_B);

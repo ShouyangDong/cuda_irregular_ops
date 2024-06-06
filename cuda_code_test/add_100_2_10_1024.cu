@@ -18,8 +18,7 @@ extern "C" void add_kernel(float *C, float *A, float *B, int size) {
   cudaMemcpy(d_B, B, size * sizeof(float), cudaMemcpyHostToDevice);
 
   dim3 blockSize(1024);
-  dim3 numBlocks((size + 1024 - 1) / 1024);
-
+  dim3 numBlocks(256);
   add<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
   cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
