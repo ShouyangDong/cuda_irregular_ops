@@ -36,7 +36,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
-    name = "layer_norm"
+    name = "layernorm"
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     so_name = args.file.replace(".cu", ".so")
@@ -63,6 +63,9 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int
     ]
     function.restype = None
     # 创建输入数组
@@ -81,7 +84,7 @@ if __name__ == "__main__":
     beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
+    function(input_ptr, gamma_ptr, beta_ptr, output_ptr, *shape)
     # 验证结果
 
     np.testing.assert_allclose(

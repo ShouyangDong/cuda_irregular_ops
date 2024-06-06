@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     input_array = generate_data(shape, dtype)
     # Calculate the result using numpy for comparison
-    output = minpool_np(input_array, kernel_stride)
+    output_np = minpool_np(input_array, kernel_stride)
     output_array = np.zeros(shape=output_np.shape, dtype=dtype)
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
@@ -90,10 +90,16 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int
     ]
     function.restype = None
+    int batch_size, int channels, int input_H, int kernel_size, int stride
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr)
+    function(output_ptr, input_ptr, shape[0], shape[3], shape[1], kernel_stride[0], kernel_stride[2])
     # Check if the results match
     np.testing.assert_allclose(
         output_array,
