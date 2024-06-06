@@ -20,7 +20,7 @@ extern "C" void avgpool_kernel(float *output, float *input, int batch_size, int 
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
 
     dim3 blockSize(1024);
-    dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
+    dim3 numBlocks((output_size + blockSize.x - 1) / blockSize.x);
 
     avgpool<<<numBlocks, blockSize>>>(d_input, d_output);
 

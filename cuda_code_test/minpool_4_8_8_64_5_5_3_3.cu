@@ -20,9 +20,7 @@ extern "C" void minpool_kernel(float *output, float *input, int batch_size, int 
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
 
     dim3 blockSize(1024);
-    dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
-
-    minpool<<<numBlocks, blockSize>>>(d_input, d_output);
+    minpool<<<blockSize>>>(d_input, d_output);
 
     cudaMemcpy(output, d_output, output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
