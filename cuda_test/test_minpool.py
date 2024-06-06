@@ -97,7 +97,6 @@ if __name__ == "__main__":
         ctypes.c_int
     ]
     function.restype = None
-    int batch_size, int channels, int input_H, int kernel_size, int stride
     # Call the function with the matrices and dimensions
     function(output_ptr, input_ptr, shape[0], shape[3], shape[1], kernel_stride[0], kernel_stride[2])
     # Check if the results match

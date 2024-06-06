@@ -44,17 +44,17 @@ if __name__ == "__main__":
     y_np = np.matmul(A, x)
 
     # Load the shared library with the batch matrix multiplication function
-    so_name = args.file.replace(".mlu", ".so")
+    so_name = args.file.replace(".cu", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
 
-    with open("./macro/mlu_macro.txt", "r") as f:
+    with open("./macro/cuda_macro.txt", "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
    
-    file_name = args.file.replace(base_name.replace(".mlu", ""), base_name + "_bak.mlu")
+    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
