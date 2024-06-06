@@ -1,45 +1,111 @@
+import numpy as np
+from ctypes import CDLL, c_void_p, c_double, c_int
+import subprocess
+import glob
+import os
 import math
-
+import ctypes
+import argparse
 import torch
-from torch.nn import functional as F
-from torch.utils.cpp_extension import load
-
-# Load the CUDA kernel as a python module
-minimal_attn = load(
-    name="minimal_attn", sources=["main.cpp", "mha.cu"], extra_cuda_cflags=["-O2"]
-)
-
-# Use small model params, otherwise slower than manual attention. See caveats in README.
-batch_size = 16
-n_head = 12
-seq_len = 64
-head_embd = 64
-
-q = torch.randn(batch_size, n_head, seq_len, head_embd).cuda()
-k = torch.randn(batch_size, n_head, seq_len, head_embd).cuda()
-v = torch.randn(batch_size, n_head, seq_len, head_embd).cuda()
-
-print("=== profiling manual attention ===")
-
-# Our minimal flash attention aims to be faster than this by avoiding HBM read/writes of N^2 matrices.
-def manual_attn(q, k, v):
-    att = q @ k.transpose(-2, -1) * (1.0 / math.sqrt(k.size(-1)))
-    att = F.softmax(att, dim=-1)
-    y = att @ v
-    return y
+import torch.nn.functional as F
 
 
-with torch.autograd.profiler.profile(use_cuda=True) as prof:
-    manual_result = manual_attn(q, k, v)
-print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
+def run_compilation(so_name, file_name):
+    try:
+        output = subprocess.run(
+            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
+            timeout=15,
+        )
+        return True, output
+    except subprocess.CalledProcessError as e:
+        return False, e.output
 
-print("=== profiling minimal flash attention === ")
 
-with torch.autograd.profiler.profile(use_cuda=True) as prof:
-    minimal_result = minimal_attn.forward(q, k, v)
-print(prof.key_averages().table(sort_by="cuda_time_total", row_limit=10))
+def ref_program(q, k, v, causal=False):
+    score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
+    if causal:
+        mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
+        mask = mask.masked_fill(mask == 1, torch.finfo(q.dtype).min)
+        mask = mask.to(q.device, q.dtype)
+        score = score + mask
+    attn = F.softmax(score, dim=-1)
+    output = torch.matmul(attn, v)
+    return output
 
-print(
-    "attn values sanity check:",
-    torch.allclose(minimal_result, manual_result, rtol=0, atol=1e-02),
-)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    name = "mha"
+    causal = False
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
+    dtype = torch.float32
+
+    query = torch.randn(shape).to(dtype)
+    key = torch.randn(shape).to(dtype)
+    value = torch.randn(shape).to(dtype)
+
+    so_name = args.file.replace(".cu", ".so")
+    with open(args.file, "r") as f:
+        code = f.read()
+        f.close()
+
+    with open("./macro/cuda_macro.txt", "r") as f:
+        macro = f.read()
+        f.close()
+    code = macro + code
+
+    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    with open(file_name, mode="w") as f:
+        f.write(code)
+        f.close()
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    lib = CDLL(os.path.join(os.getcwd(), so_name))
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int
+    ]
+    function.restype = None
+    # 创建输入数组
+    expected_output = ref_program(query, key, value)
+
+    # 创建输出数组
+    output_array = np.zeros_like(query.numpy())
+    # 将输入数组和输出数组转换为C指针类型
+    input_ptr_q = query.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_k = key.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_v = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr, *shape)
+    # 验证结果
+
+    np.testing.assert_allclose(
+        output_array,
+        expected_output,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
+
+    print("验证通过！")
+    result = subprocess.run(["rm", so_name])
