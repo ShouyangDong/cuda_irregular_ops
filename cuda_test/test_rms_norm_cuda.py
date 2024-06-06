@@ -57,6 +57,8 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int
     ]
     function.restype = None
     # 创建输入数组
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(output_ptr, input_ptr)
+    function(output_ptr, input_ptr, shape[0], shape[1])
     # 验证结果
 
     np.testing.assert_allclose(
