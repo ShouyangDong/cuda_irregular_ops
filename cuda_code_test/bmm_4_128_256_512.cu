@@ -22,8 +22,8 @@ extern "C" void bmm_kernel(float *C, float *A, float *B, int b, int m, int k, in
     cudaMemcpy(d_A, A, m * k * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, B, k * n * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(128, 512);
-    dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
+    dim3 blockSize(128, 512, 4);
+    dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y, b + blockSize.z - 1);
 
     bmm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
