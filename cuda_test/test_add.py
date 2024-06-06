@@ -73,7 +73,7 @@ if __name__ == "__main__":
     # Call the function with the matrices and dimensions
     result_ctypes = np.zeros(shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    function(output_ptr, A_ptr, B_ptr, ctypes.c_int)
+    function(output_ptr, A_ptr, B_ptr, np.prod(shape))
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,
