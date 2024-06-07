@@ -21,7 +21,7 @@ extern "C" void gemm_kernel(float *C, float *A, float *B, int m, int k, int n) {
     cudaMemcpy(d_A, A, m * k * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, B, k * n * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(32, 32);
+    dim3 blockSize(32, 6);
     dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
 
     gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
