@@ -1,6 +1,7 @@
 import subprocess
 import os
 import glob
+from tqdm import tqdm
 
 
 def run_compilation(so_name, file_name):
@@ -21,7 +22,7 @@ def run_compilation(so_name, file_name):
 
 files = glob.glob("./cuda_code_test/*.cu")
 counter = 0
-for file_name in files:
+for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
     so_name = base_name.replace("cu", "so")
     so_name = os.path.join("./cuda_code_test/", so_name)

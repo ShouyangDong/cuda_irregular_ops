@@ -1,7 +1,7 @@
 import subprocess
 import os
 import glob
-
+from tqdm import tqdm
 
 def run_compilation(so_name, file_name):
     try:
@@ -21,7 +21,7 @@ def run_compilation(so_name, file_name):
 
 files = glob.glob("./cpp_code_test/*.cpp")
 counter = 0
-for file_name in files:
+for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
 
     with open(file_name, "r") as f:
