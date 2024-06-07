@@ -1,14 +1,14 @@
 __global__ void bmm(float *A, float *B, float *C) {
-    int batch_idx = blockIdx.z;
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     int col = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (batch_idx < 4 && row < 512 && col < 512) {
-        float sum = 0.0f;
-        for (int i = 0; i < 512; i++) {
-            sum += A[batch_idx * 512 * 512 + row * 512 + i] * B[batch_idx * 512 * 512 + i * 512 + col];
+    for (int batch_idx = 0; batch_idx < 4; ++batch_idx) {
+        if (row < 512 && col < 512) {
+            float sum = 0.0f;
+            for (int i = 0; i < 512; i++) {
+                sum += A[batch_idx * 512 * 512 + row * 512 + i] * B[batch_idx * 512 * 512 + i * 512 + col];
+            }
+            C[batch_idx * 512 * 512 + row * 512 + col] = sum;
         }
-        C[batch_idx * 512 * 512 + row * 512 + col] = sum;
     }
 }
 
@@ -22,8 +22,8 @@ extern "C" void bmm_kernel(float *C, float *A, float *B, int b, int m, int k, in
     cudaMemcpy(d_A, A, m * k * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, B, k * n * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(512, 512, 4);
-    dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y, b + blockSize.z - 1);
+    dim3 blockSize(512, 512);
+    dim3 numBlocks((m + blockSize.x - 1) / blockSize.x, (n + blockSize.y - 1) / blockSize.y);
 
     bmm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
