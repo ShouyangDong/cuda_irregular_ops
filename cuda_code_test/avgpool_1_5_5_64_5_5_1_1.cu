@@ -17,7 +17,7 @@ __global__ void __launch_bounds__(1024) avgpool(float* __restrict__ A, float* __
 extern "C" void avgpool_kernel(float *output, float *input, int batch_size, int channels, int input_H, int kernel_size, int stride) {
     float *d_input, *d_output;
     int output_H = (input_H - kernel_size) / stride + 1;
-    int input_size = batch_size * kernel_size * kernel_size * channels;
+    int input_size = batch_size * input_H * input_H * channels;
     int output_size = batch_size * output_H * output_H * channels;
     cudaMalloc(&d_input, input_size * sizeof(float));
     cudaMalloc(&d_output, output_size * sizeof(float));
