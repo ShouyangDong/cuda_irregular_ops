@@ -1,16 +1,10 @@
 __global__ void conv1d(float *input, float *kernel, float *output) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int output_idx = idx + 3 / 2;
-
-    if (idx < 192) {
-        float sum = 0.0f;
-        for (int i = 0; i < 3; i++) {
-            int input_idx = idx + i - 3/2;
-            if (input_idx >= 0 && input_idx < 192) {
-                sum += input[input_idx] * kernel[i];
-            }
+    if (idx < 190) {
+        output[idx] = 0;
+        for (int j = 0; j < 3; j++) {
+            output[idx] += input[idx + j] * kernel[j];
         }
-        output[output_idx] = sum;
     }
 }
 
@@ -25,7 +19,7 @@ extern "C" void conv1d_kernel(float *output, float *input, float *kernel, int in
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(192);
+    dim3 blockSize(190);
     dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
 
     conv1d<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
