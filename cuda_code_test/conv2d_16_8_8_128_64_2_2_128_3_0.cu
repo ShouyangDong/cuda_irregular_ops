@@ -48,8 +48,8 @@ extern "C" void conv2d_kernel(float *output, float *input, float *kernel,
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(1024);
-    dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
+    dim3 blockSize(64);
+    dim3 numBlocks(1);
 
     conv2d<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
