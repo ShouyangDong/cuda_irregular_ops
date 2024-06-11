@@ -1,13 +1,4 @@
 {
-    "__bang_add" : """ __bang_add(C, A, B, size);
-        for (int i_add = 0; i_add < size; i_add++) {
-            C[i_add] = A[i_add] + B[i_add];
-        }
-        """,
-
-    "__memcpy"  : """__memcpy(dst, src, size, direction);
-        for (int i_cpy = 0; i_cpy < size /4; i_cpy++) {
-            dst[i_cpy] = src[i_cpy]
-        }
-    """
+    "__bang_add" : " __bang_add(C, A, B, size); -> for (int i_add = 0; i_add < size; i_add++) {\nC[i_add] = A[i_add] + B[i_add];\n}",
+    "__memcpy"  : "__memcpy(dst, src, size, direction); -> for (int i_cpy = 0; i_cpy < size /4; i_cpy++) {\ndst[i_cpy] = src[i_cpy];\n}"
 }

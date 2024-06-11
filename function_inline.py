@@ -1,34 +1,38 @@
 import re
+import json
 
 def inline_function(file_path, func_name, code):
     """Traverse the AST and inline small functions"""
-    with open(file_path, 'r') as f:
-        function_definitions = f.read()
-
-
+    with open(file_path) as json_file:
+        function_definitions = json.load(json_file)
     # Get the function definition from the json file.
     func_definition = function_definitions[func_name]
 
-    # replace the intrinsic with C sequential code
     # 替换函数调用和函数名
-    code = code.replace(f"{func_name}(", func_definition)
-    code = code.replace(f"def {func_name}", f"def __{func_name}")
-
+    intrinsic_bodys = []
+    for string in code.split(func_name + "(")[1:]:
+        intrinsic_body = func_name + "(" + string.split(");")[0]
+        intrinsic_bodys.append(intrinsic_body)
 
     # get the arguments of intrinsic function
-    intrinsic_args = code.split(func_name + "(")[1].splti(");")[0].strip().split(",")
-
-    definition_args = func_definition.split(func_name + "(")[1].splti(");")[0].strip().split(",")
-
-    for key, value in zip(intrinsic_args, definition_args):
-        parameter_mappings[key] = value
-
-    # 进行文本替换，将函数调用替换为C++函数的代码
-    sequential_code = code.replace(f"{func_name}(", func_definition)
-    # 替换参数名
-    for param in parameter_mappings:
-        sequential_code = re.sub(rf"\b{param}\b", parameter_mappings[param], code)
-    return sequential_code
+    intrinsic_args = []
+    for intrinsic in intrinsic_bodys:
+        intrinsic_arg = intrinsic.split(func_name + "(")[1].split(");")[0].strip().split(",")
+        intrinsic_args.append(intrinsic_arg)
+    
+    definition_args = func_definition.split(func_name + "(")[1].split(");")[0].strip().split(",")
+    for index, intrinsic_body in enumerate(intrinsic_bodys):
+        parameter_mappings = {}
+        for key, value in zip(definition_args, intrinsic_args[index]):
+            parameter_mappings[key] = value
+        
+        function_body = func_definition.split("->")[1]
+        # replace the arguments
+        for param in parameter_mappings:
+            function_body = function_body.replace(param, parameter_mappings[param])
+        # replace the intrinsic with C sequential code
+        code = code.replace(intrinsic_body, function_body)
+    return code
 
 
 if __name__ == "__main__":
@@ -54,5 +58,5 @@ if __name__ == "__main__":
     func_names = ["__memcpy", "__bang_add"]
     file_path = "./function_definition.json"
     for func_name in func_names:
-        output_code = inline_function(file_path, func_name, code)
-    print("[INFO]***************output code: ", output_code)
+        code = inline_function(file_path, func_name, code)
+    print("[INFO]******************output: ", code)
