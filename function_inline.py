@@ -33,5 +33,26 @@ def inline_function(file_path, func_name, code):
 
 if __name__ == "__main__":
     file_path = "./function_intrinsic.json"
-    func_name = "__memcpy"
-    output_code = inline_function(file_path, func_name, code)
+    code = """
+        extern "C" __mlu_global__ void add_kernel0(float* lhs, float* rhs, float* add_1515) {
+    __nram__ float lhs_local_nram[128];
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
+        __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
+        __memcpy(((float *)lhs_local_nram + (64)), ((float *)rhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
+        __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (64)), 64);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
+        __memcpy(((float *)add_1515 + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), ((float *)lhs_local_nram + (0)), 256, NRAM2GDRAM);
+    }
+    }
+    """
+
+    func_names = ["__memcpy", "__bang_add"]
+    file_path = "./function_definition.json"
+    for func_name in func_names:
+        output_code = inline_function(file_path, func_name, code)
+    print("[INFO]***************output code: ", output_code)
