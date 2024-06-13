@@ -1,34 +1,23 @@
-from pycparser import c_parser, c_ast, c_generator
-
-text = r"""
-void foo(int a, int b) {
-}
-
-void bar() {
-}
-"""
+from pycparser import c_parser, c_ast, parse_file
 
 
-class ParamAdder(c_ast.NodeVisitor):
-    def visit_FuncDecl(self, node):
-        ty = c_ast.TypeDecl(declname='_hidden',
-                            quals=[],
-                            align=[],
-                            type=c_ast.IdentifierType(['int']))
-        newdecl = c_ast.Decl(
-                    name='_hidden',
-                    quals=[],
-                    align=[],
-                    storage=[],
-                    funcspec=[],
-                    type=ty,
-                    init=None,
-                    bitsize=None,
-                    coord=node.coord)
-        if node.args:
-            node.args.params.append(newdecl)
-        else:
-            node.args = c_ast.ParamList(params=[newdecl])
+# A visitor with some state information (the funcname it's
+# looking for)
+#
+class FuncCallVisitor(c_ast.NodeVisitor):
+    def __init__(self, funcname):
+        self.funcname = funcname
+
+    def visit_FuncCall(self, node):
+        if node.name.name == self.funcname:
+            print('%s called at %s' % (
+                    self.funcname, node.name.coord))
+
+
+def show_func_calls(filename, funcname):
+    ast = parse_file(filename, use_cpp=True)
+    v = FuncCallVisitor(funcname)
+    v.visit(ast)
 
 
 if __name__ == '__main__':
