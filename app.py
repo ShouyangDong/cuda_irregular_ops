@@ -26,10 +26,16 @@ def intrinsic_conversion(source_code, transformation):
 title = """<h1 align="center">🔥Falcon: Transcompile Your Code Automatically🚀</h1>"""
 
 with gr.Blocks() as demo:
-    gr.HTML('<center> <img src="/file=falcon.png" style="width: 224px; height: 224px;">')
+    gr.HTML('<center> <img src="/file=falcon.png" style="width: 150px; height: 150px;">')
     gr.HTML(title)
 
-    inp = gr.Textbox(placeholder="Enter the source code", label="Source code")
+    with gr.Row():
+        
+        source_platform = gr.Dropdown(choices=["Intel DL Boost", "NVIDIA GPU", "AMD MI", "Cambricon MLU"], label="Select source platform")
+        inp = gr.Textbox(placeholder="Enter the source code", label="Source code")
+        target_platform = gr.Dropdown(choices=["Intel DL Boost", "NVIDIA GPU", "AMD MI", "Cambricon MLU"], label="Select target platform")
+
+
     gr.HTML("""<h1> Sequentialization/Parallelization </h1>""")
     with gr.Row():
         dropdown = gr.Dropdown(choices=["Loop Reorder", "Loop Split", "Loop Fusion", "Loop Recovery"], label="Select a loop transformation option")
