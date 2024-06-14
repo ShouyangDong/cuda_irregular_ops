@@ -10,8 +10,7 @@ class FuncCallVisitor(c_ast.NodeVisitor):
 
     def visit_FuncCall(self, node):
         if node.name.name == self.funcname:
-            print('%s called at %s' % (
-                    self.funcname, node.name.coord))
+            print("%s called at %s" % (self.funcname, node.name.coord))
 
 
 def show_func_calls(filename, funcname):
@@ -20,7 +19,7 @@ def show_func_calls(filename, funcname):
     v.visit(ast)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = c_parser.CParser()
     ast = parser.parse(text)
     # print("AST before change:")

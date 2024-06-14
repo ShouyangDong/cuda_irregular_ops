@@ -11,6 +11,7 @@ void factorial(int* result) {
 }
 """
 
+
 # Custom visitor class to reorder loop index i and j
 class LoopReorderVisitor(c_ast.NodeVisitor):
     def __init__(self, axis_name_1, axis_name_2):
@@ -23,26 +24,46 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
         if node.init.decls[0].name == self.axis_name_1:
             compound_nested_node = node.stmt
             generator = c_generator.CGenerator()
-            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(compound_nested_node.block_items[0], c_ast.For):
+            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(
+                compound_nested_node.block_items[0], c_ast.For
+            ):
                 nested_node = compound_nested_node.block_items[0]
                 if nested_node.init.decls[0].name == self.axis_name_2:
                     self.extend[self.axis_name_2] = nested_node.cond.right.value
-                    extend = int(node.cond.right.value) * int(nested_node.cond.right.value)
-                    node.init.decls[0].name = "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
-                    node.init.decls[0].type.declname = "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
-                    node.cond.left.name = "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    extend = int(node.cond.right.value) * int(
+                        nested_node.cond.right.value
+                    )
+                    node.init.decls[0].name = (
+                        "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    )
+                    node.init.decls[0].type.declname = (
+                        "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    )
+                    node.cond.left.name = (
+                        "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    )
                     node.cond.right.value = extend
-                    node.next.expr.name = "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    node.next.expr.name = (
+                        "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                    )
                     # replace the loop index with new loop index
-                    node.stmt= nested_node.stmt
+                    node.stmt = nested_node.stmt
                     self.visit(node.stmt)
 
     def visit_BinaryOp(self, node):
         if isinstance(node.left, c_ast.BinaryOp) and node.op == "+":
-            if node.left.op == "*" and node.left.left.name == self.axis_name_1 and node.left.right.value == str(self.extend[self.axis_name_2]) and node.right.name == self.axis_name_2:
-                node.left =  c_ast.Constant('int', "fuse_" + self.axis_name_1 + "_" + self.axis_name_2)
-                node.right = c_ast.Constant('int', 0)
-            
+            if (
+                node.left.op == "*"
+                and node.left.left.name == self.axis_name_1
+                and node.left.right.value == str(self.extend[self.axis_name_2])
+                and node.right.name == self.axis_name_2
+            ):
+                node.left = c_ast.Constant(
+                    "int", "fuse_" + self.axis_name_1 + "_" + self.axis_name_2
+                )
+                node.right = c_ast.Constant("int", 0)
+
+
 # Parse the C code
 parser = c_parser.CParser()
 ast = parser.parse(c_code)

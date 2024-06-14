@@ -12,6 +12,7 @@ int factorial(int result) {
 }
 """
 
+
 # Custom visitor class to reorder loop index i and j
 class LoopReorderVisitor(c_ast.NodeVisitor):
     def __init__(self, axis_name_1, axis_name_2):
@@ -23,16 +24,20 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
         if node.init.decls[0].name == self.axis_name_1:
             compound_nested_node = node.stmt
             generator = c_generator.CGenerator()
-            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(compound_nested_node.block_items[0], c_ast.For):
+            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(
+                compound_nested_node.block_items[0], c_ast.For
+            ):
                 nested_node = compound_nested_node.block_items[0]
                 if nested_node.init.decls[0].name == self.axis_name_2:
                     stmt_node = nested_node.stmt
-                    inner_loop = c_ast.For(init=node.init, cond=node.cond, next=node.next, stmt=stmt_node)
-                    node.init=nested_node.init
-                    node.cond=nested_node.cond
-                    node.next=nested_node.next
-                    node.stmt=c_ast.Compound(block_items=[inner_loop])
-                    
+                    inner_loop = c_ast.For(
+                        init=node.init, cond=node.cond, next=node.next, stmt=stmt_node
+                    )
+                    node.init = nested_node.init
+                    node.cond = nested_node.cond
+                    node.next = nested_node.next
+                    node.stmt = c_ast.Compound(block_items=[inner_loop])
+
 
 # Parse the C code
 parser = c_parser.CParser()
