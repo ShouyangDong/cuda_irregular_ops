@@ -1,5 +1,6 @@
 import ast
 
+
 # 1. 分析循环
 def analyze_loops(code):
     tree = ast.parse(code)
@@ -9,10 +10,12 @@ def analyze_loops(code):
             loops.append(node)
     return loops
 
+
 # 2. 确定合并条件
 def determine_merge_conditions(loop1, loop2):
     # 在这个示例中，我们假设两个循环的迭代次数相同并且循环变量的取值范围相同
     return True
+
 
 # 3. 生成合并代码模板
 def generate_merge_template(loop1, loop2):
@@ -22,15 +25,14 @@ def generate_merge_template(loop1, loop2):
     """
     return template
 
+
 # 4. 填充模板
 def fill_template(template, loop1_code, loop2_code, start, end):
     filled_template = template.format(
-        start=start,
-        end=end,
-        loop1_body=loop1_code,
-        loop2_body=loop2_code
+        start=start, end=end, loop1_body=loop1_code, loop2_body=loop2_code
     )
     return filled_template
+
 
 # 5. 代码优化（这里仅作示例，可以根据具体需求进行更复杂的优化）
 def optimize_code(code):
@@ -41,6 +43,7 @@ def optimize_code(code):
             node.body[0], node.body[1] = node.body[1], node.body[0]
     optimized_code = ast.unparse(tree)
     return optimized_code
+
 
 # 示例代码
 loop1_code = """

@@ -1,6 +1,7 @@
 import re
 import json
 
+
 def inline_function(file_path, func_name, code):
     """Traverse the AST and inline small functions"""
     with open(file_path) as json_file:
@@ -17,15 +18,19 @@ def inline_function(file_path, func_name, code):
     # get the arguments of intrinsic function
     intrinsic_args = []
     for intrinsic in intrinsic_bodys:
-        intrinsic_arg = intrinsic.split(func_name + "(")[1].split(");")[0].strip().split(",")
+        intrinsic_arg = (
+            intrinsic.split(func_name + "(")[1].split(");")[0].strip().split(",")
+        )
         intrinsic_args.append(intrinsic_arg)
-    
-    definition_args = func_definition.split(func_name + "(")[1].split(");")[0].strip().split(",")
+
+    definition_args = (
+        func_definition.split(func_name + "(")[1].split(");")[0].strip().split(",")
+    )
     for index, intrinsic_body in enumerate(intrinsic_bodys):
         parameter_mappings = {}
         for key, value in zip(definition_args, intrinsic_args[index]):
             parameter_mappings[key] = value
-        
+
         function_body = func_definition.split("->")[1]
         # replace the arguments
         for param in parameter_mappings:

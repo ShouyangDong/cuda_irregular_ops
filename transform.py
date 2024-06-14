@@ -4,14 +4,15 @@ from .loop_transformation import loop_fusion
 from .loop_transformation import looop_reorder
 from .Tensorization import detensorize, tensorize
 
+
 def transform(code, source_platform, target_platform):
-    """The transcompiler mainly consist of three process. 
+    """The transcompiler mainly consist of three process.
     1. Loop transformation
     2. Memory conversion
     3. Tensorization
     Then we can check the code with correcsponding platform and
     transform by chain rule.
-    """ 
+    """
     # Loop transformation
     if source_platform in ["NVIDIA GPU", "AMD MI", "Cambricon MLU"]:
         # we need to recovery the parallel variables into for loops
@@ -36,7 +37,8 @@ def transform(code, source_platform, target_platform):
             code = tensorize(code, mlu_doc)
     return code
 
-if __name__ ==  "__main__":
+
+if __name__ == "__main__":
     code = ""
     source_platform = ""
     target_platform = ""
