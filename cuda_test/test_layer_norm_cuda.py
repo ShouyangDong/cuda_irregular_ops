@@ -65,7 +65,7 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # 创建输入数组

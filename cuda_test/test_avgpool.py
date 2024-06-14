@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -42,8 +43,10 @@ def avgpool_np(data, kernel_stride):
             ret[:, i, j, :] = np.average(mask, axis=(1, 2))
     return ret
 
+
 def generate_data(shape, dtype):
     return np.random.uniform(size=shape).astype(dtype)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -94,11 +97,19 @@ if __name__ == "__main__":
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, shape[0], shape[3], shape[1], kernel_stride[0], kernel_stride[2])
+    function(
+        output_ptr,
+        input_ptr,
+        shape[0],
+        shape[3],
+        shape[1],
+        kernel_stride[0],
+        kernel_stride[2],
+    )
     # Check if the results match
     np.testing.assert_allclose(
         output_array,

@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -19,18 +20,19 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def cpu_conv(input_tensor, kernel, stride, pad=0):
     # 获取输入张量和卷积核的维度
     N, C, H, W = input_tensor.shape
     out_channels, in_channels, kernel_height, kernel_width = kernel.shape
-    
+
     # 计算输出张量的空间维度
     out_height = (H - kernel_height) // stride + 1
     out_width = (W - kernel_width) // stride + 1
-    
+
     # 初始化输出张量
     output_tensor = np.zeros((N, out_channels, out_height, out_width))
-    
+
     # 执行卷积操作
     for n in range(N):
         for out_channel in range(out_channels):
@@ -42,11 +44,11 @@ def cpu_conv(input_tensor, kernel, stride, pad=0):
                         w_start = j * stride
                         w_end = w_start + kernel_width
                         output_tensor[n, out_channel, i, j] += np.sum(
-                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end] * kernel[out_channel, in_channel]
+                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end]
+                            * kernel[out_channel, in_channel]
                         )
-    
-    return output_tensor
 
+    return output_tensor
 
 
 if __name__ == "__main__":
@@ -72,8 +74,8 @@ if __name__ == "__main__":
     data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
     kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
     # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)  
-    
+    result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)
+
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".cu", ".so")
     with open(args.file, "r") as f:

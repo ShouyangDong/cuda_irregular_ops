@@ -27,6 +27,7 @@ def run_compilation(so_name, file_name):
 def ref_program(x):
     return np.sign(x)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # 创建输入数组

@@ -80,7 +80,7 @@ if __name__ == "__main__":
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # 创建输入数组

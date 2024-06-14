@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -18,6 +19,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -53,7 +55,7 @@ if __name__ == "__main__":
         macro = f.read()
         f.close()
     code = macro + code
-   
+
     file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
     with open(file_name, mode="w") as f:
         f.write(code)
@@ -70,11 +72,11 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(y_ptr, A_ptr, x_ptr, shape[0],shape[1])
+    function(y_ptr, A_ptr, x_ptr, shape[0], shape[1])
     # Check if the results match
     np.testing.assert_allclose(
         y_ctypes,

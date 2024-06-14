@@ -33,13 +33,12 @@ for file_name in tqdm(files):
     with open("./macro/cuda_macro.txt", "r") as f:
         macro = f.read()
 
-
     code = macro + code
     back_file_name = file_name.replace(".cu", "_bak.cu")
     with open(back_file_name, mode="w") as f:
         f.write(code)
         f.close()
-    
+
     success, output = run_compilation(so_name, back_file_name)
     os.remove(back_file_name)
     if success:
@@ -47,7 +46,7 @@ for file_name in tqdm(files):
         result = subprocess.run(["rm", so_name])
     else:
         print(output)
-    
+
 print(counter)
 print(len(files))
 print("[INFO]*******************Compilation rate: ", counter / len(files))

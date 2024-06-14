@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -18,6 +19,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 def get_im2col_indices(images_shape, filter_shape, padding, stride):
     """Get index for shape"""
@@ -84,6 +86,7 @@ def cpu_conv(data, kernel, stride_w, stride_h, pad=None):
     output = output.reshape(output_channel, out_height, out_width, batch_size)
     return output.transpose(3, 1, 2, 0)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
@@ -107,8 +110,8 @@ if __name__ == "__main__":
     data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
     kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
     # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)  
-    
+    result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)
+
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".cu", ".so")
     with open(args.file, "r") as f:
@@ -139,7 +142,7 @@ if __name__ == "__main__":
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int
+        ctypes.c_int,
     ]
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
@@ -148,7 +151,17 @@ if __name__ == "__main__":
     result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr, data_shape[0], data_shape[1], data_shape[2], kernel_shape[0], kernel_shape[1], stride_h)
+    function(
+        output_ptr,
+        input_ptr,
+        kernel_ptr,
+        data_shape[0],
+        data_shape[1],
+        data_shape[2],
+        kernel_shape[0],
+        kernel_shape[1],
+        stride_h,
+    )
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,
