@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -18,6 +19,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):

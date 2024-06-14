@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -18,6 +19,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -40,7 +42,7 @@ if __name__ == "__main__":
     output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Calculate the result using numpy for comparison
-    output_np = np.convolve(input_array, kernel, mode='valid')
+    output_np = np.convolve(input_array, kernel, mode="valid")
 
     # Load the shared library with the batch matrix multiplication function
     so_name = args.file.replace(".mlu", ".so")

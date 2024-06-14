@@ -3,10 +3,19 @@ import os
 import glob
 from tqdm import tqdm
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["cncc", "-shared", "-fPIC", "--bang-mlu-arch=mtp_592", "-o", so_name, file_name],
+            [
+                "cncc",
+                "-shared",
+                "-fPIC",
+                "--bang-mlu-arch=mtp_592",
+                "-o",
+                so_name,
+                file_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -32,13 +41,12 @@ for file_name in tqdm(files):
     with open("./macro/mlu_macro.txt", "r") as f:
         macro = f.read()
 
-
     code = macro + code
     back_file_name = file_name.replace(".mlu", "_bak.mlu")
     with open(back_file_name, mode="w") as f:
         f.write(code)
         f.close()
-    
+
     success, output = run_compilation(so_name, back_file_name)
     os.remove(back_file_name)
     if success:
@@ -46,7 +54,7 @@ for file_name in tqdm(files):
         result = subprocess.run(["rm", so_name])
     else:
         print(output)
-    
+
 print(counter)
 print(len(files))
 print("[INFO]*******************MLU Compilation rate: ", counter / len(files))
