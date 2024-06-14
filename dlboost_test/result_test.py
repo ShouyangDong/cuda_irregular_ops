@@ -3,6 +3,7 @@ import glob
 import os
 from tqdm import tqdm
 
+
 def run_test(file_name, test_file):
     try:
         output = subprocess.run(
@@ -13,12 +14,13 @@ def run_test(file_name, test_file):
             check=True,
             text=True,
             timeout=400,
-        )           
+        )
         return True, output
     except subprocess.TimeoutExpired:
         return False, "timeout"
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 if __name__ == "__main__":
     files = glob.glob("./dlboost_code_test/*.cpp")
@@ -28,7 +30,9 @@ if __name__ == "__main__":
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":
-            success, output = run_test(file, "./dlboost_test/test_deformable_attention_cpp.py")
+            success, output = run_test(
+                file, "./dlboost_test/test_deformable_attention_cpp.py"
+            )
         elif name == "layernorm":
             success, output = run_test(file, "./dlboost_test/test_layer_norm_cpp.py")
         elif name == "mha":
@@ -79,4 +83,4 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************CPP test successfule rate: ",  counter / len(files))
+    print("[INFO]*******************CPP test successfule rate: ", counter / len(files))

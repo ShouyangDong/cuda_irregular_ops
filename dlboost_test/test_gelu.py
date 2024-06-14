@@ -8,10 +8,20 @@ import argparse
 import torch
 import math
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            [
+                "g++",
+                "-shared",
+                "-fPIC",
+                "-march=icelake-server",
+                "-O3",
+                file_name,
+                "-o",
+                so_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -26,6 +36,7 @@ def run_compilation(so_name, file_name):
 
 def ref_program(x):
     return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

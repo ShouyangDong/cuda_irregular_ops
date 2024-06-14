@@ -4,10 +4,20 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            [
+                "g++",
+                "-shared",
+                "-fPIC",
+                "-march=icelake-server",
+                "-O3",
+                file_name,
+                "-o",
+                so_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -18,6 +28,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):

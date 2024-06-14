@@ -4,10 +4,20 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            [
+                "g++",
+                "-shared",
+                "-fPIC",
+                "-march=icelake-server",
+                "-O3",
+                file_name,
+                "-o",
+                so_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -18,6 +28,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -52,7 +63,7 @@ if __name__ == "__main__":
         macro = f.read()
         f.close()
     code = macro + code
-    print(code)    
+    print(code)
     file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
     with open(file_name, mode="w") as f:
         f.write(code)

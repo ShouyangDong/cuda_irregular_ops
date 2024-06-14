@@ -11,7 +11,16 @@ import torch
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            [
+                "g++",
+                "-shared",
+                "-fPIC",
+                "-march=icelake-server",
+                "-O3",
+                file_name,
+                "-o",
+                so_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -27,6 +36,7 @@ def run_compilation(so_name, file_name):
 def ref_program(x):
     relu = torch.nn.ReLU()
     return relu(x)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

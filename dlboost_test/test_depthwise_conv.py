@@ -4,10 +4,20 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-march=icelake-server", "-O3", file_name, "-o", so_name],
+            [
+                "g++",
+                "-shared",
+                "-fPIC",
+                "-march=icelake-server",
+                "-O3",
+                file_name,
+                "-o",
+                so_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -18,6 +28,7 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 def depthwise_conv2d(input, w):
     """Two-dimensional depthwise convolution.
@@ -42,9 +53,9 @@ def depthwise_conv2d(input, w):
                 for fi in range(w.shape[0]):
                     for fj in range(w.shape[1]):
                         w_element = w[fi, fj, c]
-                        output[i, j, c] += (
-                            input[i + fi, j + fj, c] * w_element)
+                        output[i, j, c] += input[i + fi, j + fj, c] * w_element
     return output
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -53,18 +64,21 @@ if __name__ == "__main__":
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    input_height, kernel_size,  input_channels = shape[0], shape[1], shape[2]
+    input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
     # Define the input tensor, kernel, and parameters
-    input_tensor = np.random.rand(input_height, input_height, input_channels).astype(np.float32)
+    input_tensor = np.random.rand(input_height, input_height, input_channels).astype(
+        np.float32
+    )
     kernel = np.random.rand(kernel_size, kernel_size, input_channels).astype(np.float32)
-
 
     # Calculate the output tensor shape
     output_height = input_height - kernel_size + 1
     output_width = input_height - kernel_size + 1
 
     # Create an empty output tensor
-    output_ctypes = np.zeros((output_height, output_width, input_channels), dtype=np.float32)
+    output_ctypes = np.zeros(
+        (output_height, output_width, input_channels), dtype=np.float32
+    )
 
     # Convert the arrays to contiguous memory for ctypes
     input_ptr = input_tensor.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
@@ -73,7 +87,6 @@ if __name__ == "__main__":
     # Calculate the result using numpy for comparison
     output_np = depthwise_conv2d(input_tensor, kernel).astype("float32")
 
-        
     # Load the shared library with the depthwise convolution function
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
