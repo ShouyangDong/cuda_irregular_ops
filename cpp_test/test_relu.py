@@ -28,6 +28,7 @@ def ref_program(x):
     relu = torch.nn.ReLU()
     return relu(x)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")

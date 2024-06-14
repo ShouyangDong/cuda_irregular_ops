@@ -4,6 +4,7 @@ import subprocess
 import os
 import argparse
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -42,8 +43,10 @@ def sumpool_np(data, kernel_stride):
             ret[:, i, j, :] = np.sum(mask, axis=(1, 2))
     return ret
 
+
 def generate_data(shape, dtype):
     return np.random.uniform(size=shape).astype(dtype)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

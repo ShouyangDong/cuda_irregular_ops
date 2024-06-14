@@ -27,6 +27,7 @@ def run_compilation(so_name, file_name):
 def ref_program(x):
     return 1 / (1 + np.exp(-x))
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")

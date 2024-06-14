@@ -3,6 +3,7 @@ import os
 import glob
 from tqdm import tqdm
 
+
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -32,7 +33,7 @@ for file_name in tqdm(files):
         macro = f.read()
 
     code = macro + code
-    file_name = file_name.replace(".cpp","_bak.cpp")
+    file_name = file_name.replace(".cpp", "_bak.cpp")
 
     with open(file_name, mode="w") as f:
         f.write(code)
@@ -53,4 +54,4 @@ for file_name in tqdm(files):
 
 print(counter)
 print(len(files))
-print("[INFO]*******************CPP Compilation rate: ",  counter / len(files))
+print("[INFO]*******************CPP Compilation rate: ", counter / len(files))

@@ -23,10 +23,12 @@ def run_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def ref_program(x):
     # 对最后一个维度进行softmax操作
     e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
     return e_x / np.sum(e_x, axis=-1, keepdims=True)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

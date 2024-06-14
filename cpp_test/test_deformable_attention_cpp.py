@@ -29,7 +29,8 @@ def deformable_attention_pytorch(
     value, value_spatial_shapes, sampling_locations, attention_weights
 ):
     """Pytorch implementation of deformable attention from
-    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py"""
+    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py
+    """
     # for debug and test only,
     # need to use cuda version instead
     N_, S_, M_, D_ = value.shape
