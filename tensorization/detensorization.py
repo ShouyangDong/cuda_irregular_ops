@@ -1,45 +1,12 @@
 from pycparser import c_parser, c_ast, c_generator
 
+class FuncCallVisitor(c_ast.NodeVisitor):
+    def __init__(self, funcname):
+        self.funcname = funcname
 
-class TensorizationVisitor(c_ast.NodeVisitor):
-    def __init__(self, axis_name, factor):
-        self.axis_name = axis_name
-        self.factor = factor
-
-    def visit_Progma(self, node):
-        # check the loop index
-        if node.init.decls[0].name == self.axis_name:
-            org_extent = int(node.cond.right.value)
-            node.cond.right.value = self.factor
-            self.visit(node.stmt)
-            init_node = c_ast.Decl(
-                name=self.axis_name + "_in",
-                quals=[],
-                align=[],
-                storage=[],
-                funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_in", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
-            )
-            cond_node = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_in"), c_ast.Constant('int', node.cond.right.value))
-            next_node = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
-            
-            inner_loop = c_ast.For(init=init_node, cond=cond_node, next=next_node, stmt=node.stmt)
-            inner_loop = c_ast.Compound(block_items=[inner_loop])
-            node.init = c_ast.Decl(
-                name=self.axis_name + "_out",
-                quals=[],
-                align=[],
-                storage=[],
-                funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_out", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
-            )
-            node.cond = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_out"), c_ast.Constant('int', str(org_extent // self.factor)))
-            node.next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_out"))
-            node.stmt = inner_loop
+    def visit_FuncCall(self, node):
+        if node.name.name == self.funcname:
+            print("%s called at %s" % (self.funcname, node.name.coord))
 
 
 
@@ -74,7 +41,7 @@ def smt_transform(code, loop_index, factor):
     
     # Create an instance of a visitor that will perform the loop split
     # Assuming SplitForLoopVisitor is a class that knows how to split loops
-    visitor = SplitForLoopVisitor(loop_index, factor=factor)
+    visitor = FuncCallVisitor(loop_index, factor=factor)
     
     # Visit the AST with the visitor to apply the transformation
     visitor.visit(ast)
