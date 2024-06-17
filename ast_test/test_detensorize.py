@@ -8,24 +8,37 @@ class FuncCallVisitor(c_ast.NodeVisitor):
         self.parser = c_parser.CParser()
 
     def visit_FuncCall(self, node):
-        if node.name.name == "__memcpy" or "__bang" in node.name.name:
+        if node.name.name in self.func_defs:
             func_def = self.func_defs[node.name.name]
             seq_def = self.parser.parse(func_def)
 
-            # Ensure the sequential code is a function
-            assert isinstance(seq_def, c_ast.FileAST), "Sequential code  must be a function"
+            if not isinstance(seq_def, c_ast.FileAST):
+                raise ValueError("Sequential code must be a function")
             
             # Construct a map between the function call's  arguments and callee's arguments
-            seq_def_arg = seq_def.ext[0].decl.type.args.params
-            parameter_mappings = {}
-            for key, value in zip(node.args.exprs, seq_def_arg):
-                parameter_mappings[key] = value
+            seq_def_args = seq_def.ext[0].decl.type.args.params
+            parameter_mappings = {arg: param for arg, param in zip(node.args.exprs, seq_def_args)}
+            # 替换函数调用节点
+            new_body = self.replace(node, seq_def.ext[0].body, parameter_mappings)
+            node.parent.body.remove(node)  # 从父节点中移除原函数调用节点
+            node.parent.body.extend(new_body)  # 将新节点列表添加到父节点
 
-            # print(parameter_mappings)
-            seq_def_body = seq_def.ext[0].body
+    def replace(self, node, new_body, mappings):
+        """
+        使用新体替换函数调用节点，并更新参数映射。
+        """
+        # 创建新的参数列表和新的函数调用列表
+        new_params = [c_ast.Decl(decl.name, c_ast.TypeDecl()) for decl in new_body.ext[0].decls()]
+        new_func_calls = [c_ast.FuncCall(c_ast.ID(new_params[i].name), []) for i in range(len(new_params))]
 
+        # 更新参数映射，将新参数映射到原函数调用的参数
+        for old_arg, new_arg in zip(node.args.exprs, new_func_calls):
+            mappings[old_arg] = new_arg
 
-
+        # 替换函数调用节点的参数
+        for old_arg, new_arg in mappings.items():
+            new_body = new_body.replace(old_arg, new_arg)
+        return new_body
 
 if __name__ == "__main__":
     code = """
