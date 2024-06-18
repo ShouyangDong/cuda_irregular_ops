@@ -1,7 +1,46 @@
 from pycparser import c_parser, c_ast, c_generator
 import json
 
-class FuncCallVisitor(c_ast.NodeVisitor):
+class NodeTransformer(c_ast.NodeVisitor):
+    def generic_visit(self, node):
+        for field, old_value in iter_fields(node):
+            if isinstance(old_value, list):
+                new_values = []
+                for value in old_value:
+                    if isinstance(value, c_ast.Node):
+                        value = self.visit(value)
+                        if value is None:
+                            continue
+                        elif not isinstance(value, c_ast.Node):
+                            new_values.extend(value)
+                            continue
+                    new_values.append(value)
+                old_value[:] = new_values
+            elif isinstance(old_value, c_ast.Node):
+                new_node = self.visit(old_value)
+                setattr(node, field, new_node)
+        return node
+
+
+def iter_fields(node):
+    # this doesn't look pretty because `pycparser` decided to have structure 
+    # for AST node classes different from stdlib ones
+    index = 0
+    children = node.children()
+    while index < len(children):
+        name, child = children[index]
+        try:
+            bracket_index = name.index('[')
+        except ValueError:
+            yield name, child
+            index += 1
+        else:
+            name = name[:bracket_index]
+            child = getattr(node, name)
+            index += len(child)
+            yield name, child
+
+class FuncCallsRemover(NodeTransformer):
     def __init__(self, file_name):
         with open(file_name) as json_file:
             self.func_defs = json.load(json_file)
@@ -18,27 +57,9 @@ class FuncCallVisitor(c_ast.NodeVisitor):
             # Construct a map between the function call's  arguments and callee's arguments
             seq_def_args = seq_def.ext[0].decl.type.args.params
             parameter_mappings = {arg: param for arg, param in zip(node.args.exprs, seq_def_args)}
-            # 替换函数调用节点
-            new_body = self.replace(node, seq_def.ext[0].body, parameter_mappings)
-            node.parent.body.remove(node)  # 从父节点中移除原函数调用节点
-            node.parent.body.extend(new_body)  # 将新节点列表添加到父节点
-
-    def replace(self, node, new_body, mappings):
-        """
-        使用新体替换函数调用节点，并更新参数映射。
-        """
-        # 创建新的参数列表和新的函数调用列表
-        new_params = [c_ast.Decl(decl.name, c_ast.TypeDecl()) for decl in new_body.ext[0].decls()]
-        new_func_calls = [c_ast.FuncCall(c_ast.ID(new_params[i].name), []) for i in range(len(new_params))]
-
-        # 更新参数映射，将新参数映射到原函数调用的参数
-        for old_arg, new_arg in zip(node.args.exprs, new_func_calls):
-            mappings[old_arg] = new_arg
-
-        # 替换函数调用节点的参数
-        for old_arg, new_arg in mappings.items():
-            new_body = new_body.replace(old_arg, new_arg)
-        return new_body
+            return seq_def.ext[0].body
+        else:
+            return node
 
 if __name__ == "__main__":
     code = """
@@ -61,8 +82,7 @@ if __name__ == "__main__":
 
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    v = FuncCallVisitor(file_name = "/Users/dongshouyang/Downloads/micro/cuda_irregular_ops/function_definition.json")
+    v = FuncCallsRemover(file_name = "/Users/dongshouyang/Downloads/micro/cuda_irregular_ops/function_definition.json")
     v.visit(ast)
-
     generator = c_generator.CGenerator()
     print(generator.visit(ast))
