@@ -1,6 +1,7 @@
 from pycparser import c_parser, c_ast, c_generator
 import json
 
+
 class NodeTransformer(c_ast.NodeVisitor):
     def generic_visit(self, node):
         for field, old_value in iter_fields(node):
@@ -23,14 +24,14 @@ class NodeTransformer(c_ast.NodeVisitor):
 
 
 def iter_fields(node):
-    # this doesn't look pretty because `pycparser` decided to have structure 
+    # this doesn't look pretty because `pycparser` decided to have structure
     # for AST node classes different from stdlib ones
     index = 0
     children = node.children()
     while index < len(children):
         name, child = children[index]
         try:
-            bracket_index = name.index('[')
+            bracket_index = name.index("[")
         except ValueError:
             yield name, child
             index += 1
@@ -39,6 +40,7 @@ def iter_fields(node):
             child = getattr(node, name)
             index += len(child)
             yield name, child
+
 
 class FuncCallsRemover(NodeTransformer):
     def __init__(self, file_name):
@@ -53,11 +55,13 @@ class FuncCallsRemover(NodeTransformer):
             seq_def = self.parser.parse(func_def)
             if not isinstance(seq_def, c_ast.FileAST):
                 raise ValueError("Sequential code must be a function")
-            
+
             # Construct a map between the function call's  arguments and callee's arguments
             seq_def_args = seq_def.ext[0].decl.type.args.params
             seq_def_name = [arg_id.name for arg_id in seq_def_args]
-            self.parameter_mappings = {arg: param for arg, param in zip(seq_def_name, node.args.exprs)}
+            self.parameter_mappings = {
+                arg: param for arg, param in zip(seq_def_name, node.args.exprs)
+            }
             body = seq_def.ext[0].body
             return self.visit(body)
         else:
@@ -67,6 +71,7 @@ class FuncCallsRemover(NodeTransformer):
         if node.name in self.parameter_mappings:
             return self.parameter_mappings[node.name]
         return node
+
 
 if __name__ == "__main__":
     code = """
@@ -89,7 +94,9 @@ if __name__ == "__main__":
 
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    v = FuncCallsRemover(file_name = "/Users/dongshouyang/Downloads/micro/cuda_irregular_ops/function_definition.json")
+    v = FuncCallsRemover(
+        file_name="/Users/dongshouyang/Downloads/micro/cuda_irregular_ops/function_definition.json"
+    )
     v.visit(ast)
     generator = c_generator.CGenerator()
     print(generator.visit(ast))

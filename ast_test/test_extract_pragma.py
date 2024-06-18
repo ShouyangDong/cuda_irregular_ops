@@ -1,5 +1,6 @@
 from pycparser import c_parser, c_ast, c_generator
 
+
 class PragmaVisitor(c_ast.NodeVisitor):
     def __init__(self):
         self.pragma_info = {}
