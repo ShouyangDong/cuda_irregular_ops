@@ -1,5 +1,6 @@
 from pycparser import c_parser, c_ast, c_generator
 import json
+import detensorize_unittest
 
 class NodeTransformer(c_ast.NodeVisitor):
     def generic_visit(self, node):
@@ -110,6 +111,65 @@ def smt_transform(code, file_name):
     
     return transformed_code
 
+class FuncCallsVisitor(NodeTransformer):
+    def __init__(self):
+        self.calles = []
+
+    def visit_FuncCall(self, node):
+        self.calles.append(node.name.name)
+
+def prompt_generate(intrinsic, user_mannual):
+    """
+    Generate a prompt based on the intrinsic function and user manual.
+
+    This function analyzes the given intrinsic function and user manual to determine
+    the appropriate transformation or operation to be applied to the code. The result
+    is a prompt that can guide the code transformation process.
+
+    Parameters:
+    - intrinsic (str): The name of the intrinsic function encountered in the code.
+    - user_mannual (str): A manual or set of instructions provided by the user.
+
+    Returns:
+    - str: A prompt that indicates how to handle the intrinsic function based on the user manual.
+
+    Raises:
+    - ValueError: If the intrinsic function is not supported or the user manual is invalid.
+
+    Todo:
+    - Implement a more comprehensive analysis of the user manual to support various instructions.
+    - Extend the function to handle a wider range of intrinsic functions.
+    """
+    # 检查内建函数是否受支持
+    supported_intrinsics = {"__syncthreads", "__ballot", "__shfl"}
+    if intrinsic not in supported_intrinsics:
+        raise ValueError(f"Unsupported intrinsic function: {intrinsic}")
+
+    # 根据用户手册生成提示
+    # 这里只是一个简单的示例，实际情况可能需要解析更复杂的用户手册内容
+    if user_mannual and "loop" in user_mannual.lower():
+        prompt = f"Transform {intrinsic} into a loop construct."
+    elif user_mannual and "atomic" in user_manical.lower():
+        prompt = f"Ensure atomicity when handling {intrinsic}."
+    else:
+        # 默认提示
+        prompt = f"Handle {intrinsic} with default transformation rules."
+
+    return prompt
+
+def gpt_transform(code, prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": question_system_prompt},
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2
+    )
+    return response["choices"][0]["message"]["content"]
 
 def transform_block(code, user_mannual):
     """
@@ -135,14 +195,23 @@ def transform_block(code, user_mannual):
     - Add error handling for cases where transformation or testing fails.
     - Improve the unittest to cover more edge cases.
     """
-    # First transform the code using gpt
-    prompt = prompt_generate(user_mannual)
-    code = gpt_transform(code, prompt)
-    # Test the code with unittest
-    status = unittest(code)
-    # Fix the code with SMT
-    if not status:
-        code = smt_transform(code)
+    # traverse the intrinsic in the code
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+    visitor = FuncCallsVisitor()
+    visit.visit(ast)
+    intrinsics = visitor.calles
+    for intrinsic in intrinsics:
+        # First transform the code using gpt
+        prompt = prompt_generate(intrinsic, user_mannual)
+        gpt_code = gpt_transform(code, prompt)
+        # Test the code with unittest
+        status = detensorize_unittest(gpt_code)
+        # Fix the code with SMT
+        if not status:
+            code = smt_transform(code)
+        else:
+            code = gpt_code
     return code
 
 if __name__ == "__main__":

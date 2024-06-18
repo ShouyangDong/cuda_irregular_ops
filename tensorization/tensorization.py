@@ -84,12 +84,15 @@ def transform_block(code, user_mannual):
     """
     # First transform the code using gpt
     prompt = prompt_generate(user_mannual)
-    code = gpt_transform(code, prompt)
-    # Test the code with unittest
-    status = unittest(code)
-    # Fix the code with SMT
-    if not status:
-        code = smt_transform(code)
+    for pragma in pragmas:
+        gpt_code = gpt_transform(code, prompt)
+        # Test the code with unittest
+        status = tensorize_unittest(gpt_code)
+        # Fix the code with SMT
+        if not status:
+            code = smt_transform(code)
+        else:
+            code = gpt_code
     return code
 
 if __name__ == "__main__":
