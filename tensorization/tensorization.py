@@ -1,61 +1,26 @@
 from pycparser import c_parser, c_ast, c_generator
+class PragmaVisitor(c_ast.NodeVisitor):
+    def __init__(self):
+        self.pragma_info = {}
 
+    def visit_Compound(self, node):
+        # Get the block_items
+        blocks = node.block_items
+        for index, node in enumerate(blocks):
+            if isinstance(node, c_ast.Pragma):
+                self.pragma_info[node.string] = blocks[index + 1]
 
-class TensorizationVisitor(c_ast.NodeVisitor):
-    def __init__(self, axis_name, factor):
-        self.axis_name = axis_name
-        self.factor = factor
-
-    def visit_Progma(self, node):
-        # check the loop index
-        if node.init.decls[0].name == self.axis_name:
-            org_extent = int(node.cond.right.value)
-            node.cond.right.value = self.factor
-            self.visit(node.stmt)
-            init_node = c_ast.Decl(
-                name=self.axis_name + "_in",
-                quals=[],
-                align=[],
-                storage=[],
-                funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_in", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
-            )
-            cond_node = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_in"), c_ast.Constant('int', node.cond.right.value))
-            next_node = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
-            
-            inner_loop = c_ast.For(init=init_node, cond=cond_node, next=next_node, stmt=node.stmt)
-            inner_loop = c_ast.Compound(block_items=[inner_loop])
-            node.init = c_ast.Decl(
-                name=self.axis_name + "_out",
-                quals=[],
-                align=[],
-                storage=[],
-                funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_out", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
-            )
-            node.cond = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_out"), c_ast.Constant('int', str(org_extent // self.factor)))
-            node.next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_out"))
-            node.stmt = inner_loop
-
-
-
-def smt_transform(code, loop_index, factor):
+def smt_transform(code):
     """
-    Transform C code using an SMT solver to optimize loop constructs.
+    Transform C code using an SMT solver to auto tensorsize loop constructs.
 
     This function parses the provided C code into an Abstract Syntax Tree (AST) and applies
-    a transformation to split loops based on the given loop index and factor. The transformation
+    a transformation to tensorize the sequential with tensor intrinsic based on the given pragma. The transformation
     is guided by an SMT solver to ensure the generated code is logically equivalent to the
     original but potentially more optimized.
 
     Parameters:
-    - code (str): A string containing the C code to be transformed.
-    - loop_index (str): The index of the loop to be split in the AST.
-    - factor (int): The factor by which the loop is to be split.
+    - code (str): A string containing the pragma to be transformed.
 
     Returns:
     - str: The transformed C code as a string.
@@ -74,16 +39,22 @@ def smt_transform(code, loop_index, factor):
     
     # Create an instance of a visitor that will perform the loop split
     # Assuming SplitForLoopVisitor is a class that knows how to split loops
-    visitor = SplitForLoopVisitor(loop_index, factor=factor)
+    visitor = PragmaVisitor()
     
-    # Visit the AST with the visitor to apply the transformation
+    # Visit the AST with the visitor to get the tensorization code snippet
     visitor.visit(ast)
-    
-    # Generate the transformed code from the modified AST
-    # Assuming c_generator.CGenerator() is a valid code generator for C
+    tensorization_info = visitor.pragma_info
     generator = c_generator.CGenerator()
-    transformed_code = generator.visit(ast)
-    
+    for pragam_op, code_snippet in tensorization_info.items():
+
+    # Generate the tensorized code according to the code snippt and its definition 
+    # 
+        transformed_code = generator.visit(code_snippet)
+
+        # postprocess the code the meet the input requirement of Metalift
+        print(transformed_code)
+    # 
+    # 
     return transformed_code
 
 
@@ -122,3 +93,14 @@ def transform_block(code, user_mannual):
     return code
 
 if __name__ == "__main__":
+    source_code = """
+    void add(int dest[SIZE][SIZE], int src1[SIZE][SIZE], int src2[SIZE][SIZE]) {
+        #pragma operation(add)
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                dest[i][j] = src1[i][j] * src2[i][j];
+            }
+        }
+    }
+    """
+    tensorized_code = smt_transform(source_code)
