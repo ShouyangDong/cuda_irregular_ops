@@ -45,21 +45,28 @@ class FuncCallsRemover(NodeTransformer):
         with open(file_name) as json_file:
             self.func_defs = json.load(json_file)
         self.parser = c_parser.CParser()
+        self.parameter_mappings = {}
 
     def visit_FuncCall(self, node):
         if node.name.name in self.func_defs:
             func_def = self.func_defs[node.name.name]
             seq_def = self.parser.parse(func_def)
-
             if not isinstance(seq_def, c_ast.FileAST):
                 raise ValueError("Sequential code must be a function")
             
             # Construct a map between the function call's  arguments and callee's arguments
             seq_def_args = seq_def.ext[0].decl.type.args.params
-            parameter_mappings = {arg: param for arg, param in zip(node.args.exprs, seq_def_args)}
-            return seq_def.ext[0].body
+            seq_def_name = [arg_id.name for arg_id in seq_def_args]
+            self.parameter_mappings = {arg: param for arg, param in zip(seq_def_name, node.args.exprs)}
+            body = seq_def.ext[0].body
+            return self.visit(body)
         else:
             return node
+
+    def visit_ID(self, node):
+        if node.name in self.parameter_mappings:
+            return self.parameter_mappings[node.name]
+        return node
 
 if __name__ == "__main__":
     code = """
