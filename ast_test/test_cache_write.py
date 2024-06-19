@@ -2,7 +2,27 @@ from pycparser import c_parser, c_ast, c_generator
 
 
 class NodeTransformer(c_ast.NodeVisitor):
+    """
+    A node transformer that visits each node in an AST and applies transformations.
+
+    Attributes:
+    - None explicitly defined here, but subclasses may add attributes.
+    """
+
     def generic_visit(self, node):
+        """
+        A generic visit method that is called for nodes that don't have a specific visit_<nodetype> method.
+
+        This method iterates over all fields in the current node. If a field contains a list of nodes,
+        it applies the transformation to each item in the list. If a field contains a single node, it applies
+        the transformation to that node.
+
+        Parameters:
+        - node: The AST node to visit and potentially transform.
+
+        Returns:
+        - The original node, potentially with some of its fields transformed or replaced.
+        """
         for field, old_value in iter_fields(node):
             if isinstance(old_value, list):
                 new_values = []
@@ -23,8 +43,15 @@ class NodeTransformer(c_ast.NodeVisitor):
 
 
 def iter_fields(node):
-    # this doesn't look pretty because `pycparser` decided to have structure
-    # for AST node classes different from stdlib ones
+    """
+    Iterate over all fields of a pycparser AST node.
+
+    Parameters:
+    - node: The AST node whose fields are to be iterated over.
+
+    Yields:
+    - A tuple containing the name of the field and the value of the field.
+    """
     index = 0
     children = node.children()
     while index < len(children):
@@ -40,6 +67,7 @@ def iter_fields(node):
             index += len(child)
             yield name, child
 
+
 class CacheWriteTransformer(NodeTransformer):
     """
     A transformer that modifies loops to perform cache writes based on pragma directives.
@@ -48,6 +76,7 @@ class CacheWriteTransformer(NodeTransformer):
     - pragma_info (dict): A dictionary mapping nodes to pragma strings.
     - args (dict): A dictionary mapping buffer names to pragma strings.
     """
+
     def __init__(self, pragma_info, args):
         self.pragma_info = pragma_info
         self.args = args
@@ -55,10 +84,10 @@ class CacheWriteTransformer(NodeTransformer):
     def visit_Pragma(self, node):
         """
         Handle pragma nodes by removing them since their effect is applied during the transformation.
-        
+
         Parameters:
         - node: The AST node for the pragma.
-        
+
         Returns:
         - None, to indicate the node should be removed from the AST.
         """
@@ -67,10 +96,10 @@ class CacheWriteTransformer(NodeTransformer):
     def visit_For(self, node):
         """
         Transform the for loop to perform cache writes as specified by the pragma.
-        
+
         Parameters:
         - node: The AST node for the for loop.
-        
+
         Returns:
         - A list of new AST nodes that replace the original for loop.
         """
@@ -85,17 +114,24 @@ class CacheWriteTransformer(NodeTransformer):
                 # Create a new variable name for the cache.
                 cache_var = buffer_var + "_" + memory_space.lower()
                 # Replace the original buffer variable with the cache variable in the loop body.
-    
+                node.stmt.block_items[0].lvalue.name.name = cache_var
                 # Create a loop to copy data back from the cache to the original buffer.
-                rvalue = c_ast.ArrayRef(name=c_ast.ID(name=cache_var), subscript=buffer_store_node[0].subscript)
-                write_stmt = c_ast.Assignment(op="=", lvalue=buffer_store_node[0], rvalue=rvalue)
+                lvalue = c_ast.ArrayRef(
+                    name=c_ast.ID(name=buffer_var),
+                    subscript=buffer_store_node[0].subscript,
+                )
+                rvalue = c_ast.ArrayRef(
+                    name=c_ast.ID(name=cache_var),
+                    subscript=buffer_store_node[0].subscript,
+                )
+                write_stmt = c_ast.Assignment(op="=", lvalue=lvalue, rvalue=rvalue)
                 write_stage_node = c_ast.For(
-                        init=node.init, cond=node.cond, next=node.next, stmt=c_ast.Compound([write_stmt])
-                    )   
- 
-                # Create a new for loop node with the updated body.
-                # new_node = c_ast.Compound([node, write_stage_node])
-                # return new_node
+                    init=node.init,
+                    cond=node.cond,
+                    next=node.next,
+                    stmt=c_ast.Compound([write_stmt]),
+                )
+
                 return [node, write_stage_node]
             else:
                 return node
@@ -103,10 +139,10 @@ class CacheWriteTransformer(NodeTransformer):
     def get_memory_space(self, pragma):
         """
         Extract the memory space from the pragma string.
-        
+
         Parameters:
         - pragma (str): The pragma string containing memory space information.
-        
+
         Returns:
         - The extracted memory space as a string.
         """
@@ -114,12 +150,29 @@ class CacheWriteTransformer(NodeTransformer):
 
 
 class PragmaVisitor(c_ast.NodeVisitor):
+    """
+    A visitor for extracting pragma information from a C AST.
+
+    Attributes:
+    - pragma_info (dict): A dictionary to store the next statement after each pragma.
+    - args (dict): A dictionary to store arguments related to the pragma directives.
+    """
+
     def __init__(self):
+        """
+        Initialize the PragmaVisitor with empty dictionaries for pragma info and args.
+        """
         self.pragma_info = {}
         self.args = {}
 
     def visit_Compound(self, node):
-        # Get the block_items
+        """
+        Visit a Compound node to process pragma directives within it.
+
+        Parameters:
+        - node: The AST node for the compound statement (a block of code).
+        """
+        # Get the block_items, which is a list of statements within the compound statement
         blocks = node.block_items
         for index, node in enumerate(blocks):
             if isinstance(node, c_ast.Pragma):
@@ -128,12 +181,34 @@ class PragmaVisitor(c_ast.NodeVisitor):
                 stage_visitor.visit(blocks[index + 1])
                 self.args[node.string] = stage_visitor.write_args
 
+
 class StageVisitor(c_ast.NodeVisitor):
+    """
+    A visitor for collecting write arguments from assignment statements in a C AST.
+
+    Attributes:
+    - write_args (list): A list to store the left-hand side (lvalue) of assignment statements.
+    """
+
     def __init__(self):
+        """
+        Initialize the StageVisitor with an empty list for write arguments.
+        """
         self.write_args = []
 
     def visit_Assignment(self, node):
+        """
+        Visit an Assignment node to collect the left-hand side of the assignment.
+
+        Parameters:
+        - node: The AST node for the assignment statement being visited.
+
+        This method is called when an assignment statement is encountered in the AST.
+        It appends the left-hand side of the assignment (the part before the '=') to the
+        write_args list.
+        """
         self.write_args.append(node.lvalue)
+
 
 if __name__ == "__main__":
     code = """
