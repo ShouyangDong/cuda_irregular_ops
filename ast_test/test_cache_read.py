@@ -52,7 +52,7 @@ class CacheReadTransformer(NodeTransformer):
 
     def visit_For(self, node):
         if node.init.decls[0].name == self.axis
-            pragam = self.pragma_info[node]
+            pragma = self.pragma_info[node]
 
 
         else:

@@ -45,7 +45,7 @@ def smt_transform(code):
     visitor.visit(ast)
     tensorization_info = visitor.pragma_info
     generator = c_generator.CGenerator()
-    for pragam_op, code_snippet in tensorization_info.items():
+    for pragma_op, code_snippet in tensorization_info.items():
 
     # Generate the tensorized code according to the code snippt and its definition 
     # 
