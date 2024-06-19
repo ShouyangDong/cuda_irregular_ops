@@ -46,11 +46,11 @@ class CacheWriteTransformer(NodeTransformer):
 
     Attributes:
     - pragma_info (dict): A dictionary mapping nodes to pragma strings.
-    - agrs (dict): A dictionary mapping buffer names to pragma strings.
+    - args (dict): A dictionary mapping buffer names to pragma strings.
     """
     def __init__(self, pragma_info, args):
         self.pragma_info = pragma_info
-        self.agrs = args
+        self.args = args
 
     def visit_Pragma(self, node):
         """
@@ -74,32 +74,31 @@ class CacheWriteTransformer(NodeTransformer):
         Returns:
         - A list of new AST nodes that replace the original for loop.
         """
-        # Check if the current loop corresponds to the axis we want to transform.
-        if self.axis in (decl.name for decl in node.init.decls):
-            # Retrieve the pragma string associated with this loop.
-            pragma = self.pragma_info.get(node, "")
-            memory_space = self.get_memory_space(pragma)
-
-            # Create a new variable name for the cache.
-            cache_var = f"{self.buffer_var}_nram"
-            new_body = []
-
-            # Replace the original buffer variable with the cache variable in the loop body.
-            for stmt in node.body:
-                if isinstance(stmt, SomeASTNodeType):  # Replace with actual node type check
-                    stmt.value = stmt.value.replace(self.buffer_var, cache_var)
-                new_body.append(stmt)
-
-            # Create a new for loop node with the updated body.
-            new_node = type(node)(node.init, node.cond, node.next, new_body)
-
-            # Create a loop to copy data back from the cache to the original buffer.
-            copy_back_node = self.create_copy_back_loop(self.buffer_var, cache_var, node)
-
-            # Return both the cache write loop and the copy back loop.
-            return [new_node, copy_back_node]
-        else:
-            return node
+        # TODO: maybe use list instead of dictionary
+        for pragma, buffer_store_node in self.args.items():
+            # TODO: only deal with single element list.
+            buffer_var = buffer_store_node[0].name.name
+            loop_index = buffer_store_node[0].subscript.name
+            # if self.axis in (decl.name for decl in node.init.decls):
+            if node.init.decls[0].name == loop_index:
+                memory_space = self.get_memory_space(pragma)
+                # Create a new variable name for the cache.
+                cache_var = buffer_var + "_" + memory_space.lower()
+                # Replace the original buffer variable with the cache variable in the loop body.
+    
+                # Create a loop to copy data back from the cache to the original buffer.
+                rvalue = c_ast.ArrayRef(name=c_ast.ID(name=cache_var), subscript=buffer_store_node[0].subscript)
+                write_stmt = c_ast.Assignment(op="=", lvalue=buffer_store_node[0], rvalue=rvalue)
+                write_stage_node = c_ast.For(
+                        init=node.init, cond=node.cond, next=node.next, stmt=c_ast.Compound([write_stmt])
+                    )   
+ 
+                # Create a new for loop node with the updated body.
+                # new_node = c_ast.Compound([node, write_stage_node])
+                # return new_node
+                return [node, write_stage_node]
+            else:
+                return node
 
     def get_memory_space(self, pragma):
         """
@@ -151,5 +150,7 @@ if __name__ == "__main__":
     visitor.visit(ast)
     pragma_info = visitor.pragma_info
     args = visitor.args
-    print("[INFO]****************info: ", pragma_info)
-    print("[INFO]****************args: ", args)
+    cache_write_transform = CacheWriteTransformer(visitor.pragma_info, visitor.args)
+    cache_write_transform.visit(ast)
+    generator = c_generator.CGenerator()
+    print(generator.visit(ast))
