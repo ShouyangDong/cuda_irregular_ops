@@ -223,8 +223,6 @@ if __name__ == "__main__":
     ast = parser.parse(code)
     visitor = PragmaVisitor()
     visitor.visit(ast)
-    pragma_info = visitor.pragma_info
-    args = visitor.args
     cache_write_transform = CacheWriteTransformer(visitor.pragma_info, visitor.args)
     cache_write_transform.visit(ast)
     generator = c_generator.CGenerator()
