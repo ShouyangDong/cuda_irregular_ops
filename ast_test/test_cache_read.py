@@ -136,7 +136,7 @@ class CacheReadTransformer(NodeTransformer):
         for pragma, buffer_store_node in self.args.items():
             # Check two node are equal
             if not are_nodes_equal(node, self.pragma_info[pragma]):
-                return Node
+                return node
 
             else:
                 stmt_list = []
