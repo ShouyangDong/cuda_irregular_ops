@@ -39,7 +39,7 @@ extern "C" void gemv_kernel(float* A, float* B, float* C) {
     cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_BLOCK;
 
     // Launch kernel
-    matmul<<<dim, ktype, queue>>>(d_A, d_B, d_C);
+    gemv<<<dim, ktype, queue>>>(d_A, d_B, d_C);
 
     // Copy the result back to host
     cnrtMemcpy(C, d_C, num_C * sizeof(float), cnrtMemcpyDevToHost);
