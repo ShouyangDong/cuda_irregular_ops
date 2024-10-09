@@ -138,26 +138,65 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_activation(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    x = torch.randn(shape, device=device)
+def perf_activation(name, file, shape):
     op_name = name.split("_")[0]
+    A = te.placeholder(shape, dtype="float32", name="A")
 
-    activation = torch.nn.ReLU()
-    if name == "sigmoid":
-        activation = torch.nn.Sigmoid()
-    elif name == "gelu":
-        activation = torch.nn.GELU()
-    elif name == "softmax":
-        activation = torch.nn.Softmax(dim=len(shape))
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    def test_activation():
-        output = activation(x)
-        torch.cuda.synchronize()
+    def test_activation(A, B):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        if prod < 1024:
+            max_threads = prod
+            ib.scope_attr(tx, "thread_extent", max_threads)
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_activation, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+        else:
+            max_threads = 1024
+            max_block = (
+                prod // max_threads
+                if prod % max_threads == 0
+                else prod // max_threads + 1
+            )
+            ib.scope_attr(tx, "thread_extent", max_threads)
+            ib.scope_attr(bx, "thread_extent", max_block)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        with ib.for_range(0, n, name="i") as i:
+            Bptr[i] = Aptr[i]
+        body = ib.get()
+        return body
+
+    B = te.extern(
+        A.shape,
+        [A],
+        lambda ins, outs: test_activation(ins[0], outs[0]),
+        name=op_name,
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(B.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
+    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f(a, b)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_conv2d_nchw(name, shape, kernel, stride):
@@ -334,7 +373,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/gemm*.cu")
+    files = glob.glob("./cuda_code_test/relu*.cu")
     counter = 0
 
     for file in files:
@@ -372,7 +411,7 @@ if __name__ == "__main__":
         elif name in ["relu", "sigmoid", "gelu", "softmax"]:
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_activation(base_name, shape)
+            perf_activation(base_name, file, shape)
 
         elif name == "conv2dnchw":
             data_shape = base_name.split("_")[1:5]
