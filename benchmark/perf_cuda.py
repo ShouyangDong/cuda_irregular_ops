@@ -106,22 +106,36 @@ def perf_pooling(name, file, shape, kernel, stride):
     tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_bmm(name, shape_A, shape_B):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def perf_bmm(name, file, shape_A, shape_B, shape_C):
     # 创建随机张量
-    A = torch.randn(shape_A, device=device)
-    B = torch.randn(shape_B, device=device)
+    A = te.placeholder(shape_A, name="A", dtype="float32")
+    B = te.placeholder(shape_B, name="B", dtype="float32")
+    op_name = name.split("_")[0]
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    def test_gemm():
-        # 执行矩阵乘法操作 (GEMM)
-        C = torch.matmul(A, B)
-        # 确保 CUDA 操作完成
-        torch.cuda.synchronize()
+    
+    C = topi.cuda.batch_matmul(A, B)
+    with tvm.target.Target("cuda"):
+        s = topi.cuda.schedule_batch_matmul(C)
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_gemm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    dev = tvm.cuda(0)
 
+    a = tvm.nd.array(np.random.rand(*shape_A).astype("float32"), dev)
+    b = tvm.nd.array(np.random.rand(*shape_B).astype("float32"), dev)
+    c = tvm.nd.array(np.random.rand(*shape_C).astype("float32"), dev)
+    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f(a, b, c)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b, c)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 def perf_activation(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -319,7 +333,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/*pool*.cu")
+    files = glob.glob("./cuda_code_test/bmm*.cu")
     counter = 0
 
     for file in files:
@@ -342,8 +356,9 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
             shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
-            shape_B = [batch_size, matrix_dim_j, matrix_dim_k]
-            perf_bmm(name, shape_A, shape_B)
+            shape_B = [batch_size, matrix_dim_k, matrix_dim_j]
+            shape_C = [batch_size, matrix_dim_i, matrix_dim_k]
+            perf_bmm(name, file, shape_A, shape_B, shape_C)
 
         elif name == "gemm":
             shapes = base_name.split(".")[0]
