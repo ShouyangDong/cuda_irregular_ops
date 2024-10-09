@@ -12,15 +12,19 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
         if node.init.decls[0].name == self.axis_name_1:
             compound_nested_node = node.stmt
             generator = c_generator.CGenerator()
-            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(compound_nested_node.block_items[0], c_ast.For):
+            if isinstance(compound_nested_node, c_ast.Compound) and isinstance(
+                compound_nested_node.block_items[0], c_ast.For
+            ):
                 nested_node = compound_nested_node.block_items[0]
                 if nested_node.init.decls[0].name == self.axis_name_2:
                     stmt_node = nested_node.stmt
-                    inner_loop = c_ast.For(init=node.init, cond=node.cond, next=node.next, stmt=stmt_node)
-                    node.init=nested_node.init
-                    node.cond=nested_node.cond
-                    node.next=nested_node.next
-                    node.stmt=c_ast.Compound(block_items=[inner_loop])
+                    inner_loop = c_ast.For(
+                        init=node.init, cond=node.cond, next=node.next, stmt=stmt_node
+                    )
+                    node.init = nested_node.init
+                    node.cond = nested_node.cond
+                    node.next = nested_node.next
+                    node.stmt = c_ast.Compound(block_items=[inner_loop])
 
 
 def smt_transform(code, loop_axis_1, loop_axis_2):
@@ -51,19 +55,19 @@ def smt_transform(code, loop_axis_1, loop_axis_2):
     # Assuming c_parser.CParser() is a valid parser for C code
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    
+
     # Create an instance of a visitor that will perform the loop split
     # Assuming SplitForLoopVisitor is a class that knows how to split loops
     visitor = LoopReorderVisitor(loop_axis_1, loop_axis_2)
-    
+
     # Visit the AST with the visitor to apply the transformation
     visitor.visit(ast)
-    
+
     # Generate the transformed code from the modified AST
     # Assuming c_generator.CGenerator() is a valid code generator for C
     generator = c_generator.CGenerator()
     transformed_code = generator.visit(ast)
-    
+
     return transformed_code
 
 
@@ -100,5 +104,3 @@ def transform_block(code, user_mannual):
     if not status:
         code = smt_transform(code)
     return code
-
-if __name__ == "__main__":

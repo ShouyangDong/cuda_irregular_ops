@@ -256,6 +256,57 @@ def perf_rmsnorm(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_deformable(name, shape):
+    N, M, D = shape[:3]
+    Lq, L, P = shape[3:]
+    shapes = torch.as_tensor(
+        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long, device=device
+    )
+    level_start_index = torch.cat(
+        (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
+    ).cuda()
+    S = sum([(H * W).item() for H, W in shapes])
+
+    value = torch.rand(N, S, M, D, device=device) * 0.01
+    sampling_locations = torch.rand(N, Lq, M, L, P, 2, device=device)
+    attention_weights = torch.rand(N, Lq, M, L, P, device=device) + 1e-5
+    attention_weights /= (
+        attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True).cuda()
+    )
+
+    def test_deformable():
+        MSDA.ms_deform_attn_forward(
+            value_pt,
+            shapes_pt,
+            value_level_start_index_pt,
+            sampling_locations_pt,
+            attention_weights_pt,
+            64,
+        )
+        # necessary because kernel launches are async
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_deformable, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
+def perf_scaled_dot_product_attention(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Optionally use the context manager to ensure one of the fused kernels is run
+    query = torch.rand(shape, device="cuda")
+    key = torch.rand(shape, device="cuda")
+    value = torch.rand(shape, device="cuda")
+
+    def test_scaled_dot_product_attention():
+        output = F.scaled_dot_product_attention(query, key, value)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -338,3 +389,15 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_rmsnorm(base_name, shape)
+
+        elif name == "deformable":
+            # shapes = base_name.split(".")[0]
+            # shape = [int(intg) for intg in shapes.split("_")[1:]]
+            # perf_deformable(base_name, shape)
+            # FIXME: incompatible pytorch version with RMSNorm
+            continue
+
+        elif name == "mha":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_scaled_dot_product_attention(base_name, shape)

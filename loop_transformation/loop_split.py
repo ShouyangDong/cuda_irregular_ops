@@ -18,14 +18,25 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 align=[],
                 storage=[],
                 funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_in", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
+                type=c_ast.TypeDecl(
+                    declname=self.axis_name + "_in",
+                    quals=[],
+                    align=None,
+                    type=c_ast.IdentifierType(["int"]),
+                ),
+                init=c_ast.Constant("int", "0"),
+                bitsize=None,
             )
-            cond_node = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_in"), c_ast.Constant('int', node.cond.right.value))
+            cond_node = c_ast.BinaryOp(
+                node.cond.op,
+                c_ast.ID(self.axis_name + "_in"),
+                c_ast.Constant("int", node.cond.right.value),
+            )
             next_node = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
-            
-            inner_loop = c_ast.For(init=init_node, cond=cond_node, next=next_node, stmt=node.stmt)
+
+            inner_loop = c_ast.For(
+                init=init_node, cond=cond_node, next=next_node, stmt=node.stmt
+            )
             inner_loop = c_ast.Compound(block_items=[inner_loop])
             node.init = c_ast.Decl(
                 name=self.axis_name + "_out",
@@ -33,20 +44,35 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 align=[],
                 storage=[],
                 funcspec=[],
-                type=c_ast.TypeDecl(declname=self.axis_name + "_out", quals=[], align=None, type=c_ast.IdentifierType(['int'])),
-                init=c_ast.Constant('int', '0'),
-                bitsize=None
+                type=c_ast.TypeDecl(
+                    declname=self.axis_name + "_out",
+                    quals=[],
+                    align=None,
+                    type=c_ast.IdentifierType(["int"]),
+                ),
+                init=c_ast.Constant("int", "0"),
+                bitsize=None,
             )
-            node.cond = c_ast.BinaryOp(node.cond.op, c_ast.ID(self.axis_name + "_out"), c_ast.Constant('int', str(org_extent // self.factor)))
+            node.cond = c_ast.BinaryOp(
+                node.cond.op,
+                c_ast.ID(self.axis_name + "_out"),
+                c_ast.Constant("int", str(org_extent // self.factor)),
+            )
             node.next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_out"))
             node.stmt = inner_loop
 
-
     def visit_ID(self, node):
-        # modify the aixs name inside stmt 
+        # modify the aixs name inside stmt
         if node.name == self.axis_name:
-            node.name = self.axis_name + "_out" + " * " + str(self.factor) + " + " + self.axis_name + "_in"
-
+            node.name = (
+                self.axis_name
+                + "_out"
+                + " * "
+                + str(self.factor)
+                + " + "
+                + self.axis_name
+                + "_in"
+            )
 
 
 def smt_transform(code, loop_index, factor):
@@ -77,19 +103,19 @@ def smt_transform(code, loop_index, factor):
     # Assuming c_parser.CParser() is a valid parser for C code
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    
+
     # Create an instance of a visitor that will perform the loop split
     # Assuming SplitForLoopVisitor is a class that knows how to split loops
     visitor = SplitForLoopVisitor(loop_index, factor=factor)
-    
+
     # Visit the AST with the visitor to apply the transformation
     visitor.visit(ast)
-    
+
     # Generate the transformed code from the modified AST
     # Assuming c_generator.CGenerator() is a valid code generator for C
     generator = c_generator.CGenerator()
     transformed_code = generator.visit(ast)
-    
+
     return transformed_code
 
 
@@ -126,5 +152,3 @@ def transform_block(code, user_mannual):
     if not status:
         code = smt_transform(code)
     return code
-
-if __name__ == "__main__":

@@ -1,10 +1,6 @@
 import re
-ParaVar = {
-    "threadIdx.x": 1024,
-    "blockIdx.x": 256,
-    "coreId": 4;
-    "clusterId": 4
-}
+
+ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 
 cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
 mlu_paravar = ["coreId", "clusterId"]
@@ -22,22 +18,16 @@ coreId_loop = "for(int coreId = 0; coreId < coreDim; coreId++) {\n"
 clusterId_loop = "for(int clusterId = 0; clusterId < clusterDim; clusterId++) {\n"
 
 
-
 def get_blockDim(cuda_code):
-    """The re module in Python is used to write a regular expression 
+    """The re module in Python is used to write a regular expression
     that matches the number inside the parentheses."""
-    match = re.search(r'$(\d+)$', cuda_code)
+    match = re.search(r"$(\d+)$", cuda_code)
     if match:
         thread_count = match.group(1)
         return thread_count
     else:
         return None
 
+
 def loop_recovery():
     return
-
-    
-
-
-
-
