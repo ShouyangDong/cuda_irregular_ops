@@ -45,16 +45,19 @@ def perf_elementwise(name, file, shape):
         tvm._ffi.registry.remove_global_func(func_name)
 
     elif op_name == "sign":
-        C = torch.sign(x)
+        C = topi.sign(x)
         with tvm.target.Target("cuda"):
-            s = tvm.topi.testing.get_elemwise_schedule("cuda")(C)
+            s = tvm.topi.testing.get_injective_schedule("cuda")(C)
 
-        foo = tvm.build(s, [x, C], "cuda", name=name)
-        time_f = foo.time_evaluator(name, dev, number=20, repeat=100)
-        a = tvm.nd.array(np.random.rand(shape), dev)
-        c = tvm.nd.array(np.random.rand(shape), dev)
+        foo = tvm.build(s, [x, C], "cuda", name=op_name)
+        time_f = foo.time_evaluator(op_name, dev, number=20, repeat=100)
+        a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+        c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+        foo(a, c)
         cost = time_f(a, c)
         print(f"{name} execution time: {cost.mean * 1000} ms")
+        func_name = "tvm_callback_cuda_postproc"
+        tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_pooling(name, shape, kernel, stride):
@@ -335,7 +338,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/add*.cu")
+    files = glob.glob("./cuda_code_test/sign*.cu")
     counter = 0
 
     for file in files:
