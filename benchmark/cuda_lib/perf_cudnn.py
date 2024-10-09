@@ -240,6 +240,22 @@ def perf_layernorm(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_rmsnorm(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建输入张量
+    input_tensor = torch.randn(shape, device=device)
+    # 定义 RMSNorm 层
+    rmsnorm = torch.nn.RMSNorm(shape).to(device)
+
+    def test_rmsnorm():
+        output = rmsnorm(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_rmsnorm, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -317,3 +333,8 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_layernorm(base_name, shape)
+
+        elif name == "rmsnorm":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_rmsnorm(base_name, shape)
