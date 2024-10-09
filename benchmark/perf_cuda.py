@@ -6,6 +6,7 @@ from tvm import te, topi
 import tvm.topi.testing
 from tvm.contrib import nvcc
 import numpy as np
+from tvm.topi.utils import get_const_tuple
 
 
 @tvm.register_func("tvm_callback_cuda_compile", override=True)
@@ -60,69 +61,49 @@ def perf_elementwise(name, file, shape):
         tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_pooling(name, shape, kernel, stride):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建一个随机的输入张量
-    x = torch.randn(shape, device=device)
-    # 定义 MaxPooling 操作
+def perf_pooling(name, file, shape, kernel, stride):
     op_name = name.split("_")[0]
+    poolType = {
+        "avgpool": "avg",
+        "sumpool": "avg",
+        "maxpool": "max",
+        "minpool": "max",
+    }
 
-    pool = torch.nn.AvgPool2d(kernel_size=kernel, stride=stride)
-    if op_name == "maxpool":
-        pool = torch.nn.MaxPool2d(kernel_size=kernel, stride=stride)
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    elif op_name == "minpool":
+    A = te.placeholder(shape, name="A", dtype="float32")
+    B = topi.nn.pool2d(
+        A,
+        kernel=kernel,
+        stride=stride,
+        dilation=[1, 1],
+        padding=[0, 0, 0, 0],
+        pool_type=poolType[op_name],
+        ceil_mode=False,
+        layout="NHWC",
+        count_include_pad=False,
+    )
+    with tvm.target.Target("cuda"):
+        s = topi.cuda.schedule_pool(B, layout="NHWC")
 
-        class MinPool2d(torch.nn.Module):
-            def __init__(self, kernel_size, stride=None, padding=0):
-                super(MinPool2d, self).__init__()
-                self.kernel_size = kernel_size
-                self.stride = stride
-                self.padding = padding
+    dev = tvm.cuda(0)
 
-            def forward(self, x):
-                # 取反输入
-                x_neg = -x
-                # 执行最大池化
-                x_maxpool = F.max_pool2d(
-                    x_neg, self.kernel_size, stride=self.stride, padding=self.padding
-                )
-                # 再取反结果
-                return -x_maxpool
-
-        # 使用自定义的 MinPool2d
-        pool = MinPool2d(kernel_size=kernel, stride=stride)
-
-    elif op_name == "sumpool":
-
-        class SumPool2d(torch.nn.Module):
-            def __init__(self, kernel_size, stride=None, padding=0):
-                super(SumPool2d, self).__init__()
-                self.kernel_size = kernel_size
-                self.stride = stride
-                self.padding = padding
-
-            def forward(self, x):
-                # 使用平均池化
-                x_avgpool = F.avg_pool2d(
-                    x,
-                    kernel_size=self.kernel_size,
-                    stride=self.stride,
-                    padding=self.padding,
-                )
-                # 乘以池化窗口的大小，获得求和池化效果
-                return x_avgpool * (self.kernel_size**2)
-
-        # 使用自定义的SumPool2d
-        pool = SumPool2d(kernel_size=kernel, stride=stride)
-
-    def test_pool():
-        output = pool(x)
-        torch.cuda.synchronize()
-
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_pool, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype="float32"), dev)
+    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f(a, b)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_bmm(name, shape_A, shape_B):
@@ -338,7 +319,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/sign*.cu")
+    files = glob.glob("./cuda_code_test/*pool*.cu")
     counter = 0
 
     for file in files:
@@ -354,7 +335,7 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
+            perf_pooling(base_name, file, shape, kernel_stride[:2], kernel_stride[2:])
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
