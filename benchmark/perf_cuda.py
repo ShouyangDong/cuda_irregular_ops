@@ -111,6 +111,7 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     A = te.placeholder(shape_A, name="A", dtype="float32")
     B = te.placeholder(shape_B, name="B", dtype="float32")
     op_name = name.split("_")[0]
+
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
         code = open(file).read()
@@ -119,7 +120,6 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
         code = 'extern "C" ' + code
         return code
 
-    
     C = topi.cuda.batch_matmul(A, B)
     with tvm.target.Target("cuda"):
         s = topi.cuda.schedule_batch_matmul(C)
@@ -136,6 +136,7 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     print(f"{name} execution time: {cost.mean * 1000} ms")
     func_name = "tvm_callback_cuda_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
+
 
 def perf_activation(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -333,7 +334,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/bmm*.cu")
+    files = glob.glob("./cuda_code_test/gemm*.cu")
     counter = 0
 
     for file in files:
@@ -363,9 +364,10 @@ if __name__ == "__main__":
         elif name == "gemm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            shape_A = [shape[0], shape[1]]
-            shape_B = [shape[1], shape[2]]
-            perf_bmm(name, shape_A, shape_B)
+            shape_A = [1, shape[0], shape[1]]
+            shape_B = [1, shape[2], shape[1]]
+            shape_C = [1, shape[0], shape[2]]
+            perf_bmm(name, file, shape_A, shape_B, shape_C)
 
         elif name in ["relu", "sigmoid", "gelu", "softmax"]:
             shapes = base_name.split(".")[0]
