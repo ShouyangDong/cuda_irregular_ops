@@ -134,6 +134,44 @@ def perf_activation(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_conv2d_nchw(name, shape, kernel, stride):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_tensor = torch.randn(16, 3, 224, 224, device=device)
+    # 定义卷积层
+    conv_layer = torch.nn.Conv2d(
+        in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1
+    ).to(device)
+
+    def test_conv2d():
+        output = conv_layer(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_conv2d, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
+def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_tensor = torch.randn(shape, device=device)
+    # 定义卷积层
+    conv_layer = torch.nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel,
+        stride=stride,
+        padding=padding,
+    ).to(device)
+
+    def test_conv2d():
+        output = conv_layer(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_conv2d, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -172,3 +210,21 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_activation(base_name, shape)
+
+        if name == "conv2dnchw":
+            data_shape = base_name.split("_")[1:5]
+            data_shape = [int(intg) for intg in data_shape]
+            kernel_shape = base_name.split("_")[5:9]
+            kernel_shape = [int(intg) for intg in kernel_shape]
+            stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
+            pad = int(base_name.split(".")[0].split("_")[10])
+
+            perf_conv2d_nchw(
+                base_name,
+                data_shape,
+                kernel_shape[1],
+                kernel_shape[0],
+                kernel_shape[2],
+                stride_h,
+                pad,
+            )
