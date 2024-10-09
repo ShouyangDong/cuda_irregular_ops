@@ -4,15 +4,8 @@ import tvm
 import timeit
 from tvm import te, topi
 import tvm.topi.testing
-from tvm.contrib import nvcc
 import numpy as np
 from tvm.topi.utils import get_const_tuple
-
-
-@tvm.register_func("tvm_callback_cuda_compile", override=True)
-def tvm_callback_cuda_compile(code, target):
-    ptx = nvcc.compile_cuda(code, target_format="ptx")
-    return ptx
 
 
 def perf_elementwise(name, file, shape):
@@ -289,36 +282,104 @@ def perf_depthwise_conv2d(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
-def perf_layernorm(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建输入张量
-    input_tensor = torch.randn(shape, device=device)
-    # 定义 LayerNorm 层
-    layer_norm = torch.nn.LayerNorm(shape[-1]).to(device)
+def perf_layernorm(name, file, shape):
+    op_name = name.split("_")[0]
+    A = te.placeholder(shape, dtype="float32", name="A")
 
-    def test_layernorm():
-        output = layer_norm(input_tensor)
-        torch.cuda.synchronize()
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_layernorm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    def test_activation(A, B):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        with ib.for_range(0, n, name="i") as i:
+            Bptr[i] = Aptr[i]
+        body = ib.get()
+        return body
+
+    B = te.extern(
+        A.shape,
+        [A],
+        lambda ins, outs: test_activation(ins[0], outs[0]),
+        name=op_name,
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(B.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
+    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f(a, b)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_rmsnorm(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建输入张量
-    input_tensor = torch.randn(shape, device=device)
-    # 定义 RMSNorm 层
-    rmsnorm = torch.nn.RMSNorm(shape).to(device)
+def perf_rmsnorm(name, file, shape):
+    op_name = name.split("_")[0]
+    A = te.placeholder(shape, dtype="float32", name="A")
 
-    def test_rmsnorm():
-        output = rmsnorm(input_tensor)
-        torch.cuda.synchronize()
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_rmsnorm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    def test_activation(A, B):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        with ib.for_range(0, n, name="i") as i:
+            Bptr[i] = Aptr[i]
+        body = ib.get()
+        return body
+
+    B = te.extern(
+        A.shape,
+        [A],
+        lambda ins, outs: test_activation(ins[0], outs[0]),
+        name=op_name,
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(B.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
+    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f(a, b)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_deformable(name, shape):
@@ -373,7 +434,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/relu*.cu")
+    files = glob.glob("./cuda_code_test/rmsnorm*.cu")
     counter = 0
 
     for file in files:
@@ -450,12 +511,12 @@ if __name__ == "__main__":
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_layernorm(base_name, shape)
+            perf_layernorm(base_name, file, shape)
 
         elif name == "rmsnorm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_rmsnorm(base_name, shape)
+            perf_rmsnorm(base_name, file, shape)
 
         elif name == "deformable":
             # shapes = base_name.split(".")[0]
