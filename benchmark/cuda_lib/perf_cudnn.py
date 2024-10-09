@@ -95,6 +95,23 @@ def perf_pooling(name, shape, kernel, stride):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_bmm(name, shape_A, shape_B):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建随机张量
+    A = torch.randn(shape_A, device=device)
+    B = torch.randn(shape_B, device=device)
+
+    def test_gemm():
+        # 执行矩阵乘法操作 (GEMM)
+        C = torch.matmul(A, B)
+        # 确保 CUDA 操作完成
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_gemm, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -113,3 +130,18 @@ if __name__ == "__main__":
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
             perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
+
+        if name == "bmm":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
+            shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
+            shape_B = [batch_size, matrix_dim_j, matrix_dim_k]
+            perf_bmm(name, shape_A, shape_B)
+
+        if name == "gemm":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            shape_A = [shape[0], shape[1]]
+            shape_B = [shape[1], shape[2]]
+            perf_bmm(name, shape_A, shape_B)
