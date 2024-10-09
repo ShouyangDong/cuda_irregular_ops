@@ -417,24 +417,78 @@ def perf_deformable(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
-def perf_scaled_dot_product_attention(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # Optionally use the context manager to ensure one of the fused kernels is run
-    query = torch.rand(shape, device="cuda")
-    key = torch.rand(shape, device="cuda")
-    value = torch.rand(shape, device="cuda")
+def perf_scaled_dot_product_attention(name, file, shape):
+    op_name = name.split("_")[0]
+    A = te.placeholder(shape, dtype="float32", name="A")
+    B = te.placeholder(shape, dtype="float32", name="B")
+    C = te.placeholder(shape, dtype="float32", name="C")
 
-    def test_scaled_dot_product_attention():
-        output = F.scaled_dot_product_attention(query, key, value)
-        torch.cuda.synchronize()
+    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(
+            "multi_head_attention" + "(", "multi_head_attention" + "_kernel("
+        )
+        code = 'extern "C" ' + code
+        return code
+
+    def test_scaled_dot_product_attention(A, B, C, D, seq_len, num_heads, head_dim):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        Dptr = ib.buffer_ptr(D)
+
+        with ib.for_range(0, n, name="i") as i:
+            j = seq_len * num_heads * head_dim
+            Dptr[i] = Aptr[i] + Bptr[i] + Cptr[i] + j
+        body = ib.get()
+        return body
+
+    D = te.extern(
+        shape,
+        [A, B, C],
+        lambda ins, outs: test_scaled_dot_product_attention(
+            ins[0], ins[1], ins[2], outs[0], shape[1], shape[2], shape[3]
+        ),
+        name="multi_head_attention",
+        in_buffers=[A_buff, B_buff, C_buff],
+        out_buffers=[D_buff],
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(D.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+
+    f = tvm.build(s, [A, B, C, D], "cuda", name="multi_head_attention")
+    f(a, b, c, d)
+    time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
+    cost = time_f(a, b, c, d)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/rmsnorm*.cu")
+    files = glob.glob("./cuda_code_test/mha*.cu")
     counter = 0
 
     for file in files:
@@ -528,4 +582,4 @@ if __name__ == "__main__":
         elif name == "mha":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_scaled_dot_product_attention(base_name, shape)
+            perf_scaled_dot_product_attention(base_name, file, shape)
