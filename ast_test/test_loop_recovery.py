@@ -1,19 +1,16 @@
-from pycparser import c_parser, c_ast, c_generator
+from pycparser import c_ast, c_parser
 import re
-ParaVar = {
-    "threadIdx.x": 1024,
-    "blockIdx.x": 256,
-    "coreId": 4,
-    "clusterId": 4
-}
+
+ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 
 cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
 mlu_paravar = ["coreId", "clusterId"]
 
+
 def get_thread_dim(cuda_code):
-    """The re module in Python is used to write a regular expression 
+    """The re module in Python is used to write a regular expression
     that matches the number inside the parentheses."""
-    match = re.search(r'__launch_bounds__\((\d+)\)', cuda_code)
+    match = re.search(r"__launch_bounds__\((\d+)\)", cuda_code)
     if match:
         # 打印匹配的数值
         launch_bounds_value = int(match.group(1))
@@ -21,10 +18,10 @@ def get_thread_dim(cuda_code):
     else:
         return None
 
+
 class LoopRecoveryVisitot(c_ast.NodeVisitor):
     def visit_If(self, node):
-
-# def recovery_loops(cuda_code):
+        return None
 
 
 if __name__ == "__main__":

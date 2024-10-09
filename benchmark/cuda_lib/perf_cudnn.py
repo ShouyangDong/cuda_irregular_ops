@@ -206,6 +206,40 @@ def perf_conv1d(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_depthwise_conv2d(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建输入张量
+    input_tensor = torch.randn(16, 3, 224, 224, device=device)
+    # 定义深度卷积层
+    depthwise_conv_layer = torch.nn.Conv2d(
+        in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1, groups=3
+    ).to(device)
+
+    def test_depthwise_conv2d():
+        output = depthwise_conv_layer(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
+def perf_layernorm(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建输入张量
+    input_tensor = torch.randn(shape, device=device)
+    # 定义 LayerNorm 层
+    layer_norm = torch.nn.LayerNorm(shape[-1]).to(device)
+
+    def test_layernorm():
+        output = layer_norm(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_layernorm, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -272,3 +306,14 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_conv1d(base_name, shape)
+
+        elif name == "depthwiseconv_1":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+            perf_depthwise_conv2d(base_name, shape)
+
+        elif name == "layernorm":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_layernorm(base_name, shape)

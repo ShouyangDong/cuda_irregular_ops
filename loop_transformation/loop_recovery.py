@@ -6,6 +6,7 @@ question_system_prompt = """You are an expert compilation, and here is a code tr
                             Wrap your code with "```"
                             """
 
+
 def prompt_generate(code, user_mannual):
     """
     Generate a prompt based on the presence of specific built-in variables in the code.
@@ -51,12 +52,9 @@ def gpt_transform(code, prompt):
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": question_system_prompt},
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "user", "content": prompt},
         ],
-        temperature=0.2
+        temperature=0.2,
     )
     return response["choices"][0]["message"]["content"]
 
@@ -94,7 +92,3 @@ def transform_block(code, user_mannual):
     if not status:
         code = smt_transform(code)
     return code
-
-if __name__ == "__main__":
-    file_name =
-

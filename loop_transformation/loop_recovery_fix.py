@@ -36,8 +36,6 @@ def get_blockDim(cuda_code):
 def loop_recovery():
     return
 
-
-if __name__ == "__main__":
     
 
 
