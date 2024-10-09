@@ -1,7 +1,7 @@
-import subprocess
 import glob
 import os
 from tqdm import tqdm
+import subprocess
 
 
 def run_test(file_name, test_file):
@@ -23,7 +23,7 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./mlu_code_test/*.mlu")
+    files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
 
     for file in tqdm(files):
@@ -31,26 +31,26 @@ if __name__ == "__main__":
         name = base_name.split("_")[0]
         if name == "deformable":
             success, output = run_test(
-                file, "./mlu_test/test_deformable_attention_mlu.py"
+                file, "./cuda_test/test_deformable_attention_cuda.py"
             )
         elif name == "layernorm":
-            success, output = run_test(file, "./mlu_test/test_layer_norm_mlu.py")
+            success, output = run_test(file, "./cuda_test/test_layer_norm_cuda.py")
         elif name == "mha":
-            success, output = run_test(file, "./mlu_test/test_mha_mlu.py")
+            success, output = run_test(file, "./cuda_test/test_mha_cuda.py")
         elif name == "rmsnorm":
-            success, output = run_test(file, "./mlu_test/test_rms_norm_mlu.py")
+            success, output = run_test(file, "./cuda_test/test_rms_norm_cuda.py")
         elif name == "gemm":
-            success, output = run_test(file, "./mlu_test/test_gemm.py")
+            success, output = run_test(file, "./cuda_test/test_gemm.py")
         elif name == "gemv":
-            success, output = run_test(file, "./mlu_test/test_gemv.py")
+            success, output = run_test(file, "./cuda_test/test_gemv.py")
         elif name == "bmm":
-            success, output = run_test(file, "./mlu_test/test_bmm.py")
+            success, output = run_test(file, "./cuda_test/test_bmm.py")
         elif name == "conv1d":
             success, output = run_test(file, "./cuda_test/test_conv1d.py")
         elif name == "conv2d":
             success, output = run_test(file, "./cuda_test/test_conv2d.py")
         elif name == "conv2dnchw":
-            success, output = run_test(file, "./cuda_test/test_conv2dNCHW.py")
+            success, output = run_test(file, "./cuda_test/test_conv2d.py")
         elif name == "depthwiseconv":
             success, output = run_test(file, "./cuda_test/test_depthwiseconv.py")
         elif name == "add":
@@ -73,6 +73,9 @@ if __name__ == "__main__":
             success, output = run_test(file, "./cuda_test/test_gelu.py")
         elif name == "softmax":
             success, output = run_test(file, "./cuda_test/test_softmax.py")
+        else:
+            raise RuntimeError("The file is not tested")
+
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
 
@@ -82,4 +85,4 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************MLU test successfule rate: ", counter / len(files))
+    print("[INFO]*******************cuda test successfule rate: ", counter / len(files))

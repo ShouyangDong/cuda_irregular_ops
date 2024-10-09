@@ -9,7 +9,6 @@ es = Elasticsearch(
 )
 
 
-
 contents = json.load(open("./bang_api.json", "r"))
 for content in contents:
     sentence = content["content"]

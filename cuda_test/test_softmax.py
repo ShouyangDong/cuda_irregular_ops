@@ -1,11 +1,9 @@
 import numpy as np
-from ctypes import CDLL, c_void_p, c_double, c_int
+from ctypes import CDLL
 import subprocess
-import glob
 import os
 import ctypes
 import argparse
-import torch
 
 
 def run_compilation(so_name, file_name):

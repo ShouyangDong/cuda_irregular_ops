@@ -1,0 +1,115 @@
+import glob
+import os
+import torch
+import torch.nn.functional as F
+import timeit
+
+
+def perf_elementwise(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    x = torch.randn(shape, device=device)
+    y = torch.randn(shape, device=device)
+
+    def test_add():
+        z = torch.add(x, y)
+        torch.cuda.synchronize()
+
+    def test_sign():
+        z = torch.sign(x)
+        torch.cuda.synchronize()
+
+    op_name = name.split("_")[0]
+    if op_name == "add":
+        # 使用 timeit 进行多次测量，设置执行次数为 100
+        execution_time = timeit.timeit(test_add, number=100)
+        print(f"{name} execution time: {execution_time * 10} ms")
+
+    elif op_name == "sign":
+        execution_time = timeit.timeit(test_sign, number=100)
+        print(f"{name} execution time: {execution_time * 10} ms")
+
+
+def perf_pooling(name, shape, kernel, stride):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建一个随机的输入张量
+    x = torch.randn(shape, device=device)
+    # 定义 MaxPooling 操作
+    op_name = name.split("_")[0]
+
+    pool = torch.nn.AvgPool2d(kernel_size=kernel, stride=stride)
+    if op_name == "maxpool":
+        pool = torch.nn.MaxPool2d(kernel_size=kernel, stride=stride)
+
+    elif op_name == "minpool":
+
+        class MinPool2d(torch.nn.Module):
+            def __init__(self, kernel_size, stride=None, padding=0):
+                super(MinPool2d, self).__init__()
+                self.kernel_size = kernel_size
+                self.stride = stride
+                self.padding = padding
+
+            def forward(self, x):
+                # 取反输入
+                x_neg = -x
+                # 执行最大池化
+                x_maxpool = F.max_pool2d(
+                    x_neg, self.kernel_size, stride=self.stride, padding=self.padding
+                )
+                # 再取反结果
+                return -x_maxpool
+
+        # 使用自定义的 MinPool2d
+        pool = MinPool2d(kernel_size=kernel, stride=stride)
+
+    elif op_name == "sumpool":
+
+        class SumPool2d(torch.nn.Module):
+            def __init__(self, kernel_size, stride=None, padding=0):
+                super(SumPool2d, self).__init__()
+                self.kernel_size = kernel_size
+                self.stride = stride
+                self.padding = padding
+
+            def forward(self, x):
+                # 使用平均池化
+                x_avgpool = F.avg_pool2d(
+                    x,
+                    kernel_size=self.kernel_size,
+                    stride=self.stride,
+                    padding=self.padding,
+                )
+                # 乘以池化窗口的大小，获得求和池化效果
+                return x_avgpool * (self.kernel_size**2)
+
+        # 使用自定义的SumPool2d
+        pool = SumPool2d(kernel_size=kernel, stride=stride)
+
+    def test_pool():
+        output = pool(x)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_pool, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
+if __name__ == "__main__":
+    files = glob.glob("./cuda_code_test/*.cu")
+    counter = 0
+
+    for file in files:
+        base_name = os.path.basename(file)
+        name = base_name.split("_")[0]
+        if name == "add" or name == "sign":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_elementwise(base_name, shape)
+
+        if name in ["avgpool", "maxpool", "minpool", "sumpool"]:
+            shape = base_name.split("_")[1:5]
+            shape = [int(intg) for intg in shape]
+            kernel_stride = base_name.split(".")[0].split("_")[5:]
+            kernel_stride = [int(intg) for intg in kernel_stride]
+            perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])

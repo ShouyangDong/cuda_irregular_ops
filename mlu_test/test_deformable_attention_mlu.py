@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-from ctypes import CDLL, c_void_p, c_double, c_int
+from ctypes import CDLL
 import os
 import ctypes
 import subprocess

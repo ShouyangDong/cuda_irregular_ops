@@ -1,8 +1,11 @@
 from elasticsearch import Elasticsearch
 
 # 创建Elasticsearch客户端
-es = Elasticsearch(["https://10.100.158.12:9200"], verify_certs=False,
-                   http_auth=('elastic', '*qdSlBZ7AmkaHhyf0VLN'))
+es = Elasticsearch(
+    ["https://10.100.158.12:9200"],
+    verify_certs=False,
+    http_auth=("elastic", "*qdSlBZ7AmkaHhyf0VLN"),
+)
 
 # 索引名称
 index_name = "doc"

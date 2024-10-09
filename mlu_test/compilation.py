@@ -53,6 +53,7 @@ for file_name in tqdm(files):
         counter += 1
         result = subprocess.run(["rm", so_name])
     else:
+        print("[INFO]file_name: ", file_name)
         print(output)
 
 print(counter)

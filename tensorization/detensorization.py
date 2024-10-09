@@ -2,6 +2,7 @@ from pycparser import c_parser, c_ast, c_generator
 import json
 import detensorize_unittest
 
+
 class NodeTransformer(c_ast.NodeVisitor):
     def generic_visit(self, node):
         for field, old_value in iter_fields(node):
@@ -41,6 +42,7 @@ def iter_fields(node):
             index += len(child)
             yield name, child
 
+
 class Detensorizer(NodeTransformer):
     def __init__(self, func_defs):
         self.func_defs = func_defs
@@ -70,6 +72,7 @@ class Detensorizer(NodeTransformer):
             return self.parameter_mappings[node.name]
         return node
 
+
 def smt_transform(code, file_name):
     """
     Transform C code using an SMT solver to optimize loop constructs.
@@ -94,7 +97,7 @@ def smt_transform(code, file_name):
     # Assuming c_parser.CParser() is a valid parser for C code
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    
+
     with open(file_name) as json_file:
         func_defs = json.load(json_file)
 
@@ -103,13 +106,14 @@ def smt_transform(code, file_name):
     visitor = Detensorizer(func_defs)
     # Visit the AST with the visitor to apply the transformation
     visitor.visit(ast)
-    
+
     # Generate the transformed code from the modified AST
     # Assuming c_generator.CGenerator() is a valid code generator for C
     generator = c_generator.CGenerator()
     transformed_code = generator.visit(ast)
-    
+
     return transformed_code
+
 
 class FuncCallsVisitor(NodeTransformer):
     def __init__(self):
@@ -117,6 +121,7 @@ class FuncCallsVisitor(NodeTransformer):
 
     def visit_FuncCall(self, node):
         self.calles.append(node.name.name)
+
 
 def prompt_generate(intrinsic, user_mannual):
     """
@@ -157,19 +162,18 @@ def prompt_generate(intrinsic, user_mannual):
 
     return prompt
 
+
 def gpt_transform(code, prompt):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": question_system_prompt},
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "user", "content": prompt},
         ],
-        temperature=0.2
+        temperature=0.2,
     )
     return response["choices"][0]["message"]["content"]
+
 
 def transform_block(code, user_mannual):
     """
@@ -213,6 +217,7 @@ def transform_block(code, user_mannual):
         else:
             code = gpt_code
     return code
+
 
 if __name__ == "__main__":
     code = """

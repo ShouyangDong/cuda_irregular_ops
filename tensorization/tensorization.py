@@ -1,4 +1,6 @@
 from pycparser import c_parser, c_ast, c_generator
+
+
 class PragmaVisitor(c_ast.NodeVisitor):
     def __init__(self):
         self.pragma_info = {}
@@ -9,6 +11,7 @@ class PragmaVisitor(c_ast.NodeVisitor):
         for index, node in enumerate(blocks):
             if isinstance(node, c_ast.Pragma):
                 self.pragma_info[node.string] = blocks[index + 1]
+
 
 def smt_transform(code):
     """
@@ -36,25 +39,25 @@ def smt_transform(code):
     # Assuming c_parser.CParser() is a valid parser for C code
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    
+
     # Create an instance of a visitor that will perform the loop split
     # Assuming SplitForLoopVisitor is a class that knows how to split loops
     visitor = PragmaVisitor()
-    
+
     # Visit the AST with the visitor to get the tensorization code snippet
     visitor.visit(ast)
     tensorization_info = visitor.pragma_info
     generator = c_generator.CGenerator()
     for pragma_op, code_snippet in tensorization_info.items():
 
-    # Generate the tensorized code according to the code snippt and its definition 
-    # 
+        # Generate the tensorized code according to the code snippt and its definition
+        #
         transformed_code = generator.visit(code_snippet)
 
         # postprocess the code the meet the input requirement of Metalift
         print(transformed_code)
-    # 
-    # 
+    #
+    #
     return transformed_code
 
 
@@ -94,6 +97,7 @@ def transform_block(code, user_mannual):
         else:
             code = gpt_code
     return code
+
 
 if __name__ == "__main__":
     source_code = """
