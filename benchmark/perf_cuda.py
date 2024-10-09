@@ -261,25 +261,73 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
     tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    input_tensor = torch.randn(shape, device=device)
-    # 定义卷积层
-    conv_layer = torch.nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel,
-        stride=stride,
-        padding=padding,
-    ).to(device)
+def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
 
-    def test_conv2d():
-        output = conv_layer(input_tensor)
-        torch.cuda.synchronize()
+    # generate data
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    # cpu compute
+    A = te.placeholder(data_shape, dtype="float32", name="A")
+    B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    def conv(A, B, C):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        if prod < 1024:
+            max_threads = prod
+            ib.scope_attr(tx, "thread_extent", max_threads)
+
+        else:
+            max_threads = 1024
+            max_block = (
+                prod // max_threads
+                if prod % max_threads == 0
+                else prod // max_threads + 1
+            )
+            ib.scope_attr(tx, "thread_extent", max_threads)
+            ib.scope_attr(bx, "thread_extent", max_block)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        with ib.for_range(0, n, name="i") as i:
+            Cptr[i] = Aptr[i] + Bptr[i]
+        body = ib.get()
+        return body
+
+    C = te.extern(
+        output_shape,
+        [A, B],
+        lambda ins, outs: conv(ins[0], ins[1], outs[0]),
+        name="conv2d",
+        dtype="float32",
+    )
+
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(C.op)
+
+    dev = tvm.cuda(0)
+    data_dev = tvm.nd.array(data_np, dev)
+    kernel_dev = tvm.nd.array(kernel_np, dev)
+    result_np = np.zeros(output_shape, dtype="float32")
+    result_dev = tvm.nd.array(result_np, dev)
+    func = tvm.build(s, [A, B, C], "cuda", name="conv2d")
+    func(data_dev, kernel_dev, result_dev)
+    time_f = func.time_evaluator("conv2d", dev, number=20)
+    cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
+    print(f"{name} execution time: {cost} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_gemv(name, shape):
@@ -613,7 +661,7 @@ if __name__ == "__main__":
                 name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
             )
 
-        elif name == "conv2dnchw":
+        elif name == "conv2dnchw_1":
             data_shape = base_name.split("_")[1:5]
             data_shape = [int(intg) for intg in data_shape]
             kernel_shape = base_name.split("_")[5:9]
