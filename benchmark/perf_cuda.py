@@ -285,6 +285,13 @@ def perf_depthwise_conv2d(name, shape):
 def perf_layernorm(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
+    B = te.placeholder(shape[-1:], dtype="float32", name="B")
+    C = te.placeholder(shape[-1:], dtype="float32", name="C")
+
+    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
@@ -294,7 +301,7 @@ def perf_layernorm(name, file, shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B):
+    def test_activation(A, B, C, D):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -305,28 +312,33 @@ def perf_layernorm(name, file, shape):
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        Dptr = ib.buffer_ptr(D)
+
         with ib.for_range(0, n, name="i") as i:
-            Bptr[i] = Aptr[i]
+            Dptr[i] = Aptr[i] + Bptr[i] + Cptr[i]
         body = ib.get()
         return body
 
-    B = te.extern(
+    D = te.extern(
         A.shape,
-        [A],
-        lambda ins, outs: test_activation(ins[0], outs[0]),
+        [A, B, C],
+        lambda ins, outs: test_activation(ins[0], ins[1], ins[2], outs[0]),
         name=op_name,
         dtype="float32",
     )
     with tvm.target.Target("cuda"):
-        s = te.create_schedule(B.op)
+        s = te.create_schedule(D.op)
 
     dev = tvm.cuda(0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = tvm.build(s, [A, B], "cuda", name=op_name)
-    f(a, b)
+    b = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
+    c = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
+    d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    f = tvm.build(s, [A, B, C, D], "cuda", name=op_name)
+    f(a, b, c, d)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b)
+    cost = time_f(a, b, c, d)
     print(f"{name} execution time: {cost.mean * 1000} ms")
     func_name = "tvm_callback_cuda_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
@@ -488,7 +500,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/mha*.cu")
+    files = glob.glob("./cuda_code_test/layernorm*.cu")
     counter = 0
 
     for file in files:
