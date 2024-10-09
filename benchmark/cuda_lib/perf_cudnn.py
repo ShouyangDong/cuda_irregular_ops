@@ -112,6 +112,28 @@ def perf_bmm(name, shape_A, shape_B):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
+def perf_activation(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    x = torch.randn(shape, device=device)
+    op_name = name.split("_")[0]
+
+    activation = torch.nn.ReLU()
+    if name == "sigmoid":
+        activation = torch.nn.Sigmoid()
+    elif name == "gelu":
+        activation = torch.nn.GELU()
+    elif name == "softmax":
+        activation = torch.nn.Softmax(dim=len(shape))
+
+    def test_activation():
+        output = activation(x)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_activation, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
     counter = 0
@@ -145,3 +167,8 @@ if __name__ == "__main__":
             shape_A = [shape[0], shape[1]]
             shape_B = [shape[1], shape[2]]
             perf_bmm(name, shape_A, shape_B)
+
+        if name in ["relu", "sigmoid", "gelu", "softmax"]:
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_activation(base_name, shape)
