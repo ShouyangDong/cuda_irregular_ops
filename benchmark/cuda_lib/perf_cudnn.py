@@ -139,7 +139,7 @@ def perf_conv2d_nchw(name, shape, kernel, stride):
     input_tensor = torch.randn(16, 3, 224, 224, device=device)
     # 定义卷积层
     conv_layer = torch.nn.Conv2d(
-        in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=1
+        in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=0
     ).to(device)
 
     def test_conv2d():
@@ -171,17 +171,38 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
 
+
 def perf_gemv(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
-    # 创建随机矩阵和向量 M, N = 1000, 1000 
-    matrix = torch.randn(shape, device=device) 
-    vector = torch.randn(shape[1], device=device) 
-    def test_gemv(): 
-        output = torch.matmul(matrix, vector) 
-        # 或者使用 matrix @ vector 
-        torch.cuda.synchronize() 
-    # 使用 timeit 进行多次测量，设置执行次数为 100 
-    execution_time = timeit.timeit(test_gemv, number=100) 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建随机矩阵和向量 M, N = 1000, 1000
+    matrix = torch.randn(shape, device=device)
+    vector = torch.randn(shape[1], device=device)
+
+    def test_gemv():
+        output = torch.matmul(matrix, vector)
+        # 或者使用 matrix @ vector
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_gemv, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+
+
+def perf_conv1d(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 创建输入张量
+    input_tensor = torch.randn(1, shape[1], device=device)
+    # 定义卷积层
+    conv_layer = torch.nn.Conv1d(
+        in_channels=1, out_channels=1, kernel_size=3, stride=1, padding=0
+    ).to(device)
+
+    def test_conv1d():
+        output = conv_layer(input_tensor)
+        torch.cuda.synchronize()
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_conv1d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
@@ -197,14 +218,14 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_elementwise(base_name, shape)
 
-        if name in ["avgpool", "maxpool", "minpool", "sumpool"]:
+        elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
             shape = base_name.split("_")[1:5]
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
             perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
 
-        if name == "bmm":
+        elif name == "bmm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
@@ -212,19 +233,19 @@ if __name__ == "__main__":
             shape_B = [batch_size, matrix_dim_j, matrix_dim_k]
             perf_bmm(name, shape_A, shape_B)
 
-        if name == "gemm":
+        elif name == "gemm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             shape_A = [shape[0], shape[1]]
             shape_B = [shape[1], shape[2]]
             perf_bmm(name, shape_A, shape_B)
 
-        if name in ["relu", "sigmoid", "gelu", "softmax"]:
+        elif name in ["relu", "sigmoid", "gelu", "softmax"]:
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_activation(base_name, shape)
 
-        if name == "conv2dnchw":
+        elif name == "conv2dnchw":
             data_shape = base_name.split("_")[1:5]
             data_shape = [int(intg) for intg in data_shape]
             kernel_shape = base_name.split("_")[5:9]
@@ -242,7 +263,12 @@ if __name__ == "__main__":
                 pad,
             )
 
-        if name == "gemv":
+        elif name == "gemv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_gemv(base_name, shape)
+
+        elif name == "conv1d":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_conv1d(base_name, shape)
