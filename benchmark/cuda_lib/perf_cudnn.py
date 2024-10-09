@@ -171,6 +171,19 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
 
+def perf_gemv(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
+    # 创建随机矩阵和向量 M, N = 1000, 1000 
+    matrix = torch.randn(shape, device=device) 
+    vector = torch.randn(shape[1], device=device) 
+    def test_gemv(): 
+        output = torch.matmul(matrix, vector) 
+        # 或者使用 matrix @ vector 
+        torch.cuda.synchronize() 
+    # 使用 timeit 进行多次测量，设置执行次数为 100 
+    execution_time = timeit.timeit(test_gemv, number=100) 
+    print(f"{name} execution time: {execution_time * 10} ms")
+
 
 if __name__ == "__main__":
     files = glob.glob("./cuda_code_test/*.cu")
@@ -228,3 +241,8 @@ if __name__ == "__main__":
                 stride_h,
                 pad,
             )
+
+        if name == "gemv":
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_gemv(base_name, shape)
