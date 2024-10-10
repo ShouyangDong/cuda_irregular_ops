@@ -347,7 +347,7 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B, C):
+    def test_gemv(A, B, C):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -368,7 +368,7 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     C = te.extern(
         output_shape,
         [A, B],
-        lambda ins, outs: test_activation(ins[0], ins[1], outs[0]),
+        lambda ins, outs: test_gemv(ins[0], ins[1], outs[0]),
         name=op_name,
         dtype="float32",
     )
@@ -405,7 +405,7 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B, C):
+    def test_conv1d(A, B, C):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -426,7 +426,7 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     C = te.extern(
         output_shape,
         [A, B],
-        lambda ins, outs: test_activation(ins[0], ins[1], outs[0]),
+        lambda ins, outs: test_conv1d(ins[0], ins[1], outs[0]),
         name=op_name,
         dtype="float32",
     )
@@ -463,7 +463,7 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B, C):
+    def test_depthwise_conv2d(A, B, C):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -484,7 +484,7 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     C = te.extern(
         output_shape,
         [A, B],
-        lambda ins, outs: test_activation(ins[0], ins[1], outs[0]),
+        lambda ins, outs: test_depthwise_conv2d(ins[0], ins[1], outs[0]),
         name=op_name,
         dtype="float32",
     )
@@ -523,7 +523,7 @@ def perf_layernorm(name, file, shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B, C, D):
+    def test_layernorm(A, B, C, D):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -545,7 +545,7 @@ def perf_layernorm(name, file, shape):
     D = te.extern(
         A.shape,
         [A, B, C],
-        lambda ins, outs: test_activation(ins[0], ins[1], ins[2], outs[0]),
+        lambda ins, outs: test_layernorm(ins[0], ins[1], ins[2], outs[0]),
         name=op_name,
         dtype="float32",
     )
@@ -578,7 +578,7 @@ def perf_rmsnorm(name, file, shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B):
+    def test_rmsnorm(A, B):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -597,7 +597,7 @@ def perf_rmsnorm(name, file, shape):
     B = te.extern(
         A.shape,
         [A],
-        lambda ins, outs: test_activation(ins[0], outs[0]),
+        lambda ins, outs: test_rmsnorm(ins[0], outs[0]),
         name=op_name,
         dtype="float32",
     )
@@ -648,7 +648,7 @@ def perf_deformable(name, file, shape):
         code = 'extern "C" ' + code
         return code
 
-    def test_activation(A, B, C, D, E):
+    def test_deformable(A, B, C, D, E):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -670,7 +670,7 @@ def perf_deformable(name, file, shape):
     out_D = te.extern(
         output_shape,
         [A, shape_pl, B, C],
-        lambda ins, outs: test_activation(ins[0], ins[1], ins[2], ins[3], outs[0]),
+        lambda ins, outs: test_deformable(ins[0], ins[1], ins[2], ins[3], outs[0]),
         name=op_name,
         dtype="float32",
     )
