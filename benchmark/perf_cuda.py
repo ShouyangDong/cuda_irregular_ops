@@ -346,22 +346,62 @@ def perf_gemv(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
-def perf_conv1d(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建输入张量
-    input_tensor = torch.randn(1, shape[1], device=device)
-    # 定义卷积层
-    conv_layer = torch.nn.Conv1d(
-        in_channels=1, out_channels=1, kernel_size=3, stride=1, padding=0
-    ).to(device)
+def perf_conv1d(name, file, shape, kernel_shape, output_shape):
+    op_name = name.split("_")[0]
+    A = te.placeholder(shape, dtype="float32", name="A")
+    B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    def test_conv1d():
-        output = conv_layer(input_tensor)
-        torch.cuda.synchronize()
+    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_conv1d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
+
+    def test_activation(A, B, C):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+
+        with ib.for_range(0, n, name="i") as i:
+            Cptr[i] = Aptr[i] + Bptr[i]
+        body = ib.get()
+        return body
+
+    C = te.extern(
+        output_shape,
+        [A, B],
+        lambda ins, outs: test_activation(ins[0], ins[1], outs[0]),
+        name=op_name,
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(C.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
+    c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
+    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f(a, b, c)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b, c)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
@@ -640,7 +680,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/depthwiseconv*.cu")
+    files = glob.glob("./cuda_code_test/conv1d*.cu")
     counter = 0
 
     for file in files:
@@ -727,7 +767,10 @@ if __name__ == "__main__":
         elif name == "conv1d":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_conv1d(base_name, shape)
+            shape = [shape[1]]
+            kernel_shape = [3]
+            output_shape = [shape[0]]
+            perf_conv1d(base_name, file, shape, kernel_shape, output_shape)
 
         elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
