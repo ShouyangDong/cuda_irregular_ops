@@ -1,11 +1,11 @@
 import glob
 import os
 import tvm
-import timeit
 from tvm import te, topi
 import tvm.topi.testing
 import numpy as np
 from tvm.topi.utils import get_const_tuple
+import torch
 
 
 def perf_elementwise(name, file, shape):
@@ -616,39 +616,80 @@ def perf_rmsnorm(name, file, shape):
     tvm._ffi.registry.remove_global_func(func_name)
 
 
-def perf_deformable(name, shape):
+def perf_deformable(name, file, shape):
+    op_name = "cuda_deformable_attention"
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
-        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long, device=device
+        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
     )
     level_start_index = torch.cat(
         (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
-    ).cuda()
+    )
     S = sum([(H * W).item() for H, W in shapes])
 
-    value = torch.rand(N, S, M, D, device=device) * 0.01
-    sampling_locations = torch.rand(N, Lq, M, L, P, 2, device=device)
-    attention_weights = torch.rand(N, Lq, M, L, P, device=device) + 1e-5
-    attention_weights /= (
-        attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True).cuda()
+    A = te.placeholder([N, S, M, D], dtype="float32", name="A")
+    B = te.placeholder([N, Lq, M, L, P, 2], dtype="float32", name="B")
+    C = te.placeholder([N, Lq, M, L, P], dtype="float32", name="C")
+    shape_pl = te.placeholder([4, 2], dtype="int32", name="shape")
+    output_shape = [N, Lq, M * D]
+
+    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    shape_buffer = tvm.tir.decl_buffer(shape_pl.shape, "int32", "A_buf")
+    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
+
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
+
+    def test_activation(A, B, C, D, E):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        Dptr = ib.buffer_ptr(D)
+
+        with ib.for_range(0, n, name="i") as i:
+            Dptr[i] = Aptr[i] + Bptr[i] + Cptr[i]
+        body = ib.get()
+        return body
+
+    out_D = te.extern(
+        output_shape,
+        [A, shape_pl, B, C],
+        lambda ins, outs: test_activation(ins[0], ins[1], ins[2], ins[3], outs[0]),
+        name=op_name,
+        dtype="float32",
     )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(out_D.op)
 
-    def test_deformable():
-        MSDA.ms_deform_attn_forward(
-            value_pt,
-            shapes_pt,
-            value_level_start_index_pt,
-            sampling_locations_pt,
-            attention_weights_pt,
-            64,
-        )
-        # necessary because kernel launches are async
-        torch.cuda.synchronize()
-
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_deformable, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(N, S, M, D).astype("float32"), dev)
+    b = tvm.nd.array(np.random.rand(4, 2).astype("int32"), dev)
+    c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
+    d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
+    e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
+    f = tvm.build(s, [A, shape_pl, B, C, out_D], "cuda", name=op_name)
+    f(a, b, c, d, e)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b, c, d, e)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_scaled_dot_product_attention(name, file, shape):
@@ -722,7 +763,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/gemv*.cu")
+    files = glob.glob("./cuda_code_test/deformable*.cu")
     counter = 0
 
     for file in files:
@@ -839,11 +880,9 @@ if __name__ == "__main__":
             perf_rmsnorm(base_name, file, shape)
 
         elif name == "deformable":
-            # shapes = base_name.split(".")[0]
-            # shape = [int(intg) for intg in shapes.split("_")[1:]]
-            # perf_deformable(base_name, shape)
-            # FIXME: incompatible pytorch version with RMSNorm
-            continue
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_deformable(base_name, file, shape)
 
         elif name == "mha":
             shapes = base_name.split(".")[0]
