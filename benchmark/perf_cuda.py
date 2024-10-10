@@ -364,22 +364,62 @@ def perf_conv1d(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
 
 
-def perf_depthwise_conv2d(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建输入张量
-    input_tensor = torch.randn(16, 3, 224, 224, device=device)
-    # 定义深度卷积层
-    depthwise_conv_layer = torch.nn.Conv2d(
-        in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1, groups=3
-    ).to(device)
+def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
+    op_name = "depthwise_convolution"
+    A = te.placeholder(shape, dtype="float32", name="A")
+    B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    def test_depthwise_conv2d():
-        output = depthwise_conv_layer(input_tensor)
-        torch.cuda.synchronize()
+    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
+
+    def test_activation(A, B, C):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        ib.scope_attr(tx, "thread_extent", 1024)
+        ib.scope_attr(bx, "thread_extent", 256)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+
+        with ib.for_range(0, n, name="i") as i:
+            Cptr[i] = Aptr[i] + Bptr[i]
+        body = ib.get()
+        return body
+
+    C = te.extern(
+        output_shape,
+        [A, B],
+        lambda ins, outs: test_activation(ins[0], ins[1], outs[0]),
+        name=op_name,
+        dtype="float32",
+    )
+    with tvm.target.Target("cuda"):
+        s = te.create_schedule(C.op)
+
+    dev = tvm.cuda(0)
+    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
+    c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
+    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f(a, b, c)
+    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
+    cost = time_f(a, b, c)
+    print(f"{name} execution time: {cost.mean * 1000} ms")
+    func_name = "tvm_callback_cuda_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_layernorm(name, file, shape):
@@ -600,7 +640,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob("./cuda_code_test/conv2d*.cu")
+    files = glob.glob("./cuda_code_test/depthwiseconv*.cu")
     counter = 0
 
     for file in files:
@@ -689,11 +729,17 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_conv1d(base_name, shape)
 
-        elif name == "depthwiseconv_1":
+        elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
-            perf_depthwise_conv2d(base_name, shape)
+            shape = [input_height, input_height, input_channels]
+            kernel_shape = [kernel_size, kernel_size, input_channels]
+            # Calculate the output tensor shape
+            output_height = input_height - kernel_size + 1
+            output_width = input_height - kernel_size + 1
+            output_shape = [output_height, output_width, input_channels]
+            perf_depthwise_conv2d(base_name, file, shape, kernel_shape, output_shape)
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
