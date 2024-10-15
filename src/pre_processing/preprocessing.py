@@ -2,10 +2,10 @@
 import openai
 
 from src.pre_processing.preprocessing_prompt import *
-
+from src.prompt.prompt import SYSTEM_PROMPT, APPLY_OPT_PROMPT
 
 OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
-openai.api_key = """ OPENAI API KEY """
+openai.api_key = """gpt-3.5-turbo"""
 
 
 def pre_processing_pipeline(func_content, target):
@@ -21,8 +21,15 @@ def pre_processing_pipeline(func_content, target):
             if trans != "DETENSORIZATION"
             else f"{trans}_PROMPT"
         )
+        demo_name = f"{trans}_DEMO_{target}"
         prompt_content = globals()[prompt_name]
-        TRANS_DESCRIPTION += prompt_content
+        PRAGMA_DEMO_COMPLETE = globals()[prompt_name]
+        _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
+        _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", trans)
+        _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
+
+        STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
+        print(STAGE_OPT_PROMPT_COMPLETE)
     return TRANS_DESCRIPTION
 
 
