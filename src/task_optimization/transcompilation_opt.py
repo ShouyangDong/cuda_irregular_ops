@@ -4,14 +4,7 @@ opt_options = [
     "LOOP_FUSION",
     "LOOP_REORDER",
     "LOOP_SPLIT",
-    "LOOP_RECOVERY",
-    "THREAD_BINDING",
     "TENSOR_COMTRACTION",
-    "CACHE_READ",
-    "CACHE_WRITE",
-    "TENSORIZATION",
-    "DETENSORIZATION",
-    "DOUBLE_BUFFER",
 ]
 
 

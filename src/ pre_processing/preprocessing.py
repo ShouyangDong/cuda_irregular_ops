@@ -1,4 +1,3 @@
-import os
 import re
 import time
 import openai
@@ -10,16 +9,16 @@ from prompt.prompt import (
     TASK_PIPELINE_STRATEGY_PROMPT_4,
 )
 
+
+OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
 root_path = "./"
 benchmark_dir = "./benchmark"
 pipeline_log_path = "./log/pipeline"
 
 openai.api_key = """ OPENAI API KEY """
-os.environ["HTTP_PROXY"] = "http://127.0.0.1:33210"
-os.environ["HTTPS_PROXY"] = "http://127.0.0.1:33210"
 
 # split the whole code
-def gen_task_pipeline_prompt(algo_name, func_description):
+def gen_task_pipeline_prompt(func_description):
     _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
     _SYSTEM_PROMPT = _SYSTEM_PROMPT.replace("{FUNCTION_DESCRIPTION}", func_description)
 
@@ -36,7 +35,7 @@ def gen_task_pipeline_prompt(algo_name, func_description):
 
 
 # split sub function in the code
-def gen_sub_task_pipeline_prompt(algo_name, func_description, func_content):
+def gen_sub_task_pipeline_prompt(func_description, func_content):
     _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
     _SYSTEM_PROMPT = _SYSTEM_PROMPT.replace("{FUNCTION_DESCRIPTION}", func_description)
 
@@ -51,7 +50,7 @@ def gen_sub_task_pipeline_prompt(algo_name, func_description, func_content):
 
 
 def extract_content_and_save(
-    chat_completion, prompt_content, model_name, algo_name, sub_func=False
+    chat_completion, prompt_content, model_name, sub_func=False
 ):
     if model_name in ["gpt-4-1106-preview", "gpt-4"]:
         model_name = "gpt4"
@@ -81,8 +80,8 @@ def extract_content_and_save(
             code_file.write(code_content)
 
 
-def run_task_pipeline(algo_name, func_description):
-    prompt = gen_task_pipeline_prompt(algo_name, func_description)
+def run_task_pipeline(func_description):
+    prompt = gen_task_pipeline_prompt(func_description)
     model_name = "gpt-4-1106-preview"
     task_pipeline_completion = openai.ChatCompletion.create(
         model=model_name, messages=[{"role": "user", "content": prompt}]
@@ -91,72 +90,29 @@ def run_task_pipeline(algo_name, func_description):
     extract_content_and_save(task_pipeline_completion, prompt, model_name, algo_name)
 
 
-def run_sub_task_pipeline(algo_name, func_description, func_content):
-    prompt = gen_sub_task_pipeline_prompt(algo_name, func_description, func_content)
+def run_sub_task_pipeline(func_description, func_content):
+    prompt = gen_sub_task_pipeline_prompt(func_description, func_content)
     model_name = "gpt-4-1106-preview"
     sub_task_pipeline_completion = openai.ChatCompletion.create(
         model=model_name, messages=[{"role": "user", "content": prompt}]
     )
     print(sub_task_pipeline_completion)
     extract_content_and_save(
-        sub_task_pipeline_completion, prompt, model_name, algo_name, sub_func=True
+        sub_task_pipeline_completion, prompt, model_name, sub_func=True
     )
 
-
-def connection_test():
-    prompt = "hello"
-    model_name = "gpt-4-1106-preview"
-    test_completion = openai.ChatCompletion.create(
-        model=model_name, messages=[{"role": "user", "content": prompt}]
-    )
-    print(test_completion)
-
-
-algo_name_list = [
-    "bfs",
-    "cc",
-    "dft",
-    "fft",
-    "fir",
-    "histogram",
-    "huffman",
-    "insert_sort",
-    "matrix_multiplication",
-    "merge_sort",
-    "pagerank",
-    "prefix_sum",
-    "spmv",
-    "sssp",
-]
-# gen_task_pipeline_prompt("pagerank", "pagerank algorithm")
 
 if __name__ == "__main__":
-    algo_name = "bfs"
-    func_description = "bfs algorithm"
     func_content = """
-void explore_neighbors(const int *rpao, const int *ciao, int *labels, int *queue, int &front, int &rear) {
-    if (front == -1) {
-        return; // No more vertices to process
-    }
-    int cur_idx = queue[front++];
-
-#pragma HLS PIPELINE II=1
-    int start = rpao[cur_idx];
-    int end   = rpao[cur_idx + 1];
-
-    for (int j = start; j < end; ++j) {
-#pragma HLS LOOP_FLATTEN off
-#pragma HLS PIPELINE II=1
-        int ngb_idx = ciao[j];
-        if (labels[ngb_idx] == -1) {
-            labels[ngb_idx] = labels[cur_idx];
-            queue[rear++] = ngb_idx;
-        }
-    }
-
-    if (front == rear) {
-        front = -1; // Completed processing current component
-    }
-}
-"""
-    run_task_pipeline(algo_name, func_description)
+        extern "C" __mlu_global__ void tanh_kernel0(float* input0, float* active_tanh_210) {
+                __nram__ float input0_local_nram[640];
+                for (int clusterId = 0; clusterId < 4; clusterId++) {
+                    for (int coreId = 0; coreId < 4; coreId++) {
+                    __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
+                    __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
+                    __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
+                    }
+                }
+            }
+    """
+    run_task_pipeline(func_content)
