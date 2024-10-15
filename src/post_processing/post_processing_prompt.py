@@ -12,6 +12,7 @@ Application Scenario:
 reused frequently within a thread block, `CACHE_READ` optimizes the data fetching from global 
 memory to shared memory or registers.
 """
+
 CACHE_READ_DEMO = """
 Usage Examples:
 
@@ -47,9 +48,20 @@ extern "C" void abs_kernel(float *A, float *B, float *C) {
 }
 ```
 """
-CACHE_WRITE_PROMPT = """
 
+CACHE_WRITE_PROMPT = """
+cache write
+
+Function Overview:
+`CACHE_WRITE` is an optimization technique that allows data to be written directly to a cache, 
+ensuring faster access during future computations and reducing the overhead of writing to slower main memory. 
+By buffering writes in the cache, it improves memory locality, increases the overall performance of the program, 
+and minimizes memory bottlenecks. 
+
+Application Scenario:
+- Deep learning frameworks often perform multiple passes over large datasets. For operations such as backpropagation, `CACHE_WRITE` helps in caching gradients or intermediate results during training, thus speeding up the memory access and reducing the time spent writing to memory.
 """
+
 CACHE_WRITE_DEMO = """
 Usage Examples:
 input:
@@ -80,8 +92,19 @@ extern "C" void abs_kernel(float *A, float *B) {
     }
 }
 """
+
 TENSORIZATION_PROMPT = """
+Tensorization
+
+Function Overview:
+`TENSORIZATION` in the context of SIMD (Single Instruction, Multiple Data) is a technique that transforms scalar operations into vectorized operations to take advantage of the parallel processing capabilities of modern processors. By converting scalar computations (processing one element at a time) into tensorized or vectorized computations, SIMD instructions can process multiple data points simultaneously, improving throughput and reducing the overall computation time.
+
+Application Scenario:
+- Tensorization is widely used in deep learning frameworks to speed up matrix multiplications, convolutions, and other tensor operations by leveraging SIMD. For example, it can be used to vectorize the processing of large batches of input data, improving performance on CPUs, GPUs, and other accelerators.
+  
+- SIMD-based tensorization can be applied to common linear algebra kernels such as matrix-vector multiplications (GEMV), matrix-matrix multiplications (GEMM), and vector dot products. SIMD instructions accelerate these operations by processing multiple elements of vectors or matrices in parallel.
 """
+
 TENSORIZATION_DEMO = """
 Usage Examples:
 input:
@@ -95,10 +118,20 @@ output:
 __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
 """
 
-
 DOUBLE_BUFFER_PROMPT = """
+double buffering
+
+Function Overview:
+`DOUBLE_BUFFER` is a memory management and parallel processing technique designed to hide memory access latency by overlapping computation with data transfers. It utilizes two buffers, where one buffer is being read from or written to by the compute unit, while the other buffer is being populated with the next data to process. This ensures that the compute unit is never idle, leading to higher throughput and more efficient usage of hardware resources. 
+
+Application Scenario:
+- In deep learning processors and GPUs, where large datasets need to be streamed to and from the compute units, 
+`DOUBLE_BUFFER` ensures that data movement does not stall computation. 
+For example, while one batch of input data is being processed, the next batch can be loaded into memory.
 """
+
 DOUBLE_BUFFER_DEMO = """
+Usage Examples:
 input
 ```
 __mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {

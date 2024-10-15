@@ -20,6 +20,7 @@ OPT_LIST = [
 
 openai.api_key = """ OPENAI API KEY """
 
+
 # split the whole code
 def gen_task_pipeline_prompt(func_description):
     _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
@@ -125,6 +126,7 @@ if __name__ == "__main__":
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
                 for (int k = 0; k < dim3; k++) {
+                    #pragma operation(add)
                     for (int l = 0; l < dim4; l++) {
                         int index = i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l;
                         output[index] = input1[index] + input2[index];

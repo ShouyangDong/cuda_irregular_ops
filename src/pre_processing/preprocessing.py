@@ -17,6 +17,7 @@ pipeline_log_path = "./log/pipeline"
 
 openai.api_key = """ OPENAI API KEY """
 
+
 # split the whole code
 def gen_task_pipeline_prompt(func_description):
     _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
