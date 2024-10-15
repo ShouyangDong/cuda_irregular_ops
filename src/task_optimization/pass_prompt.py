@@ -15,7 +15,7 @@ Application Scenario:
 LOOP_FUSION_DEMO = """
 Usage Examples:
 
-Input:
+// before:
 ```cpp
 for (int i = 0; i < 300; i++) {
     for (int j = 0; j < 300; j++)
@@ -23,7 +23,7 @@ for (int i = 0; i < 300; i++) {
     }
 }
 
-Output:
+// after:
 ```cpp
 for (int i_fuse = 0; i_fuse < 300 * 300; i_fuse++) {
     a[i_fuse] = b[i_fuse] + 4;
@@ -49,7 +49,7 @@ reducing memory latency.
 LOOP_REORDER_DEMO = """
 Usage Examples:
 
-Input:
+// before:
 ```cpp
 for (int i = 0; i < N; i++) { 
     for (int j = 0; j < N; j++) { 
@@ -57,7 +57,7 @@ for (int i = 0; i < N; i++) {
     }
 }
 
-Output:
+// after:
 ```cpp
 for (int j = 0; j < N; j++) { 
     for (int i = 0; i < N; i++) { 
@@ -91,7 +91,7 @@ for (int i = 0; i < N; i++) {
 }
 ```
 
-output:
+// after:
 ```cpp
 int tile_size = 64;
 for (int t = 0; t < N; t += tile_size) {

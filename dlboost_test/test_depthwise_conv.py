@@ -36,7 +36,7 @@ def depthwise_conv2d(input, w):
     Uses SAME padding with 0s, a stride of 1 and no dilation. A single output
     channel is used per input channel (channel_multiplier=1).
 
-    input: input array with shape (height, width, in_depth)
+    // before: input array with shape (height, width, in_depth)
     w: filter array with shape (fd, fd, in_depth)
 
     Returns a result with shape (height, width, in_depth).

@@ -5,8 +5,8 @@ from src.pre_processing.preprocessing_prompt import *
 from src.prompt.prompt import SYSTEM_PROMPT, APPLY_OPT_PROMPT
 
 OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
-openai.api_key = """gpt-3.5-turbo"""
-
+model_name = """gpt-3.5-turbo"""
+openai.api_key = """ OPENAI API KEY """
 
 def pre_processing_pipeline(func_content, target):
     """This function transforms the given code by performing two main transformations:

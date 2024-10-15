@@ -16,10 +16,13 @@ Application Scenario:
 
 DETENSORIZATION_DEMO = """
 exmaple 1:
+
+// before:
 ```
 __memcpy((float *)input0_local_nram + (0), (float *)input0 + (((clusterId * 256) + (coreId * 64))), 64, GDRAM2NRAM);
 ```
-converted to:
+
+// after:
 ```
 for (int i = 0; i < 64/sizeof(float); i++) {
     input0_local_nram[i] = input0[(((clusterId * 256) + (coreId * 64))) + i];
@@ -32,13 +35,13 @@ LOOP_RECOVERY_PROMPT_CUDA = """
 
 LOOP_RECOVERY_DEMO_CUDA = """
 Example 1:
-input:
+// before:
 ```
 extern "C" __global__ void __launch_bounds__(640) sign_kernel(float* __restrict__ A, float* __restrict__ T_sign) {
     T_sign[((int)threadIdx.x)] = ((0.000000e+00f < A[((int)threadIdx.x)]) ? 1.000000e+00f : ((A[((int)threadIdx.x)] < 0.000000e+00f) ? -1.000000e+00f : 0.000000e+00f));
 }
 ```
-output:
+// after:
 ```
 extern "C" void sign_kernel(float* A, float* T_sign) {
 for (int threadIdx.x = 0; threadIdx.x < 640; threadIdx.x++) {
@@ -47,7 +50,7 @@ for (int threadIdx.x = 0; threadIdx.x < 640; threadIdx.x++) {
 }
 ```
 Example 2:
-input:
+// before:
 ```
 extern "C" __global__ void __launch_bounds__(1024) add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
     if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
@@ -55,7 +58,7 @@ extern "C" __global__ void __launch_bounds__(1024) add_kernel(float* __restrict_
     }
 }
 ```
-output:
+// after:
 ```
 extern "C" void add_kernel(float* A, float* B, float* T_add) {
     for (int blockIdx.x = 0; blockIdx.x < 32; blockIdx.x++) {
@@ -73,13 +76,13 @@ LOOP_RECOVERY_PROMPT_BANG = """
 
 
 LOOP_RECOVERY_DEMO_BANG = """
-input:
+// before:
 ```
 for (int i = 0; i < 64; i++) {
     output[coreId * 64 + i] += A[coreId * 64 + i] * 2;
 }
 ```
-output:
+// after:
 ```
 for (int coreId = 0; coreId < 4; coreId++) {
     for (int i = 0; i < 64; i++) {

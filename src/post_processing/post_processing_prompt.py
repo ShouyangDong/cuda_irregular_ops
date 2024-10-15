@@ -17,7 +17,7 @@ CACHE_READ_DEMO = """
 Usage Examples:
 
 ```cpp
-input: 
+// before: 
 ```
 extern "C" void abs_kernel(float *A, float *B, float *C) {
     for (int i = 0; i < 512; ++i) {
@@ -29,7 +29,7 @@ extern "C" void abs_kernel(float *A, float *B, float *C) {
 ```
 buffer region: A
 scope: NRAM
-output:
+// after:
 
 ```
 extern "C" void abs_kernel(float *A, float *B, float *C) {
@@ -64,7 +64,7 @@ Application Scenario:
 
 CACHE_WRITE_DEMO = """
 Usage Examples:
-input:
+// before:
 extern "C" void abs_kernel(float *A, float *B) {
     for (int i = 0; i < 512; ++i) {
         for (int j = 0; j < 512; ++j) {
@@ -76,7 +76,7 @@ extern "C" void abs_kernel(float *A, float *B) {
 buffer region: B
 scope: NRAM
 
-output:
+// after:
 extern "C" void abs_kernel(float *A, float *B) {
     __nram__ float B[512 * 512];
     for (int i = 0; i < 512; ++i) {
@@ -107,14 +107,14 @@ Application Scenario:
 
 TENSORIZATION_DEMO = """
 Usage Examples:
-input:
+// before:
 for (int i = 0; i < 512; ++i) {
     for (int j = 0; j < 512; ++j) {
         output[i * 512 + j] = output_nram[i * 512 + j];
     }
 }
 
-output: 
+// after: 
 __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
 """
 

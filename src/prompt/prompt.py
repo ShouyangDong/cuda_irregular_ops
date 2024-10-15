@@ -9,7 +9,8 @@ and hardware-specific parallelization strategies like tiling and pipelining.
 # apply optimization to the stage code according to the opt list
 APPLY_OPT_PROMPT = \
 """
-In code transformation, code optimization can be achieved by adding various types of compilation directive (pragmas). The following code is one stage of the whole algorithm: 
+In code transformation, code optimization can be achieved by adding various types of compilation directive (pragmas). 
+The following code is one stage of the whole algorithm: 
 {STAGE_CODE_CONTENT}
 Please apply the following optimization pragma to the above code: 
 {OPT_LIST}
