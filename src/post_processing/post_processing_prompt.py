@@ -99,4 +99,52 @@ __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
 DOUBLE_BUFFER_PROMPT = """
 """
 DOUBLE_BUFFER_DEMO = """
+input
+```
+__mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
+    __nram__ float INPUT0_N[64];
+    __nram__ float INPUT1_N[64];
+    __nram__ float OUTPUT_N[64];
+    for (int i = 0; i < 2048; ++i) {
+        __memcpy(INPUT0_N, INPUT0 + (i * 64), 256, GDRAM2NRAM);
+        __memcpy(INPUT1_N, INPUT1 + (i * 64), 256, GDRAM2NRAM);
+        __bang_add(OUTPUT_N, INPUT0_N , INPUT1_N, 64);
+        __memcpy(OUTPUT + (i * 64), OUTPUT_N, 256, NRAM2GDRAM);
+    }
+}
+```
+
+output
+```
+__mlu_entry__ void fvec_add_double_buffering_kernel0(float* INPUT0, float* INPUT1, float*OUTPUT) {
+    __nram__ float INPUT0_N[128];
+    __nram__ float INPUT1_N[128];
+    __nram__ float OUTPUT_N[128];
+    __memcpy_async(INPUT0_N, INPUT0, 256, GDRAM2NRAM);
+    __asm__ volatile("sync;");
+    __memcpy_async(INPUT1_N, INPUT1, 256, GDRAM2NRAM);
+    __asm__ volatile("sync;");
+    __memcpy_async(INPUT0_N + 64, INPUT0 + 64, 256, GDRAM2NRAM);
+    __memcpy_async(INPUT1_N + 64, INPUT1 + 64, 256, GDRAM2NRAM);
+    __bang_add(OUTPUT_N, INPUT0_N, INPUT1_N, 64);
+    __asm__ volatile("sync;");
+    for (int i_outer = 0; i_outer < 1023; ++i_outer) {
+        __memcpy_async(INPUT0_N, INPUT0 + ((i_outer * 128) + 128), 256,GDRAM2NRAM);
+        __memcpy_async(INPUT1_N, INPUT1 + ((i_outer * 128) + 128), 256,GDRAM2NRAM);
+        __bang_add(OUTPUT_N + 64, INPUT0_N + 64, INPUT1_N + 64, 64);
+        __memcpy_async(OUTPUT + (i_outer * 128), OUTPUT_N, 256,NRAM2GDRAM);
+        __asm__ volatile("sync;");
+        __memcpy_async(INPUT0_N + 64, INPUT0 + ((i_outer * 128) + 192),256, GDRAM2NRAM);
+        __memcpy_async(INPUT1_N + 64, INPUT1 + ((i_outer * 128) + 192),256, GDRAM2NRAM);
+        __bang_add(OUTPUT_N, INPUT0_N, INPUT1_N,64);
+        __memcpy_async(OUTPUT + ((i_outer * 128) + 64), OUTPUT_N + 64, 256,NRAM2GDRAM);
+        __asm__ volatile("sync;");
+    }
+        
+    __bang_add(OUTPUT_N + 64, INPUT0_N + 64, INPUT1_N + 64,64);
+    __memcpy_async(OUTPUT + 130944, OUTPUT_N, 256, NRAM2GDRAM);
+    __asm__ volatile("sync;");
+    __memcpy_async(OUTPUT + 131008, OUTPUT_N + 64, 256, NRAM2GDRAM);
+    __asm__ volatile("sync;");}
+```
 """

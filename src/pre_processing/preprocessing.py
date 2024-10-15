@@ -104,15 +104,15 @@ def run_sub_task_pipeline(func_description, func_content):
 
 if __name__ == "__main__":
     func_content = """
-        extern "C" __mlu_global__ void tanh_kernel0(float* input0, float* active_tanh_210) {
-                __nram__ float input0_local_nram[640];
-                for (int clusterId = 0; clusterId < 4; clusterId++) {
-                    for (int coreId = 0; coreId < 4; coreId++) {
-                    __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
-                    __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
-                    __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
-                    }
+    extern "C" __mlu_global__ void tanh_kernel0(float* input0, float* active_tanh_210) {
+            __nram__ float input0_local_nram[640];
+            for (int clusterId = 0; clusterId < 4; clusterId++) {
+                for (int coreId = 0; coreId < 4; coreId++) {
+                __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
+                __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
+                __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
                 }
             }
+        }
     """
     run_task_pipeline(func_content)

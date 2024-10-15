@@ -17,9 +17,6 @@ OPT_LIST = [
     "TENSORIZATION",
     "DOUBLE_BUFFER",
 ]
-root_path = "./"
-benchmark_dir = "./benchmark"
-pipeline_log_path = "./log/pipeline"
 
 openai.api_key = """ OPENAI API KEY """
 
