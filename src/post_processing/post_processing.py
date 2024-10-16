@@ -57,6 +57,7 @@ def run_code_transformation(code, pass_name, target):
             code = run_code_transformation(code, pass_name, target)
         return code
 
+
     PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
     _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
     _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
@@ -68,6 +69,7 @@ def run_code_transformation(code, pass_name, target):
         model=model_name,
         messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
+
     content = transformation_completion.choices[0].message["content"]
     match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
     print("[INFO]*********transformation: ", match)
@@ -79,6 +81,7 @@ def post_processing_pipeline(func_content, target):
         1. Convert parallel loop variables (e.g., OpenMP, CUDA) into standard C for loops.
         2. Convert SIMD tensor operations into scalar for-loop based calculations.
     :param func_content: The content of the function (code) to be transformed.
+
     :return: Transformed code after applying the two transformations."""
     for i, trans in enumerate(OPT_PROCESSURE):
         # First analysis the code, and insert corresponding tensorize pragma
