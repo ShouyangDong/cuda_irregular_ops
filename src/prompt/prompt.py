@@ -7,8 +7,7 @@ and hardware-specific parallelization strategies like tiling and pipelining.
 
 
 # select suitable opt option from the pragma list
-PRAGMA_INSERT_PROMPT = \
-"""
+PRAGMA_INSERT_PROMPT = """
 In code transformation, code transformation can be achieved by adding various types of compilation directive (pragmas). 
 Different pragmas are suitable for different scenarios and cannot be applied arbitrarily. 
 The following are some function introductions and applicable scenarios of pragmas: 
@@ -19,8 +18,7 @@ You only need to insert a pragma above the code block, without providing the opt
 """
 
 # apply optimization to the stage code according to the opt list
-APPLY_OPT_PROMPT = \
-"""
+APPLY_OPT_PROMPT = """
 In code transformation, code optimization can be achieved by adding various types of compilation directive (pragmas). 
 The following code is one stage of the whole algorithm: 
 {STAGE_CODE_CONTENT}

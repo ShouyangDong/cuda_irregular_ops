@@ -11,7 +11,7 @@ Application Scenario:
 
 - SIMD instructions can sometimes obscure the logic of a program, making it harder to track down bugs. Converting SIMD operations into scalar loops via `DETENSORIZE` can improve readability and facilitate testing.
 
-- **Performance Tuning on Non-SIMD Hardware**: In cases where SIMD operations do not provide a significant performance benefit or where the cost of managing vectorization is too high, `DETENSORIZE` can be used to simplify and optimize performance for scalar-based execution units.
+- In cases where SIMD operations do not provide a significant performance benefit or where the cost of managing vectorization is too high, `DETENSORIZE` can be used to simplify and optimize performance for scalar-based execution units.
 """
 
 DETENSORIZATION_DEMO_BANG = """
