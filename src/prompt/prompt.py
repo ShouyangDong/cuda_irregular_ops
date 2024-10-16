@@ -8,14 +8,20 @@ and hardware-specific parallelization strategies like tiling and pipelining.
 
 # select suitable opt option from the pragma list
 PRAGMA_INSERT_PROMPT = """
-In code transformation, code transformation can be achieved by adding various types of compilation directive (pragmas). 
-Different pragmas are suitable for different scenarios and cannot be applied arbitrarily. 
-The following are some function introductions and applicable scenarios of pragmas: 
-{PRAGMA_DESCRIPTION}
-The following code is one stage of the tensor program. Please insert a pragma {PRAGMA_NAME} above the corresponding code block. 
-{STAGE_CODE_CONTENT}
-You only need to insert a pragma above the code block, without providing the optimized code. 
-"""
+In code transformation, pragmas are compiler directives that guide the optimization process. 
+Each pragma has specific scenarios and cannot be applied arbitrarily. 
+Here is the function description and the applicable scenarios for the pragma: 
+{PRAGMA_DESCRIPTION} 
+The following is one stage of the tensor program. Your task is to insert the pragma {PRAGMA_NAME} 
+**only** above the specific code block that it applies to. 
+Instructions: 
+- **Do not modify** the code in any other way. 
+- **Do not add pragmas** in inappropriate places or across the entire code. 
+- **Do not provide optimized code**, only insert the pragma above the corresponding code block. 
+- Ensure the pragma is correctly positioned to affect only the intended section of the code. 
+Here is the code where the pragma should be inserted: 
+{STAGE_CODE_CONTENT} 
+Please insert the pragma directly above the relevant code block, without changing the existing code content. """
 
 # apply optimization to the stage code according to the opt list
 APPLY_OPT_PROMPT = """

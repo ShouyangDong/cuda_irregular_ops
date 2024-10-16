@@ -1,7 +1,6 @@
 import re
 import openai
 
-from src.pre_processing.preprocessing_prompt import *
 from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
 OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
@@ -32,25 +31,27 @@ def run_code_analysis(code, pass_name, target):
         messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
     content = analysis_completion.choices[0].message["content"]
-    print("[INFO]*********final code: ", content)
-    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
 
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    print("[INFO]*********final code: ", content)
     return match
 
 
-def run_code_transformation(code, pass_name, pragma):
-    PRAGMA_DEMO_COMPLETE = globals()[pass_name]
+def run_code_transformation(code, pass_name, target):
+    PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
     _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
-    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", trans)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
     _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
 
     STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
+
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
-    content = chat_completion.choices[0].message["content"]
+    content = transformation_completion.choices[0].message["content"]
     match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    print("[INFO]*********transformation: ", match)
     return match
 
 
@@ -62,17 +63,11 @@ def pre_processing_pipeline(func_content, target):
     :return: Transformed code after applying the two transformations."""
     TRANS_DESCRIPTION = ""
     for i, trans in enumerate(OPT_LIST):
-        prompt_name = (
-            f"{trans}_PROMPT_{target}"
-            if trans != "DETENSORIZATION"
-            else f"{trans}_PROMPT"
-        )
-
         # First analysis the code, and insert corresponding pragma
-        pragma_code = run_code_analysis(func_content, trans, target)
-        # # Transform the code according to the pragma
-        # transform_code = run_code_transformation(pragma_code, trans, target)
-    return pragma_code
+        func_content = run_code_analysis(func_content, trans, target)
+        # Transform the code according to the pragma
+        func_content = run_code_transformation(func_content, trans, target)
+    return func_content
 
 
 if __name__ == "__main__":
