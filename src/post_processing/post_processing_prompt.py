@@ -181,3 +181,41 @@ __mlu_entry__ void fvec_add_double_buffering_kernel0(float* INPUT0, float* INPUT
     __asm__ volatile("sync;");}
 ```
 """
+
+THREAD_BINDING_PROMPT_BANG = """
+Thread binding
+
+Function Overview:
+`THREAD_BINDING` is a parallel computing optimization technique used to control the mapping of 
+threads to specific hardware resources, such as CPU cores or GPU execution units. 
+By binding or pinning threads to specific hardware threads or cores, 
+the technique leads to better cache locality, memory access patterns, and overall system performance.
+
+
+Application Scenario:
+- In scenarios where different cores are handling different tasks, binding threads to specific cores 
+  can minimize cache misses and maximize the usage of per-core resources. 
+  This is important in high-performance applications where CPU utilization 
+  needs to be balanced and consistent.
+  
+- Thread binding is crucial in GPU programming to control how threads are distributed across the 
+  various compute units (CUs) or streaming multiprocessors (SMs). 
+  This allows optimal utilization of shared memory, registers, and caches in GPU architectures,
+  ensuring efficient execution of parallel workloads.
+"""
+
+THREAD_BINDING_DEMO_BANG = """
+```cpp
+__kernel void matrix_mul(__global float* A, __global float* B, __global float* C, int N) {
+    int row = get_global_id(0); // Global thread index
+    int col = get_global_id(1);
+
+    float sum = 0.0f;
+    for (int i = 0; i < N; i++) {
+        sum += A[row * N + i] * B[i * N + col];
+    }
+    C[row * N + col] = sum;
+}
+}
+```
+"""

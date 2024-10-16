@@ -1,6 +1,7 @@
 import re
 import openai
 
+from src.pre_processing.preprocessing_prompt import *
 from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
 OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
@@ -61,7 +62,6 @@ def pre_processing_pipeline(func_content, target):
         2. Convert SIMD tensor operations into scalar for-loop based calculations.
     :param func_content: The content of the function (code) to be transformed.
     :return: Transformed code after applying the two transformations."""
-    TRANS_DESCRIPTION = ""
     for i, trans in enumerate(OPT_LIST):
         # First analysis the code, and insert corresponding pragma
         func_content = run_code_analysis(func_content, trans, target)

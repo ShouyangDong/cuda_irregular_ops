@@ -1,118 +1,85 @@
 import re
-import time
 import openai
 
-from prompt.prompt import (
-    SYSTEM_PROMPT,
-    TASK_PIPELINE_FOR_SINGLE_FUNCTION_PROMPT,
-    TASK_PIPELINE_PROMPT,
-    TASK_PIPELINE_STRATEGY_PROMPT_4,
-)
+from src.post_processing.post_processing_prompt import *
+from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
-
-OPT_LIST = [
-    "THREAD_BINDING",
+TENSORIZATION_OPT_LIST = [
     "CACHE_READ",
     "CACHE_WRITE",
+    "TENSORIZATION",
+]
+
+OPT_PROCESSURE = [
+    "THREAD_BINDING",
     "TENSORIZATION",
     "DOUBLE_BUFFER",
 ]
 
-openai.api_key = """ OPENAI API KEY """
+model_name = """gpt-3.5-turbo"""
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+openai.api_base = "https://api.keya.pw/v1"
+
+POST_PROCESSING_PRAGMA_HINTS = {
+    "THREAD_BINDING": "#pragma thread_bind({target})",
+    "TENSORIZATION": "#pragma",
+    "DOUBLE_BUFFER": "#pragma double_buffer({target})",
+}
 
 
-# split the whole code
-def gen_task_pipeline_prompt(func_description):
-    _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
-    _SYSTEM_PROMPT = _SYSTEM_PROMPT.replace("{FUNCTION_DESCRIPTION}", func_description)
-
-    code_path = f"{benchmark_dir}/{algo_name}/{algo_name}.cpp"
-    with open(code_path, "r") as code_file:
-        CODE = "\n" + code_file.read()
-
-    TASK_PIPELINE_PROMPT_COMPLETE = _SYSTEM_PROMPT + TASK_PIPELINE_PROMPT + CODE
-    TASK_PIPELINE_PROMPT_COMPLETE += (
-        TASK_PIPELINE_STRATEGY_PROMPT_4  # add strategy hint
+def run_code_analysis(code, pass_name, target):
+    PRAGMA_DESCRIPTION = globals()[pass_name + "_PROMPT_" + target]
+    _PRAGMA_INSERT_PROMPT = PRAGMA_INSERT_PROMPT.replace(
+        "{PRAGMA_DESCRIPTION}", PRAGMA_DESCRIPTION
     )
-    print(TASK_PIPELINE_PROMPT_COMPLETE)
-    return TASK_PIPELINE_PROMPT_COMPLETE
-
-
-# split sub function in the code
-def gen_sub_task_pipeline_prompt(func_description, func_content):
-    _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
-    _SYSTEM_PROMPT = _SYSTEM_PROMPT.replace("{FUNCTION_DESCRIPTION}", func_description)
-
-    TASK_PIPELINE_PROMPT_COMPLETE = (
-        _SYSTEM_PROMPT + TASK_PIPELINE_FOR_SINGLE_FUNCTION_PROMPT + func_content
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace(
+        "{PRAGMA_NAME}",
+        POST_PROCESSING_PRAGMA_HINTS[pass_name].replace("{target}", target),
     )
-    TASK_PIPELINE_PROMPT_COMPLETE += (
-        TASK_PIPELINE_STRATEGY_PROMPT_4  # add strategy hint
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace("{STAGE_CODE_CONTENT}", code)
+
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _PRAGMA_INSERT_PROMPT
+    analysis_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
-    print(TASK_PIPELINE_PROMPT_COMPLETE)
-    return TASK_PIPELINE_PROMPT_COMPLETE
+    content = analysis_completion.choices[0].message["content"]
 
-
-def extract_content_and_save(
-    chat_completion, prompt_content, model_name, sub_func=False
-):
-    if model_name in ["gpt-4-1106-preview", "gpt-4"]:
-        model_name = "gpt4"
-    else:
-        model_name = "gpt3.5"
-    cur_time = time.strftime("%y%m%d_%H%M", time.localtime())
-    chat_file_path = f"{pipeline_log_path}/{model_name}/{algo_name}/pipeline_{model_name}_{algo_name}_{cur_time}.txt"
-    code_file_path = f"{pipeline_log_path}/{model_name}/{algo_name}/pipeline_{model_name}_{algo_name}_{cur_time}.cpp"
-
-    if sub_func:
-        chat_file_path = f"{pipeline_log_path}/{model_name}/{algo_name}/sub_pipeline_{model_name}_{algo_name}_{cur_time}.txt"
-        code_file_path = f"{pipeline_log_path}/{model_name}/{algo_name}/sub_pipeline_{model_name}_{algo_name}_{cur_time}.cpp"
-
-    # save chat completion
-    with open(chat_file_path, "w") as chat_file:
-        chat_file.write(str(chat_completion))
-        chat_file.write("\n\n====================================\n\n")
-        chat_file.write(prompt_content)
-
-    # extract code from ``` ``` and save
-    content = chat_completion.choices[0].message["content"]
     match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
-    if match:
-        code_content = match.group(1)
-        print(code_content)
-        with open(code_file_path, "w") as code_file:
-            code_file.write(code_content)
+    print("[INFO]*********final code: ", content)
+    return match
 
 
-def run_task_pipeline(func_description):
-    prompt = gen_task_pipeline_prompt(func_description)
-    model_name = "gpt-4-1106-preview"
-    task_pipeline_completion = openai.ChatCompletion.create(
-        model=model_name, messages=[{"role": "user", "content": prompt}]
+def run_code_transformation(code, pass_name, target):
+    PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
+    _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
+
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
+
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
-    print(task_pipeline_completion)
-    extract_content_and_save(task_pipeline_completion, prompt, model_name, algo_name)
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    print("[INFO]*********transformation: ", match)
+    return match
 
 
-def run_sub_task_pipeline(func_description, func_content):
-    prompt = gen_sub_task_pipeline_prompt(func_description, func_content)
-    model_name = "gpt-4-1106-preview"
-    sub_task_pipeline_completion = openai.ChatCompletion.create(
-        model=model_name, messages=[{"role": "user", "content": prompt}]
-    )
-    print(sub_task_pipeline_completion)
-    extract_content_and_save(
-        sub_task_pipeline_completion, prompt, model_name, sub_func=True
-    )
-
-
-def connection_test():
-    prompt = "hello"
-    model_name = "gpt-4-1106-preview"
-    test_completion = openai.ChatCompletion.create(
-        model=model_name, messages=[{"role": "user", "content": prompt}]
-    )
-    print(test_completion)
+def post_processing_pipeline(func_content, target):
+    """This function transforms the given code by performing two main transformations:
+        1. Convert parallel loop variables (e.g., OpenMP, CUDA) into standard C for loops.
+        2. Convert SIMD tensor operations into scalar for-loop based calculations.
+    :param func_content: The content of the function (code) to be transformed.
+    :return: Transformed code after applying the two transformations."""
+    for i, trans in enumerate(OPT_PROCESSURE):
+        # First analysis the code, and insert corresponding tensorize pragma
+        func_content = run_code_analysis(func_content, trans, target)
+        # Transform the code according to the pragma
+        func_content = run_code_transformation(func_content, trans, target)
+    return func_content
 
 
 if __name__ == "__main__":
@@ -126,7 +93,6 @@ if __name__ == "__main__":
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
                 for (int k = 0; k < dim3; k++) {
-                    #pragma operation(add)
                     for (int l = 0; l < dim4; l++) {
                         int index = i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l;
                         output[index] = input1[index] + input2[index];
@@ -136,4 +102,4 @@ if __name__ == "__main__":
         }
     }
     """
-    run_task_pipeline(func_content)
+    _ = post_processing_pipeline(func_content, "BANG")
