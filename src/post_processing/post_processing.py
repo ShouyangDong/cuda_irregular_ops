@@ -51,6 +51,12 @@ def run_code_analysis(code, pass_name, target):
 
 
 def run_code_transformation(code, pass_name, target):
+    if pass_name != "THREAD_BINDING":
+        # Traverse all possible pragma, just follow the tensorization schedule
+        for pass_name in TENSORIZATION_OPT_LIST:
+            code = run_code_transformation(code, pass_name, target)
+        return code
+
     PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
     _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
     _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
@@ -79,6 +85,7 @@ def post_processing_pipeline(func_content, target):
         func_content = run_code_analysis(func_content, trans, target)
         # Transform the code according to the pragma
         func_content = run_code_transformation(func_content, trans, target)
+
     return func_content
 
 

@@ -205,17 +205,17 @@ Application Scenario:
 """
 
 THREAD_BINDING_DEMO_BANG = """
+before
 ```cpp
-__kernel void matrix_mul(__global float* A, __global float* B, __global float* C, int N) {
-    int row = get_global_id(0); // Global thread index
-    int col = get_global_id(1);
-
-    float sum = 0.0f;
-    for (int i = 0; i < N; i++) {
-        sum += A[row * N + i] * B[i * N + col];
+for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4 j++) {
+        B[i * 4 + j] = A[i * 4 + j] + 1.0;
     }
-    C[row * N + col] = sum;
 }
-}
+```
+
+after
+```cpp
+B[clusterId * 4 + coreId] = A[clusterId * 4 + coreId] + 1.0;
 ```
 """
