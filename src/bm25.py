@@ -121,14 +121,14 @@ class BM25(object):
         if self.docs:
             if not os.path.exists(self.docs):
                 raise Exception(f"input docs {self.docs} not found")
-            # with open(self.docs, 'r', encoding='utf8') as reader:
+ 
             with open(self.docs, "r") as reader:
                 param = _cal_param(reader)
 
         else:
             if not os.path.exists(self._docs_path):
                 raise Exception(f"system docs {self._docs_path} not found")
-            # with open(self._docs_path, 'r', encoding='utf8') as reader:
+
             with open(self._docs_path, "r") as reader:
                 param = _cal_param(reader)
 
