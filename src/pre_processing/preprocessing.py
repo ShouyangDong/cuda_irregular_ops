@@ -1,12 +1,50 @@
 # autoflake: skip_file
+import re
 import openai
 
 from src.pre_processing.preprocessing_prompt import *
-from src.prompt.prompt import SYSTEM_PROMPT, APPLY_OPT_PROMPT
+from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
 OPT_LIST = ["LOOP_RECOVERY", "DETENSORIZATION"]
 model_name = """gpt-3.5-turbo"""
-openai.api_key = """ OPENAI API KEY """
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+
+PRE_PROCESSING_PRAGMA_HINTS = {
+"LOOP_RECOVERY": "#pragma thread({target})",
+"DETENSORIZATION": "#pragma intrinsic({target})"
+}
+
+
+def run_code_analysis(code, pass_name, target):
+    PRAGMA_DESCRIPTION = globals()[pass_name + "_PROMPT_" + target]
+    _PRAGMA_INSERT_PROMPT = PRAGMA_INSERT_PROMPT.replace("{PRAGMA_DESCRIPTION}", PRAGMA_DESCRIPTION)
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace("{PRAGMA_NAME}", PRE_PROCESSING_PRAGMA_HINTS[pass_name].replace("{target}", target))
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace("{STAGE_CODE_CONTENT}", code)
+
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _PRAGMA_INSERT_PROMPT
+    print(STAGE_OPT_PROMPT_COMPLETE)
+    # analysis_completion = openai.ChatCompletion.create(model=model_name, messages=[{
+    #     "role": "user",
+    #     "content": STAGE_OPT_PROMPT_COMPLETE}])
+    # content = chat_completion.choices[0].message["content"]
+    # match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    match = None
+
+    return match
+
+def run_code_transformation(code, pass_name, pragma):
+    PRAGMA_DEMO_COMPLETE = globals()[pass_name]
+    _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", trans)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
+
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
+    transformation_completion = openai.ChatCompletion.create(model=model_name, messages=[{
+        "role": "user",
+        "content": STAGE_OPT_PROMPT_COMPLETE}])
+    content = chat_completion.choices[0].message["content"]
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    return match
 
 def pre_processing_pipeline(func_content, target):
     """This function transforms the given code by performing two main transformations:
@@ -15,22 +53,18 @@ def pre_processing_pipeline(func_content, target):
     :param func_content: The content of the function (code) to be transformed.
     :return: Transformed code after applying the two transformations."""
     TRANS_DESCRIPTION = ""
-    for trans in OPT_LIST:
+    for i, trans in enumerate(OPT_LIST):
         prompt_name = (
             f"{trans}_PROMPT_{target}"
             if trans != "DETENSORIZATION"
             else f"{trans}_PROMPT"
         )
-        demo_name = f"{trans}_DEMO_{target}"
-        prompt_content = globals()[prompt_name]
-        PRAGMA_DEMO_COMPLETE = globals()[prompt_name]
-        _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
-        _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", trans)
-        _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
 
-        STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
-        print(STAGE_OPT_PROMPT_COMPLETE)
-    return TRANS_DESCRIPTION
+        # First analysis the code, and insert corresponding pragma
+        pragma_code = run_code_analysis(func_content, trans, target)
+        # # Transform the code according to the pragma
+        # transform_code = run_code_transformation(pragma_code, trans, target)
+    return pragma_code
 
 
 if __name__ == "__main__":
@@ -42,4 +76,4 @@ if __name__ == "__main__":
         __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
     }
     """
-    pre_processing_pipeline(func_content, target="BANG")
+    _ = pre_processing_pipeline(func_content, target="BANG")

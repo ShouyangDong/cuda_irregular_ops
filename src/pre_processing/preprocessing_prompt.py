@@ -1,4 +1,4 @@
-DETENSORIZATION_PROMPT = """
+DETENSORIZATION_PROMPT_BANG = """
 Detensorize
 
 Function Overview:
@@ -14,7 +14,7 @@ Application Scenario:
 - **Performance Tuning on Non-SIMD Hardware**: In cases where SIMD operations do not provide a significant performance benefit or where the cost of managing vectorization is too high, `DETENSORIZE` can be used to simplify and optimize performance for scalar-based execution units.
 """
 
-DETENSORIZATION_DEMO = """
+DETENSORIZATION_DEMO_BANG = """
 exmaple 1:
 
 // before:
