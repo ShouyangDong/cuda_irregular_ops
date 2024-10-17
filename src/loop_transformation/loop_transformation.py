@@ -1,4 +1,8 @@
+import re
 import openai
+
+from src.loop_transformation.loop_transformation import *
+from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
 opt_options = [
     "LOOP_FUSION",
@@ -7,122 +11,77 @@ opt_options = [
     "TENSOR_COMTRACTION",
 ]
 
+model_name = """gpt-3.5-turbo"""
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+openai.api_base = "https://api.keya.pw/v1"
 
-model_name = "gpt-4-turbo"
+
+LOOP_TRANSFORMATION_HINTS = {
+    "LOOP_FUSION": "#pragma loop_fusion",
+    "LOOP_REORDER": "#pragma loop_reorder",
+    "LOOP_SPLIT": "#pragma loop_split(factor={factor})",
+    "TENSOR_COMTRACTION": "#pragma tensor_contraction"
+}
 
 
-def gen_stage_opt_prompt(stage_code):
-    STAGE_CODE_CONTENT = stage_code
-    PRAGMA_DESCRIPTION = ""
-    for opt in opt_options:
-        prompt_name = f"{opt}_PROMPT"
-        prompt_content = globals()[prompt_name]
-        PRAGMA_DESCRIPTION += prompt_content
-        PRAGMA_DESCRIPTION += "-----------------------"
-    _OPT_CHOICE_PROMPT = OPT_CHOICE_PROMPT.replace(
+def run_code_analysis(code, pass_name):
+    PRAGMA_DESCRIPTION = globals()[pass_name + "_PROMPT"]
+    _PRAGMA_INSERT_PROMPT = PRAGMA_INSERT_PROMPT.replace(
         "{PRAGMA_DESCRIPTION}", PRAGMA_DESCRIPTION
     )
-    _OPT_CHOICE_PROMPT = _OPT_CHOICE_PROMPT.replace(
-        "{STAGE_CODE_CONTENT}", STAGE_CODE_CONTENT
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace(
+        "{PRAGMA_NAME}",
+        PRE_PROCESSING_PRAGMA_HINTS[pass_name],
     )
-    print(_OPT_CHOICE_PROMPT)
-    return _OPT_CHOICE_PROMPT
+    _PRAGMA_INSERT_PROMPT = _PRAGMA_INSERT_PROMPT.replace("{STAGE_CODE_CONTENT}", code)
 
-
-# completion_type: opt_choose or opt_apply
-def save_chat_completion(completion_type, prompt_content, chat_completion, model_name):
-    experiment_name = completion_type
-    if model_name in ["gpt-4-1106-preview", "gpt-4"]:
-        model_name = "gpt4"
-    else:
-        model_name = "gpt3.5"
-
-    cur_time = time.strftime("%y%m%d_%H%M", time.localtime())
-    chat_file_path = f"{root_path}/log/stage_opt/{model_name}/{experiment_name}_{model_name}_{cur_time}.txt"
-    with open(chat_file_path, "w") as chat_file:
-        chat_file.write(str(chat_completion))
-        chat_file.write("\n\n====================================\n\n")
-        chat_file.write(prompt_content)
-
-    # extract code from ``` ``` and save
-    if completion_type == "opt_apply":
-        code_file_path = f"{root_path}/log/stage_opt/{model_name}/{experiment_name}_{model_name}_{cur_time}.cpp"
-        content = chat_completion.choices[0].message["content"]
-        match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
-        if match:
-            code_content = match.group(1)
-            print(code_content)
-            with open(code_file_path, "w") as code_file:
-                code_file.write(code_content)
-
-
-def parse_opt_list(stage_opt_completion):
-    raw_list_str = stage_opt_completion.choices[0].message["content"]
-    raw_list_str = raw_list_str[1:-1]
-    opt_list = raw_list_str.split(", ")
-    return opt_list
-
-
-def apply_opt(stage_code, stage_opt_list, algo_name, func_description):
-    _SYSTEM_PROMPT = SYSTEM_PROMPT.replace("{ALGO_NAME}", algo_name)
-    _SYSTEM_PROMPT = _SYSTEM_PROMPT.replace("{FUNCTION_DESCRIPTION}", func_description)
-
-    STAGE_CODE_CONTENT = stage_code
-    OPT_LIST = ""
-    PRAGMA_DEMO_COMPLETE = ""
-
-    opt_code = "xxx"
-    for i, opt_option in enumerate(stage_opt_list):
-        OPT_LIST += str(i) + ". " + opt_option + "\n"
-        pragma_name = opt_option.split(" ")[-1].upper() + "_DEMO"
-        PRAGMA_DEMO = globals()[pragma_name]
-        PRAGMA_DEMO_COMPLETE += str(i) + ". " + opt_option + ":\n" + PRAGMA_DEMO + "\n"
-
-    _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace(
-        "{STAGE_CODE_CONTENT}", STAGE_CODE_CONTENT
-    )
-    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", OPT_LIST)
-    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
-
-    STAGE_OPT_PROMPT_COMPLETE = _SYSTEM_PROMPT + _APPLY_OPT_PROMPT
-    print(STAGE_OPT_PROMPT_COMPLETE)
-
-    opt_apply_completion = openai.ChatCompletion.create(
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _PRAGMA_INSERT_PROMPT
+    analysis_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
-    print(opt_apply_completion)
-    save_chat_completion(
-        "opt_apply", STAGE_OPT_PROMPT_COMPLETE, opt_apply_completion, model_name
+    content = analysis_completion.choices[0].message["content"]
+
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    print("[INFO]*********final code: ", content)
+    return match
+
+
+def run_code_transformation(code, pass_name):
+    PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO"]
+    _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
+    _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{PRAGMA_DEMO}", PRAGMA_DEMO_COMPLETE)
+
+    STAGE_OPT_PROMPT_COMPLETE = SYSTEM_PROMPT + _APPLY_OPT_PROMPT
+
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": STAGE_OPT_PROMPT_COMPLETE}],
     )
-    return opt_code
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    print("[INFO]*********transformation: ", match)
+    return match
 
 
-"""
-model_list = ["gpt-4-1106-preview", "gpt-4", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"]
-"""
-
-
-def run_stage_code_opt(stage_code):
-    prompt = gen_stage_opt_prompt(stage_code)
-    stage_opt_completion = openai.ChatCompletion.create(
-        model=model_name, messages=[{"role": "user", "content": prompt}]
-    )
-    print(stage_opt_completion)
-    stage_opt_list = parse_opt_list(stage_opt_completion)
-    save_chat_completion("opt_choose", prompt, stage_opt_completion, model_name)
-    opt_code = apply_opt(stage_code, stage_opt_list)
-    return opt_code
+def loop_transformation_pipeline(func_content, target):
+    """This function transforms the given code by performing some loop transformations"""
+    for i, trans in enumerate(OPT_LIST):
+        # First analysis the code, and insert corresponding pragma
+        func_content = run_code_analysis(func_content, trans)
+        # Transform the code according to the pragma
+        func_content = run_code_transformation(func_content, trans)
+    return func_content
 
 
 if __name__ == "__main__":
-    stage_code = """
-    __global__ void __launch_bounds__(1024) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
-        for (int ax0_ax1_fused_ax2_fused_ax3_fused_outer = 0; ax0_ax1_fused_ax2_fused_ax3_fused_outer < 8; ++ax0_ax1_fused_ax2_fused_ax3_fused_outer) {
-            if (((ax0_ax1_fused_ax2_fused_ax3_fused_outer * 262144) + ((int)blockIdx.x)) < 2048000) {
-            T_add[(((ax0_ax1_fused_ax2_fused_ax3_fused_outer * 262144) + (((int)blockIdx.x) * 1024)) + ((int)threadIdx.x))] = (A[(((ax0_ax1_fused_ax2_fused_ax3_fused_outer * 262144) + (((int)blockIdx.x) * 1024)) + ((int)threadIdx.x))] + B[(((ax0_ax1_fused_ax2_fused_ax3_fused_outer * 262144) + (((int)blockIdx.x) * 1024)) + ((int)threadIdx.x))]);
-            }
-        }
+    func_content = """
+    extern "C" __mlu_global__ void tanh(float* input0, float* active_tanh_210) {
+        __nram__ float input0_local_nram[640];
+        __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
+        __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
+        __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
     }
     """
-    run_stage_code_opt(stage_code)
+    _ = loop_transformation_pipeline(func_content, target="BANG")
