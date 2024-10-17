@@ -40,7 +40,7 @@ if __name__ == "__main__":
     }
     """
     op_pragma = {
-        "matmul": "#pragma intrinsic(__bang_mlu(input[Nram, Wram], ouptut[Nram]))",
+        "matmul": "#pragma intrinsic(__bang_mlp(input[Nram, Wram], output[Nram]))",
         "add": "#pragma intrinsic(__bang_add(input[Nram], output[Nram]))",
     }
     final_code = replace_pragma_with_intrinsic(code, op_pragma)
