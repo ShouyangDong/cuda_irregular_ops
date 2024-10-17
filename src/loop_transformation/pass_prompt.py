@@ -17,7 +17,7 @@ Usage Examples:
 
 // before:
 ```cpp
-// pragma loop_fusion
+#pragma loop_fusion
 for (int i = 0; i < 300; i++) {
     for (int j = 0; j < 300; j++)
         a[i * 300 + j] = b[i * 300 + j] + 4;
@@ -52,7 +52,7 @@ Usage Examples:
 
 // before:
 ```cpp
-// pragma loop_reorder
+#pragma loop_reorder
 for (int i = 0; i < N; i++) { 
     for (int j = 0; j < N; j++) { 
         A[i][j] = B[i][j] + C[i][j]; 
@@ -88,7 +88,7 @@ Usage Examples:
 
 before:
 ```cpp
-// Pragma loop_split(factor=4)
+#pragma loop_split(factor=4)
 for (int i = 0; i < 60; i++) {
     A[i] = B[i] * C[i];
 }
@@ -125,7 +125,7 @@ TENSOR_COMTRACTION_DEMO =
 Usage Examples:
 before:
 ```cpp
-// pragma tensor_contraction
+#pragma tensor_contraction
 if (((clusterId * 4) + coreId) < 5) {
     for (int i = 0; i < 672; i++) {
         if (input0_local_nram[i] >= 0.0f) {

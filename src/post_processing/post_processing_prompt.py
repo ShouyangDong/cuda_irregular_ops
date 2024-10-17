@@ -108,6 +108,7 @@ Application Scenario:
 TENSORIZATION_DEMO = """
 Usage Examples:
 // before:
+#pragma operation(memory store to output)
 for (int i = 0; i < 512; ++i) {
     for (int j = 0; j < 512; ++j) {
         output[i * 512 + j] = output_nram[i * 512 + j];
@@ -138,6 +139,7 @@ __mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
     __nram__ float INPUT0_N[64];
     __nram__ float INPUT1_N[64];
     __nram__ float OUTPUT_N[64];
+    #pragma software_pipeline
     for (int i = 0; i < 2048; ++i) {
         __memcpy(INPUT0_N, INPUT0 + (i * 64), 256, GDRAM2NRAM);
         __memcpy(INPUT1_N, INPUT1 + (i * 64), 256, GDRAM2NRAM);
@@ -207,6 +209,7 @@ Application Scenario:
 THREAD_BINDING_DEMO_BANG = """
 before
 ```cpp
+#pragma thread_binding
 for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4 j++) {
         B[i * 4 + j] = A[i * 4 + j] + 1.0;
