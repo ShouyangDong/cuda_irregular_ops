@@ -17,6 +17,7 @@ Usage Examples:
 
 // before:
 ```cpp
+// pragma loop_fusion
 for (int i = 0; i < 300; i++) {
     for (int j = 0; j < 300; j++)
         a[i * 300 + j] = b[i * 300 + j] + 4;
@@ -51,6 +52,7 @@ Usage Examples:
 
 // before:
 ```cpp
+// pragma loop_reorder
 for (int i = 0; i < N; i++) { 
     for (int j = 0; j < N; j++) { 
         A[i][j] = B[i][j] + C[i][j]; 
@@ -84,23 +86,71 @@ Application Scenario:
 LOOP_SPLIT_DEMO = """
 Usage Examples:
 
-Original loop:
+before:
 ```cpp
-for (int i = 0; i < N; i++) {
+// Pragma loop_split(factor=4)
+for (int i = 0; i < 60; i++) {
     A[i] = B[i] * C[i];
 }
 ```
 
 // after:
 ```cpp
-int tile_size = 64;
-for (int t = 0; t < N; t += tile_size) {
-    for (int j = t; j < std::min(t + tile_size, N); j++) {
-        A[i] = B[i] * C[i];
+for (i.outer, 0, 4) {
+    for (i.inner, 0, 16) {
+        if ((i.inner + i.outer*16) < 60) {
+            A[i.inner + i.outer*16] = B[i.inner + i.outer*16] + B[i.inner + i.outer*16]
+        }
     }
 }
 ```
 """
 
 
-TENSOR_COMTRACTION = ""
+TENSOR_COnTRACTION = 
+""" 
+Tensor Contraction
+
+Function Overview:  
+Tensor contraction is a technique used to merge two loops that share the same size and stride into a single loop. 
+By combining these loops, the overall computational workload can be reduced, 
+and memory access patterns can be optimized, leading to improved performance in tensor computations. 
+
+Application Scenario:  
+Tensor contraction is commonly applied in scenarios where two or more loops operate over dimensions with identical sizes and memory strides. This is particularly useful in optimizing tensor operations in deep learning models, such as matrix multiplications, convolutions, and backpropagation. By reducing the number of loops, tensor contraction helps minimize the overhead of loop management and improves the efficiency of data accesses, which is critical in handling large-scale tensor computations in fields like scientific computing, machine learning, and quantum physics.
+"""
+
+TENSOR_COMTRACTION_DEMO = 
+"""
+Usage Examples:
+before:
+```cpp
+// pragma tensor_contraction
+if (((clusterId * 4) + coreId) < 5) {
+    for (int i = 0; i < 672; i++) {
+        if (input0_local_nram[i] >= 0.0f) {
+            input0_local_nram[i] = 1.0f;
+        } else {
+            input0_local_nram[i] = -1.0f;
+        }
+    }
+}
+if (((clusterId * 4) + coreId) < 5) {
+    for (int i = 0; i < 2688/sizeof(float); i++) {
+        active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
+    }
+}
+```
+after
+```cpp
+if (((clusterId * 4) + coreId) < 5) {
+    for (int i = 0; i < 672; i++) {
+        if (input0_local_nram[i] >= 0.0f) {
+            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = 1.0f;
+        } else {
+            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = -1.0f;
+        }
+    }
+}
+```
+"""
