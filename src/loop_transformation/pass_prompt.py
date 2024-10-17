@@ -26,8 +26,8 @@ for (int i = 0; i < 300; i++) {
 
 // after:
 ```cpp
-for (int i_fuse = 0; i_fuse < 300 * 300; i_fuse++) {
-    a[i_fuse] = b[i_fuse] + 4;
+for (int i_j_fuse = 0; i_j_fuse < 300 * 300; i_j_fuse++) {
+    a[i_j_fuse] = b[i_j_fuse] + 4;
 } 
 """
 
