@@ -26,11 +26,11 @@ def tensorization(op, code, document):
     PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", TENSORIZATION_PROMPT)
     PROMPT = PROMPT.replace("{document}", document)
     PROMPT = PROMPT.replace("{code}", code)
-    ROMPT = PROMPT.replace("{op}", op)
+    PROMPT = PROMPT.replace("{op}", op)
 
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
-        messages=[{"role": "user", "content": ROMPT}],
+        messages=[{"role": "user", "content": PROMPT}],
     )
 
     content = transformation_completion.choices[0].message["content"]
