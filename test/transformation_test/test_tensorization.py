@@ -1,9 +1,14 @@
 import re
+import openai
 
 from src.prompt.prompt import SYSTEM_PROMPT
 from src.post_processing.post_processing_prompt import (
     TENSORIZATION_PROMPT,
 )
+
+model_name = """gpt-3.5-turbo"""
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+openai.api_base = "https://api.keya.pw/v1"
 
 
 def tensorization(op, code, document):
@@ -22,8 +27,18 @@ def tensorization(op, code, document):
     PROMPT = PROMPT.replace("{document}", document)
     PROMPT = PROMPT.replace("{code}", code)
     ROMPT = PROMPT.replace("{op}", op)
-    print("[INFO]************prompt: ", PROMPT)
-    return PROMPT
+
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": ROMPT}],
+    )
+
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    if match:
+        code_content = match.group(1)
+        return code_content
+    return None
 
 
 def get_operation_words(pragma_line):
