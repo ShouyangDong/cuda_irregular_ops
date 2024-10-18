@@ -1,5 +1,4 @@
 import re
-import openai
 
 from src.post_processing.post_processing_prompt import (
     CACHE_READ_PROMPT,

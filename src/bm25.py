@@ -121,7 +121,7 @@ class BM25(object):
         if self.docs:
             if not os.path.exists(self.docs):
                 raise Exception(f"input docs {self.docs} not found")
- 
+
             with open(self.docs, "r") as reader:
                 param = _cal_param(reader)
 

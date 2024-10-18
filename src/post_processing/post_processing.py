@@ -1,7 +1,6 @@
 import re
 import openai
 
-from src.post_processing.post_processing_prompt import *
 from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
 
 TENSORIZATION_OPT_LIST = [
@@ -56,7 +55,6 @@ def run_code_transformation(code, pass_name, target):
         for pass_name in TENSORIZATION_OPT_LIST:
             code = run_code_transformation(code, pass_name, target)
         return code
-
 
     PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
     _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)

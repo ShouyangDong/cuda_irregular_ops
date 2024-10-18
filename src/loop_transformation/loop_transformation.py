@@ -20,7 +20,7 @@ LOOP_TRANSFORMATION_HINTS = {
     "LOOP_FUSION": "#pragma loop_fusion",
     "LOOP_REORDER": "#pragma loop_reorder",
     "LOOP_SPLIT": "#pragma loop_split(factor={factor})",
-    "TENSOR_COMTRACTION": "#pragma tensor_contraction"
+    "TENSOR_COMTRACTION": "#pragma tensor_contraction",
 }
 
 
