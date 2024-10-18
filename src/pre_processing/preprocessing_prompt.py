@@ -88,6 +88,28 @@ void vector_add(float* A, float* B, float* C, int N, int numBlocks, int threadsP
 ```
 """
 LOOP_RECOVERY_PROMPT_BANG = """
+Loop recovery
+
+Function Overview:
+This prompt is designed to convert MLU multi-core indexing logic (with `clusterId` and `coreId`) into standard C++ `for` loop structures. 
+The goal is to simulate the multi-core execution on a CPU using nested `for` loops, while preserving the logic for executing across different clusters and cores.
+
+Application Scenario:
+- Use this prompt when you need to convert MLU code, where the execution logic depends on multi-core and multi-cluster indexing, into sequential C++ code. This can be useful for debugging, CPU-based simulations of the original multi-core behavior, or porting the logic to platforms without multi-core NPUs.
+
+### Input:
+A function written for an MLU that uses `clusterId` and `coreId` for multi-core execution, and that requires converting this parallel structure into standard C++ `for` loops.
+
+### Output:
+The same logic rewritten using nested `for` loops to emulate the multi-core behavior of the MLU in a sequential manner.
+
+### Steps for Conversion:
+1. Identify the use of `clusterId` and `coreId` in the input code.
+2. Convert the parallel multi-core structure into nested `for` loops in standard C++.
+3. Replace the multi-core indexing expressions with loop index variables (e.g., `clusterId * 4 + coreId` becomes a C++ loop with the same arithmetic).
+
+### GPT Task:
+Transform the following NPU code into equivalent C++ for-loop code that sequentially emulates the multi-cluster and multi-core indexing logic. The output should use nested `for` loops to replace the MLU indexing logic.
 """
 
 

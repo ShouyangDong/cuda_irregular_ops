@@ -5,9 +5,11 @@ from src.prompt.prompt import SYSTEM_PROMPT
 from src.pre_processing.preprocessing_prompt import (
     LOOP_RECOVERY_PROMPT_CUDA,
     LOOP_RECOVERY_DEMO_CUDA,
+    LOOP_RECOVERY_PROMPT_BANG,
+    LOOP_RECOVERY_DEMO_BANG,
 )
 
-model_name = """gpt-4-turbo"""
+model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -29,8 +31,19 @@ def run_loop_recovery(code, target):
     """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
-    PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", LOOP_RECOVERY_PROMPT_CUDA)
-    PROMPT = PROMPT.replace("{LOOP_RECOVERY_DEMO}", LOOP_RECOVERY_DEMO_CUDA)
+    prompt_des = None
+    if target == "CUDA":
+        prompt_des = LOOP_RECOVERY_PROMPT_CUDA
+    elif target == "BANG":
+        prompt_des = LOOP_RECOVERY_PROMPT_BANG
+    prompt_demo = None
+    if target == "CUDA":
+        prompt_demo = LOOP_RECOVERY_DEMO_CUDA
+    elif target == "BANG":
+        prompt_demo = LOOP_RECOVERY_DEMO_BANG
+
+    PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", prompt_des)
+    PROMPT = PROMPT.replace("{LOOP_RECOVERY_DEMO}", prompt_demo)
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
@@ -54,4 +67,17 @@ if __name__ == "__main__":
     }
     """
     code = run_loop_recovery(code, target="CUDA")
+    print(code)
+
+    code = """
+    extern "C" __mlu_global__ void multiply(float* A_nram, float* B_wram, float* C_nram) {
+        for (int col = 0; col < 64; col++) {
+            C_nram[(clusterId * 4 + coreId) * 64 + col] = 0.0f;
+            for (int i = 0; i < 512; i++) {
+                C_nram[col] += A_nram[i] * B_wram[i * 64 + col];
+            }
+        }
+    }
+    """
+    code = run_loop_recovery(code, target="BANG")
     print(code)
