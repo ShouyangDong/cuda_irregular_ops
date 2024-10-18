@@ -3,28 +3,32 @@ import re
 from src.prompt.prompt import SYSTEM_PROMPT
 from src.post_processing.post_processing_prompt import (
     TENSORIZATION_PROMPT,
-    TENSORIZATION_DEMO,
 )
 
 
-def tensorization(code, document):
+def tensorization(op, code, document):
     PROMPT = """
     {SYSTEM_PROMPT}
     
     Here is the introduction of Tensorization: {TENSORIZATION_PROMPT}
-    Please transform the following code {code} accordingt to the demo:
-    {TENSORIZATION_DEMO}"""
+    Please tensorize the sequential code of {op} below the #pragma operation in {code} 
+    accordingt to the introduction of tensorized intrinsic.
+    {document}
+    Please return the tensorized code without any additional information.
+    """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", TENSORIZATION_PROMPT)
-    PROMPT = PROMPT.replace("{TENSORIZATION_DEMO}", TENSORIZATION_DEMO)
+    PROMPT = PROMPT.replace("{document}", document)
     PROMPT = PROMPT.replace("{code}", code)
+    ROMPT = PROMPT.replace("{op}", op)
+    print("[INFO]************prompt: ", PROMPT)
     return PROMPT
 
 
 def get_operation_words(pragma_line):
-    # Define the regex pattern to match all words inside parentheses after '#pragma operation'
-    pattern = r"#pragma\s+operation\((\w+)\)"
+    # Modify the pattern to capture everything inside parentheses, allowing spaces and underscores
+    pattern = r"#pragma\s+operation\(([^)]+)\)"
     # Find all matches in the given string
     matches = re.findall(pattern, pragma_line)
     # Return the list of matches (it will be empty if no matches are found)
@@ -64,9 +68,9 @@ op_dict = {
 def run_tensorization(code, target):
     op_list = get_operation_words(code)
     for op in op_list:
-        op == "memcpy" if "memory" in op else op
+        op = "memcpy" if "memory" in op else op
         op_document = op_dict[op]
-        code = tensorization(code, op_document)
+        code = tensorization(op, code, op_document)
     return code
 
 
