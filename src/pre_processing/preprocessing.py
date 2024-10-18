@@ -38,7 +38,7 @@ def run_code_analysis(code, pass_name, target):
     return match
 
 
-def run_code_transformation(code, pass_name, target):
+def run_code_transformation(code, pass_name, target, domain_document):
     PRAGMA_DEMO_COMPLETE = globals()[pass_name + "_DEMO_" + target]
     _APPLY_OPT_PROMPT = APPLY_OPT_PROMPT.replace("{STAGE_CODE_CONTENT}", func_content)
     _APPLY_OPT_PROMPT = _APPLY_OPT_PROMPT.replace("{OPT_LIST}", pass_name)
@@ -66,7 +66,9 @@ def pre_processing_pipeline(func_content, target):
         # First analysis the code, and insert corresponding pragma
         func_content = run_code_analysis(func_content, trans, target)
         # Transform the code according to the pragma
-        func_content = run_code_transformation(func_content, trans, target)
+        func_content = run_code_transformation(
+            func_content, trans, target, domain_document
+        )
     return func_content
 
 
