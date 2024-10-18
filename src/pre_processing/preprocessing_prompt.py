@@ -31,40 +31,56 @@ for (int i = 0; i < 64/sizeof(float); i++) {
 """
 
 LOOP_RECOVERY_PROMPT_CUDA = """
+Loop recovery
+
+Function Overview:
+Loop recovery is designed to convert CUDA C code that utilizes GPU thread indexing (using `threadIdx`, `blockIdx`, `blockDim`, and `gridDim`) 
+into standard C++ code with `for` loop structures. The goal is to remove CUDA-specific parallelism while preserving the logical flow and structure of the code.
+
+Application Scenario:
+- Use this prompt when you want to convert CUDA C code into sequential C++ code, either for environments without GPU support or to analyze/debug the logic in a CPU-based system. This transformation is useful for simplifying GPU code or porting it to CPU environments.
+
+### Input:
+A CUDA C kernel function that uses `threadIdx`, `blockIdx`, `blockDim`, and `gridDim` to define parallel execution on a GPU.
+
+### Output:
+The same logic rewritten using standard C++ for loops to emulate the behavior of thread and block indexing in a sequential CPU-based program.
+
+### Steps for Conversion:
+1. Identify the use of `blockIdx`, `threadIdx`, `blockDim`, and `gridDim` in the input CUDA code.
+2. Convert the parallel structure into nested `for` loops in standard C++.
+3. Replace the GPU thread index expressions with loop index variables (e.g., `blockIdx.x * blockDim.x + threadIdx.x` becomes a C++ `for` loop with the same arithmetic).
+4. Ensure that all CUDA-specific syntax, such as `__global__` and `__device__`, is removed or replaced.
+
+### GPT Task:
+Transform the following CUDA C code into equivalent C++ for loop code that sequentially emulates the CUDA threading structure. The output should use nested `for` loops to replace CUDA thread indexing.
 """
 
 LOOP_RECOVERY_DEMO_CUDA = """
-Example 1:
-// before:
-```
-extern "C" __global__ void __launch_bounds__(640) sign_kernel(float* __restrict__ A, float* __restrict__ T_sign) {
-    T_sign[((int)threadIdx.x)] = ((0.000000e+00f < A[((int)threadIdx.x)]) ? 1.000000e+00f : ((A[((int)threadIdx.x)] < 0.000000e+00f) ? -1.000000e+00f : 0.000000e+00f));
-}
-```
-// after:
-```
-extern "C" void sign_kernel(float* A, float* T_sign) {
-for (int threadIdx.x = 0; threadIdx.x < 640; threadIdx.x++) {
-    T_sign[threadIdx.x] = ((0.000000e+00f < A[threadIdx.x]) ? 1.000000e+00f : ((A[threadIdx.x] < 0.000000e+00f) ? -1.000000e+00f : 0.000000e+00f));
+Example:
+
+#### CUDA C Code:
+
+```cuda
+__global__ void vector_add(float* A, float* B, float* C, int N) {
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    if (index < N) {
+        C[index] = A[index] + B[index];
     }
 }
 ```
-Example 2:
-// before:
-```
-extern "C" __global__ void __launch_bounds__(1024) add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
-    if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
-        T_add[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = (A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] + B[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
-    }
-}
-```
-// after:
-```
-extern "C" void add_kernel(float* A, float* B, float* T_add) {
-    for (int blockIdx.x = 0; blockIdx.x < 32; blockIdx.x++) {
-        for (int threadIdx.x = 0; threadIdx.x < 1024; threadIdx.x++) {
-            if (((blockIdx.x * 4) + (threadIdx.x >> 8)) < 9) {
-                T_add[((blockIdx.x * 1024) + threadIdx.x)] = (A[((blockIdx.x * 1024) + threadIdx.x)] + B[((blockIdx.x * 1024) + threadIdx.x)]);
+
+#### Desired C++ Output:
+
+```cpp
+void vector_add(float* A, float* B, float* C, int N, int numBlocks, int threadsPerBlock) {
+    // Loop over all blocks
+    for (int blockIdx = 0; blockIdx < numBlocks; ++blockIdx) {
+        // Loop over all threads in each block
+        for (int threadIdx = 0; threadIdx < threadsPerBlock; ++threadIdx) {
+            int index = blockIdx * threadsPerBlock + threadIdx;
+            if (index < N) {
+                C[index] = A[index] + B[index];
             }
         }
     }

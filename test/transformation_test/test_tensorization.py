@@ -19,7 +19,7 @@ def tensorization(op, code, document):
     Please tensorize the sequential code of {op} below the #pragma operation in {code} 
     accordingt to the introduction of tensorized intrinsic.
     {document}
-    Please return the tensorized code without any additional information.
+    Please return the output kernel function without any additional information.
     """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)

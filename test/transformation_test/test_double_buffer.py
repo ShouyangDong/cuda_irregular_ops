@@ -25,7 +25,7 @@ def double_buffer(code):
     accordingt to the introduction of double buffer.
 
     {DOUBLE_BUFFER_DEMO}
-    Please return the optimized code without any additional information.
+    Please return the output kernel function without any additional information.
     """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)

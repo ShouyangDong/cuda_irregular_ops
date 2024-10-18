@@ -24,7 +24,7 @@ def detensorization(op, code, document):
 
     {document}
 
-    Please return the kernel function without any additional information.
+    Please return the output kernel function without any additional information.
     """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
