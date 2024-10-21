@@ -12,3 +12,13 @@ if __name__ == "__main__":
     """
     code = pre_processing_pipeline(func_content, target="BANG")
     print(code)
+
+    func_content = """
+    extern "C" __global__ void __launch_bounds__(1024) exp_kernel(float* __restrict__ A, float* __restrict__ compute) {
+        if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 1125) {
+            compute[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = __expf(A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
+        }
+    }
+    """
+    code = pre_processing_pipeline(func_content, target="CUDA")
+    print(code)
