@@ -243,5 +243,6 @@ def post_processing_pipeline(code, target):
     code = run_thread_binding(code, target)
     code = run_code_decoration(code)
     code = run_cache_process(code)
+    code = run_code_decoration(code)
     code = run_tensorization(code, target)
     return code
