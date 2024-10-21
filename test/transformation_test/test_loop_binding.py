@@ -34,34 +34,14 @@ The transformed code with appropriate `#pragma` or thread binding directives ins
 ensuring that each iteration of the loop is handled by different threads or cores for parallel execution.
 
 
-
 ### Steps for Insertion:
 1. Identify loops or axes that are candidates for parallel execution. Typically, outer loops or large iterations are ideal for parallelization.
 2. Bind these loops to available hardware threads or cores using directives such as `#pragma thread_binding` or directly using CUDA constructs like `threadIdx` and `blockIdx`.
 3. For NPU hardware, bind the loops to clusters and cores (e.g., clusterId, coreId).
 4. Maintain the code logic, ensuring that the transformed code remains functionally equivalent while parallelizing the computation.
 
-### Example for NPU (4 clusters, each with 4 cores):
-
-#### Input NPU C++ Code:
-```cpp
-for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] * B[i][j];
-    }
-}
-```
-
-#### Desired Output NPU Code with Cluster/Core Binding:
-```cpp
-#pragma thread_binding(clusterId, coreId)
-for (int i = 0; i < N; i++) {
-    #pragma thread_binding(coreId)
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] * B[i][j];
-    }
-}
-```
+### Example 
+{LOOP_RECOVERY_DEMO}
 
 ### GPT Task:
 Please transform the following C++ or CUDA code by binding the parallel loops to GPU threads or NPU clusters and cores for efficient parallel computation. Insert `#pragma thread_binding` or equivalent GPU/NPU constructs where appropriate.
@@ -86,9 +66,6 @@ def run_THREAD_BINDING(code, target):
     
     {THREAD_BINDING_PROMPT}
     
-    Example: 
-    {THREAD_BINDING_DEMO}
-
     Please return the output kernel function without any additional information.
     """
 
@@ -137,3 +114,17 @@ if __name__ == "__main__":
     """
     output_code = run_THREAD_BINDING(code, "BANG")
     print(output_code)
+
+    code = """
+    extern "C" void  add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 1024; j++) {
+                if (((i * 1024) + j) < 2309) {
+                    T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
+                }
+            }
+        }
+    }
+    """
+    code = run_loop_recovery(code, target="CUDA")
+    print(code)
