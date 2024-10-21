@@ -10,6 +10,8 @@ from src.post_processing.post_processing_prompt import (
     CACHE_READ_DEMO,
     CACHE_WRITE_PROMPT,
     CACHE_WRITE_DEMO,
+    DECORATION_PROMPT,
+    TENSORIZATION_PROMPT,
 )
 
 model_name = """gpt-3.5-turbo"""
@@ -191,6 +193,18 @@ op_dict = {
 
     [in] width: The width of <filter>.
     """,
+    "add": """void __bang_add(float *dst, const float *src0, const float *src1, unsigned int elem_count)
+    This function performs addition operation element-wisely on <src0> and <src1> and saves the result in <dst>.
+
+    Parameters
+    [out] dst: The address of the destination vector.
+
+    [in] src0: The address of the first source vector.
+
+    [in] src1: The address of the second source vector.
+
+    [in] elem_count: The number of elements in the source vector.
+    """,
 }
 
 
@@ -203,6 +217,22 @@ def run_tensorization(code, target):
     return code
 
 
+def run_code_decoration(code):
+    PROMPT = DECORATION_PROMPT.replace("{cpp_code}", code)
+    decoration_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": PROMPT}],
+    )
+
+    content = decoration_completion.choices[0].message["content"]
+
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    if match:
+        code_content = match.group(1)
+        return code_content
+    return None
+
+
 def post_processing_pipeline(code, target):
     """This function transforms the given code by performing two main transformations:
         1. Convert parallel loop variables (e.g., OpenMP, CUDA) into standard C for loops.
@@ -211,29 +241,7 @@ def post_processing_pipeline(code, target):
 
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
+    code = run_code_decoration(code)
     code = run_cache_process(code)
     code = run_tensorization(code, target)
     return code
-
-
-if __name__ == "__main__":
-    func_content = """
-    extern "C" void add_kernel(float* output, float* input1, float* input2) {
-        int dim1 = 4;
-        int dim2 = 4;
-        int dim3 = 4;
-        int dim4 = 64;
-        
-        for (int i = 0; i < dim1; i++) {
-            for (int j = 0; j < dim2; j++) {
-                for (int k = 0; k < dim3; k++) {
-                    for (int l = 0; l < dim4; l++) {
-                        int index = i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l;
-                        output[index] = input1[index] + input2[index];
-                    }
-                }
-            }
-        }
-    }
-    """
-    _ = post_processing_pipeline(func_content, "BANG")

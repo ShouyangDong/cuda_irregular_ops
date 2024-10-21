@@ -273,3 +273,75 @@ for (int i = 0; i < N; i++) {
 }
 ```
 """
+
+DECORATION_PROMPT = """
+Operation Recognition
+
+Function Overview:
+Operation Recognition is designed to identify element-wise or matrix multiplication arithmetic 
+operations inside for loops in C++ code and insert the corresponding `#pragma operation( )` directives. 
+The inserted pragmas are intended to mark operations for future SIMD (Single Instruction, Multiple Data) vectorization. 
+This ensures that element-wise or matrix multiplication calculations can be efficiently transformed into SIMD instructions 
+during a later code transformation stage.
+
+### Application Scenario:
+Use this prompt when preparing C++ code for SIMD tensorization. It helps identify and mark arithmetic operations inside for loops that operate on individual elements of arrays or matrices. These operations will be optimized and vectorized in the later stages.
+
+### Input:
+The input is a C++ code snippet containing for loops with element-wise or matrix multiplication arithmetic operations, where you want to insert `#pragma operation( )` directives before each operation for SIMD vectorization purposes.
+
+### Output:
+The transformed C++ code with the `#pragma operation( )` directives inserted before the detected operations inside loops, which marks them for SIMD vectorization.
+
+### Example:
+
+#### Input C++ Code:
+```cpp
+for (int i = 0; i < 64; i++) {
+    C[i] = A[i] + B[i];
+}
+
+for (int i = 0; i < 64; i++) {
+    C[i] = C[i] * D[i];
+}
+
+for (int i = 0; i < 64; i++) {
+    E[i] = C[i] - D[i];
+}
+```
+
+#### Desired Output C++ Code with Pragmas for SIMD Preparation:
+```cpp 
+#pragma operation(add)
+for (int i = 0; i < 64; i++) {
+    C[i] = A[i] + B[i];
+}
+#pragma operation(mul)
+for (int i = 0; i < 64; i++) {
+    C[i] = C[i] * D[i];
+}
+#pragma operation(sub)
+for (int i = 0; i < 64; i++) {
+    E[i] = C[i] - D[i];
+}
+```
+
+### Steps for Insertion:
+1. Identify element-wise or matrix multiplication arithmetic operations inside the for loop such as addition (`+`), subtraction (`-`), multiplication (`*`), and division (`/`).
+2. Insert the corresponding `#pragma operation( )` directive directly above each identified operation, specifying the operation type in parentheses (e.g., `#pragma operation(add)` for addition).
+3. Focus only on the operations inside loops, as these are the target for SIMD tensorization.
+4. Ensure that the structure and logic of the code are not altered, and only relevant element-wise or matrix multiplication operations are annotated.
+
+### GPT Task:
+Please transform the following C++ code by inserting `#pragma operation( )` directives above each element-wise or matrix multiplication arithmetic operation inside for loops. These pragmas will be used to prepare the code for SIMD vectorization in a later stage.
+
+#### Input C++ Code:
+{cpp_code}
+
+#### Output C++ Code with Pragmas for SIMD Preparation:
+```
+
+### Notes:
+- The input should be replaced with the actual input C++ code containing loops with element-wise or matrix multiplication operations.
+- The output should focus on identifying and marking operations inside loops that are candidates for SIMD vectorization.
+"""
