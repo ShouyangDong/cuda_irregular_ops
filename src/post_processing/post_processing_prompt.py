@@ -207,6 +207,8 @@ Application Scenario:
 """
 
 THREAD_BINDING_DEMO_BANG = """
+Usage Examples:
+
 before
 ```cpp
 #pragma thread_binding
@@ -220,5 +222,29 @@ for (int i = 0; i < 4; ++i) {
 after
 ```cpp
 B[clusterId * 4 + coreId] = A[clusterId * 4 + coreId] + 1.0;
+```
+"""
+
+THREAD_BINDING_DEMO_CUDA = """
+Usage Examples:
+
+Input CUDA/NPU C++ Code:
+```cpp
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
+    }
+}
+```
+
+Desired Output Code with Thread/Cluster Binding:
+```cpp
+#pragma thread_binding(threadIdx.x, blockIdx.x)
+for (int i = 0; i < N; i++) {
+    #pragma thread_binding(threadIdx.y, blockIdx.y)
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
+    }
+}
 ```
 """
