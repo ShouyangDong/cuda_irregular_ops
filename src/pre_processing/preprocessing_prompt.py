@@ -106,7 +106,8 @@ The same logic rewritten using nested `for` loops to emulate the multi-core beha
 ### Steps for Conversion:
 1. Identify the use of `clusterId` and `coreId` in the input code.
 2. Convert the parallel multi-core structure into nested `for` loops in standard C++.
-3. Replace the multi-core indexing expressions with loop index variables (e.g., `clusterId * 4 + coreId` becomes a C++ loop with the same arithmetic).
+3. The number of clusters and cores are both 4.
+4. Replace the multi-core indexing expressions with loop index variables (e.g., `clusterId * 4 + coreId` becomes a C++ loop with the same arithmetic).
 
 ### GPT Task:
 Transform the following NPU code into equivalent C++ for-loop code that sequentially emulates the multi-cluster and multi-core indexing logic. The output should use nested `for` loops to replace the MLU indexing logic.
