@@ -65,7 +65,7 @@ def generate_cache_write_prompt(i, space, op_name, code):
     return PROMPT
 
 
-def do_cache_process(code):
+def run_cache_process(code):
     # Get the list of intrinsics from the code
     intrinsic_list = get_intrinsic_content(code)
     # Iterate over each intrinsic found in the code
@@ -101,4 +101,4 @@ if __name__ == "__main__":
     }
 
     """
-    final_code = do_cache_process(code)
+    final_code = run_cache_process(code)

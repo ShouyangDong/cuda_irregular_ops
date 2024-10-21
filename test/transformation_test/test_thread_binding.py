@@ -1,0 +1,83 @@
+import re
+import openai
+
+from src.prompt.prompt import SYSTEM_PROMPT
+from src.post_processing.post_processing_prompt import (
+    THREAD_BINDING_DEMO_BANG,
+    THREAD_BINDING_DEMO_CUDA,
+    THREAD_BINDING_PROMPT,
+)
+
+model_name = """gpt-3.5-turbo"""
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+openai.api_base = "https://api.keya.pw/v1"
+
+
+def run_thread_binding(code, target):
+    PROMPT = """
+    {SYSTEM_PROMPT}
+    
+    {THREAD_BINDING_PROMPT}
+    
+    Please return the output kernel function without any additional information.
+    """
+
+    PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
+    prompt_demo = None
+    if target == "CUDA":
+        prompt_demo = THREAD_BINDING_DEMO_CUDA
+    elif target == "BANG":
+        prompt_demo = THREAD_BINDING_DEMO_BANG
+
+    PROMPT = PROMPT.replace("{THREAD_BINDING_PROMPT}", THREAD_BINDING_PROMPT)
+    PROMPT = PROMPT.replace("{LOOP_RECOVERY_DEMO}", prompt_demo)
+    PROMPT = PROMPT.replace("{cpp_code}", code)
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": PROMPT}],
+    )
+
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    if match:
+        code_content = match.group(1)
+        return code_content
+    return None
+
+
+if __name__ == "__main__":
+    code = """
+    extern "C" void add_kernel(float* output, float* input1, float* input2) {
+        int dim1 = 4;
+        int dim2 = 4;
+        int dim3 = 4;
+        int dim4 = 64;
+        
+        for (int i = 0; i < dim1; i++) {
+            for (int j = 0; j < dim2; j++) {
+                for (int k = 0; k < dim3; k++) {
+                    for (int l = 0; l < dim4; l++) {
+                        int index = i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l;
+                        output[index] = input1[index] + input2[index];
+                    }
+                }
+            }
+        }
+    }
+    """
+    output_code = run_thread_binding(code, "BANG")
+    print(output_code)
+
+    code = """
+    extern "C" void  add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 1024; j++) {
+                if (((i * 1024) + j) < 2309) {
+                    T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
+                }
+            }
+        }
+    }
+    """
+    code = run_thread_binding(code, target="CUDA")
+    print(code)
