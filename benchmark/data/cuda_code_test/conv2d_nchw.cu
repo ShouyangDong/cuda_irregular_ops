@@ -62,8 +62,8 @@ extern "C" void conv2d_nchw_kernel(float *output, float *input, float *kernel,
     cudaMemcpy(d_input, input, input_size * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cudaMemcpyHostToDevice);
 
-    dim3 blockSize(64);
-    dim3 numBlocks(1);
+    dim3 blockSize(16, 16); // 16x16 threads per block 
+    dim3 gridSize((H + blockSize.y - 1) / blockSize.y, output_channels, batch_size);
 
     conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
