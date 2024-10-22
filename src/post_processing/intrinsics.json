@@ -1,4 +1,0 @@
-{
-    "matmul" : "#pragma intrinsic(__bang_mlp(input[Nram, Wram], ouptut[Nram]))",
-    "add": "#pragma intrinsic(__bang_add(input[Nram], output[Nram]))"
-}

@@ -1,6 +1,6 @@
 import re
 import openai
-
+import json
 from src.prompt.prompt import SYSTEM_PROMPT
 from src.pre_processing.preprocessing_prompt import (
     LOOP_RECOVERY_PROMPT_CUDA,
@@ -134,6 +134,7 @@ op_dict = {
 
 
 def run_detensorization(code, target):
+    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
     instructions = extract_bang_instructions(code)
     # First, detensorize memory
     code = detensorization("__memcpy", code, op_dict["__memcpy"])

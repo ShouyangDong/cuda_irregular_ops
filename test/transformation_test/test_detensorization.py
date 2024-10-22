@@ -1,6 +1,6 @@
 import re
 import openai
-
+import json
 from src.prompt.prompt import SYSTEM_PROMPT
 from src.pre_processing.preprocessing_prompt import (
     DETENSORIZATION_PROMPT_BANG,
@@ -57,35 +57,8 @@ def extract_bang_instructions(code):
     return instructions
 
 
-op_dict = {
-    "__memcpy": """void __memcpy(void *dst, const void *src, unsigned int size, mluMemcpyDirection_t dir)
-    Copies <size> bytes data from source address <src> to destination address <dst>.
-
-    parameters:
-        [out] dst: The address of destination area.
-
-        [in] src: The address of source area.
-
-        [in] size: The number of bytes to be copied.
-
-        [in] dir: The copy direction.
-    """,
-    "__bang_active_tanh": """void __bang_active_tanh(float *dst, const float *src, unsigned int elem_count)
-    Applies active (tanh) operation on <src>.
-
-    The function requires auxiliary __nram__ space internally. See the table Activation Table Space for the Activation Function for more information.
-
-    Parameters
-    [out] dst: The address of the destination vector.
-
-    [in] src: The address of the source vector.
-
-    [in] elem_count: Number of elements in the source vector.
-    """,
-}
-
-
 def run_detensorization(code, target):
+    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
     instructions = extract_bang_instructions(code)
     # First, detensorize memory
     code = detensorization("__memcpy", code, op_dict["__memcpy"])

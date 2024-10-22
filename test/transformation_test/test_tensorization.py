@@ -1,6 +1,6 @@
 import re
 import openai
-
+import json
 from src.prompt.prompt import SYSTEM_PROMPT
 from src.post_processing.post_processing_prompt import (
     TENSORIZATION_PROMPT,
@@ -50,37 +50,8 @@ def get_operation_words(pragma_line):
     return matches
 
 
-op_dict = {
-    "memcpy": """void __memcpy(void *dst, const void *src, unsigned int size, mluMemcpyDirection_t dir)
-    Copies <size> bytes data from source address <src> to destination address <dst>.
-
-    parameters:
-        [out] dst: The address of destination area.
-
-        [in] src: The address of source area.
-
-        [in] size: The number of bytes to be copied.
-
-        [in] dir: The copy direction.
-    """,
-    "matmul": """void __bang_mlp(float *dst, const float *src, const float *filter, int height, int width)
-    Applies multilayer perception operation. <dst>=<src>×<filter>.
-
-    Parameters
-    [out] dst: The address of the destination vector.
-
-    [in] src: The address of the source vector.
-
-    [in] filter: The address of filter matrix which has row-major data layout.
-
-    [in] height: The height of <filter>.
-
-    [in] width: The width of <filter>.
-    """,
-}
-
-
 def run_tensorization(code, target):
+    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
     op_list = get_operation_words(code)
     for op in op_list:
         op = "memcpy" if "memory" in op else op
