@@ -1,4 +1,5 @@
 import re
+import openai
 
 from src.post_processing.post_processing_prompt import (
     CACHE_READ_PROMPT,
@@ -7,6 +8,10 @@ from src.post_processing.post_processing_prompt import (
     CACHE_WRITE_DEMO,
 )
 from src.prompt.prompt import SYSTEM_PROMPT
+
+model_name = """gpt-3.5-turbo"""
+openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
+openai.api_base = "https://api.keya.pw/v1"
 
 
 def get_intrinsic_content(code):
@@ -75,13 +80,28 @@ def run_cache_process(code):
         outputs = get_output_memory_spaces(op)
         for i, space in enumerate(inputs):
             cache_read_prompt = generate_cache_read_prompt(i + 1, space, op_name, code)
-            print("[INFO]*************cache_read_prompt: ", cache_read_prompt)
+            # print("[INFO]*************cache_read_prompt: ", cache_read_prompt)
+            transformation_completion = openai.ChatCompletion.create(
+                model=model_name,
+                messages=[{"role": "user", "content": cache_read_prompt}],
+            )
+
+            content = transformation_completion.choices[0].message["content"]
+            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            code = match.group(1) if match else code
 
         for i, space in enumerate(outputs):
             cache_write_prompt = generate_cache_write_prompt(
                 i + 1, space, op_name, code
             )
-            print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
+            transformation_completion = openai.ChatCompletion.create(
+                model=model_name,
+                messages=[{"role": "user", "content": cache_write_prompt}],
+            )
+            content = transformation_completion.choices[0].message["content"]
+            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            code = match.group(1) if match else code
+            # print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
     return code
 
 
@@ -102,3 +122,4 @@ if __name__ == "__main__":
 
     """
     final_code = run_cache_process(code)
+    print(final_code)
