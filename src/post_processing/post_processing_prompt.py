@@ -247,57 +247,102 @@ __mlu_entry__ void fvec_add_double_buffering_kernel0(float* INPUT0, float* INPUT
 ```
 """
 
-THREAD_BINDING_PROMPT = """
+THREAD_BINDING_PROMPT_CUDA = """
 Thread Binding
 
 Function Overview:
 This prompt is designed to identify parallelizable loops or axes in C++ 
-and bind them to the available threads or cores on a GPU or NPU. The prompt helps 
-transform the input code by mapping the loops onto specific hardware resources like GPU threads or NPU cores 
+and bind them to the available threads on a GPU. The prompt helps 
+transform the input code by mapping the loops onto specific hardware resources like GPU threads
 to enable parallel computation.
 
 Application Scenario:
 Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.) 
-to the available threads or cores in a GPU/NPU. This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
+to the available threads in a GPU. This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
 
 Input:
-The input is a C++/CUDA code snippet containing loops that can be parallelized, with the goal of binding these loops to threads or cores on a GPU/NPU. 
-The target hardware may have specific clusters, cores, or threads, and the prompt will help map the loop dimensions accordingly.
+The input is a C++/CUDA code snippet containing loops that can be parallelized, with the goal of binding these loops to threads on a GPU. 
+The target hardware may have specific threads, and the prompt will help map the loop dimensions accordingly.
 
 Output:
-The transformed code with appropriate `#pragma` or thread binding directives inserted into the loops, 
-ensuring that each iteration of the loop is handled by different threads or cores for parallel execution.
+The transformed code with appropriate thread binding directives inserted into the loops, 
+ensuring that each iteration of the loop is handled by different threads for parallel execution.
 
 
 ### Steps for Insertion:
 1. Identify loops or axes that are candidates for parallel execution. Typically, outer loops or large iterations are ideal for parallelization.
-2. Bind these loops to available hardware threads or cores using directives such as `#pragma thread_binding` or directly using CUDA constructs like `threadIdx` and `blockIdx`.
-3. For NPU hardware, bind the loops to clusters and cores (e.g., clusterId, coreId).
-4. Maintain the code logic, ensuring that the transformed code remains functionally equivalent while parallelizing the computation.
+2. Bind these loops to available hardware threads directly using CUDA constructs like `threadIdx` and `blockIdx`.
+3. Maintain the code logic, ensuring that the transformed code remains functionally equivalent while parallelizing the computation.
 
 ### Example 
-{LOOP_RECOVERY_DEMO}
+{THREAD_BINDING_DEMO}
 
 ### GPT Task:
-Please transform the following C++ or CUDA code by binding the parallel loops to GPU threads or NPU clusters and cores for efficient parallel computation. Insert `#pragma thread_binding` or equivalent GPU/NPU constructs where appropriate.
+Please transform the following C++ by binding the parallel loops to GPU threads and cores for efficient parallel computation.
 
 #### Input Code:
 {cpp_code}
 
-#### Output Code with Thread/Cluster Binding:
+#### Output Code with Thread Binding:
 ```
 
 ### Notes:
-- `{cpp_code}` should be replaced with the actual input C++/CUDA code containing loops that are suitable for parallelization.
-- The output should map parallel loops to the hardware resources available on the target device (e.g., GPU threads, NPU clusters/cores).
-- The prompt is flexible enough to handle both GPU (CUDA) and NPU-specific architectures.
+- Input code should be replaced with the actual input C++/CUDA code containing loops that are suitable for parallelization.
+- The output should map parallel loops to the hardware resources available on GPU threads.
+- The prompt is flexible enough to handle GPU (CUDA).
 
 """
 
-THREAD_BINDING_DEMO_BANG = """
-Usage Examples:
+THREAD_BINDING_PROMPT_BANG = """
+Thread Binding
 
-before
+Function Overview:
+This prompt is designed to identify parallelizable loops or axes in C++ and bind them to the available cores on an NPU. 
+The prompt helps transform the input code by mapping the loops onto specific hardware resources like NPU clusters 
+and cores to enable parallel computation.
+
+Application Scenario:
+Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.) 
+to the available cores in a NPU. This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
+
+Input:
+The input is a C++/CUDA code snippet containing loops that can be parallelized. The goal is to bind these loops to cores and clusters on an NPU for parallel execution. 
+The target hardware has 4 clusters and 4 cores per cluster, and the prompt will help map the loop dimensions accordingly.
+
+Output:
+The transformed code should include appropriate thread binding directives, ensuring that iterations of the loop are distributed across the clusters and cores of the NPU for parallel execution.
+
+
+### Steps for Insertion:
+1. **Identify loops or axes** that are candidates for parallel execution.
+2. **Bind the loops** to clusters and cores (e.g., clusterId, coreId), where clusterId maps to 4 clusters and coreId maps to 4 cores per cluster.
+3. Maintain the code logic to ensure the transformed code is functionally equivalent while parallelizing the computation.
+
+
+### Example 
+{THREAD_BINDING_DEMO}
+
+### GPT Task:
+Please transform the following C++ by binding the parallel loops to NPU clusters and cores for efficient parallel computation.
+
+#### Input Code:
+{cpp_code}
+
+#### Output Code with Cluster Binding:
+```
+
+### Notes:
+- Input code should be replaced with the actual input C++code containing loops that are suitable for parallelization.
+- The output should map parallel loops to the hardware resources available on NPU clusters/cores.
+- The prompt is flexible enough to handle NPU-specific architectures.
+
+"""
+
+
+THREAD_BINDING_DEMO_BANG = """
+### Example
+
+### Input Code:
 ```cpp
 #pragma thread_binding
 for (int i = 0; i < 4; ++i) {
@@ -307,7 +352,12 @@ for (int i = 0; i < 4; ++i) {
 }
 ```
 
-after
+### Output Code with Cluster and Core Binding:
+- Bind loops to **4 clusters** and **4 cores** on the NPU.
+- Ensure parallel execution across clusters and cores.
+
+Expected Output:
+
 ```cpp
 B[clusterId * 4 + coreId] = A[clusterId * 4 + coreId] + 1.0;
 ```

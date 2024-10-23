@@ -181,6 +181,8 @@ def run_cache_process(code, space_maps):
     # Get the list of intrinsics from the code
     intrinsic_list = get_intrinsic_content(code)
     # Ensure the intrinsic lists and spaces have matching lengths
+    print(intrinsic_list)
+    print(space_maps)
     if len(intrinsic_list) != len(space_maps):
         raise ValueError(
             f"intrinsics and memory spaces length mismatch for operation"
@@ -282,10 +284,13 @@ def post_processing_pipeline(code, target):
 
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
+    print(code)
     code = run_code_decoration(code)
-    op_pragma = json.load(
-        open("./documents/operation_bang_C_instruction_map.json", "r")
-    )
+    op_pragma = {}
+    if target == "BANG":
+        op_pragma = json.load(
+            open("./documents/operation_bang_C_instruction_map.json", "r")
+        )
     final_code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
     code = run_cache_process(code, space_maps)
     code = run_code_decoration(code)
