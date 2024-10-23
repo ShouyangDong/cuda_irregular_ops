@@ -9,7 +9,7 @@ from src.post_processing.post_processing_prompt import (
 )
 from src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-3.5-turbo"""
+model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -97,11 +97,9 @@ def run_cache_process(code, space_maps):
                 model=model_name,
                 messages=[{"role": "user", "content": cache_read_prompt}],
             )
-
             content = transformation_completion.choices[0].message["content"]
             match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
             code = match.group(1) if match else code
-            print("[INFO]*************cache_read_prompt: ", code)
         for key, value in space_map["output"].items():
             cache_write_prompt = generate_cache_write_prompt(key, value, code)
             transformation_completion = openai.ChatCompletion.create(
@@ -111,7 +109,6 @@ def run_cache_process(code, space_maps):
             content = transformation_completion.choices[0].message["content"]
             match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
             code = match.group(1) if match else code
-            # print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
     return code
 
 
@@ -128,4 +125,4 @@ if __name__ == "__main__":
     ]
 
     final_code = run_cache_process(code, space_maps)
-    # print(final_code)
+    print(final_code)

@@ -117,30 +117,28 @@ def generate_cache_write_prompt(i, space, op_name, code):
     return PROMPT
 
 
-def run_cache_process(code):
+def run_cache_process(code, space_maps):
     # Get the list of intrinsics from the code
     intrinsic_list = get_intrinsic_content(code)
+    # Ensure the intrinsic lists and spaces have matching lengths
+    if len(intrinsic_list) != len(space_maps):
+        raise ValueError(
+            f"intrinsics and memory spaces length mismatch for operation"
+            f"({len(intrinsic_list)} intrinsics vs {len(space_maps)} spaces)."
+        )
     # Iterate over each intrinsic found in the code
-    for op in intrinsic_list:
-        op_name = op.split("__")[1].split("(")[0]
-        inputs = get_input_memory_spaces(op)
-        outputs = get_output_memory_spaces(op)
-        for i, space in enumerate(inputs):
-            cache_read_prompt = generate_cache_read_prompt(i + 1, space, op_name, code)
-            # print("[INFO]*************cache_read_prompt: ", cache_read_prompt)
+    for op, space_map in zip(intrinsic_list, space_maps):
+        for key, value in space_map["input"].items():
+            cache_read_prompt = generate_cache_read_prompt(key, value, code)
             transformation_completion = openai.ChatCompletion.create(
                 model=model_name,
                 messages=[{"role": "user", "content": cache_read_prompt}],
             )
-
             content = transformation_completion.choices[0].message["content"]
             match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
             code = match.group(1) if match else code
-
-        for i, space in enumerate(outputs):
-            cache_write_prompt = generate_cache_write_prompt(
-                i + 1, space, op_name, code
-            )
+        for key, value in space_map["output"].items():
+            cache_write_prompt = generate_cache_write_prompt(key, value, code)
             transformation_completion = openai.ChatCompletion.create(
                 model=model_name,
                 messages=[{"role": "user", "content": cache_write_prompt}],
@@ -148,7 +146,6 @@ def run_cache_process(code):
             content = transformation_completion.choices[0].message["content"]
             match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
             code = match.group(1) if match else code
-            # print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
     return code
 
 
@@ -226,7 +223,9 @@ def post_processing_pipeline(code, target):
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
     code = run_code_decoration(code)
-    code = run_cache_process(code)
+    op_pragma = {}
+    final_code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
+    code = run_cache_process(code, space_maps)
     code = run_code_decoration(code)
     code = run_tensorization(code, target)
     return code

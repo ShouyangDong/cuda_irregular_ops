@@ -10,14 +10,7 @@ The goal is to cache data into faster {CACHE_NAME} memory and adjust the loop ac
 4. Output the transformed C code.
 
 ### Input:
-The input will be C for loop code that accesses arrays repeatedly, as shown below:
-```c
-for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] + B[i][j];
-    }
-}
-```
+The input will be C for loop code that accesses arrays repeatedly.
 
 ### Output:
 Transform the code by introducing cache {CACHE_NAME} for one or more of the arrays, as in the following steps:
@@ -34,6 +27,7 @@ CACHE_READ_DEMO = """
 ### Example Input:
 ```c
 for (int i = 0; i < N; i++) {
+    #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < M; j++) {
         C[i][j] = A[i][j] + B[i][j];
     }
@@ -42,19 +36,42 @@ for (int i = 0; i < N; i++) {
 
 ### Example Output:
 ```c
-// Cache read of A into {CACHE_NAME} memory
-{NAMESPACE} float A_{CACHE_NAME}[N][M];
 for (int i = 0; i < N; i++) {
+    {NAMESPACE} float A_{CACHE_NAME}[M];
+    // Cache read of A into {CACHE_NAME} memory
     for (int j = 0; j < M; j++) {
-        A_{CACHE_NAME}[i][j] = A[i][j];
+        A_{CACHE_NAME}[j] = A[i][j];
     }
+
+    #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A_{CACHE_NAME}[j] + B[i][j]; // Use cached version of A
+    }
+}
+```
+
+### Example Input:
+```c
+#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
+for (int j = 0; j < 64; j++) {
+    C[j] = A[j] + B[j];
 }
 
-for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A_{CACHE_NAME}[i][j] + B[i][j]; // Use cached version of A
-    }
+```
+
+### Example Output:
+```c
+{NAMESPACE} float A_{CACHE_NAME}[64];
+// Cache read of A into {CACHE_NAME} memory
+for (int j = 0; j < 64; j++) {
+    A_{CACHE_NAME}[j] = A[j];
 }
+
+#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
+for (int j = 0; j < 64; j++) {
+    C[j] = A_{CACHE_NAME}[j] + B[j]; // Use cached version of A
+}
+
 ```
 """
 
@@ -70,14 +87,7 @@ during computation and write them back to the main memory once the computation i
 3. **Write back the cached results** to the original array after the computation.
 
 ### Input:
-The input will be C for loop code where arrays are written to inside the loop, as shown below:
-```c
-for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] + B[i][j];
-    }
-}
-```
+The input will be C for loop code where arrays are written to inside the loop.
 
 ### Output:
 Transform the code by introducing a cache {CACHE_NAME} to buffer the write operations, and then write the cached results back to the original memory location after the loop. 
@@ -92,6 +102,7 @@ CACHE_WRITE_DEMO = """
 ### Example Input:
 ```c
 for (int i = 0; i < N; i++) {
+    #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < M; j++) {
         C[i][j] = A[i][j] + B[i][j];
     }
@@ -100,19 +111,39 @@ for (int i = 0; i < N; i++) {
 
 ### Example Output:
 ```c
-{NAMESPACE} float C_{CACHE_NAME}[N][M];
 
-// Cache writes to C in {CACHE_NAME} memory
+
 for (int i = 0; i < N; i++) {
+    {NAMESPACE} float C_{CACHE_NAME}[M];
+    #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < M; j++) {
         C_{CACHE_NAME}[j] = A[i][j] + B[i][j]; // Store result in {CACHE_NAME} cache
     }
-}
-// Write back the cached results to C
-for (int i = 0; i < N; i++) {
+    // Write back the cached results to C
     for (int j = 0; j < M; j++) {
         C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original array
     }
+}
+```
+
+### Example Input:
+```c
+#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
+for (int j = 0; j < 64; j++) {
+    C[j] = A[j] + B[j];
+}
+```
+
+### Example Output:
+```c
+{NAMESPACE} float C_{CACHE_NAME}[64];
+#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
+for (int j = 0; j < 64; j++) {
+    C_{CACHE_NAME}[j] = A[j] + B[j]; // Store result in {CACHE_NAME} cache
+}
+// Write back the cached results to C
+for (int j = 0; j < 64; j++) {
+    C[j] = C_{CACHE_NAME}[j]; // Write cached result to original array
 }
 ```
 """
