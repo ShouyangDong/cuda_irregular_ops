@@ -140,10 +140,8 @@ def generate_cache_read_prompt(buffer, space, code):
     PROMPT = """
     {SYSTEM_PROMPT}
     
-    Here is the introduction of cache read: {CACHE_READ_PROMPT}
-    The input buffer {buffer} is readed into {CACHE_NAME} memory space.
+    {CACHE_READ_PROMPT}
 
-    Please transform the following code {code} accordingt to the Example:
     {CACHE_READ_DEMO}
     Please return the output kernel function without any additional information.
     """
@@ -155,7 +153,7 @@ def generate_cache_read_prompt(buffer, space, code):
     PROMPT = PROMPT.replace("{buffer}", buffer)
     PROMPT = PROMPT.replace("{CACHE_READ_DEMO}", CACHE_READ_DEMO)
     PROMPT = PROMPT.replace("{CACHE_NAME}", space)
-    PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{CODE}", code)
     PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE)
     return PROMPT
 
@@ -164,10 +162,7 @@ def generate_cache_write_prompt(buffer, space, code):
     assert space, "memory space cannot be empty"
     PROMPT = """
     {SYSTEM_PROMPT}
-
-    Here is the introduction of cache write: {CACHE_WRITE_PROMPT}
-    The output buffer {buffer} is writed into {CACHE_NAME} memory space.
-    Please transform the following code {code} accordingt to the demo:
+    {CACHE_WRITE_PROMPT}
     {CACHE_WRITE_DEMO}
     Please return the output kernel function without any additional information.
     """
@@ -177,7 +172,7 @@ def generate_cache_write_prompt(buffer, space, code):
     PROMPT = PROMPT.replace("{buffer}", buffer)
     PROMPT = PROMPT.replace("{CACHE_WRITE_DEMO}", CACHE_WRITE_DEMO)
     PROMPT = PROMPT.replace("{CACHE_NAME}", space)
-    PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{CODE}", code)
     PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE)
     return PROMPT
 
@@ -288,7 +283,9 @@ def post_processing_pipeline(code, target):
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
     code = run_code_decoration(code)
-    op_pragma = {}
+    op_pragma = json.load(
+        open("./documents/operation_bang_C_instruction_map.json", "r")
+    )
     final_code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
     code = run_cache_process(code, space_maps)
     code = run_code_decoration(code)

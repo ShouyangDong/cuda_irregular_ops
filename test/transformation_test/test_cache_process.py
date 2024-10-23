@@ -103,7 +103,6 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_write_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            print("[IFNO]**********content: ", content)
             match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
             code = match.group(1) if match else code
     return code
