@@ -42,15 +42,17 @@ for (int i = 0; i < N; i++) {
 
 ### Example Output:
 ```c
+// Cache read of A into {CACHE_NAME} memory
+{NAMESPACE} float A_{CACHE_NAME}[N][M];
 for (int i = 0; i < N; i++) {
-    // Cache read of A into {CACHE_NAME} memory
-    {NAMESPACE} float A_{CACHE_NAME}[M];
     for (int j = 0; j < M; j++) {
-        A_{CACHE_NAME}[j] = A[i][j];
+        A_{CACHE_NAME}[i][j] = A[i][j];
     }
+}
 
+for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {
-        C[i][j] = A_{CACHE_NAME}[j] + B[i][j]; // Use cached version of A
+        C[i][j] = A_{CACHE_NAME}[i][j] + B[i][j]; // Use cached version of A
     }
 }
 ```
@@ -98,15 +100,16 @@ for (int i = 0; i < N; i++) {
 
 ### Example Output:
 ```c
+{NAMESPACE} float C_{CACHE_NAME}[N][M];
+
+// Cache writes to C in {CACHE_NAME} memory
 for (int i = 0; i < N; i++) {
-    // Cache writes to C in {CACHE_NAME} memory
-    {NAMESPACE} float C_{CACHE_NAME}[M];
-    
     for (int j = 0; j < M; j++) {
         C_{CACHE_NAME}[j] = A[i][j] + B[i][j]; // Store result in {CACHE_NAME} cache
     }
-
-    // Write back the cached results to C
+}
+// Write back the cached results to C
+for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {
         C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original array
     }

@@ -52,12 +52,13 @@ def replace_operation_with_intrinsic(code, op_pragma):
                 f"({len(output_operands)} operands vs {len(output_spaces)} spaces)."
             )
         # Create the space map by zipping operands and spaces
-        space_map = {
-            operand: space
-            for operand, space in zip(
-                input_operands + output_operands, input_spaces + output_spaces
-            )
+        input_map = {
+            operand: space for operand, space in zip(input_operands, input_spaces)
         }
+        output_map = {
+            operand: space for operand, space in zip(output_operands, output_spaces)
+        }
+        space_map = {"input": input_map, "output": output_map}
         # Replace the matching pragma with the corresponding value from op_pragma
         code = re.sub(pragma_pattern, op_pragma[op_name], code)
         # Append the space map for this operation
