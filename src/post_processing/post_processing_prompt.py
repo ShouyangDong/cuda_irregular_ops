@@ -1,49 +1,57 @@
 CACHE_READ_PROMPT = """
-cache read
+### Prompt:
+You are tasked with performing an optimization on C code that mimics the effect of `cache_read` from TVM in C for loops. 
+The goal is to cache data into faster local memory and adjust the loop accesses accordingly. 
 
-Function Overview:
-`CACHE_READ` is a memory optimization technique used to control how data is read 
-from cache memory in systems that use hierarchical memory structures (e.g., CPUs, GPUs). 
-It ensures that data is loaded efficiently from different levels of cache or main memory 
-into registers or local memory to minimize memory latency and maximize performance.
 
-Application Scenario:
-- In GPU workloads or NPU workloads, where threads operate in parallel and data needs to be 
-reused frequently within a thread block, `CACHE_READ` optimizes the data fetching from global 
-memory to shared memory or registers.
-"""
+### Steps for conversion:
+1. **Identify repeated memory reads** within the C code's for loops.
+2. **Cache these reads** into a local array (e.g., simulating shared memory or local memory).
+3. **Adjust the loop** to read from the cached array instead of the original memory location.
+4. Output the transformed C code.
 
-CACHE_READ_DEMO = """
-Usage Examples:
-
-```cpp
-// before: 
-```
-extern "C" void abs_kernel(float *A, float *B, float *C) {
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            C[i * 512 + j] = A[i * 512 + j] + B[i * 512 + j];
-        }
+### Input:
+The input will be C for loop code that accesses arrays repeatedly, as shown below:
+```c
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
     }
 }
 ```
-buffer region: A
-scope: NRAM
-// after:
 
+### Output:
+Transform the code by introducing cache {CACHE_NAME} for one or more of the arrays, as in the following steps:
+1. Load the array into a temporary cache before the innermost loop.
+2. Access the cache instead of the original memory location in the inner loop.
+
+### Requirements:
+- The transformation must mimic the behavior of `cache_read` from TVM.
+- All caching should be done before the innermost loop starts.
+- The transformation should not alter the semantics of the computation.
+"""
+
+CACHE_READ_DEMO = """
+### Example Input:
+```c
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
+    }
+}
 ```
-extern "C" void abs_kernel(float *A, float *B, float *C) {
-    __nram__ float A[512 * 512];
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            A_nram[i * 512 + j] = A[i * 512 + j];
-        }
+
+### Example Output:
+```c
+for (int i = 0; i < N; i++) {
+    // Cache read of A into {CACHE_NAME} memory
+    {NAMESPACE} float A_{CACHE_NAME}[M];
+    for (int j = 0; j < M; j++) {
+        A_{CACHE_NAME}[j] = A[i][j];
     }
 
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            C[i * 512 + j] = A_nram[i * 512 + j] + B[i * 512 + j];
-        }
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A_{CACHE_NAME}[j] + B[i][j]; // Use cached version of A
     }
 }
 ```
