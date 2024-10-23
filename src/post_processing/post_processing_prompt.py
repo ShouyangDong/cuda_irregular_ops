@@ -312,7 +312,7 @@ Use this prompt when preparing C++ code for SIMD tensorization. It helps identif
 The input is a C++ code snippet containing for loops with element-wise or matrix multiplication arithmetic operations, where you want to insert `#pragma operation( )` directives before each operation for SIMD vectorization purposes.
 
 ### Output:
-The transformed C++ code with the `#pragma operation( )` directives inserted before the detected operations inside loops, which marks them for SIMD vectorization.
+The transformed C++ code with the `#pragma operation( )` directives inserted before the detected operations and arguments inside loops, which marks them for SIMD vectorization.
 
 ### Example:
 
@@ -333,15 +333,15 @@ for (int i = 0; i < 64; i++) {
 
 #### Desired Output C++ Code with Pragmas for SIMD Preparation:
 ```cpp 
-#pragma operation(add)
+#pragma operation(add(input[A, B], output[C]))
 for (int i = 0; i < 64; i++) {
     C[i] = A[i] + B[i];
 }
-#pragma operation(mul)
+#pragma operation(mul(input[C, D], output[C]))
 for (int i = 0; i < 64; i++) {
     C[i] = C[i] * D[i];
 }
-#pragma operation(sub)
+#pragma operation(sub(input[C, D], output[E]))
 for (int i = 0; i < 64; i++) {
     E[i] = C[i] - D[i];
 }

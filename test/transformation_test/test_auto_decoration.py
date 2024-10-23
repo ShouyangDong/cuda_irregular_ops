@@ -1,5 +1,5 @@
 import openai
-from src.post_processing.post_processing import code_decoration
+from src.post_processing.post_processing import run_code_decoration
 
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
@@ -28,5 +28,5 @@ if __name__ == "__main__":
         C[(clusterId * 4 + coreId) * 64 + col] = C_nram[col];
     }
     """
-    code = code_decoration(code)
+    code = run_code_decoration(code)
     print(code)

@@ -59,7 +59,7 @@ def generate_cache_read_prompt(i, space, op_name, code):
 
 
 def generate_cache_write_prompt(i, space, op_name, code):
-    assert(space), "memory space cannot be empty"
+    assert space, "memory space cannot be empty"
     PROMPT = """
     {SYSTEM_PROMPT}
 
@@ -76,7 +76,7 @@ def generate_cache_write_prompt(i, space, op_name, code):
     PROMPT = PROMPT.replace("{CACHE_WRITE_DEMO}", CACHE_WRITE_DEMO)
     PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{code}", code)
-    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE) 
+    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE)
     return PROMPT
 
 
