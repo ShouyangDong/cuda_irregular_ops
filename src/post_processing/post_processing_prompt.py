@@ -1,26 +1,28 @@
 CACHE_READ_PROMPT = """
 You are tasked with performing an optimization on C code that mimics the effect of `cache_read` from TVM in C for loops. 
-The goal is to cache data into faster {CACHE_NAME} memory and adjust the loop accesses accordingly. 
+The goal is to buffer {buffer} into faster {CACHE_NAME} memory and adjust the loop accesses accordingly. 
 
 
 ### Steps for conversion:
-1. **Identify repeated memory reads** within the C code's for loops.
-2. **Cache these reads** into a {CACHE_NAME} array (e.g., simulating shared memory or {CACHE_NAME} memory).
-3. **Adjust the loop** to read from the cached array instead of the original memory location.
-4. Output the transformed C code.
+1. Identify repeated memory reads of {buffer} within the C code's for loops.
+2. **Cache these reads** {buffer} into a {CACHE_NAME} buffer.
+3. **Adjust the loop** to read from the cached buffer instead of the original memory location.
+4. **Preserve any existing cache reads** from other buffers (e.g., if `A` is already cached, do not overwrite it). 
+If both buffers (e.g., `A` and `B`) need to be cached, **perform cache reads for both** buffers into separate buffers.
+5. Output the transformed C code.
 
 ### Input:
-The input will be C for loop code that accesses arrays repeatedly.
+The input will be C for loop code that accesses buffer {buffer} repeatedly. The loop bounds should be retained as per the input code. 
+The transformation must not assume a fixed loop boundary, but instead, retain the original boundary in the output.
+Additionally, existing cache reads should not be removed.
 
-### Output:
-Transform the code by introducing cache {CACHE_NAME} for one or more of the arrays, as in the following steps:
-1. Load the array into a temporary cache before the innermost loop.
-2. Access the cache instead of the original memory location in the inner loop.
+{CODE}
 
 ### Requirements:
-- The transformation must mimic the behavior of `cache_read` from TVM.
-- All caching should be done before the innermost loop starts.
-- The transformation should not alter the semantics of the computation.
+- The transformation should **maintain the original loop bounds** from the input code.
+- Existing cached buffers (e.g., if `A` is cached in Nram) should be retained.
+- If new buffers need to be cached (e.g., `B`), cache them in separate buffers.
+- The transformation should mimic the behavior of `cache_read` from TVM and not alter the computation.
 """
 
 CACHE_READ_DEMO = """
@@ -78,24 +80,30 @@ for (int j = 0; j < 64; j++) {
 CACHE_WRITE_PROMPT = """
 Cache Write： 
 You are tasked with performing an optimization on C code that mimics the effect of `cache_write` from TVM in C for loops. 
-The goal is to buffer intermediate results in {CACHE_NAME} memory (e.g., a temporary array) 
+The goal is to buffer intermediate results in {CACHE_NAME} memory (e.g., a temporary buffer) 
 during computation and write them back to the main memory once the computation is complete.
 
 ### Task:
 1. **Identify the memory writes** in the innermost loop.
-2. **Cache the write operations** into a {CACHE_NAME} array  instead of writing directly to the original array.
-3. **Write back the cached results** to the original array after the computation.
+2. **Cache the write operations** into a {CACHE_NAME} buffer instead of writing directly to the original buffer.
+3. **Write back the cached results** to the original buffer after the computation.
+4. **Preserve any existing cache writes or reads** from other buffers (e.g., if `A` is already cached, do not overwrite it). 
+If both buffers (e.g., `A` and `B`) need to be cached, **perform cache reads for both** buffers into separate buffers.
+5. Output the transformed C code.
 
 ### Input:
-The input will be C for loop code where arrays are written to inside the loop.
+The input will be C for loop code that accesses buffers repeatedly. The loop bounds should be retained as per the input code. 
+The transformation must not assume a fixed loop boundary, but instead, retain the original boundary in the output.
+Additionally, existing cache reads should not be removed.
 
-### Output:
-Transform the code by introducing a cache {CACHE_NAME} to buffer the write operations, and then write the cached results back to the original memory location after the loop. 
+{CODE}
+
 
 ### Requirements:
-- The transformation should buffer the write operations to a temporary {CACHE_NAME} array.
-- After the innermost loop finishes, the results in the {CACHE_NAME} cache should be written back to the original array.
-- The transformation should not alter the semantics of the computation.
+- The transformation should **maintain the original loop bounds** from the input code.
+- Existing cached buffers (e.g., if `A` is cached in Nram) should be retained.
+- If new buffers need to be cached (e.g., `B`), cache them in separate buffers.
+- The transformation should mimic the behavior of `cache_read` from TVM and not alter the computation.
 """
 
 CACHE_WRITE_DEMO = """
@@ -121,7 +129,7 @@ for (int i = 0; i < N; i++) {
     }
     // Write back the cached results to C
     for (int j = 0; j < M; j++) {
-        C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original array
+        C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original buffer
     }
 }
 ```
@@ -143,7 +151,7 @@ for (int j = 0; j < 64; j++) {
 }
 // Write back the cached results to C
 for (int j = 0; j < 64; j++) {
-    C[j] = C_{CACHE_NAME}[j]; // Write cached result to original array
+    C[j] = C_{CACHE_NAME}[j]; // Write cached result to original buffer
 }
 ```
 """
@@ -340,7 +348,7 @@ This ensures that element-wise or matrix multiplication calculations can be effi
 during a later code transformation stage.
 
 ### Application Scenario:
-Use this prompt when preparing C++ code for SIMD tensorization. It helps identify and mark arithmetic operations inside for loops that operate on individual elements of arrays or matrices. These operations will be optimized and vectorized in the later stages.
+Use this prompt when preparing C++ code for SIMD tensorization. It helps identify and mark arithmetic operations inside for loops that operate on individual elements of buffers or matrices. These operations will be optimized and vectorized in the later stages.
 
 ### Input:
 The input is a C++ code snippet containing for loops with element-wise or matrix multiplication arithmetic operations, where you want to insert `#pragma operation( )` directives before each operation for SIMD vectorization purposes.
