@@ -76,36 +76,45 @@ def generate_cache_read_prompt(i, space, op_name, code):
     {SYSTEM_PROMPT}
     
     Here is the introduction of cache read: {CACHE_READ_PROMPT}
-    The {i}st input argument is readed into {space} memory space.
-    Please transform the following code {code} accordingt to the demo:
-    {CACHE_READ_DEMO}"""
+    The {i}st input argument is readed into {CACHE_NAME} memory space.
+
+    Please transform the following code {code} accordingt to the Example:
+    {CACHE_READ_DEMO}
+    Please return the output kernel function without any additional information.
+    """
+    space_map = {"nram": "__nram__", "wram": "__wram__"}
+    NAMESPACE = space_map[space.lower()]
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{CACHE_READ_PROMPT}", CACHE_READ_PROMPT)
     PROMPT = PROMPT.replace("{i}", str(i))
-    PROMPT = PROMPT.replace("{space}", space)
     PROMPT = PROMPT.replace("{CACHE_READ_DEMO}", CACHE_READ_DEMO)
+    PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE)
     return PROMPT
 
 
 def generate_cache_write_prompt(i, space, op_name, code):
+    assert(space), "memory space cannot be empty"
     PROMPT = """
     {SYSTEM_PROMPT}
 
     Here is the introduction of cache write: {CACHE_WRITE_PROMPT}
-    The {i}st output argument is writed into {space} memory space.
+    The {i}st output argument is writed into {CACHE_NAME} memory space.
     Please transform the following code {code} accordingt to the demo:
-    {CACHE_WRITE_DEMO}"""
-
+    {CACHE_WRITE_DEMO}
+    Please return the output kernel function without any additional information.
+    """
+    NAMESPACE = "__nram__"
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{CACHE_WRITE_PROMPT}", CACHE_WRITE_PROMPT)
     PROMPT = PROMPT.replace("{i}", str(i))
-    PROMPT = PROMPT.replace("{space}", space)
     PROMPT = PROMPT.replace("{CACHE_WRITE_DEMO}", CACHE_WRITE_DEMO)
+    PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE) 
     return PROMPT
-
 
 def run_cache_process(code):
     # Get the list of intrinsics from the code
@@ -117,13 +126,28 @@ def run_cache_process(code):
         outputs = get_output_memory_spaces(op)
         for i, space in enumerate(inputs):
             cache_read_prompt = generate_cache_read_prompt(i + 1, space, op_name, code)
-            print("[INFO]*************cache_read_prompt: ", cache_read_prompt)
+            # print("[INFO]*************cache_read_prompt: ", cache_read_prompt)
+            transformation_completion = openai.ChatCompletion.create(
+                model=model_name,
+                messages=[{"role": "user", "content": cache_read_prompt}],
+            )
+
+            content = transformation_completion.choices[0].message["content"]
+            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            code = match.group(1) if match else code
 
         for i, space in enumerate(outputs):
             cache_write_prompt = generate_cache_write_prompt(
                 i + 1, space, op_name, code
             )
-            print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
+            transformation_completion = openai.ChatCompletion.create(
+                model=model_name,
+                messages=[{"role": "user", "content": cache_write_prompt}],
+            )
+            content = transformation_completion.choices[0].message["content"]
+            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            code = match.group(1) if match else code
+            # print("[INFO]*************cache_write_prompt: ", cache_write_prompt)
     return code
 
 
