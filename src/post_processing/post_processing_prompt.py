@@ -1,12 +1,11 @@
 CACHE_READ_PROMPT = """
-### Prompt:
 You are tasked with performing an optimization on C code that mimics the effect of `cache_read` from TVM in C for loops. 
-The goal is to cache data into faster local memory and adjust the loop accesses accordingly. 
+The goal is to cache data into faster {CACHE_NAME} memory and adjust the loop accesses accordingly. 
 
 
 ### Steps for conversion:
 1. **Identify repeated memory reads** within the C code's for loops.
-2. **Cache these reads** into a local array (e.g., simulating shared memory or local memory).
+2. **Cache these reads** into a {CACHE_NAME} array (e.g., simulating shared memory or {CACHE_NAME} memory).
 3. **Adjust the loop** to read from the cached array instead of the original memory location.
 4. Output the transformed C code.
 
@@ -58,47 +57,61 @@ for (int i = 0; i < N; i++) {
 """
 
 CACHE_WRITE_PROMPT = """
-cache write
+Cache Write： 
+You are tasked with performing an optimization on C code that mimics the effect of `cache_write` from TVM in C for loops. 
+The goal is to buffer intermediate results in {CACHE_NAME} memory (e.g., a temporary array) 
+during computation and write them back to the main memory once the computation is complete.
 
-Function Overview:
-`CACHE_WRITE` is an optimization technique that allows data to be written directly to a cache, 
-ensuring faster access during future computations and reducing the overhead of writing to slower main memory. 
-By buffering writes in the cache, it improves memory locality, increases the overall performance of the program, 
-and minimizes memory bottlenecks. 
+### Task:
+1. **Identify the memory writes** in the innermost loop.
+2. **Cache the write operations** into a {CACHE_NAME} array  instead of writing directly to the original array.
+3. **Write back the cached results** to the original array after the computation.
 
-Application Scenario:
-- Deep learning frameworks often perform multiple passes over large datasets. For operations such as backpropagation, `CACHE_WRITE` helps in caching gradients or intermediate results during training, thus speeding up the memory access and reducing the time spent writing to memory.
+### Input:
+The input will be C for loop code where arrays are written to inside the loop, as shown below:
+```c
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
+    }
+}
+```
+
+### Output:
+Transform the code by introducing a cache {CACHE_NAME} to buffer the write operations, and then write the cached results back to the original memory location after the loop. 
+
+### Requirements:
+- The transformation should buffer the write operations to a temporary {CACHE_NAME} array.
+- After the innermost loop finishes, the results in the {CACHE_NAME} cache should be written back to the original array.
+- The transformation should not alter the semantics of the computation.
 """
 
 CACHE_WRITE_DEMO = """
-Usage Examples:
-// before:
-extern "C" void abs_kernel(float *A, float *B) {
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            B[i * 512 + j] = A[i * 512 + j] + 1.0;
-        }
+### Example Input:
+```c
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
     }
 }
+```
 
-buffer region: B
-scope: NRAM
-
-// after:
-extern "C" void abs_kernel(float *A, float *B) {
-    __nram__ float B[512 * 512];
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            B_nram[i * 512 + j] = A[i * 512 + j];
-        }
+### Example Output:
+```c
+for (int i = 0; i < N; i++) {
+    // Cache writes to C in {CACHE_NAME} memory
+    {NAMESPACE} float C_{CACHE_NAME}[M];
+    
+    for (int j = 0; j < M; j++) {
+        C_{CACHE_NAME}[j] = A[i][j] + B[i][j]; // Store result in {CACHE_NAME} cache
     }
 
-    for (int i = 0; i < 512; ++i) {
-        for (int j = 0; j < 512; ++j) {
-            B[i * 512 + j] = B_nram[i * 512 + j];
-        }
+    // Write back the cached results to C
+    for (int j = 0; j < M; j++) {
+        C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original array
     }
 }
+```
 """
 
 TENSORIZATION_PROMPT = """

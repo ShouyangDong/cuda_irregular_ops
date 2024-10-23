@@ -51,34 +51,32 @@ def generate_cache_read_prompt(i, space, op_name, code):
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{CACHE_READ_PROMPT}", CACHE_READ_PROMPT)
     PROMPT = PROMPT.replace("{i}", str(i))
-    PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{CACHE_READ_DEMO}", CACHE_READ_DEMO)
+    PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE)
     return PROMPT
 
 
 def generate_cache_write_prompt(i, space, op_name, code):
+    assert(space), "memory space cannot be empty"
     PROMPT = """
     {SYSTEM_PROMPT}
 
     Here is the introduction of cache write: {CACHE_WRITE_PROMPT}
-    The {i}st output argument is writed into {space} memory space.
+    The {i}st output argument is writed into {CACHE_NAME} memory space.
     Please transform the following code {code} accordingt to the demo:
     {CACHE_WRITE_DEMO}
-    
-    ### Steps for Conversion:
-    1. Identify the buffer that needs to be cached and locate all the writers of the buffer.
-    2. Create a new cache stage for the buffer to store it in a temporary buffer (cached version) for efficient access.
-    3. Update the writers to read from the cached buffer instead of the original one.
-    4. Ensure that the cache is written back to the original buffer if any modifications are made, maintaining synchronization between the cache and the original data source.
-    5. Manage memory usage efficiently, avoiding unnecessary memory overhead while ensuring fast access to frequently used data.
+    Please return the output kernel function without any additional information.
     """
+    NAMESPACE = "__nram__"
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{CACHE_WRITE_PROMPT}", CACHE_WRITE_PROMPT)
     PROMPT = PROMPT.replace("{i}", str(i))
-    PROMPT = PROMPT.replace("{space}", space)
     PROMPT = PROMPT.replace("{CACHE_WRITE_DEMO}", CACHE_WRITE_DEMO)
+    PROMPT = PROMPT.replace("{CACHE_NAME}", space)
     PROMPT = PROMPT.replace("{code}", code)
+    PROMPT = PROMPT.replace("{NAMESPACE}", NAMESPACE) 
     return PROMPT
 
 
