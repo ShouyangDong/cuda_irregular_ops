@@ -103,18 +103,38 @@ for (int j = 0; j < M; j++) {
 """
 
 LOOP_SPLIT_PROMPT = """
-Loop split
+Please split the following loop based on the parameter specified in the `#pragma loop_split` directive. 
 
-Function Overview:
-`LOOP_SPLIT` is a loop transformation technique used to break a single loop into two or more separate loops. 
-This technique can enhance performance by enabling better control over memory access, parallelization, 
-and instruction-level optimizations. 
+### Original Code:
+```cpp
+#pragma loop_split(4)
+for (int i = 0; i < 60; i++) {
+    A[i] = B[i] * C[i];
+}
+```
 
+### Transformation Steps:
+1. **Identify the Split Factor**: The split factor is specified as `4`, indicating that the loop variable `i` should be split into 4 outer iterations.
+2. **Calculate the Iteration Range**: Given that the original loop iterates from `0` to `59`, the outer loop should iterate 4 times, and the inner loop should cover the corresponding range of iterations. Each outer iteration will cover `60 / 4 = 15` iterations of the inner loop.
 
-Application Scenario:
-- In memory-bound applications, splitting a loop can improve data locality, reducing cache misses by working on smaller chunks of data.
-- For multicore systems or GPUs, splitting loops can facilitate parallel execution by distributing the work across multiple processing units.
-- Loops with conditionals can be split so that different conditions are handled in separate loops, improving the predictability of the loop behavior for the compiler.
+3. **Create the New Loop Structure**: The outer loop will iterate over `k` from `0` to `3`, and the inner loop will iterate over `j` from `0` to `14`. 
+
+### After Transformation:
+```cpp
+for (int k = 0; k < 4; k++) {
+    for (int j = 0; j < 15; j++) {
+        A[k * 15 + j] = B[k * 15 + j] * C[k * 15 + j];
+    }
+}
+```
+
+### Input Code:
+Please provide the C++ code containing nested `for` loops suitable for loop split.
+
+{code}
+
+### Output Code:
+Return the transformed C++ code after applying loop split.
 """
 
 LOOP_SPLIT_DEMO = """
@@ -130,13 +150,14 @@ for (int i = 0; i < 60; i++) {
 
 // after:
 ```cpp
-for (i.outer, 0, 4) {
-    for (i.inner, 0, 16) {
-        if ((i.inner + i.outer*16) < 60) {
-            A[i.inner + i.outer*16] = B[i.inner + i.outer*16] + B[i.inner + i.outer*16]
-        }
+for (int k = 0; k < 4; k++) {
+    for (int j = 0; j < 15; j++) {
+        if ((k * 15 + j) < 60) {
+            A[k * 15 + j] = B[k * 15 + j] * C[k * 15 + j];
+        } 
     }
 }
+
 ```
 """
 
