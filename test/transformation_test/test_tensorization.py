@@ -58,13 +58,13 @@ op_dict = {
         [in] dir: The copy direction.
     """,
     "matmul": """void __bang_mlp(float *dst, const float *src, const float *filter, int height, int width)
-    Applies multilayer perception operation. <dst>=<src>×<filter>.
-    Parameters
-    [out] dst: The address of the destination vector.
-    [in] src: The address of the source vector.
-    [in] filter: The address of filter matrix which has row-major data layout.
-    [in] height: The height of <filter>.
-    [in] width: The width of <filter>.
+        Applies multilayer perception operation. <dst>=<src>×<filter>.
+        Parameters
+        [out] dst: The address of the destination vector.
+        [in] src: The address of the source vector.
+        [in] filter: The address of filter matrix which has row-major data layout.
+        [in] height: The height of <filter>.
+        [in] width: The width of <filter>.
     """,
 }
 
@@ -74,7 +74,6 @@ def run_tensorization(code, target):
     for op in op_list:
         op = "memcpy" if "memory" in op else op
         op_document = op_dict[op]
-        print(op_document)
         code = tensorization(op, code, op_document)
     return code
 
