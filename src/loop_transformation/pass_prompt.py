@@ -56,31 +56,50 @@ leading to better performance on hardware such as CPUs, GPUs, or other accelerat
 By modifying the loop order, this technique can reduce cache misses and take advantage of memory hierarchies, 
 resulting in faster execution for data-intensive applications. 
 
-Application Scenario: 
-- For matrix multiplications, convolutions, or stencil computations, loop reordering can increase data locality, 
-reducing memory latency. 
-- Reordering loops in scientific computing kernels can optimize cache usage and improve performance. 
+Application Scenario:
+- In memory-bound applications, splitting a loop can improve data locality, reducing cache misses by working on smaller chunks of data.
+- For multicore systems or GPUs, splitting loops can facilitate parallel execution by distributing the work across multiple processing units.
+
+### Transformation Steps:
+1. **Analyze Loop Dependencies**: Ensure that the inner loop (the loop over `j`) does not depend on the execution order of the outer loop (the loop over `i`).
+2. **Check Array Access Patterns**: Make sure that reordering the loops does not affect data locality. For example, prioritize accessing adjacent memory locations to improve cache utilization.
+3. **Adjust Loop Structure**: Swap the order of the inner and outer loops.
+4. **Update Indices**: Ensure that all array accesses remain correct in the new loop structure.
+
+### Considerations:
+- **Data Dependency**: Ensure that there are no data dependencies between the reordered loops; otherwise, it could compromise the correctness of the program.
+- **Cache Performance**: Reordering may affect cache locality. Try to maintain contiguous memory access to optimize performance.
+- **Testing and Validation**: Conduct thorough testing after reordering to ensure that the output remains consistent with the original code.
+
+### Input Code:
+Please provide the C++ code containing nested `for` loops suitable for loop reorder.
+
+{code}
+
+### Output Code:
+Return the transformed C++ code after applying loop reorder.
 """
 
 LOOP_REORDER_DEMO = """
-Usage Examples:
+Example：
 
-// before:
+### Original Code:
 ```cpp
-#pragma loop_reorder
-for (int i = 0; i < N; i++) { 
-    for (int j = 0; j < N; j++) { 
-        A[i][j] = B[i][j] + C[i][j]; 
+for (int i = 0; i < N; i++) {
+    for (int j = 0; j < M; j++) {
+        C[i][j] = A[i][j] + B[i][j];
     }
 }
+```
 
-// after:
+### Target Code:
 ```cpp
-for (int j = 0; j < N; j++) { 
-    for (int i = 0; i < N; i++) { 
-        A[i][j] = B[i][j] + C[i][j]; 
+for (int j = 0; j < M; j++) {
+    for (int i = 0; i < N; i++) {
+        C[i][j] = A[i][j] + B[i][j];
     }
-} 
+}
+```
 """
 
 LOOP_SPLIT_PROMPT = """
