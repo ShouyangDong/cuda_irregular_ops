@@ -1,4 +1,3 @@
-import json
 import re
 
 import openai
@@ -6,7 +5,7 @@ import openai
 from src.post_processing.post_processing_prompt import TENSORIZATION_PROMPT
 from src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-3.5-turbo"""
+model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -16,12 +15,11 @@ def tensorization(op, code, document):
     {SYSTEM_PROMPT}
     
     Here is the introduction of Tensorization: {TENSORIZATION_PROMPT}
-    Please tensorize the sequential code of {op} below the #pragma operation in {code} 
+    Please tensorize the sequential code of {op} in {code} 
     accordingt to the introduction of tensorized intrinsic.
     {document}
     Please return the output kernel function without any additional information.
     """
-
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", TENSORIZATION_PROMPT)
     PROMPT = PROMPT.replace("{document}", document)
@@ -50,12 +48,33 @@ def get_operation_words(pragma_line):
     return matches
 
 
+op_dict = {
+    "memcpy": """void __memcpy(void *dst, const void *src, unsigned int size, mluMemcpyDirection_t dir)
+    Copies <size> bytes data from source address <src> to destination address <dst>.
+    parameters:
+        [out] dst: The address of destination area.
+        [in] src: The address of source area.
+        [in] size: The number of bytes to be copied.
+        [in] dir: The copy direction.
+    """,
+    "matmul": """void __bang_mlp(float *dst, const float *src, const float *filter, int height, int width)
+    Applies multilayer perception operation. <dst>=<src>×<filter>.
+    Parameters
+    [out] dst: The address of the destination vector.
+    [in] src: The address of the source vector.
+    [in] filter: The address of filter matrix which has row-major data layout.
+    [in] height: The height of <filter>.
+    [in] width: The width of <filter>.
+    """,
+}
+
+
 def run_tensorization(code, target):
-    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
     op_list = get_operation_words(code)
     for op in op_list:
         op = "memcpy" if "memory" in op else op
         op_document = op_dict[op]
+        print(op_document)
         code = tensorization(op, code, op_document)
     return code
 
@@ -87,3 +106,4 @@ if __name__ == "__main__":
     }
     """
     code = run_tensorization(code, target="BANG")
+    print(code)

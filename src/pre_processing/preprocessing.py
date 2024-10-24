@@ -107,7 +107,7 @@ def extract_bang_instructions(code):
 
 
 def run_detensorization(code, target):
-    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
+    op_dict = json.load(open("./documents/bang_c_user_guide.json", "r"))
     instructions = extract_bang_instructions(code)
     # First, detensorize memory
     code = detensorization("__memcpy", code, op_dict["__memcpy"])

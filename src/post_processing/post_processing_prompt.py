@@ -292,7 +292,7 @@ Please transform the following C++ by binding the parallel loops to GPU threads 
 ### Notes:
 - Replace the loop dimensions with `blockIdx.x` and `threadIdx` where possible. 
 - Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
-
+- The variables `blockIdx.x` and `threadIdx` are built-in parallel variables and do not require initialization.
 """
 
 THREAD_BINDING_PROMPT_BANG = """
@@ -339,7 +339,7 @@ Please transform the following C++ by binding the parallel loops to NPU clusters
 ### Notes:
 - Replace the loop dimensions with `clusterId` and `coreId` where possible. 
 - Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
-
+- The variables `clusterId` and `coreId` are built-in parallel variables and do not require initialization.
 """
 
 

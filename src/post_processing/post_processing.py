@@ -12,11 +12,12 @@ from src.post_processing.post_processing_prompt import (
     TENSORIZATION_PROMPT,
     THREAD_BINDING_DEMO_BANG,
     THREAD_BINDING_DEMO_CUDA,
-    THREAD_BINDING_PROMPT,
+    THREAD_BINDING_PROMPT_BANG,
+    THREAD_BINDING_PROMPT_CUDA,
 )
 from src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-3.5-turbo"""
+model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -32,13 +33,17 @@ def run_thread_binding(code, target):
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_demo = None
+    vairables = None
+    THREAD_BINDING_PROMPT = None
     if target == "CUDA":
         prompt_demo = THREAD_BINDING_DEMO_CUDA
+        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_CUDA
     elif target == "BANG":
         prompt_demo = THREAD_BINDING_DEMO_BANG
+        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_BANG
 
     PROMPT = PROMPT.replace("{THREAD_BINDING_PROMPT}", THREAD_BINDING_PROMPT)
-    PROMPT = PROMPT.replace("{LOOP_RECOVERY_DEMO}", prompt_demo)
+    PROMPT = PROMPT.replace("{THREAD_BINDING_DEMO}", prompt_demo)
     PROMPT = PROMPT.replace("{cpp_code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
@@ -253,7 +258,7 @@ def get_operation_words(pragma_line):
 
 
 def run_tensorization(code, target):
-    op_dict = json.load(open("./documents/bang_c_user_guide", "r"))
+    op_dict = json.load(open("./documents/bang_c_op_map.json", "r"))
     op_list = get_operation_words(code)
     for op in op_list:
         op = "memcpy" if "memory" in op else op
@@ -286,14 +291,13 @@ def post_processing_pipeline(code, target):
 
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
-    print(code)
     code = run_code_decoration(code)
     op_pragma = {}
     if target == "BANG":
         op_pragma = json.load(
             open("./documents/operation_bang_C_instruction_map.json", "r")
         )
-    final_code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
+    code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
     code = run_cache_process(code, space_maps)
     code = run_code_decoration(code)
     code = run_tensorization(code, target)
