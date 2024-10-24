@@ -1,9 +1,10 @@
+import json
+import logging
 import math
 import os
-import jieba
 import pickle
-import logging
-import json
+
+import jieba
 
 jieba.setLogLevel(log_level=logging.INFO)
 

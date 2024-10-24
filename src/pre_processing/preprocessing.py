@@ -1,14 +1,16 @@
-import re
-import openai
 import json
-from src.prompt.prompt import SYSTEM_PROMPT
+import re
+
+import openai
+
 from src.pre_processing.preprocessing_prompt import (
-    LOOP_RECOVERY_PROMPT_CUDA,
+    DETENSORIZATION_PROMPT_BANG,
+    LOOP_RECOVERY_DEMO_BANG,
     LOOP_RECOVERY_DEMO_CUDA,
     LOOP_RECOVERY_PROMPT_BANG,
-    LOOP_RECOVERY_DEMO_BANG,
-    DETENSORIZATION_PROMPT_BANG,
+    LOOP_RECOVERY_PROMPT_CUDA,
 )
+from src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"

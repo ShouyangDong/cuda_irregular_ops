@@ -1,8 +1,9 @@
 import glob
 import os
+import timeit
+
 import torch
 import torch.nn.functional as F
-import timeit
 
 
 def perf_elementwise(name, shape):

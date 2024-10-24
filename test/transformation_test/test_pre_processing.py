@@ -1,6 +1,5 @@
 from src.pre_processing.preprocessing import pre_processing_pipeline
 
-
 if __name__ == "__main__":
     func_content = """
     extern "C" __mlu_global__ void tanh(float* input0, float* active_tanh_210) {

@@ -1,9 +1,10 @@
-import numpy as np
-from ctypes import CDLL
-import subprocess
-import os
-import math
 import ctypes
+import math
+import os
+import subprocess
+from ctypes import CDLL
+
+import numpy as np
 import torch
 import torch.nn.functional as F
 

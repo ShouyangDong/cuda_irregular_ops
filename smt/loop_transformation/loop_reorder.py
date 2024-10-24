@@ -1,4 +1,4 @@
-from pycparser import c_parser, c_ast, c_generator
+from pycparser import c_ast, c_generator, c_parser
 
 
 # Custom visitor class to reorder loop index i and j

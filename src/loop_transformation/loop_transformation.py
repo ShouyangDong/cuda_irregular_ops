@@ -1,8 +1,9 @@
 import re
+
 import openai
 
 from src.loop_transformation.loop_transformation import *
-from src.prompt.prompt import SYSTEM_PROMPT, PRAGMA_INSERT_PROMPT, APPLY_OPT_PROMPT
+from src.prompt.prompt import APPLY_OPT_PROMPT, PRAGMA_INSERT_PROMPT, SYSTEM_PROMPT
 
 opt_options = [
     "LOOP_FUSION",

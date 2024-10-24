@@ -1,10 +1,10 @@
-import re
-import openai
 import json
+import re
+
+import openai
+
+from src.pre_processing.preprocessing_prompt import DETENSORIZATION_PROMPT_BANG
 from src.prompt.prompt import SYSTEM_PROMPT
-from src.pre_processing.preprocessing_prompt import (
-    DETENSORIZATION_PROMPT_BANG,
-)
 
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"

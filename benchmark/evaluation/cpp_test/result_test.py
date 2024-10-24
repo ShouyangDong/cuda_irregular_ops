@@ -1,6 +1,7 @@
-import subprocess
 import glob
 import os
+import subprocess
+
 from tqdm import tqdm
 
 

@@ -1,5 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # 数据
 operators = ["falcon w/o Auto-tuning", "falcon", "TVM"]

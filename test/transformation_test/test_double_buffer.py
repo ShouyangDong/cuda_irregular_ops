@@ -1,11 +1,12 @@
 import re
+
 import openai
 
-from src.prompt.prompt import SYSTEM_PROMPT
 from src.post_processing.post_processing_prompt import (
-    DOUBLE_BUFFER_PROMPT,
     DOUBLE_BUFFER_DEMO,
+    DOUBLE_BUFFER_PROMPT,
 )
+from src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"

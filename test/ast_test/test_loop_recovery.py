@@ -1,5 +1,6 @@
-from pycparser import c_ast, c_parser
 import re
+
+from pycparser import c_ast, c_parser
 
 ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 

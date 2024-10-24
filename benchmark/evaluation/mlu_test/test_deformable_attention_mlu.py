@@ -1,10 +1,11 @@
+import ctypes
+import os
+import subprocess
+from ctypes import CDLL
+
+import numpy as np
 import torch
 import torch.nn.functional as F
-import numpy as np
-from ctypes import CDLL
-import os
-import ctypes
-import subprocess
 
 
 def run_compilation(so_name, file_name):

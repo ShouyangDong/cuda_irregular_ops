@@ -1,4 +1,4 @@
-from pycparser import c_parser, c_ast, c_generator
+from pycparser import c_ast, c_generator, c_parser
 
 # C code with a function containing a for loop
 c_code = """

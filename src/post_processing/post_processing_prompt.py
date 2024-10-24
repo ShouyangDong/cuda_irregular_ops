@@ -297,13 +297,14 @@ THREAD_BINDING_PROMPT_BANG = """
 Thread Binding
 
 Function Overview:
-This prompt is designed to identify parallelizable loops or axes in C++ and bind them to the available cores on an NPU. 
-The prompt helps transform the input code by mapping the loops onto specific hardware resources like NPU clusters 
-and cores to enable parallel computation.
+You are tasked with identifying parallelizable loops in C++ code and binding them to the available clusters and cores on an NPU. 
+The target NPU has 4 clusters and 4 cores per cluster. Your goal is to transform the input code by mapping the loops onto specific
+hardware resources (clusters and cores) for parallel execution. 
+
 
 Application Scenario:
-Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.) 
-to the available cores in a NPU. This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
+Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop to the available cores in a NPU.
+This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
 
 Input:
 The input is a C++/CUDA code snippet containing loops that can be parallelized. The goal is to bind these loops to cores and clusters on an NPU for parallel execution. 
@@ -313,10 +314,12 @@ Output:
 The transformed code should include appropriate thread binding directives, ensuring that iterations of the loop are distributed across the clusters and cores of the NPU for parallel execution.
 
 
-### Steps for Insertion:
-1. **Identify loops or axes** that are candidates for parallel execution.
-2. **Bind the loops** to clusters and cores (e.g., clusterId, coreId), where clusterId maps to 4 clusters and coreId maps to 4 cores per cluster.
-3. Maintain the code logic to ensure the transformed code is functionally equivalent while parallelizing the computation.
+ ### Steps for the transformation: 
+ 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is larger than the number of clusters (4) or cores (4). 
+ 
+ 2. **Replace loop variables with `clusterId` and `coreId`:** - For loops where the iteration count is larger than the number of clusters (4) or cores (4), replace the loop variables with `clusterId` and `coreId` respectively. - If the loop’s iteration count is smaller than 4, add condition checks to ensure proper core binding. For example, `if (clusterId < dim)`. 
+ 
+ 3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `clusterId` and `coreId`, and directly map iterations to hardware cores and clusters. 
 
 
 ### Example 
@@ -332,9 +335,8 @@ Please transform the following C++ by binding the parallel loops to NPU clusters
 ```
 
 ### Notes:
-- Input code should be replaced with the actual input C++code containing loops that are suitable for parallelization.
-- The output should map parallel loops to the hardware resources available on NPU clusters/cores.
-- The prompt is flexible enough to handle NPU-specific architectures.
+- Replace the loop dimensions with `clusterId` and `coreId` where possible. 
+- Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
 
 """
 
@@ -347,7 +349,9 @@ THREAD_BINDING_DEMO_BANG = """
 #pragma thread_binding
 for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 4 j++) {
-        B[i * 4 + j] = A[i * 4 + j] + 1.0;
+        for (int k = 0; k <  7; k++) {
+            B[i * 4 * 7 + j * 7 + k] = A[i * 4 * 7 + j * 7 + k] + 1.0;
+        }
     }
 }
 ```
@@ -359,7 +363,9 @@ for (int i = 0; i < 4; ++i) {
 Expected Output:
 
 ```cpp
-B[clusterId * 4 + coreId] = A[clusterId * 4 + coreId] + 1.0;
+for (int k = 0; k <  7; k++) {
+    B[clusterId * 4 * 7 + coreId * 7 + k] = A[clusterId * 4 * 7 + coreId * 7 + k] + 1.0;
+}
 ```
 """
 

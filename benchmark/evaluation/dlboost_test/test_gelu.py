@@ -1,9 +1,10 @@
-import numpy as np
-from ctypes import CDLL
-import subprocess
-import os
-import ctypes
 import argparse
+import ctypes
+import os
+import subprocess
+from ctypes import CDLL
+
+import numpy as np
 
 
 def run_compilation(so_name, file_name):

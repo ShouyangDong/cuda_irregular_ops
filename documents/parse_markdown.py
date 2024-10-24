@@ -1,6 +1,7 @@
+import json
+
 import markdown
 from bs4 import BeautifulSoup
-import json
 
 
 def parse_markdown(file_path):

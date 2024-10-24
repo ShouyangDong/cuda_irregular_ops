@@ -1,5 +1,6 @@
-from pycparser import c_parser, c_ast, c_generator
 import json
+
+from pycparser import c_ast, c_generator, c_parser
 
 
 class NodeTransformer(c_ast.NodeVisitor):

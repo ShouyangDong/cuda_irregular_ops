@@ -1,11 +1,12 @@
 import glob
 import os
-import tvm
-from tvm import te, topi
-import tvm.topi.testing
+
 import numpy as np
-from tvm.topi.utils import get_const_tuple
 import torch
+import tvm
+import tvm.topi.testing
+from tvm import te, topi
+from tvm.topi.utils import get_const_tuple
 
 
 def perf_elementwise(name, file, shape):

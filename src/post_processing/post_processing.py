@@ -1,18 +1,20 @@
-import re
-import openai
 import json
-from src.prompt.prompt import SYSTEM_PROMPT
+import re
+
+import openai
+
 from src.post_processing.post_processing_prompt import (
+    CACHE_READ_DEMO,
+    CACHE_READ_PROMPT,
+    CACHE_WRITE_DEMO,
+    CACHE_WRITE_PROMPT,
+    DECORATION_PROMPT,
+    TENSORIZATION_PROMPT,
     THREAD_BINDING_DEMO_BANG,
     THREAD_BINDING_DEMO_CUDA,
     THREAD_BINDING_PROMPT,
-    CACHE_READ_PROMPT,
-    CACHE_READ_DEMO,
-    CACHE_WRITE_PROMPT,
-    CACHE_WRITE_DEMO,
-    DECORATION_PROMPT,
-    TENSORIZATION_PROMPT,
 )
+from src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"

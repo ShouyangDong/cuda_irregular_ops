@@ -1,6 +1,5 @@
 from src.post_processing.post_processing import post_processing_pipeline
 
-
 if __name__ == "__main__":
     code = """
     extern "C" void add_kernel(float* output, float* input1, float* input2) {

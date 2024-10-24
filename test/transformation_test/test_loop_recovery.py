@@ -1,13 +1,14 @@
 import re
+
 import openai
 
-from src.prompt.prompt import SYSTEM_PROMPT
 from src.pre_processing.preprocessing_prompt import (
-    LOOP_RECOVERY_PROMPT_CUDA,
+    LOOP_RECOVERY_DEMO_BANG,
     LOOP_RECOVERY_DEMO_CUDA,
     LOOP_RECOVERY_PROMPT_BANG,
-    LOOP_RECOVERY_DEMO_BANG,
+    LOOP_RECOVERY_PROMPT_CUDA,
 )
+from src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
