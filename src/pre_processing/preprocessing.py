@@ -123,5 +123,6 @@ def pre_processing_pipeline(code, target):
     :param func_content: The content of the function (code) to be transformed.
     :return: Transformed code after applying the two transformations."""
     code = run_loop_recovery(code, target)
-    code = run_detensorization(code, target)
+    if target in ["BANG"]:
+        code = run_detensorization(code, target)
     return code

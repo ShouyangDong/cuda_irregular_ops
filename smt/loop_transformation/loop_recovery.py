@@ -49,7 +49,7 @@ def prompt_generate(code, user_mannual):
 
 def gpt_transform(code, prompt):
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4-turbo",
         messages=[
             {"role": "system", "content": question_system_prompt},
             {"role": "user", "content": prompt},

@@ -2,7 +2,7 @@ import openai
 
 from src.post_processing.post_processing import run_code_decoration
 
-model_name = """gpt-3.5-turbo"""
+model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
