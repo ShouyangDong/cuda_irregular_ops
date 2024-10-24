@@ -251,10 +251,9 @@ THREAD_BINDING_PROMPT_CUDA = """
 Thread Binding
 
 Function Overview:
-This prompt is designed to identify parallelizable loops or axes in C++ 
-and bind them to the available threads on a GPU. The prompt helps 
-transform the input code by mapping the loops onto specific hardware resources like GPU threads
-to enable parallel computation.
+You are tasked with identifying parallelizable loops in C++ code and binding them to the available block and thread on an GPU. 
+Maximum number of threads per block is 1024, and the maximum number of blocks per grid is 256. 
+Your goal is to transform the input code by mapping the loops onto specific hardware resources (block and thread) for parallel execution. 
 
 Application Scenario:
 Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.) 
@@ -270,9 +269,13 @@ ensuring that each iteration of the loop is handled by different threads for par
 
 
 ### Steps for Insertion:
-1. Identify loops or axes that are candidates for parallel execution. Typically, outer loops or large iterations are ideal for parallelization.
-2. Bind these loops to available hardware threads directly using CUDA constructs like `threadIdx` and `blockIdx`.
-3. Maintain the code logic, ensuring that the transformed code remains functionally equivalent while parallelizing the computation.
+1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is smaller than the number of blocks (256) or threads (1024).
+2. Bind these loops to available hardware threads directly using CUDA constructs like `threadIdx.x` and `blockIdx.x`.
+    For loops where the iteration count is larger than the number of block (256) or threads (1024), 
+    replace the loop variables with `blockIdx.x` and `threadIdx` respectively. 
+    - If the loop’s iteration count is smaller than 1024, add condition checks to ensure proper core binding. 
+    For example, `if (threadIdx.x < dim)`. 
+3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `threadIdx.x` and `blockIdx.x`, and directly map iterations to hardware blocks and threads. 
 
 ### Example 
 {THREAD_BINDING_DEMO}
@@ -287,9 +290,8 @@ Please transform the following C++ by binding the parallel loops to GPU threads 
 ```
 
 ### Notes:
-- Input code should be replaced with the actual input C++/CUDA code containing loops that are suitable for parallelization.
-- The output should map parallel loops to the hardware resources available on GPU threads.
-- The prompt is flexible enough to handle GPU (CUDA).
+- Replace the loop dimensions with `blockIdx.x` and `threadIdx` where possible. 
+- Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
 
 """
 
@@ -374,8 +376,8 @@ Usage Examples:
 
 Input CUDA/NPU C++ Code:
 ```cpp
-for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
+for (int i = 0; i < 32; i++) {
+    for (int j = 0; j < 1024; j++) {
         C[i][j] = A[i][j] + B[i][j];
     }
 }
@@ -383,11 +385,9 @@ for (int i = 0; i < N; i++) {
 
 Desired Output Code with Thread/Cluster Binding:
 ```cpp
-#pragma thread_binding(threadIdx.x, blockIdx.x)
-for (int i = 0; i < N; i++) {
-    #pragma thread_binding(threadIdx.y, blockIdx.y)
-    for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] + B[i][j];
+if (blockIdx.x < 32) {
+    if (threadIdx.x < 1024) {
+        C[blockIdx.x][threadIdx.x] = A[blockIdx.x][threadIdx.x] + B[blockIdx.x][threadIdx.x];
     }
 }
 ```

@@ -38,7 +38,6 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{THREAD_BINDING_PROMPT}", THREAD_BINDING_PROMPT)
     PROMPT = PROMPT.replace("{THREAD_BINDING_DEMO}", prompt_demo)
     PROMPT = PROMPT.replace("{cpp_code}", code)
-    print("[INFO]**************prompt: ", PROMPT)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": PROMPT}],
@@ -75,16 +74,16 @@ if __name__ == "__main__":
     output_code = run_thread_binding(code, "BANG")
     print(output_code)
 
-    # code = """
-    # extern "C" void  add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
-    #     for (int i = 0; i < 256; i++) {
-    #         for (int j = 0; j < 1024; j++) {
-    #             if (((i * 1024) + j) < 2309) {
-    #                 T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
-    #             }
-    #         }
-    #     }
-    # }
-    # """
-    # code = run_thread_binding(code, target="CUDA")
-    # print(code)
+    code = """
+    extern "C" void  add_kernel(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        for (int i = 0; i < 256; i++) {
+            for (int j = 0; j < 1024; j++) {
+                if (((i * 1024) + j) < 2309) {
+                    T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
+                }
+            }
+        }
+    }
+    """
+    code = run_thread_binding(code, target="CUDA")
+    print(code)
