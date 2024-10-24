@@ -1,15 +1,30 @@
 LOOP_FUSION_PROMPT = """
 Loop fusion
 
-Function Overview: 
-Fuse multiple independent or partially dependent `for` loops into a single loop to minimize 
-loop overhead and improve cache efficiency. You should ensure that the transformation is correct, 
-preserves program semantics, and handles any dependencies or constraints between the loops. 
 
+You are tasked with performing loop fusion on the provided C++ code. Loop fusion is a technique that combines multiple loops that iterate over the same range into a single loop to enhance performance by improving data locality and reducing overhead.
 
-Application Scenario: 
-- When multiple loops iterate over the same or related data structures, loop fusion combines them into a single loop.
-- Loop fusion helps to streamline computation and reduce time spent on memory access.
+### Transformation Steps:
+1. **Identify Candidate Loops**: Look for `for` loops that operate over the same index ranges and perform independent operations on arrays.
+
+2. **Flatten the Loop Structure**: Replace the nested loops with a single loop that computes the combined index. This involves calculating a new index that represents the unique combination of the original loop indices.
+
+3. **Adjust the Loop Body**: Ensure that the operations within the fused loop reflect the original operations from the individual loops.
+
+4. **Remove the Original Loops**: After fusion, remove the original loops to avoid redundant computation.
+
+### Notes:
+- Ensure that the loops operate on the same data structure and index ranges.
+- Make sure that the original logic and computations are preserved after fusion.
+- Handle array indexing carefully to avoid out-of-bounds errors.
+
+### Input Code:
+Please provide the C++ code containing nested `for` loops suitable for loop fusion.
+
+{code}
+
+### Output Code:
+Return the transformed C++ code after applying loop fusion.
 """
 
 LOOP_FUSION_DEMO = """
@@ -107,8 +122,7 @@ for (i.outer, 0, 4) {
 """
 
 
-TENSOR_COnTRACTION = 
-""" 
+TENSOR_CONTRACTION = """ 
 Tensor Contraction
 
 Function Overview:  
@@ -120,8 +134,7 @@ Application Scenario:
 Tensor contraction is commonly applied in scenarios where two or more loops operate over dimensions with identical sizes and memory strides. This is particularly useful in optimizing tensor operations in deep learning models, such as matrix multiplications, convolutions, and backpropagation. By reducing the number of loops, tensor contraction helps minimize the overhead of loop management and improves the efficiency of data accesses, which is critical in handling large-scale tensor computations in fields like scientific computing, machine learning, and quantum physics.
 """
 
-TENSOR_COMTRACTION_DEMO = 
-"""
+TENSOR_COMTRACTION_DEMO = """
 Usage Examples:
 before:
 ```cpp
