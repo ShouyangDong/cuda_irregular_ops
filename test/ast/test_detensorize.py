@@ -1,14 +1,12 @@
-import json
-
 from pycparser import c_ast, c_generator, c_parser
 
+from smt.simplification import simplify_code
 from smt.util import NodeTransformer
 
 
 class FuncCallsRemover(NodeTransformer):
-    def __init__(self, file_name):
-        with open(file_name) as json_file:
-            self.func_defs = json.load(json_file)
+    def __init__(self, func_defs):
+        self.func_defs = func_defs
         self.parser = c_parser.CParser()
         self.parameter_mappings = {}
 
@@ -40,26 +38,21 @@ if __name__ == "__main__":
     code = """
     void add_kernel0(float* lhs, float* rhs, float* add_1515) {
         float lhs_local_nram[128];
-        if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
-            __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
-        }
-        if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
-            __memcpy(((float *)lhs_local_nram + (64)), ((float *)rhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
-        }
-        if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
-            __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (64)), 64);
-        }
-        if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
-            __memcpy(((float *)add_1515 + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), ((float *)lhs_local_nram + (0)), 256, NRAM2GDRAM);
-        }
+        __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
+        __memcpy(((float *)lhs_local_nram + (64)), ((float *)rhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
+        __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (64)), 64);
+        __memcpy(((float *)add_1515 + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), ((float *)lhs_local_nram + (0)), 256, NRAM2GDRAM);
     }
     """
+    func_map = {
+        "__memcpy": "void memcpy(float* dst, float* src, int size, char direction) {for(int i=0; i<size/4; i++) {dst[i]=src[i];}}",
+        "__bang_add": "void bang_add(float* C, float* A, float* B, int size) {for(int i=0; i < size; i++){C[i]=A[i] + B[i];}}",
+    }
 
     parser = c_parser.CParser()
     ast = parser.parse(code)
-    v = FuncCallsRemover(
-        file_name="/Users/dongshouyang/Downloads/micro/cuda_irregular_ops/function_definition.json"
-    )
+    v = FuncCallsRemover(func_map)
     v.visit(ast)
     generator = c_generator.CGenerator()
-    print(generator.visit(ast))
+    code = simplify_code(generator.visit(ast))
+    print(code)

@@ -29,7 +29,7 @@ class SimplifyConstants(NodeTransformer):
                 node.right, c_ast.Constant
             ):
                 # 计算并返回新的常量节点
-                result = int(node.left.value) / int(node.right.value)
+                result = int(node.left.value) // int(node.right.value)
                 return c_ast.Constant("int", value=str(result))
         elif node.op == "-":
             # 如果两个操作数都是常量，则可以进行简化
