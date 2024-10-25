@@ -188,8 +188,6 @@ def run_cache_process(code, space_maps):
     # Get the list of intrinsics from the code
     intrinsic_list = get_intrinsic_content(code)
     # Ensure the intrinsic lists and spaces have matching lengths
-    print(intrinsic_list)
-    print(space_maps)
     if len(intrinsic_list) != len(space_maps):
         raise ValueError(
             f"intrinsics and memory spaces length mismatch for operation"
@@ -250,7 +248,7 @@ def tensorization(op, code, document):
 
 def get_operation_words(pragma_line):
     # Modify the pattern to capture everything inside parentheses, allowing spaces and underscores
-    pattern = r"#pragma\s+operation\(([^)]+)\)"
+    pattern = r"#pragma\s+operation\((\w+)"
     # Find all matches in the given string
     matches = re.findall(pattern, pragma_line)
     # Return the list of matches (it will be empty if no matches are found)

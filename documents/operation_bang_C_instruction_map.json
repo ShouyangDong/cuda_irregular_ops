@@ -1,5 +1,6 @@
 {
     "matmul": "#pragma intrinsic(__bang_mlp(input[Nram, Wram], output[Nram]))",
     "add": "#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))",
-    "sub": "#pragma intrinsic(__bang_sub(input[Nram, Nram], output[Nram]))"
+    "sub": "#pragma intrinsic(__bang_sub(input[Nram, Nram], output[Nram]))",
+    "mul": "#pragma intrinsic(__bang_mul(input[Nram, Nram], output[Nram]))"
 }
