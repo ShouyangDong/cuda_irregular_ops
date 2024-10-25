@@ -289,14 +289,17 @@ def post_processing_pipeline(code, target):
 
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
-    code = run_code_decoration(code)
-    op_pragma = {}
-    if target == "BANG":
-        op_pragma = json.load(
-            open("./documents/operation_bang_C_instruction_map.json", "r")
-        )
-    code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
-    code = run_cache_process(code, space_maps)
-    code = run_code_decoration(code)
-    code = run_tensorization(code, target)
+
+    # when target is "BANG" or "DLBOOST", insert tensorization process.
+    if target in ["BANG", "DLBOOST"]:
+        code = run_code_decoration(code)
+        op_pragma = {}
+        if target == "BANG":
+            op_pragma = json.load(
+                open("./documents/operation_bang_C_instruction_map.json", "r")
+            )
+        code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
+        code = run_cache_process(code, space_maps)
+        code = run_code_decoration(code)
+        code = run_tensorization(code, target)
     return code

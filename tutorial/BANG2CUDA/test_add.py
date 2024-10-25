@@ -1,8 +1,18 @@
+from src.loop_transformation.loop_transformation import (
+    run_apply_split,
+    run_loop_fusion,
+    run_split_annotation,
+)
+from src.post_processing.post_processing import post_processing_pipeline
 from src.pre_processing.preprocessing import pre_processing_pipeline
 
 
 def run_transcompile_code(code, source, target):
     code = pre_processing_pipeline(code, target=source)
+    code = run_loop_fusion(code)
+    code = run_split_annotation(code)
+    code = run_apply_split(code)
+    code = post_processing_pipeline(code, target)
     return code
 
 
