@@ -1,94 +1,105 @@
-import openai
+import re
 
-question_system_prompt = """You are an expert compilation, and here is a code transformation task. 
-                            You will generate the corresponding code based on the hints provided.
-                            You should only output the C function without any explanation and natural language. 
-                            Wrap your code with "```"
-                            """
+from pycparser import c_ast, c_generator, c_parser
 
+from smt.util import NodeTransformer
 
-def prompt_generate(code, user_mannual):
-    """
-    Generate a prompt based on the presence of specific built-in variables in the code.
+# TODO(dongshouyang): Add more varaibles
+ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 
-    This function checks if the provided code contains certain built-in variables that are
-    indicative of parallel programming constructs. Depending on the presence of these
-    variables, it generates a boolean prompt that can be used to guide the transformation
-    of these variables into corresponding loop constructs.
-
-    Parameters:
-    - code (str): The source code to analyze.
-    - user_mannual (str): Additional user manual or instructions (currently not used).
-
-    Returns:
-    - bool: A prompt indicating whether 'threadIdx' or 'coreId' is present in the code.
-      - True if 'threadIdx' is found, suggesting a transformation to a thread-level loop.
-      - False if 'coreId' is found, suggesting a transformation to a core-level loop.
-
-    Raises:
-    - ValueError: If both 'threadIdx' and 'coreId' are found in the code, which is
-      ambiguous for transformation purposes.
-
-    Todo:
-    - Implement logic to handle cases where both 'threadIdx' and 'coreId' are present.
-    - Extend the function to recognize more built-in variables and generate appropriate prompts.
-    """
-    # Check for the presence of 'threadIdx' and 'coreId' in the code
-    has_threadIdx = "threadIdx" in code
-    has_coreId = "coreId" in code
-
-    # If both are present, raise an exception as it's ambiguous which to transform
-    if has_threadIdx and has_coreId:
-        raise ValueError("Ambiguous code: contains both 'threadIdx' and 'coreId'.")
-
-    # Generate the prompt based on the presence of the built-in variables
-    prompt = has_threadIdx
-
-    return prompt
+cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
+mlu_paravar = ["coreId", "clusterId"]
 
 
-def gpt_transform(code, prompt):
-    response = openai.ChatCompletion.create(
-        model="gpt-4-turbo",
-        messages=[
-            {"role": "system", "content": question_system_prompt},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.2,
-    )
-    return response["choices"][0]["message"]["content"]
+def get_thread_dim(cuda_code):
+    """The re module in Python is used to write a regular expression
+    that matches the number inside the parentheses."""
+    match = re.search(r"__launch_bounds__\((\d+)\)", cuda_code)
+    if match:
+        # 打印匹配的数值
+        launch_bounds_value = int(match.group(1))
+        return launch_bounds_value
+    else:
+        return None
 
 
-def transform_block(code, user_mannual):
-    """
-    Apply a series of transformations to the input code based on user manual instructions.
+class LoopRecoveryVisitor(NodeTransformer):
+    def __init__(self, variable_map):
+        self.variable_map = variable_map
 
-    This function first transforms the code using an AI model (presumably 'gpt') that
-    understands the user manual instructions. It then tests the transformed code with a
-    unittest to check for any issues. If the unittest indicates a failure, the code
-    is further refined using a Satisfiability Modulo Theories (SMT) solver to fix any
-    potential problems.
+    def visit_FuncDef(self, node):
+        self.visit(node.body)
+        body_node = node.body
+        for var, ext in self.variable_map.items():
+            init_node = c_ast.Decl(
+                name=var.replace(".", ""),
+                quals=[],
+                align=[],
+                storage=[],
+                funcspec=[],
+                type=c_ast.TypeDecl(
+                    declname=var.replace(".", ""),
+                    quals=[],
+                    align=None,
+                    type=c_ast.IdentifierType(["int"]),
+                ),
+                init=c_ast.Constant("int", "0"),
+                bitsize=None,
+            )
+            cond_node = c_ast.BinaryOp(
+                "<",
+                c_ast.ID(var.replace(".", "")),
+                c_ast.Constant("int", ext),
+            )
+            next_node = c_ast.UnaryOp("++", c_ast.ID(var.replace(".", "")))
 
-    Parameters:
-    - code (str): The original source code to be transformed.
-    - user_mannual (str): Instructions provided by the user to guide the transformation.
+            inner_loop = c_ast.For(
+                init=init_node, cond=cond_node, next=next_node, stmt=body_node
+            )
+            body_node = c_ast.Compound(block_items=[inner_loop])
 
-    Returns:
-    - str: The transformed and potentially fixed source code.
+        node = c_ast.FuncDef(
+            decl=node.decl, param_decls=node.param_decls, body=body_node
+        )
+        return node
 
-    Raises:
-    - NotImplementedError: If any of the transformation functions are not implemented.
+    def visit_StructRef(self, node):
+        assert node.name.name in ["threadIdx", "blockIdx"]
+        name = node.name.name
+        filed = node.field.name
+        return c_ast.ID(name=name + filed)
 
-    Todo:
-    - Add error handling for cases where transformation or testing fails.
-    - Improve the unittest to cover more edge cases.
-    """
-    # First transform the code using gpt
-    prompt = prompt_generate(user_mannual)
-    code = gpt_transform(code, prompt)
-    # Test the code with unittest
-    status = unittest(code)
-    # Fix the code with SMT
-    if not status:
-        code = smt_transform(code)
-    return code
+
+def ast_loop_recovery(code, target="CUDA"):
+    builtin_map = {}
+    if target == "CUDA":
+        for builtin_var in cuda_paravar:
+            if builtin_var in code:
+                builtin_map[builtin_var] = ParaVar[builtin_var]
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__global__\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
+
+    elif target == "BANG":
+        for builtin_var in mlu_paravar:
+            if builtin_var in code:
+                builtin_map[builtin_var] = ParaVar[builtin_var]
+
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__mlu_global__\s+", "", code)
+
+    # insert the parallel loop
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+    generator = c_generator.CGenerator()
+    visitor = LoopRecoveryVisitor(builtin_map)
+    visitor.visit(ast)
+    return generator.visit(ast)

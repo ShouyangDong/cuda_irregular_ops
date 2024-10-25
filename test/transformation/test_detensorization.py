@@ -44,7 +44,6 @@ def detensorization(op, code, document):
     match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
     if match:
         code_content = match.group(1)
-        print(code_content)
         return code_content
     return None
 
