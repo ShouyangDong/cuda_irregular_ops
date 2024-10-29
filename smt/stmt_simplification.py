@@ -12,7 +12,6 @@ class MergeForLoopsVisitor(NodeTransformer):
         i = 0
         while i < len(node.block_items):
             current_node = node.block_items[i]
-
             # 检查是否是 for 循环，且下一个节点也是 for 循环
             if (
                 isinstance(current_node, c_ast.For)
@@ -74,30 +73,27 @@ code = """
 void add_kernel0(float *lhs, float *rhs, float *add_1515)
 {
   float lhs_local_nram[128];
-  {
-    for (int i = 0; i < 64; i++)
-    {
-      (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
-    }
-  }
-  {
-    for (int i = 0; i < 64; i++)
-    {
-      (((float *) lhs_local_nram) + 64)[i] = (((float *) rhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
-    }
-  }
-  {
-    for (int i = 0; i < 64; i++)
-    {
-      (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs_local_nram) + 0)[i] + (((float *) lhs_local_nram) + 64)[i];
-    }
-  }
-  {
-    for (int i = 0; i < 64; i++)
-    {
-      (((float *) add_1515) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i] = (((float *) lhs_local_nram) + 0)[i];
-    }
-  }
+for (int i = 0; i < 64; i++)
+{
+    (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
+}
+
+for (int i = 0; i < 64; i++)
+{
+    (((float *) lhs_local_nram) + 64)[i] = (((float *) rhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
+}
+
+for (int i = 0; i < 64; i++)
+{
+    (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs_local_nram) + 0)[i] + (((float *) lhs_local_nram) + 64)[i];
+}
+
+
+for (int i = 0; i < 64; i++)
+{
+    (((float *) add_1515) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i] = (((float *) lhs_local_nram) + 0)[i];
+}
+
 }
 """
 
