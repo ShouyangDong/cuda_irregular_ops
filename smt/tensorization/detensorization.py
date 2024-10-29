@@ -1,7 +1,5 @@
 import json
-
 from pycparser import c_ast, c_generator, c_parser
-
 from smt.util import NodeTransformer
 
 
@@ -25,7 +23,7 @@ class Detensorizer(NodeTransformer):
                 arg: param for arg, param in zip(seq_def_name, node.args.exprs)
             }
             body = seq_def.ext[0].body
-            return self.visit(body)
+            return self.visit(body.block_items[0])
         else:
             return node
 
