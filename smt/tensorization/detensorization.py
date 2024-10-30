@@ -81,3 +81,13 @@ if __name__ == "__main__":
     """
     code = ast_detensorization(code, "BANG")
     print(code)
+    code = """
+        void tanh(float* input0, float* active_tanh_210) {
+        float input0_local_nram[640];
+        __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
+        __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
+        __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
+    }
+    """
+    code = ast_detensorization(code, "BANG")
+    print(code)

@@ -16,6 +16,10 @@ class NodeTransformer(c_ast.NodeVisitor):
                             continue
                     new_values.append(value)
                 old_value[:] = new_values
+            elif isinstance(old_value, c_ast.FuncCall):
+                new_node = self.generic_visit(old_value)
+                setattr(node, field, new_node)
+
             elif isinstance(old_value, c_ast.Node):
                 new_node = self.visit(old_value)
                 setattr(node, field, new_node)
