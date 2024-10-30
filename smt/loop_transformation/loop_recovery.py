@@ -88,6 +88,9 @@ def ast_loop_recovery(code, target="CUDA"):
         # 移除 `__launch_bounds__(\d+)`
         code = re.sub(r"\b__restrict__\b", "", code)
 
+        # 移除所有 C/C++ 样式的注释
+        code = re.sub(r'//.*?\n|/\*.*?\*/', '', code, flags=re.S)
+
     elif target == "BANG":
         for builtin_var in mlu_paravar:
             if builtin_var in code:
@@ -101,6 +104,9 @@ def ast_loop_recovery(code, target="CUDA"):
 
         # 使用正则表达式移除 `__nram__` 关键字，仅保留 `float` 声明
         code = re.sub(r"\b__nram__\s+", "", code)
+
+        # 移除所有 C/C++ 样式的注释
+        code = re.sub(r'//.*?\n|/\*.*?\*/', '', code, flags=re.S)
 
     # insert the parallel loop
     parser = c_parser.CParser()
