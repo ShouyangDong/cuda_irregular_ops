@@ -11,16 +11,15 @@ cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
 mlu_paravar = ["coreId", "clusterId"]
 
 
-def get_thread_dim(cuda_code):
+def update_dim(cuda_code):
     """The re module in Python is used to write a regular expression
     that matches the number inside the parentheses."""
     match = re.search(r"__launch_bounds__\((\d+)\)", cuda_code)
     if match:
         # 打印匹配的数值
         launch_bounds_value = int(match.group(1))
-        return launch_bounds_value
-    else:
-        return None
+        ParaVar["threadIdx.x"] = launch_bounds_value
+    return ParaVar
 
 
 class LoopRecoveryVisitor(NodeTransformer):
@@ -71,6 +70,7 @@ class LoopRecoveryVisitor(NodeTransformer):
 
 
 def ast_loop_recovery(code, target="CUDA"):
+    ParaVar = update_dim(code)
     builtin_map = {}
     if target == "CUDA":
         for builtin_var in cuda_paravar:
@@ -84,6 +84,9 @@ def ast_loop_recovery(code, target="CUDA"):
 
         # 移除 `__launch_bounds__(\d+)`
         code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"\b__restrict__\b", "", code)
 
     elif target == "BANG":
         for builtin_var in mlu_paravar:
@@ -103,3 +106,36 @@ def ast_loop_recovery(code, target="CUDA"):
     visitor = LoopRecoveryVisitor(builtin_map)
     visitor.visit(ast)
     return generator.visit(ast)
+
+
+if __name__ == "__main__":
+    cuda_code = """
+    void add(float*  A, float*  B, float*  T_add) {
+        if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
+            T_add[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = (A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] + B[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
+        }
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)
+
+    bang_code = """
+    void matmul_kernel(float *A, float *B, float *C) {
+        for (int col = 0; col < 128; col++) {
+            C[(clusterId * 4 + coreId) * 128 + col] = 0.0f;
+            for (int i = 0; i < 128; i++) {
+                C[(clusterId * 4 + coreId) * 128 + col] += A[(clusterId * 4 + coreId) * 128 + i] * B[i * 128 + col];
+            }
+        }
+    }
+    """
+    converted_code = ast_loop_recovery(bang_code, "BANG")
+    print(converted_code)
+
+    cuda_code = """
+    __global__ void __launch_bounds__(960) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)

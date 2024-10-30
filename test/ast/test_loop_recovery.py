@@ -11,16 +11,15 @@ cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
 mlu_paravar = ["coreId", "clusterId"]
 
 
-def get_thread_dim(cuda_code):
+def update_dim(cuda_code):
     """The re module in Python is used to write a regular expression
     that matches the number inside the parentheses."""
     match = re.search(r"__launch_bounds__\((\d+)\)", cuda_code)
     if match:
         # 打印匹配的数值
         launch_bounds_value = int(match.group(1))
-        return launch_bounds_value
-    else:
-        return None
+        ParaVar["threadIdx.x"] = launch_bounds_value
+    return ParaVar
 
 
 class LoopRecoveryVisitor(NodeTransformer):
@@ -71,16 +70,34 @@ class LoopRecoveryVisitor(NodeTransformer):
 
 
 def ast_loop_recovery(code, target="CUDA"):
+    ParaVar = update_dim(code)
     builtin_map = {}
     if target == "CUDA":
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__global__\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"\b__restrict__\b", "", code)
 
     elif target == "BANG":
         for builtin_var in mlu_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
+
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__mlu_global__\s+", "", code)
 
     # insert the parallel loop
     parser = c_parser.CParser()
@@ -113,4 +130,12 @@ if __name__ == "__main__":
     }
     """
     converted_code = ast_loop_recovery(bang_code, "BANG")
+    print(converted_code)
+
+    cuda_code = """
+    __global__ void __launch_bounds__(960) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
     print(converted_code)
