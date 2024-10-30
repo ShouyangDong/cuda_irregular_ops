@@ -51,19 +51,15 @@ class InlineTransformer(NodeTransformer):
             return self.nodes_equal(stmt1.lvalue, stmt2.rvalue.args)
 
         elif isinstance(stmt2.rvalue, c_ast.UnaryOp):
-            # generator = c_generator.CGenerator()
-            # output_code = generator.visit(stmt1.lvalue)
-            # print(output_code)
-            # generator = c_generator.CGenerator()
-            # output_code = generator.visit(stmt2.rvalue.expr)
-            # print(output_code)
             return self.nodes_equal(stmt1.lvalue, stmt2.rvalue.expr)
+
         else:
             return self.nodes_equal(stmt1.lvalue, stmt2.rvalue)
 
     def create_inlined_stmt(self, stmt1, stmt2):
         """创建一个新的内联语句，将 stmt2 的右值更新为 stmt1 的左值"""
         # 更新 stmt2 的右值为 stmt1 的左值
+        # TODO(add binary op check)
         if isinstance(stmt2.rvalue, c_ast.FuncCall):
             inlined_stmt = c_ast.Assignment(
                 op="=",
@@ -73,16 +69,10 @@ class InlineTransformer(NodeTransformer):
                 ),
             )
         elif isinstance(stmt2.rvalue, c_ast.UnaryOp):
-            inlined_stmt = (
-                c_ast.Assignment(
-                    op="=",
-                    lvalue=stmt2.lvalue,
-                    rvalue=c_ast.UnaryOp(op=stmt2.rvalue.op, expr=stmt1.rvalue),
-                ),
-            )
-        else:
             inlined_stmt = c_ast.Assignment(
-                op="=", lvalue=stmt2.lvalue, rvalue=stmt1.rvalue
+                op="=",
+                lvalue=stmt2.lvalue,
+                rvalue=c_ast.UnaryOp(op=stmt2.rvalue.op, expr=stmt1.rvalue),
             )
         return inlined_stmt
 
