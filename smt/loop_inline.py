@@ -74,6 +74,10 @@ class InlineTransformer(NodeTransformer):
                 lvalue=stmt2.lvalue,
                 rvalue=c_ast.UnaryOp(op=stmt2.rvalue.op, expr=stmt1.rvalue),
             )
+        else:
+            inlined_stmt = c_ast.Assignment(
+                op="=", lvalue=stmt2.lvalue, rvalue=stmt1.rvalue
+            )
         return inlined_stmt
 
     def nodes_equal(self, node1, node2):

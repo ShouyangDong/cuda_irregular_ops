@@ -2,13 +2,14 @@ from smt.loop_transformation.loop_recovery import ast_loop_recovery
 from smt.simplification import simplify_code
 from smt.stmt_simplification import ast_stmt_simplification
 from smt.tensorization.detensorization import ast_detensorization
-
+from smt.loop_inline import ast_inline
 
 def pre_processing_pipeline(code, target):
     code = ast_loop_recovery(code, target)
     code = ast_detensorization(code, target)
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
+    code = ast_inline(code)
     return code
 
 
