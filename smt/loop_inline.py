@@ -46,20 +46,22 @@ class InlineTransformer(NodeTransformer):
 
     def is_dependency(self, stmt1, stmt2):
         """检查 stmt1 的输出是否是 stmt2 的输入"""
-        # print(type(stmt2.rvalue))
         if isinstance(stmt2.rvalue, c_ast.FuncCall):
-            return self.nodes_equal(stmt1.lvalue, stmt2.rvalue.args)
+            return self.nodes_equal(stmt1.lvalue, stmt2.rvalue.args.exprs[0])
 
         elif isinstance(stmt2.rvalue, c_ast.UnaryOp):
             return self.nodes_equal(stmt1.lvalue, stmt2.rvalue.expr)
+
+        elif isinstance(stmt2.rvalue, c_ast.BinaryOp):
+            return self.nodes_equal(
+                stmt1.lvalue, stmt2.rvalue.left
+            ) or self.nodes_equal(stmt1.lvalue, stmt2.rvalue.right)
 
         else:
             return self.nodes_equal(stmt1.lvalue, stmt2.rvalue)
 
     def create_inlined_stmt(self, stmt1, stmt2):
         """创建一个新的内联语句，将 stmt2 的右值更新为 stmt1 的左值"""
-        # 更新 stmt2 的右值为 stmt1 的左值
-        # TODO(add binary op check)
         if isinstance(stmt2.rvalue, c_ast.FuncCall):
             inlined_stmt = c_ast.Assignment(
                 op="=",
@@ -74,6 +76,23 @@ class InlineTransformer(NodeTransformer):
                 lvalue=stmt2.lvalue,
                 rvalue=c_ast.UnaryOp(op=stmt2.rvalue.op, expr=stmt1.rvalue),
             )
+        elif isinstance(stmt2.rvalue, c_ast.BinaryOp):
+            if self.nodes_equal(stmt1.lvalue, stmt2.rvalue.left):
+                inlined_stmt = c_ast.Assignment(
+                    op="=",
+                    lvalue=stmt2.lvalue,
+                    rvalue=c_ast.BinaryOp(
+                        op=stmt2.rvalue.op, left=stmt1.rvalue, right=stmt2.rvalue.right
+                    ),
+                )
+            else:
+                inlined_stmt = c_ast.Assignment(
+                    op="=",
+                    lvalue=stmt2.lvalue,
+                    rvalue=c_ast.BinaryOp(
+                        op=stmt2.rvalue.op, left=stmt2.rvalue.left, right=stmt1.rvalue
+                    ),
+                )
         else:
             inlined_stmt = c_ast.Assignment(
                 op="=", lvalue=stmt2.lvalue, rvalue=stmt1.rvalue

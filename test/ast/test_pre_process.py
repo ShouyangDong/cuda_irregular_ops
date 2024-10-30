@@ -1,8 +1,9 @@
+from smt.loop_inline import ast_inline
 from smt.loop_transformation.loop_recovery import ast_loop_recovery
 from smt.simplification import simplify_code
 from smt.stmt_simplification import ast_stmt_simplification
 from smt.tensorization.detensorization import ast_detensorization
-from smt.loop_inline import ast_inline
+
 
 def pre_processing_pipeline(code, target):
     code = ast_loop_recovery(code, target)
@@ -33,4 +34,15 @@ if __name__ == "__main__":
     }
     """
     code = pre_processing_pipeline(func_content, target="CUDA")
+    print(code)
+    code = """
+    extern "C" __mlu_global__ void add_kernel0(float* lhs, float* rhs, float* add_1935) {
+        __nram__ float lhs_local_nram[2048];
+        __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);
+        __memcpy(((float *)lhs_local_nram + (1024)), ((float *)rhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);
+        __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (1024)), 1024);
+        __memcpy(((float *)add_1935 + ((((int)coreId) * 1024))), ((float *)lhs_local_nram + (0)), 4096, NRAM2GDRAM);
+    }
+    """
+    code = pre_processing_pipeline(code, target="BANG")
     print(code)
