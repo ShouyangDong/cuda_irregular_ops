@@ -89,7 +89,7 @@ def ast_loop_recovery(code, target="CUDA"):
         code = re.sub(r"\b__restrict__\b", "", code)
 
         # 移除所有 C/C++ 样式的注释
-        code = re.sub(r'//.*?\n|/\*.*?\*/', '', code, flags=re.S)
+        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
 
     elif target == "BANG":
         for builtin_var in mlu_paravar:
@@ -106,7 +106,7 @@ def ast_loop_recovery(code, target="CUDA"):
         code = re.sub(r"\b__nram__\s+", "", code)
 
         # 移除所有 C/C++ 样式的注释
-        code = re.sub(r'//.*?\n|/\*.*?\*/', '', code, flags=re.S)
+        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
 
     # insert the parallel loop
     parser = c_parser.CParser()

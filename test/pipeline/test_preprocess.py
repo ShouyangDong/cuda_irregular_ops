@@ -25,37 +25,27 @@ def falcon_preprocess_pipeline(file_name, target):
         org_code = f.read()
         f.close()
 
-    code = run_loop_recovery(org_code, target)
-    if not unitest(file_name, code, target):
-        code = ast_loop_recovery(org_code, target)
+    device_code = org_code.split("extern")[0]
+    host_code = "extern" + org_code.split("extern")[1]
+
+    code = run_loop_recovery(device_code, target)
+    if not unitest(file_name, device_code + host_code, target):
+
+        code = ast_loop_recovery(device_code, target)
 
     if target in ["BANG"]:
         modi_code = run_detensorization(code, target)
-        if not unitest(file_name, modi_code, target):
-            code = ast_detensorization(code, target)
+        if not unitest(file_name, modi_code + host_code, target):
+            modi_code = ast_detensorization(code, target)
 
     return code
 
 
 if __name__ == "__main__":
-    # func_content = """
-    # extern "C" __mlu_global__ void sigmoid_kernel0(float* input0, float* active_sigmoid_116) {
-    #     __nram__ float input0_local_nram[128];
-    #     if (((((int)clusterId) * 4) + ((int)coreId)) < 5) {
-    #         __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 512) + (((int)coreId) * 128)))), 512, GDRAM2NRAM);
-    #     }
-    #     if (((((int)clusterId) * 4) + ((int)coreId)) < 5) {
-    #         __bang_active_sigmoid(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 128);
-    #     }
-    #     if (((((int)clusterId) * 4) + ((int)coreId)) < 5) {
-    #         __memcpy(((float *)active_sigmoid_116 + (((((int)clusterId) * 512) + (((int)coreId) * 128)))), ((float *)input0_local_nram + (0)), 512, NRAM2GDRAM);
-    #     }
-    # }
-    # """
-    # code = falcon_preprocess_pipeline(func_content, target="BANG")
-    # print(code)
+    cuda_file_name = "benchmark/data/mlu_code_test/sign_45_25.mlu"
+    code = falcon_preprocess_pipeline(cuda_file_name, target="BANG")
+    print(code)
 
     cuda_file_name = "benchmark/data/cuda_code_test/add_3_3_256.cu"
-
     code = falcon_preprocess_pipeline(cuda_file_name, target="CUDA")
     print(code)
