@@ -99,6 +99,9 @@ def ast_loop_recovery(code, target="CUDA"):
         # 移除 `__global__` 修饰符
         code = re.sub(r"__mlu_global__\s+", "", code)
 
+        # 使用正则表达式移除 `__nram__` 关键字，仅保留 `float` 声明
+        code = re.sub(r"\b__nram__\s+", "", code)
+
     # insert the parallel loop
     parser = c_parser.CParser()
     ast = parser.parse(code)

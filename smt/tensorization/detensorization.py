@@ -4,6 +4,8 @@ from pycparser import c_ast, c_generator, c_parser
 
 from smt.util import NodeTransformer
 
+file_name = "documents/op_tensorization.json"
+
 
 class Detensorizer(NodeTransformer):
     def __init__(self, func_defs):
@@ -35,7 +37,7 @@ class Detensorizer(NodeTransformer):
         return node
 
 
-def smt_transform(code, file_name):
+def ast_detensorization(code, target):
     """
     Transform C code using an SMT solver to optimize loop constructs.
 
@@ -55,17 +57,16 @@ def smt_transform(code, file_name):
     - Implement additional error checking for the input parameters.
     - Extend the visitor to handle more complex loop structures.
     """
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-
-    with open(file_name) as json_file:
-        func_defs = json.load(json_file)
-
-    visitor = Detensorizer(func_defs)
-    visitor.visit(ast)
-    generator = c_generator.CGenerator()
-    transformed_code = generator.visit(ast)
-    return transformed_code
+    if target == "BANG":
+        parser = c_parser.CParser()
+        ast = parser.parse(code)
+        with open(file_name) as json_file:
+            func_defs = json.load(json_file)
+        visitor = Detensorizer(func_defs)
+        visitor.visit(ast)
+        generator = c_generator.CGenerator()
+        code = generator.visit(ast)
+    return code
 
 
 if __name__ == "__main__":
@@ -78,4 +79,5 @@ if __name__ == "__main__":
         __memcpy(((float *)add_1515 + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), ((float *)lhs_local_nram + (0)), 256, NRAM2GDRAM);
     }
     """
-    code = smt_transform(code, "a.json")
+    code = ast_detensorization(code, "BANG")
+    print(code)

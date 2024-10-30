@@ -68,43 +68,80 @@ class MergeForLoopsVisitor(NodeTransformer):
         )
 
 
-# 示例使用
-code = """
-void add_kernel0(float *lhs, float *rhs, float *add_1515)
-{
-  float lhs_local_nram[128];
-for (int i = 0; i < 64; i++)
-{
-    (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
-}
+def ast_stmt_simplification(code):
+    # 解析代码并应用合并
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
 
-for (int i = 0; i < 64; i++)
-{
-    (((float *) lhs_local_nram) + 64)[i] = (((float *) rhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
-}
+    # 使用 MergeForLoopsVisitor 进行遍历和合并
+    merge_visitor = MergeForLoopsVisitor()
+    ast = merge_visitor.visit(ast)
 
-for (int i = 0; i < 64; i++)
-{
-    (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs_local_nram) + 0)[i] + (((float *) lhs_local_nram) + 64)[i];
-}
+    # 输出修改后的代码
+    generator = c_generator.CGenerator()
+    return generator.visit(ast)
 
 
-for (int i = 0; i < 64; i++)
-{
-    (((float *) add_1515) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i] = (((float *) lhs_local_nram) + 0)[i];
-}
+if __name__ == "__main__":
+    # 示例使用
+    code = """
+    void add_kernel0(float *lhs, float *rhs, float *add_1515)
+    {
+    float lhs_local_nram[128];
+    for (int i = 0; i < 64; i++)
+    {
+        (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
+    }
 
-}
-"""
+    for (int i = 0; i < 64; i++)
+    {
+        (((float *) lhs_local_nram) + 64)[i] = (((float *) rhs) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i];
+    }
 
-# 解析代码并应用合并
-parser = c_parser.CParser()
-ast = parser.parse(code)
+    for (int i = 0; i < 64; i++)
+    {
+        (((float *) lhs_local_nram) + 0)[i] = (((float *) lhs_local_nram) + 0)[i] + (((float *) lhs_local_nram) + 64)[i];
+    }
 
-# 使用 MergeForLoopsVisitor 进行遍历和合并
-merge_visitor = MergeForLoopsVisitor()
-ast = merge_visitor.visit(ast)
 
-# 输出修改后的代码
-generator = c_generator.CGenerator()
-print(generator.visit(ast))
+    for (int i = 0; i < 64; i++)
+    {
+        (((float *) add_1515) + ((((int) clusterId) * 256) + (((int) coreId) * 64)))[i] = (((float *) lhs_local_nram) + 0)[i];
+    }
+
+    }
+    """
+    code = ast_stmt_simplification(code)
+    print(code)
+
+    code = """
+    void tanh(float *input0, float *active_tanh_210)
+    {
+    for (int clusterId = 0; clusterId < 4; ++clusterId)
+    {
+        for (int coreId = 0; coreId < 4; ++coreId)
+        {
+        float input0_local_nram[640];
+        for (int i = 0; i < 640; i++)
+        {
+            (((float *) input0_local_nram) + 0)[i] = (((float *) input0) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i];
+        }
+
+        for (int i = 0; i < 640; i++)
+        {
+            (((float *) input0_local_nram) + 0)[i] = tanh(A[i]);
+        }
+
+        for (int i = 0; i < 640; i++)
+        {
+            (((float *) active_tanh_210) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i] = (((float *) input0_local_nram) + 0)[i];
+        }
+
+        }
+
+    }
+
+    }
+    """
+    code = ast_stmt_simplification(code)
+    print(code)
