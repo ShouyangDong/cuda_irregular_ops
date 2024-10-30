@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void conv_kernel0(float* data, float* kernel, float* conv2d_nhwc) {
+extern "C" __mlu_global__ void conv(float* data, float* kernel, float* conv2d_nhwc) {
   __nram__ float kernel_local_nram[66560];
   __wram__ float reshape_filter[32768];
   __memcpy(((float *)reshape_filter + (0)), ((float *)kernel + (0)), 131072, GDRAM2WRAM);
@@ -7,4 +7,35 @@ extern "C" __mlu_global__ void conv_kernel0(float* data, float* kernel, float* c
   __bang_conv(((float *)kernel_local_nram + (65536)), ((float *)kernel_local_nram + (0)), ((float *)reshape_filter + (0)), 128, 8, 8, 2, 2, 2, 2, 64);
 
   __memcpy(((float *)conv2d_nhwc + (((((int)clusterId) * 4096) + (((int)coreId) * 1024)))), ((float *)kernel_local_nram + (65536)), 4096, NRAM2GDRAM);
+}
+
+extern "C" void conv2d_kernel(float *output, float *input, float *kernel, 
+                                int batch_size, int input_height, int input_channels,
+                                int output_channels, int kernel_height, int stride) {
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);  
+    int output_height = (input_height - kernel_height) / stride + 1;
+    int input_size = batch_size * input_height * input_height * input_channels;
+    int kernel_size = input_channels * output_channels * kernel_height * kernel_height;
+    int output_size = batch_size * output_height * output_height * output_channels;
+    float *d_input, *d_kernel, *d_output;
+
+    cnrtMalloc(&d_input, input_size * sizeof(float));
+    cnrtMalloc(&d_kernel, kernel_size * sizeof(float));
+    cnrtMalloc(&d_output, output_size * sizeof(float));
+
+    cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDevice);
+    cnrtMemcpy(d_kernel, kernel, kernel_size * sizeof(float), cnrtMemcpyHostToDevice);
+
+ cnrtDim3_t dim = {1, 4, 4};
+  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+    conv2d<<<dim, ktype, queue>>>(d_input, d_kernel, d_output);
+
+    cnrtMemcpy(output, d_output, output_size * sizeof(float), cnrtMemcpyDeviceToHost);
+
+    cnrtFree(d_input);
+    cnrtFree(d_kernel);
+    cnrtFree(d_output);
 }

@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void softmax_kernel0(float* A, float* output){
+extern "C" __mlu_global__ void softmax(float* A, float* output){
   __nram__ float dest[32];
   __nram__ float dinominator[32];
   __nram__ float dinominator_temp[32];
@@ -14,4 +14,24 @@ extern "C" __mlu_global__ void softmax_kernel0(float* A, float* output){
     __bang_div(dest, src1, dinominator_temp, addition, 32);
     __memcpy(output + 32 * i, dest, 32 * sizeof(float), NRAM2GDRAM);
   }
+}
+extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
+  float *d_A, *d_C;
+    cnrtQueue_t queue;
+    cnrtSetDevice(0);
+    cnrtQueueCreate(&queue);
+  cnrtMalloc(&d_A, size1 * size2 * sizeof(float));
+  cnrtMalloc(&d_C, size1 * size2 * sizeof(float));
+
+  cnrtMemcpy(d_A, A, size1 * size2 * sizeof(float), cnrtMemcpyHostToDevice);
+
+ cnrtDim3_t dim = {1, 4, 4};
+  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+  softmax<<<dim, ktype, queue>>>(d_A, d_C);
+
+  cnrtMemcpy(C, d_C, size1 * size2 * sizeof(float), cnrtMemcpyDeviceToHost);
+
+  cnrtFree(d_A);
+  cnrtFree(d_C);
 }

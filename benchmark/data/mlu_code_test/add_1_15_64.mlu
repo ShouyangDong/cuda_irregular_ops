@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void add_kernel0(float* lhs, float* rhs, float* add_1515) {
+extern "C" __mlu_global__ void add(float* lhs, float* rhs, float* add_1515) {
   __nram__ float lhs_local_nram[128];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 15) {
     __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
@@ -14,3 +14,27 @@ extern "C" __mlu_global__ void add_kernel0(float* lhs, float* rhs, float* add_15
   }
 }
 
+extern "C" void add_kernel(float *C, float *A, float *B, int size) {
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  float *d_A, *d_B, *d_C;
+
+  cnrtMalloc(&d_A, size * sizeof(float));
+  cnrtMalloc(&d_B, size * sizeof(float));
+  cnrtMalloc(&d_C, size * sizeof(float));
+
+  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_B, B, size * sizeof(float), cnrtMemcpyHostToDevice);
+
+  cnrtDim3_t dim = {1, 4, 4};
+  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+
+  add<<<dim, ktype, queue>>>(d_A, d_B, d_C);
+
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDeviceToHost);
+
+  cnrtFree(d_A);
+  cnrtFree(d_B);
+  cnrtFree(d_C);
+}
