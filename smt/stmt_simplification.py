@@ -4,9 +4,12 @@ from smt.util import NodeTransformer
 
 
 class MergeForLoopsVisitor(NodeTransformer):
+    def __init__(self):
+        self.loop_vars = []
+
     def visit_Compound(self, node):
         """查找并合并连续的 for 循环"""
-        if not node.block_items:
+        if not node.block_items or node.block_items == 1:
             return node
         new_block_items = []
         i = 0
@@ -31,9 +34,16 @@ class MergeForLoopsVisitor(NodeTransformer):
                     and isinstance(node.block_items[i], c_ast.For)
                     and self.is_similar_loop(current_node, node.block_items[i])
                 ):
+                    loop_var = self.get_loop_variable(node.block_items[i])
+                    if loop_var:
+                        self.loop_vars.append(loop_var)
+
                     # 合并循环体内容
                     combined_body.extend(node.block_items[i].stmt.block_items)
                     i += 1  # 继续检查下一个节点
+
+                # 更新循环体中的循环变量
+                combined_body = self.rename_loop_variables(combined_body)
 
                 # 创建合并后的 for 循环
                 combined_for = c_ast.For(
@@ -52,7 +62,7 @@ class MergeForLoopsVisitor(NodeTransformer):
 
         # 更新 node 的 block_items
         node.block_items = new_block_items
-        return node
+        return self.generic_visit(node)
 
     def is_similar_loop(self, loop1, loop2):
         """检查两个 for 循环是否具有相同的循环条件、初始条件和步进操作"""
@@ -62,17 +72,33 @@ class MergeForLoopsVisitor(NodeTransformer):
             and loop1.init.__class__ == loop2.init.__class__
             and loop1.cond.__class__ == loop2.cond.__class__
             and loop1.next.__class__ == loop2.next.__class__
-            and loop1.init.decls[0].name == loop2.init.decls[0].name  # 确保变量名一致
             and loop1.cond.right.value == loop2.cond.right.value  # 确保范围一致
             and loop1.cond.op == loop2.cond.op  # 确保操作符一致
         )
+
+    def get_loop_variable(self, for_loop):
+        """获取 for 循环中的循环变量"""
+        if isinstance(for_loop, c_ast.For):
+            return for_loop.init.decls[0].name
+        return None
+
+    def rename_loop_variables(self, block_items):
+        """重命名循环体中的循环变量"""
+        # 使用第一个循环变量的名称进行重命名
+        for item in block_items:
+            self.generic_visit(item)
+        return block_items
+
+    def visit_ID(self, node):
+        if node.name in self.loop_vars:
+            node.name = self.loop_vars[0]
+        return node
 
 
 def ast_stmt_simplification(code):
     # 解析代码并应用合并
     parser = c_parser.CParser()
     ast = parser.parse(code)
-
     # 使用 MergeForLoopsVisitor 进行遍历和合并
     merge_visitor = MergeForLoopsVisitor()
     ast = merge_visitor.visit(ast)
@@ -129,12 +155,44 @@ if __name__ == "__main__":
 
         for (int i = 0; i < 640; i++)
         {
-            (((float *) input0_local_nram) + 0)[i] = tanh(A[i]);
+            (((float *) input0_local_nram) + 0)[i] = tanh((((float *) input0_local_nram) + 0)[i]);
         }
 
         for (int i = 0; i < 640; i++)
         {
             (((float *) active_tanh_210) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i] = (((float *) input0_local_nram) + 0)[i];
+        }
+
+        }
+
+    }
+
+    }
+    """
+    code = ast_stmt_simplification(code)
+    print(code)
+
+    code = """
+    void tanh(float *input0, float *active_tanh_210)
+    {
+    for (int clusterId = 0; clusterId < 4; ++clusterId)
+    {
+        for (int coreId = 0; coreId < 4; ++coreId)
+        {
+        float input0_local_nram[640];
+        for (int i = 0; i < 640; i++)
+        {
+            (((float *) input0_local_nram) + 0)[i] = (((float *) input0) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i];
+        }
+
+        for (int j = 0; j < 640; j++)
+        {
+            (((float *) input0_local_nram) + 0)[j] = tanh((((float *) input0_local_nram) + 0)[j]);
+        }
+
+        for (int k = 0; k < 640; k++)
+        {
+            (((float *) active_tanh_210) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[k] = (((float *) input0_local_nram) + 0)[k];
         }
 
         }
