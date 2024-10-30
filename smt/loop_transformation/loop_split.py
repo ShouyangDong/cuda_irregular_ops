@@ -4,6 +4,8 @@ from pycparser import c_ast, c_generator, c_parser
 class SplitForLoopVisitor(c_ast.NodeVisitor):
     def __init__(self):
         self.factor = None  # 用于存储从pragma中提取的拆分因子
+        self.axis_name = None
+        self.org_extent = None
 
     def visit_Compound(self, node):
         """查找 #pragma loop_split 并获取拆分因子，应用到后续的 for 循环"""
@@ -44,11 +46,12 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
 
         # 更新 `block_items`
         node.block_items = new_block_items
+        self.generic_visit(node)
 
     def split_for_loop(self, node):
         """对 for 循环进行拆分"""
         # 提取原始循环的最大值（循环范围）
-        org_extent = int(node.cond.right.value)
+        self.org_extent = int(node.cond.right.value)
         outer_extent = self.factor
 
         # 创建内部循环
@@ -70,7 +73,7 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
         inner_cond = c_ast.BinaryOp(
             node.cond.op,
             c_ast.ID(self.axis_name + "_in"),
-            c_ast.Constant("int", str(org_extent // self.factor)),
+            c_ast.Constant("int", str(self.org_extent // self.factor)),
         )
         inner_next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
 
@@ -117,29 +120,36 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
         )
 
         # 修改内层循环中对 `axis_name` 的引用
-        self.modify_inner_loop_indices(inner_for)
-
+        self.generic_visit(inner_for)
         return outer_for
 
-    def modify_inner_loop_indices(self, node):
-        """更新内层循环中对 axis_name 的引用"""
-        for child in node.stmt.block_items:
-            if isinstance(child, c_ast.Assignment):
-                # 如果有对 axis_name 的引用，则替换成嵌套的表达式
-                if child.lvalue.name == self.axis_name:
-                    child.lvalue = c_ast.BinaryOp(
-                        op="+",
-                        left=c_ast.BinaryOp(
-                            op="*",
-                            left=c_ast.ID(self.axis_name + "_out"),
-                            right=c_ast.Constant("int", str(self.factor)),
-                        ),
-                        right=c_ast.ID(self.axis_name + "_in"),
-                    )
+    def visit_ID(self, node):
+        if node.name == self.axis_name:
+            node.name = (
+                self.axis_name
+                + "_out"
+                + " * "
+                + str(self.org_extent // self.factor)
+                + " + "
+                + self.axis_name
+                + "_in"
+            )
+
+
+def ast_loop_split(code):
+    # Parse the C code
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+    generator = c_generator.CGenerator()
+    # Custom visitor instance
+    visitor = SplitForLoopVisitor()
+    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+    visitor.visit(ast)
+    return generator.visit(ast)
 
 
 if __name__ == "__main__":
-    c_code = """
+    code = """
     int factorial(int result) {
         #pragma loop_split(2)
         for (int i = 0; i < 10; i++) {
@@ -148,14 +158,18 @@ if __name__ == "__main__":
         return result;
     }
     """
-    # Parse the C code
-    parser = c_parser.CParser()
-    ast = parser.parse(c_code)
-    generator = c_generator.CGenerator()
-    print(generator.visit(ast))
-    # Custom visitor instance
-    visitor = SplitForLoopVisitor()
+    final_node = ast_loop_split(code)
+    print(final_node)
 
-    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
-    visitor.visit(ast)
-    print(generator.visit(ast))
+    code = """
+    void add_kernel(float* A, float* B, float* T_add) {
+        for (int i = 0; i < 256; i++) {
+            #pragma loop_split(4)
+            for(int j = 0; j < 1024; j++) {
+                T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
+            }
+        }
+    }
+    """
+    final_node = ast_loop_split(code)
+    print(final_node)
