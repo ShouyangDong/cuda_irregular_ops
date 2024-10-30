@@ -1,5 +1,7 @@
 import json
+
 from pycparser import c_ast, c_generator, c_parser
+
 from smt.util import NodeTransformer
 
 
