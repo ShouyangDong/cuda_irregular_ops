@@ -111,7 +111,7 @@ def ast_stmt_simplification(code):
 if __name__ == "__main__":
     # 示例使用
     code = """
-    void add_kernel0(float *lhs, float *rhs, float *add_1515)
+    void add(float *lhs, float *rhs, float *add_1515)
     {
     float lhs_local_nram[128];
     for (int i = 0; i < 64; i++)

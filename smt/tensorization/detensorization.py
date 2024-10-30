@@ -71,7 +71,7 @@ def ast_detensorization(code, target):
 
 if __name__ == "__main__":
     code = """
-    void add_kernel0(float* lhs, float* rhs, float* add_1515) {
+    void add(float* lhs, float* rhs, float* add_1515) {
         float lhs_local_nram[128];
         __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);
         __memcpy(((float *)lhs_local_nram + (64)), ((float *)rhs + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), 256, GDRAM2NRAM);

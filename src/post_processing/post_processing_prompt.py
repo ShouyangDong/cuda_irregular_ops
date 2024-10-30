@@ -214,7 +214,7 @@ __mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
 
 output
 ```
-__mlu_entry__ void fvec_add_double_buffering_kernel0(float* INPUT0, float* INPUT1, float*OUTPUT) {
+__mlu_entry__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*OUTPUT) {
     __nram__ float INPUT0_N[128];
     __nram__ float INPUT1_N[128];
     __nram__ float OUTPUT_N[128];

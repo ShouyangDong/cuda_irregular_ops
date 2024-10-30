@@ -20,7 +20,7 @@ if __name__ == "__main__":
     print(code)
 
     code = """
-    extern "C" __mlu_global__ void multiply(float* A_nram, float* B_wram, float* C_nram) {
+    __mlu_global__ void multiply(float* A_nram, float* B_wram, float* C_nram) {
         for (int col = 0; col < 64; col++) {
             C_nram[(clusterId * 4 + coreId) * 64 + col] = 0.0f;
             for (int i = 0; i < 512; i++) {
