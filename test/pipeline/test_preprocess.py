@@ -14,14 +14,18 @@ def unitest(file_name, code, target):
         with open(base_name, mode="w") as f:
             f.write(code)
             f.close()
-        success, output = run_test(base_name, ".benchmark/evaluation/cuda_test/test_add.py")
+        success, output = run_test(
+            base_name, ".benchmark/evaluation/cuda_test/test_add.py"
+        )
         _ = subprocess.run(["rm", base_name])
         return success
     elif target == "BANG":
         with open(base_name, mode="w") as f:
             f.write(code)
             f.close()
-        success, output = run_test(base_name, ".benchmark/evaluation/mlu_test/test_add.py")
+        success, output = run_test(
+            base_name, ".benchmark/evaluation/mlu_test/test_add.py"
+        )
         _ = subprocess.run(["rm", base_name])
         return success
     return False

@@ -64,7 +64,14 @@ BANG_unary_template = Template(
 }\n"""
 )
 
-
+op_map = {
+    "__bang_add": "binary_double_buffering",
+    "__bang_active_tanh": "unary_double_buffering",
+}
+op_template = {
+    "__bang_add": BANG_binary_template,
+    "__bang_active_tanh": BANG_unary_template,
+}
 from pycparser import c_ast, c_generator, c_parser
 
 from smt.util import NodeTransformer
@@ -105,10 +112,9 @@ class PragmaVisitor(NodeTransformer):
                         if "__bang" in stmt.name.name:
                             self.inst = stmt.name.name
                             ext_const = c_ast.Constant(type="int", value=ext)
-
                             new_args = stmt.args.exprs + [ext_const]
                             new_call = c_ast.FuncCall(
-                                name=c_ast.ID(name="binary_double_buffering"),
+                                name=c_ast.ID(name=op_map[self.inst]),
                                 args=c_ast.ExprList(new_args),
                             )
 
@@ -134,7 +140,7 @@ def smt_double_buffer(code):
     ast = parser.parse(code)
     visitor = PragmaVisitor()
     visitor.visit(ast)
-    output_code = BANG_binary_template.substitute(inst=visitor.inst)
+    output_code = op_template[visitor.inst].substitute(inst=visitor.inst)
     generator = c_generator.CGenerator()
     modify_code = generator.visit(ast)
     return output_code + modify_code
