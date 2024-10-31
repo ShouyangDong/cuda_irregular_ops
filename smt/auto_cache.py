@@ -186,26 +186,31 @@ class CacheTransformationVisitor(NodeTransformer):
         )
 
 
-# 示例代码和 space_map
-code = """
-void __bang_add(float *C, float *A, float *B, int size) {
-    #pragma __bang_add(input[Nram, Nram], output[Nram])
-    for (int i_add = 0; i_add < size; i_add++) {
-        C[i_add] = A[i_add] + B[i_add];
+def ast_auto_cache(code, space_map):
+    # 解析代码
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+    # 进行缓存加载和写回插入
+    transformer = CacheTransformationVisitor(space_map)
+    ast = transformer.visit(ast)
+
+    # 输出最终代码
+    generator = c_generator.CGenerator()
+    return generator.visit(ast)
+
+
+if __name__ == "__main__":
+    # 示例代码和 space_map
+    code = """
+    void __bang_add(float *C, float *A, float *B, int size) {
+        #pragma __bang_add(input[Nram, Nram], output[Nram])
+        for (int i_add = 0; i_add < size; i_add++) {
+            C[i_add] = A[i_add] + B[i_add];
+        }
     }
-}
-"""
+    """
 
-space_map = [{"input": {"A": "Nram", "B": "Nram"}, "output": {"C": "Nram"}}]
+    space_map = [{"input": {"A": "Nram", "B": "Nram"}, "output": {"C": "Nram"}}]
+    output_code = ast_auto_cache(code, space_map)
 
-# 解析代码
-parser = c_parser.CParser()
-ast = parser.parse(code)
-# 进行缓存加载和写回插入
-transformer = CacheTransformationVisitor(space_map)
-ast = transformer.visit(ast)
-
-# 输出最终代码
-generator = c_generator.CGenerator()
-output_code = generator.visit(ast)
-print(output_code)
+    print(output_code)

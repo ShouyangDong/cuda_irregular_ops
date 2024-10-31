@@ -118,50 +118,55 @@ class PragmaToSIMDTransformer(NodeTransformer):
         return node
 
 
-# 示例代码
-code = """
-void matmul(float *A, float *B, float *C)
-{
-  float B_wram[32768];
-  float A_nram[512];
-  float C_nram[64];
-  
-  #pragma operation(memory(input[B], output[B_wram]))
-  for (int col = 0; col < 64; col++) {
-      for (int i = 0; i < 512; i++) {
-          B_wram[i * 64 + col] = B[i * 64 + col];
-      }
-  }
+def ast_tensorization(code, target="BANG"):
+    # 解析代码
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
 
-  #pragma operation(memory(input[A], output[A_wram]))
-  for (int i = 0; i < 512; i++) {
-      A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
-  }
+    # 进行 PragmaToSIMD 转换
+    transformer = PragmaToSIMDTransformer()
+    ast = transformer.visit(ast)
 
-  #pragma operation(matmul(input[A_nram, B_wram], output[C_nram]))
-  for (int col = 0; col < 64; col++) {
-      C_nram[(clusterId * 4 + coreId) * 64 + col] = 0.0f;
-      for (int i = 0; i < 512; i++) {
-          C_nram[col] += A_nram[i] * B_wram[i * 64 + col];
-      }
-  }
+    # 输出修改后的代码
+    generator = c_generator.CGenerator()
+    return generator.visit(ast)
 
-  #pragma operation(memory(input[C_nram], output[C]))
-  for (int col = 0; col < 64; col++) {
-      C[(clusterId * 4 + coreId) * 64 + col] = C_nram[col];
-  }
-}
-"""
 
-# 解析代码
-parser = c_parser.CParser()
-ast = parser.parse(code)
+if __name__ == "__main__":
+    # 示例代码
+    code = """
+    void matmul(float *A, float *B, float *C)
+    {
+    float B_wram[32768];
+    float A_nram[512];
+    float C_nram[64];
+    
+    #pragma operation(memory(input[B], output[B_wram]))
+    for (int col = 0; col < 64; col++) {
+        for (int i = 0; i < 512; i++) {
+            B_wram[i * 64 + col] = B[i * 64 + col];
+        }
+    }
 
-# 进行 PragmaToSIMD 转换
-transformer = PragmaToSIMDTransformer()
-ast = transformer.visit(ast)
+    #pragma operation(memory(input[A], output[A_wram]))
+    for (int i = 0; i < 512; i++) {
+        A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
+    }
 
-# 输出修改后的代码
-generator = c_generator.CGenerator()
-output_code = generator.visit(ast)
-print(output_code)
+    #pragma operation(matmul(input[A_nram, B_wram], output[C_nram]))
+    for (int col = 0; col < 64; col++) {
+        C_nram[(clusterId * 4 + coreId) * 64 + col] = 0.0f;
+        for (int i = 0; i < 512; i++) {
+            C_nram[col] += A_nram[i] * B_wram[i * 64 + col];
+        }
+    }
+
+    #pragma operation(memory(input[C_nram], output[C]))
+    for (int col = 0; col < 64; col++) {
+        C[(clusterId * 4 + coreId) * 64 + col] = C_nram[col];
+    }
+    }
+    """
+
+    output_code = ast_tensorization(code)
+    print(output_code)
