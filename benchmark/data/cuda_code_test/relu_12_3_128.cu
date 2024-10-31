@@ -1,6 +1,8 @@
-__global__ void __launch_bounds__(1024) relu(float* __restrict__ A, float* __restrict__ compute) {
+__global__ void __launch_bounds__(1024)
+    relu(float *__restrict__ A, float *__restrict__ compute) {
   if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 4608) {
-    compute[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = max(A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))], 0.000000e+00f);
+    compute[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = max(
+        A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))], 0.000000e+00f);
   }
 }
 

@@ -1,81 +1,80 @@
 
 
-__mlu_global__ void mlu_layer_norm(
-    float* input, 
-    float* gamma, 
-    float* beta, 
-    float* output
-) {
-    __nram__ float diff[32];
-    __nram__ float mean[32];
-    __nram__ float variance[32];
-    __nram__ float local_input[32];
-    __nram__ float local_gamma[32];
-    __nram__ float local_beta[32];
-    __memcpy(local_gamma, gamma, 128, GDRAM2NRAM);
-    __memcpy(local_beta, beta, 128, GDRAM2NRAM);
+__mlu_global__ void mlu_layer_norm(float *input, float *gamma, float *beta,
+                                   float *output) {
+  __nram__ float diff[32];
+  __nram__ float mean[32];
+  __nram__ float variance[32];
+  __nram__ float local_input[32];
+  __nram__ float local_gamma[32];
+  __nram__ float local_beta[32];
+  __memcpy(local_gamma, gamma, 128, GDRAM2NRAM);
+  __memcpy(local_beta, beta, 128, GDRAM2NRAM);
 
-    if (clusterId  < 2) {
-        if (coreId < 4) {
-            __memcpy(local_input, input + clusterId * 4 * 32 + coreId * 32, 128, GDRAM2NRAM);
-            __bang_sumpool(mean, local_input, 1, 1, 32, 1, 32, 1, 1);
-            __bang_mul_const(mean, mean, 1.0/32, 32);
+  if (clusterId < 2) {
+    if (coreId < 4) {
+      __memcpy(local_input, input + clusterId * 4 * 32 + coreId * 32, 128,
+               GDRAM2NRAM);
+      __bang_sumpool(mean, local_input, 1, 1, 32, 1, 32, 1, 1);
+      __bang_mul_const(mean, mean, 1.0 / 32, 32);
 
-            // Calculate variance
-            __bang_sub(diff, local_input, mean, 32);
-            __bang_mul(diff, diff, diff, 32);
+      // Calculate variance
+      __bang_sub(diff, local_input, mean, 32);
+      __bang_mul(diff, diff, diff, 32);
 
-            __bang_sumpool(variance, diff, 1, 1, 32, 1, 32, 1, 1);
-            variance[0] = sqrt(variance[0] / 32);
+      __bang_sumpool(variance, diff, 1, 1, 32, 1, 32, 1, 1);
+      variance[0] = sqrt(variance[0] / 32);
 
-            // Normalize input
-            __bang_sub(diff, local_input, mean, 32);
-            __bang_mul(diff, diff, gamma, 32);
-            __bang_mul_const(diff, diff, 1.0/(variance[0] + 1e-5f), 32);
-            __bang_add(diff, diff, beta, 32);
-            __memcpy(output + clusterId * 4 * 32 + coreId * 32, diff, 128, NRAM2GDRAM);
-        }
+      // Normalize input
+      __bang_sub(diff, local_input, mean, 32);
+      __bang_mul(diff, diff, gamma, 32);
+      __bang_mul_const(diff, diff, 1.0 / (variance[0] + 1e-5f), 32);
+      __bang_add(diff, diff, beta, 32);
+      __memcpy(output + clusterId * 4 * 32 + coreId * 32, diff, 128,
+               NRAM2GDRAM);
     }
+  }
 }
 
-extern "C" void layernorm_kernel(float* input, float* gamma, float* beta, float* output) {
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
-    int batch_size = 1;
-    int seq_length = 8;
-    int d_model = 32;
-    int num_elements = batch_size * seq_length * d_model;
+extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
+                                 float *output) {
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  int batch_size = 1;
+  int seq_length = 8;
+  int d_model = 32;
+  int num_elements = batch_size * seq_length * d_model;
 
-    // Allocate memory on the device
-    float* d_input;
-    cnrtMalloc((void**)(&d_input), num_elements * sizeof(float));
-    float* d_gamma;
-    cnrtMalloc((void**)(&d_gamma), d_model * sizeof(float));
-    float* d_beta;
-    cnrtMalloc((void**)(&d_beta), d_model * sizeof(float));
-    float* d_output;
-    cnrtMalloc((void**)(&d_output), num_elements * sizeof(float));
+  // Allocate memory on the device
+  float *d_input;
+  cnrtMalloc((void **)(&d_input), num_elements * sizeof(float));
+  float *d_gamma;
+  cnrtMalloc((void **)(&d_gamma), d_model * sizeof(float));
+  float *d_beta;
+  cnrtMalloc((void **)(&d_beta), d_model * sizeof(float));
+  float *d_output;
+  cnrtMalloc((void **)(&d_output), num_elements * sizeof(float));
 
-    // Copy data from host to device
-    cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
-    cnrtMemcpy(d_gamma, gamma, d_model * sizeof(float), cnrtMemcpyHostToDev);
-    cnrtMemcpy(d_beta, beta, d_model * sizeof(float), cnrtMemcpyHostToDev);
+  // Copy data from host to device
+  cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+  cnrtMemcpy(d_gamma, gamma, d_model * sizeof(float), cnrtMemcpyHostToDev);
+  cnrtMemcpy(d_beta, beta, d_model * sizeof(float), cnrtMemcpyHostToDev);
 
+  // Define the function type
+  cnrtDim3_t dim = {1, 4, 4};
+  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
-    // Define the function type
-    cnrtDim3_t dim = {1, 4, 4};
-    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+  // Launch kernel
+  mlu_layer_norm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
 
-    // Launch kernel
-    mlu_layer_norm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
+  // Copy the result back to host
+  cnrtMemcpy(output, d_output, num_elements * sizeof(float),
+             cnrtMemcpyDevToHost);
 
-    // Copy the result back to host
-    cnrtMemcpy(output, d_output, num_elements * sizeof(float), cnrtMemcpyDevToHost);
-
-    // Free device memory
-    cnrtFree(d_input);
-    cnrtFree(d_gamma);
-    cnrtFree(d_beta);
-    cnrtFree(d_output);
+  // Free device memory
+  cnrtFree(d_input);
+  cnrtFree(d_gamma);
+  cnrtFree(d_beta);
+  cnrtFree(d_output);
 }

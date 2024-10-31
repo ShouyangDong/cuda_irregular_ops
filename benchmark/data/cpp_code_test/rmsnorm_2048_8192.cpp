@@ -1,6 +1,6 @@
 
 
-extern "C" void rmsnorm_kernel(float* A, float* B) {
+extern "C" void rmsnorm_kernel(float *A, float *B) {
   float eps = 1e-5f;
 
   for (int i = 0; i < 2048; i++) {
@@ -12,6 +12,7 @@ extern "C" void rmsnorm_kernel(float* A, float* B) {
     mean /= 8192;
     float scale = 1.0 / sqrt(mean + eps);
 
-    for (int k = 0; k < 8192; k++) B[i * 8192 + k] = A[i * 8192 + k] * scale;
+    for (int k = 0; k < 8192; k++)
+      B[i * 8192 + k] = A[i * 8192 + k] * scale;
   }
 }

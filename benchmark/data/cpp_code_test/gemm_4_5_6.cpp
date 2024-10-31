@@ -1,10 +1,10 @@
 extern "C" void gemm_kernel(float *result, float *A, float *B) {
-    for (int j = 0; j < 4; j++) {
-        for (int k = 0; k < 6; k++) {
-            result[j * 6 + k] = 0;
-            for (int l = 0; l < 5; l++) {
-                result[j * 6 + k] += A[j * 5 + l] * B[l * 6 + k];
-            }
-        }
+  for (int j = 0; j < 4; j++) {
+    for (int k = 0; k < 6; k++) {
+      result[j * 6 + k] = 0;
+      for (int l = 0; l < 5; l++) {
+        result[j * 6 + k] += A[j * 5 + l] * B[l * 6 + k];
+      }
     }
+  }
 }

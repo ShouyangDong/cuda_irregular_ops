@@ -1,101 +1,110 @@
 
 
-__mlu_global__ void mlu_multiHeadAttentionForward(
-    float* Q, //[batch, seq_len, heads, dim] 
-    float* K, //[batch, seq_len, heads, dim]
-    float* V, //[batch, seq_len, heads, dim]
-    float* output //[batch, seq_len, heads, dim]
-){  
-    __nram__ float score[12 * 12];
-    __nram__ float dinominator[12];
-    __nram__ float dinominator_temp[12];
-    // The dimension 64, 2048, 12, 256
-    if (clusterId < 4) {
-        if (coreId < 4) {
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 2048; j++) {
-                    __nram__ float local_Q[12 * 256];
-                    __nram__ float local_K[12 * 256];
-                    __nram__ float local_K_trans[12 * 256];
-                    __wram__ float local_K_wram[12 * 256];
-                    __memcpy(local_Q, Q + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2NRAM);
-                    __memcpy(local_K, K + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2NRAM);
+__mlu_global__ void
+mlu_multiHeadAttentionForward(float *Q,     //[batch, seq_len, heads, dim]
+                              float *K,     //[batch, seq_len, heads, dim]
+                              float *V,     //[batch, seq_len, heads, dim]
+                              float *output //[batch, seq_len, heads, dim]
+) {
+  __nram__ float score[12 * 12];
+  __nram__ float dinominator[12];
+  __nram__ float dinominator_temp[12];
+  // The dimension 64, 2048, 12, 256
+  if (clusterId < 4) {
+    if (coreId < 4) {
+      for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 2048; j++) {
+          __nram__ float local_Q[12 * 256];
+          __nram__ float local_K[12 * 256];
+          __nram__ float local_K_trans[12 * 256];
+          __wram__ float local_K_wram[12 * 256];
+          __memcpy(local_Q,
+                   Q + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 +
+                       j * 12 * 256,
+                   12 * 256 * 4, GDRAM2NRAM);
+          __memcpy(local_K,
+                   K + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 +
+                       j * 12 * 256,
+                   12 * 256 * 4, GDRAM2NRAM);
 
-                    // Transpose local_K
-                    __bang_transpose(local_K_trans, local_K, 12, 256);
-                    __memcpy(local_K_wram, local_K_trans, 256 * 12 *  4, NRAM2WRAM);
-                    __bang_mlp(score, local_Q, local_K_wram, 12, 12);
+          // Transpose local_K
+          __bang_transpose(local_K_trans, local_K, 12, 256);
+          __memcpy(local_K_wram, local_K_trans, 256 * 12 * 4, NRAM2WRAM);
+          __bang_mlp(score, local_Q, local_K_wram, 12, 12);
 
-                    // score
-                    __bang_div(score, score, sqrt(256), 12 * 12);
+          // score
+          __bang_div(score, score, sqrt(256), 12 * 12);
 
-                    // The Softmax code:
-                    for (int j_sf = 0; j_sf < 12; ++j_sf) {
-                        __bang_active_exp(score + j_sf * 12, score + j_sf * 12, 12);
-                        __bang_write_zero(dinominator, 12);
-                        __bang_sumpool(dinominator, score + j_sf * 12, 1, 1, 12, 1, 12, 1, 1);
-                        __memset_nram(dinominator_temp, 12, dinominator[0]);
-                        __bang_recip(dinominator_temp, dinominator_temp, 12);
-                        __bang_mul(score + j_sf * 12, score + j_sf * 12, dinominator_temp, 12);
-                    }
-                    // The final Matmul
-                    __wram__ float local_V[12 * 256];
-                    __nram__ float local_output[12 * 256];
-                    __memcpy(local_V, V + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, 12 * 256 * 4, GDRAM2WRAM);
-                    __bang_mlp(local_output, score, local_V, 12, 256);
-                    __memcpy(output + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 + j * 12 * 256, local_output, 12 * 256 * 4, NRAM2GDRAM);
-                }
-            }
+          // The Softmax code:
+          for (int j_sf = 0; j_sf < 12; ++j_sf) {
+            __bang_active_exp(score + j_sf * 12, score + j_sf * 12, 12);
+            __bang_write_zero(dinominator, 12);
+            __bang_sumpool(dinominator, score + j_sf * 12, 1, 1, 12, 1, 12, 1,
+                           1);
+            __memset_nram(dinominator_temp, 12, dinominator[0]);
+            __bang_recip(dinominator_temp, dinominator_temp, 12);
+            __bang_mul(score + j_sf * 12, score + j_sf * 12, dinominator_temp,
+                       12);
+          }
+          // The final Matmul
+          __wram__ float local_V[12 * 256];
+          __nram__ float local_output[12 * 256];
+          __memcpy(local_V,
+                   V + (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 +
+                       j * 12 * 256,
+                   12 * 256 * 4, GDRAM2WRAM);
+          __bang_mlp(local_output, score, local_V, 12, 256);
+          __memcpy(output +
+                       (clusterId * 16 + coreId * 4 + i) * 2048 * 12 * 256 +
+                       j * 12 * 256,
+                   local_output, 12 * 256 * 4, NRAM2GDRAM);
         }
+      }
     }
+  }
 }
 
+extern "C" void multiHeadAttentionForward_kernel(float *Q, float *K, float *V,
+                                                 float *output) {
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
 
-extern "C" void multiHeadAttentionForward_kernel(
-    float* Q,
-    float* K,
-    float* V,
-    float* output
-) {
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
+  int batch = 64;
+  int seq_len = 2048;
+  int heads = 12;
+  int final_dim = 256;
 
-    int batch = 64;
-    int seq_len = 2048;
-    int heads = 12;
-    int final_dim = 256;
+  // Allocate memory on the device
+  int num_elements = batch * seq_len * heads * final_dim;
+  float *d_Q;
+  cnrtMalloc((void **)(&d_Q), num_elements * sizeof(float));
+  float *d_K;
+  cnrtMalloc((void **)(&d_K), num_elements * sizeof(float));
+  float *d_V;
+  cnrtMalloc((void **)(&d_V), num_elements * sizeof(float));
+  float *d_output;
+  cnrtMalloc((void **)(&d_output), num_elements * sizeof(float));
 
-    // Allocate memory on the device
-    int num_elements = batch * seq_len * heads * final_dim;
-    float* d_Q;
-    cnrtMalloc((void**)(&d_Q), num_elements * sizeof(float));
-    float* d_K;
-    cnrtMalloc((void**)(&d_K), num_elements * sizeof(float));
-    float* d_V;
-    cnrtMalloc((void**)(&d_V), num_elements * sizeof(float));
-    float* d_output;
-    cnrtMalloc((void**)(&d_output), num_elements * sizeof(float));
+  // Allocate memory on the device
+  cnrtMemcpy(d_Q, Q, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+  cnrtMemcpy(d_K, K, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+  cnrtMemcpy(d_V, V, num_elements * sizeof(float), cnrtMemcpyHostToDev);
 
-    // Allocate memory on the device
-    cnrtMemcpy(d_Q, Q, num_elements * sizeof(float), cnrtMemcpyHostToDev);
-    cnrtMemcpy(d_K, K, num_elements * sizeof(float), cnrtMemcpyHostToDev);
-    cnrtMemcpy(d_V, V, num_elements * sizeof(float), cnrtMemcpyHostToDev);
+  // Define the function type
+  cnrtDim3_t dim = {1, 4, 4};
+  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
+  // Launch kernel
+  mlu_multiHeadAttentionForward<<<dim, ktype, queue>>>(d_Q, d_K, d_V, d_output);
 
-    // Define the function type
-    cnrtDim3_t dim = {1, 4, 4};
-    cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
+  // Copy the result back to host
+  cnrtMemcpy(output, d_output, num_elements * sizeof(float),
+             cnrtMemcpyDevToHost);
 
-    // Launch kernel
-    mlu_multiHeadAttentionForward<<<dim, ktype, queue>>>(d_Q, d_K, d_V, d_output);
-
-    // Copy the result back to host
-    cnrtMemcpy(output, d_output, num_elements * sizeof(float), cnrtMemcpyDevToHost);
-
-    // Free device memory
-    cnrtFree(d_Q);
-    cnrtFree(d_K);
-    cnrtFree(d_V);
-    cnrtFree(d_output);
+  // Free device memory
+  cnrtFree(d_Q);
+  cnrtFree(d_K);
+  cnrtFree(d_V);
+  cnrtFree(d_output);
 }

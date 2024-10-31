@@ -1,34 +1,46 @@
-extern "C" __mlu_global__ void relu(float* input0, float* active_relu_144) {
+extern "C" __mlu_global__ void relu(float *input0, float *active_relu_144) {
   __nram__ float input0_local_nram[25];
-  for (int i0_outer_outer_outer = 0; i0_outer_outer_outer < 3; ++i0_outer_outer_outer) {
-    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
-      __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) + (((int)coreId) * 25)))), 100, GDRAM2NRAM);
+  for (int i0_outer_outer_outer = 0; i0_outer_outer_outer < 3;
+       ++i0_outer_outer_outer) {
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) +
+         ((int)coreId)) < 45) {
+      __memcpy(((float *)input0_local_nram + (0)),
+               ((float *)input0 +
+                ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) +
+                  (((int)coreId) * 25)))),
+               100, GDRAM2NRAM);
     }
-    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
-      __bang_active_relu(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 25);
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) +
+         ((int)coreId)) < 45) {
+      __bang_active_relu(((float *)input0_local_nram + (0)),
+                         ((float *)input0_local_nram + (0)), 25);
     }
-    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) + ((int)coreId)) < 45) {
-      __memcpy(((float *)active_relu_144 + ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) + (((int)coreId) * 25)))), ((float *)input0_local_nram + (0)), 100, NRAM2GDRAM);
+    if ((((i0_outer_outer_outer * 16) + (((int)clusterId) * 4)) +
+         ((int)coreId)) < 45) {
+      __memcpy(((float *)active_relu_144 +
+                ((((i0_outer_outer_outer * 400) + (((int)clusterId) * 100)) +
+                  (((int)coreId) * 25)))),
+               ((float *)input0_local_nram + (0)), 100, NRAM2GDRAM);
     }
   }
 }
 
 extern "C" void relu_kernel(float *C, float *A, int size) {
   float *d_A, *d_C;
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
-  cnrtMalloc(&d_A, size * sizeof(float));
-  cnrtMalloc(&d_C, size * sizeof(float));
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  cnrtMalloc((void **)(&d_A), size * sizeof(float));
+  cnrtMalloc((void **)(&d_C), size * sizeof(float));
 
-  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
 
- cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {1, 4, 4};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   relu<<<dim, ktype, queue>>>(d_A, d_C);
 
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDeviceToHost);
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
 
   cnrtFree(d_A);
   cnrtFree(d_C);

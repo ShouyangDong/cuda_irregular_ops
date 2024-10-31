@@ -1,30 +1,37 @@
-extern "C" __mlu_global__ void sumpool(float* input0, float* sumpool_18) {
+extern "C" __mlu_global__ void sumpool(float *input0, float *sumpool_18) {
   __nram__ float input0_local_nram[3712];
-  __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + ((((int)coreId) * 4096))), 1792, GDRAM2NRAM,1792, 2048, 6);
-  __bang_sumpool(((float *)input0_local_nram + (3136)), ((float *)input0_local_nram + (0)), 64, 7, 7, 3, 3, 2, 2);
-  __memcpy(((float *)sumpool_18 + ((((int)coreId) * 576))), ((float *)input0_local_nram + (3136)), 2304, NRAM2GDRAM);
+  __memcpy(((float *)input0_local_nram + (0)),
+           ((float *)input0 + ((((int)coreId) * 4096))), 1792, GDRAM2NRAM, 1792,
+           2048, 6);
+  __bang_sumpool(((float *)input0_local_nram + (3136)),
+                 ((float *)input0_local_nram + (0)), 64, 7, 7, 3, 3, 2, 2);
+  __memcpy(((float *)sumpool_18 + ((((int)coreId) * 576))),
+           ((float *)input0_local_nram + (3136)), 2304, NRAM2GDRAM);
 }
 
-extern "C" void sumpool_kernel(float *output, float *input, int batch_size, int channels, int input_H, int kernel_size, int stride) {
-        float *d_input, *d_output;
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
-    int output_H = (input_H - kernel_size) / stride + 1;
-    int input_size = batch_size * input_H * input_H * channels;
-    int output_size = batch_size * output_H * output_H * channels;
-    cnrtMalloc(&d_input, input_size * sizeof(float));
-    cnrtMalloc(&d_output, output_size * sizeof(float));
+extern "C" void sumpool_kernel(float *output, float *input, int batch_size,
+                               int channels, int input_H, int kernel_size,
+                               int stride) {
+  float *d_input, *d_output;
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  int output_H = (input_H - kernel_size) / stride + 1;
+  int input_size = batch_size * input_H * input_H * channels;
+  int output_size = batch_size * output_H * output_H * channels;
+  cnrtMalloc((void **)(&d_input), input_size * sizeof(float));
+  cnrtMalloc((void **)(&d_output), output_size * sizeof(float));
 
-    cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDev);
 
   cnrtDim3_t dim = {1, 1, 4};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
 
-    sumpool<<<dim, ktype, queue>>>(d_input, d_output);
+  sumpool<<<dim, ktype, queue>>>(d_input, d_output);
 
-    cnrtMemcpy(output, d_output, output_size * sizeof(float), cnrtMemcpyDeviceToHost);
+  cnrtMemcpy(output, d_output, output_size * sizeof(float),
+             cnrtMemcpyDevToHost);
 
-    cnrtFree(d_input);
-    cnrtFree(d_output);
+  cnrtFree(d_input);
+  cnrtFree(d_output);
 }

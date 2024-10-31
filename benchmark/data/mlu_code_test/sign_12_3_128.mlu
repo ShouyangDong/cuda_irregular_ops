@@ -1,32 +1,38 @@
-extern "C" __mlu_global__ void sign(float* input0, float* active_sign_237) {
+extern "C" __mlu_global__ void sign(float *input0, float *active_sign_237) {
   __nram__ float input0_local_nram[384];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 12) {
-    __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 1536) + (((int)coreId) * 384)))), 1536, GDRAM2NRAM);
+    __memcpy(((float *)input0_local_nram + (0)),
+             ((float *)input0 +
+              (((((int)clusterId) * 1536) + (((int)coreId) * 384)))),
+             1536, GDRAM2NRAM);
   }
   if (((((int)clusterId) * 4) + ((int)coreId)) < 12) {
-    __bang_active_sign(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 384);
+    __bang_active_sign(((float *)input0_local_nram + (0)),
+                       ((float *)input0_local_nram + (0)), 384);
   }
   if (((((int)clusterId) * 4) + ((int)coreId)) < 12) {
-      __memcpy(((float *)active_sign_237 + (((((int)clusterId) * 1536) + (((int)coreId) * 384)))), ((float *)input0_local_nram + (0)), 1536, NRAM2GDRAM);
+    __memcpy(((float *)active_sign_237 +
+              (((((int)clusterId) * 1536) + (((int)coreId) * 384)))),
+             ((float *)input0_local_nram + (0)), 1536, NRAM2GDRAM);
   }
 }
 
 extern "C" void sign_kernel(float *C, float *A, int size) {
   float *d_A, *d_C;
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
-  cnrtMalloc(&d_A, size * sizeof(float));
-  cnrtMalloc(&d_C, size * sizeof(float));
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  cnrtMalloc((void **)(&d_A), size * sizeof(float));
+  cnrtMalloc((void **)(&d_C), size * sizeof(float));
 
-  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
 
- cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {1, 4, 4};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   sign<<<dim, ktype, queue>>>(d_A, d_C);
 
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDeviceToHost);
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
 
   cnrtFree(d_A);
   cnrtFree(d_C);

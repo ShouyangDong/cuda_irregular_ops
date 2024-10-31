@@ -29,17 +29,21 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob("./mlu_code_test/*.mlu")
+print()
+files = glob.glob(os.path.join(os.getcwd(), "./benchmark/data/mlu_code_test/*.mlu"))
 counter = 0
 for file_name in tqdm(files):
+    print(file_name)
     base_name = os.path.basename(file_name)
     so_name = base_name.replace("mlu", "so")
-    so_name = os.path.join("./mlu_code_test/", so_name)
+    so_name = os.path.join(
+        os.path.join(os.getcwd(), "./benchmark/data/mlu_code_test/"), so_name
+    )
 
     with open(file_name, "r") as f:
         code = f.read()
 
-    with open("./macro/mlu_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/mlu_macro.txt"), "r") as f:
         macro = f.read()
 
     code = macro + code

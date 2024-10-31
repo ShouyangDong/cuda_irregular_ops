@@ -1,15 +1,28 @@
-extern "C" __mlu_global__ void gelu(float* input0, float* active_gelup_291) {
+extern "C" __mlu_global__ void gelu(float *input0, float *active_gelup_291) {
   __nram__ float input0_local_nram[2944];
-  for (int i1_outer_i0_fused_outer_outer = 0; i1_outer_i0_fused_outer_outer < 8; ++i1_outer_i0_fused_outer_outer) {
-    if (clusterId < 2) {  
-      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) + ((int)coreId)) < 60) {
-        __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + ((((i1_outer_i0_fused_outer_outer * 23552) + (((int)clusterId) * 11776)) + (((int)coreId) * 2944)))), 11776, GDRAM2NRAM);
+  for (int i1_outer_i0_fused_outer_outer = 0; i1_outer_i0_fused_outer_outer < 8;
+       ++i1_outer_i0_fused_outer_outer) {
+    if (clusterId < 2) {
+      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) +
+           ((int)coreId)) < 60) {
+        __memcpy(((float *)input0_local_nram + (0)),
+                 ((float *)input0 + ((((i1_outer_i0_fused_outer_outer * 23552) +
+                                       (((int)clusterId) * 11776)) +
+                                      (((int)coreId) * 2944)))),
+                 11776, GDRAM2NRAM);
       }
-      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) + ((int)coreId)) < 60) {
-        __bang_active_gelup(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 2944);
+      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) +
+           ((int)coreId)) < 60) {
+        __bang_active_gelup(((float *)input0_local_nram + (0)),
+                            ((float *)input0_local_nram + (0)), 2944);
       }
-      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) + ((int)coreId)) < 60) {
-          __memcpy(((float *)active_gelup_291 + ((((i1_outer_i0_fused_outer_outer * 23552) + (((int)clusterId) * 11776)) + (((int)coreId) * 2944)))), ((float *)input0_local_nram + (0)), 11776, NRAM2GDRAM);
+      if ((((i1_outer_i0_fused_outer_outer * 8) + (((int)clusterId) * 4)) +
+           ((int)coreId)) < 60) {
+        __memcpy(((float *)active_gelup_291 +
+                  ((((i1_outer_i0_fused_outer_outer * 23552) +
+                     (((int)clusterId) * 11776)) +
+                    (((int)coreId) * 2944)))),
+                 ((float *)input0_local_nram + (0)), 11776, NRAM2GDRAM);
       }
     }
   }
@@ -20,17 +33,17 @@ extern "C" void gelu_kernel(float *C, float *A, int size) {
   cnrtQueue_t queue;
   cnrtSetDevice(0);
   cnrtQueueCreate(&queue);
-  cnrtMalloc(&d_A, size * sizeof(float));
-  cnrtMalloc(&d_C, size * sizeof(float));
+  cnrtMalloc((void **)(&d_A), size * sizeof(float));
+  cnrtMalloc((void **)(&d_C), size * sizeof(float));
 
-  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
 
- cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {1, 4, 4};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   gelu<<<dim, ktype, queue>>>(d_A, d_C);
 
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDeviceToHost);
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
 
   cnrtFree(d_A);
   cnrtFree(d_C);

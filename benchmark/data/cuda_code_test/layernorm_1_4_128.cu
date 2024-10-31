@@ -1,4 +1,4 @@
-__global__ void layernorm(float* A, float* gamma, float* beta, float* B) {
+__global__ void layernorm(float *A, float *gamma, float *beta, float *B) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < 4) {
     float mean = 0.0;
@@ -41,8 +41,8 @@ __global__ void layernorm(float* A, float* gamma, float* beta, float* B) {
   }
 }
 
-extern "C" void layernorm_kernel(float* A, float* gamma, float* beta,
-                                  float* B, int batch_size, int seq_length, int d_model) {
+extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
+                                 int batch_size, int seq_length, int d_model) {
   // Allocate memory on the device
   float *d_A, *d_B, *d_gamma, *d_beta;
   int num_elements = batch_size * seq_length * d_model;

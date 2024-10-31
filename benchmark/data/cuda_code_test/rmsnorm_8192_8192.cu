@@ -1,6 +1,6 @@
 
 
-__global__ void rmsnorm(float* A, float* B) {
+__global__ void rmsnorm(float *A, float *B) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   float eps = 1e-5f;
 
@@ -24,7 +24,7 @@ __global__ void rmsnorm(float* A, float* B) {
   }
 }
 
-extern "C" void rmsnorm_kernel(float* A, float* B, int size1, int size2) {
+extern "C" void rmsnorm_kernel(float *A, float *B, int size1, int size2) {
   // Allocate memory on the device
   float *d_A, *d_B;
   int num_elements = size1 * size2;

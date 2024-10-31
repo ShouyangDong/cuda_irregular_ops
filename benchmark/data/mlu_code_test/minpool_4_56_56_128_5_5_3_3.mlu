@@ -1,33 +1,42 @@
-extern "C" __mlu_global__ void minpool(float* input0, float* minpool_37) {
+extern "C" __mlu_global__ void minpool(float *input0, float *minpool_37) {
   __nram__ float input0_local_nram[85760];
   for (int yy_outer = 0; yy_outer < 6; ++yy_outer) {
-    __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)coreId) * 401408) + (yy_outer * 64512)))), 315392, GDRAM2NRAM);
-    __bang_minpool(((float *)input0_local_nram + (78848)), ((float *)input0_local_nram + (0)), 128, 11, 56, 5, 5, 3, 3);
-    __memcpy(((float *)minpool_37 + (((((int)coreId) * 41472) + (yy_outer * 6912)))), ((float *)input0_local_nram + (78848)), 27648, NRAM2GDRAM);
+    __memcpy(
+        ((float *)input0_local_nram + (0)),
+        ((float *)input0 + (((((int)coreId) * 401408) + (yy_outer * 64512)))),
+        315392, GDRAM2NRAM);
+    __bang_minpool(((float *)input0_local_nram + (78848)),
+                   ((float *)input0_local_nram + (0)), 128, 11, 56, 5, 5, 3, 3);
+    __memcpy(
+        ((float *)minpool_37 + (((((int)coreId) * 41472) + (yy_outer * 6912)))),
+        ((float *)input0_local_nram + (78848)), 27648, NRAM2GDRAM);
   }
 }
 
-extern "C" void minpool_kernel(float *output, float *input, int batch_size, int channels, int input_H, int kernel_size, int stride) {
-    float *d_input, *d_output;
+extern "C" void minpool_kernel(float *output, float *input, int batch_size,
+                               int channels, int input_H, int kernel_size,
+                               int stride) {
+  float *d_input, *d_output;
 
-    cnrtQueue_t queue;
-    cnrtSetDevice(0);
-    cnrtQueueCreate(&queue);
-    int output_H = (input_H - kernel_size) / stride + 1;
-    int input_size = batch_size * input_H * input_H * channels;
-    int output_size = batch_size * output_H * output_H * channels;
-    cnrtMalloc(&d_input, input_size * sizeof(float));
-    cnrtMalloc(&d_output, output_size * sizeof(float));
+  cnrtQueue_t queue;
+  cnrtSetDevice(0);
+  cnrtQueueCreate(&queue);
+  int output_H = (input_H - kernel_size) / stride + 1;
+  int input_size = batch_size * input_H * input_H * channels;
+  int output_size = batch_size * output_H * output_H * channels;
+  cnrtMalloc((void **)(&d_input), input_size * sizeof(float));
+  cnrtMalloc((void **)(&d_output), output_size * sizeof(float));
 
-    cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDevice);
+  cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDev);
 
   cnrtDim3_t dim = {1, 1, 4};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
 
-    minpool<<<dim, ktype, queue>>>(d_input, d_output);
+  minpool<<<dim, ktype, queue>>>(d_input, d_output);
 
-    cnrtMemcpy(output, d_output, output_size * sizeof(float), cnrtMemcpyDeviceToHost);
+  cnrtMemcpy(output, d_output, output_size * sizeof(float),
+             cnrtMemcpyDevToHost);
 
-    cnrtFree(d_input);
-    cnrtFree(d_output);
+  cnrtFree(d_input);
+  cnrtFree(d_output);
 }

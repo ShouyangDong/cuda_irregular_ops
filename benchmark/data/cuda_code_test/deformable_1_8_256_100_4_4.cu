@@ -1,10 +1,10 @@
 __global__ void __launch_bounds__(64)
-    cuda_deformable_attention(float* __restrict__ attention_weights_,
-                              float* __restrict__ output_,
-                              float* __restrict__ sampling_locations_,
-                              float* __restrict__ value_,
-                              int* __restrict__ value_level_start_index_,
-                              int* __restrict__ value_spatial_shapes_) {
+    cuda_deformable_attention(float *__restrict__ attention_weights_,
+                              float *__restrict__ output_,
+                              float *__restrict__ sampling_locations_,
+                              float *__restrict__ value_,
+                              int *__restrict__ value_level_start_index_,
+                              int *__restrict__ value_spatial_shapes_) {
   float attention_sum[4];
   int height_width[2];
   float xy[2];
@@ -128,9 +128,10 @@ __global__ void __launch_bounds__(64)
   }
 }
 
-extern "C" void deformable_kernel(
-    float* value, int* value_spatial_shapes, int* level_start_index,
-    float* sampling_locations, float* attention_weights, float* output) {
+extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
+                                  int *level_start_index,
+                                  float *sampling_locations,
+                                  float *attention_weights, float *output) {
   // Allocate memory on the device
   float *d_value, *d_sampling_locations, *d_attention_weights, *d_output;
   int *d_value_spatial_shapes, *d_value_level_start_index;
