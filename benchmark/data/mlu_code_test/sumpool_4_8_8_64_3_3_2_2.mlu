@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void sumpool(float *input0, float *sumpool_18) {
+__mlu_global__ void sumpool(float *input0, float *sumpool_18) {
   __nram__ float input0_local_nram[3712];
   __memcpy(((float *)input0_local_nram + (0)),
            ((float *)input0 + ((((int)coreId) * 4096))), 1792, GDRAM2NRAM, 1792,

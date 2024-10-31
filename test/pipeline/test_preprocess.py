@@ -9,20 +9,17 @@ from src.pre_processing.preprocessing import run_detensorization, run_loop_recov
 
 def unitest(file_name, code, target):
     base_name = os.path.basename(file_name)
+    with open(base_name, mode="w") as f:
+        f.write(code)
+        f.close()
     # save code as file
     if target == "CUDA":
-        with open(base_name, mode="w") as f:
-            f.write(code)
-            f.close()
         success, output = run_test(
             base_name, ".benchmark/evaluation/cuda_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
         return success
     elif target == "BANG":
-        with open(base_name, mode="w") as f:
-            f.write(code)
-            f.close()
         success, output = run_test(
             base_name, ".benchmark/evaluation/mlu_test/test_add.py"
         )
@@ -38,7 +35,6 @@ def falcon_preprocess_pipeline(file_name, target):
 
     device_code = org_code.split("extern")[0]
     host_code = "extern" + org_code.split("extern")[1]
-
     code = run_loop_recovery(device_code, target)
     if not unitest(file_name, device_code + host_code, target):
         code = ast_loop_recovery(device_code, target)

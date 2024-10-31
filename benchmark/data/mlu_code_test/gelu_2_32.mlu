@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void gelu(float *input0, float *active_gelup_80) {
+__mlu_global__ void gelu(float *input0, float *active_gelup_80) {
   __nram__ float input0_local_nram[4];
   __memcpy(
       ((float *)input0_local_nram + (0)),

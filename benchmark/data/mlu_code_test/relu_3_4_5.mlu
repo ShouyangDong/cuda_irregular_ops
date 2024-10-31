@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void relu(float *input0, float *active_relu_174) {
+__mlu_global__ void relu(float *input0, float *active_relu_174) {
   __nram__ float input0_local_nram[5];
   if (((int)clusterId) < 3) {
     __memcpy(

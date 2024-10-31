@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void softmax(float *A, float *output) {
+__mlu_global__ void softmax(float *A, float *output) {
   __nram__ float dest[32];
   __nram__ float dinominator[32];
   __nram__ float dinominator_temp[32];

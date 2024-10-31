@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void sign(float *input0, float *active_sign_147) {
+__mlu_global__ void sign(float *input0, float *active_sign_147) {
   __nram__ float input0_local_nram[25];
   for (int i0_outer_outer_outer = 0; i0_outer_outer_outer < 3;
        ++i0_outer_outer_outer) {

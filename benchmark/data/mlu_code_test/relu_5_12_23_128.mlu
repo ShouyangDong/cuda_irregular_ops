@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void relu(float *input0, float *active_relu_295) {
+__mlu_global__ void relu(float *input0, float *active_relu_295) {
   __nram__ float input0_local_nram[2944];
   for (int i1_outer_i0_fused_outer_outer = 0; i1_outer_i0_fused_outer_outer < 8;
        ++i1_outer_i0_fused_outer_outer) {

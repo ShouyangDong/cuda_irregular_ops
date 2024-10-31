@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_1605) {
+__mlu_global__ void add(float *lhs, float *rhs, float *add_1605) {
   __nram__ float lhs_local_nram[512];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
     __memcpy(

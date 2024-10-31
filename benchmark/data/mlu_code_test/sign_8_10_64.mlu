@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void sign(float *input0, float *active_sign_207) {
+__mlu_global__ void sign(float *input0, float *active_sign_207) {
   __nram__ float input0_local_nram[640];
   if ((clusterId * 4 + coreId) < 8) {
     __memcpy(((float *)input0_local_nram + (0)),

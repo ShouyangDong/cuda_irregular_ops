@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void gelu(float *input0, float *active_gelup_230) {
+__mlu_global__ void gelu(float *input0, float *active_gelup_230) {
   __nram__ float input0_local_nram[384];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 12) {
     __memcpy(((float *)input0_local_nram + (0)),

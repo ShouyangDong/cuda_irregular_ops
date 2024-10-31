@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void conv2d(float *data, float *kernel,
+__mlu_global__ void conv2d(float *data, float *kernel,
                                       float *conv2d_nhwc) {
   __nram__ float kernel_local_nram[4672];
   __wram__ float reshape_filter[16384];

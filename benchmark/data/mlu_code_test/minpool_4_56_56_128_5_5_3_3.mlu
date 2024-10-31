@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void minpool(float *input0, float *minpool_37) {
+__mlu_global__ void minpool(float *input0, float *minpool_37) {
   __nram__ float input0_local_nram[85760];
   for (int yy_outer = 0; yy_outer < 6; ++yy_outer) {
     __memcpy(

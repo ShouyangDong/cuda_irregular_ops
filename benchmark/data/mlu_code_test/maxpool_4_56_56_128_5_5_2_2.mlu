@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void maxpool(float *input0, float *maxpool_36) {
+__mlu_global__ void maxpool(float *input0, float *maxpool_36) {
   __nram__ float input0_local_nram[55936];
   for (int yy_outer = 0; yy_outer < 13; ++yy_outer) {
     __memcpy(

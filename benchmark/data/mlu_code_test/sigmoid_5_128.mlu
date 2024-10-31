@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void sigmoid(float *input0,
+__mlu_global__ void sigmoid(float *input0,
                                        float *active_sigmoid_116) {
   __nram__ float input0_local_nram[128];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 5) {

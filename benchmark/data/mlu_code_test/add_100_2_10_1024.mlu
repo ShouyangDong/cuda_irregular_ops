@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_2265) {
+__mlu_global__ void add(float *lhs, float *rhs, float *add_2265) {
   __nram__ float lhs_local_nram[512];
   for (int i3_outer_i2_fused_i1_fused_i0_fused_outer_outer = 0;
        i3_outer_i2_fused_i1_fused_i0_fused_outer_outer < 500;
