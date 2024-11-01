@@ -14,7 +14,6 @@ class PragmaToSIMDTransformer(NodeTransformer):
         """遍历代码块，查找并修改带有 #pragma 的 for 循环"""
         new_block_items = []
         i = 0
-
         while i < len(node.block_items):
             stmt = node.block_items[i]
 
@@ -41,7 +40,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
             i += 1
 
         node.block_items = new_block_items
-        return node
+        return self.generic_visit(node)
 
     def transform_pragma_loop(self, for_loop, pragma_text):
         def get_args(pragma_text):
@@ -97,6 +96,19 @@ class PragmaToSIMDTransformer(NodeTransformer):
                     [c_ast.ID("C_nram"), c_ast.ID("A_nram"), c_ast.ID("B_wram")]
                 ),
             )
+        elif "add" in pragma_text:
+            transformed_code = c_ast.FuncCall(
+                name=c_ast.ID("__bang_add"),
+                args=c_ast.ExprList(
+                    [
+                        *([c_ast.ID(arg) for arg in args]),
+                        c_ast.Constant(
+                            "int",
+                            str(np.prod([int(ext) for ext in self.loop_exts])),
+                        ),
+                    ]
+                ),
+            )
         else:
             # 如果 pragma 不匹配，返回原始 for 循环
             return for_loop
@@ -115,7 +127,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
             for stmt in node.stmt.block_items:
                 if isinstance(stmt, c_ast.For):
                     self.visit(stmt)  # 手动调用 visit 以访问嵌套的 for 循环
-        return node
+        return self.generic_visit(node)
 
 
 def ast_tensorization(code, target="BANG"):
