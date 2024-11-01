@@ -188,6 +188,7 @@ class CacheTransformationVisitor(NodeTransformer):
 
 def ast_auto_cache(code, space_map):
     # 解析代码
+    print("[INFO]ast_auto_cache:", code)
     parser = c_parser.CParser()
     ast = parser.parse(code)
     # 进行缓存加载和写回插入

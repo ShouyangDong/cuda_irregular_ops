@@ -277,7 +277,7 @@ def run_code_decoration(code):
     match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
     if match:
         code_content = match.group(1)
-        return code_content
+        return code_content.replace("cpp", "")
     return None
 
 

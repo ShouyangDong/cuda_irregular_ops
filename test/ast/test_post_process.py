@@ -1,6 +1,13 @@
+import json
+
 from smt.auto_cache import ast_auto_cache
+from smt.const_inline import constant_inline
 from smt.tensorization.tensorization import ast_tensorization
-from src.post_processing.post_processing import run_code_decoration
+from smt.thread_binding import ast_thread_binding
+from src.post_processing.post_processing import (
+    replace_operation_with_intrinsic,
+    run_code_decoration,
+)
 
 
 def post_processing_pipeline(code, target):
@@ -10,31 +17,34 @@ def post_processing_pipeline(code, target):
     :param func_content: The content of the function (code) to be transformed.
 
     :return: Transformed code after applying the two transformations."""
-    code = run_thread_binding(code, target)
-
+    code = constant_inline(code)
+    code = ast_thread_binding(code, target)
     # when target is "BANG" or "DLBOOST", insert tensorization process.
     if target in ["BANG", "DLBOOST"]:
         code = run_code_decoration(code)
+        print("[INFO] decorated: ", code)
         op_pragma = {}
         if target == "BANG":
             op_pragma = json.load(
                 open("./documents/operation_bang_C_instruction_map.json", "r")
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
-        code = run_cache_process(code, space_maps)
-        code = ast_auto_cache(code)
+        print("[INFO] intrinsic: ", code)
+        code = ast_auto_cache(code, space_maps)
+        print("[INFO] cache: ", code)
+        code = run_code_decoration(code)
         code = ast_tensorization(code, target)
     return code
 
 
 if __name__ == "__main__":
     code = """
-    extern "C" void add_kernel(float* output, float* input1, float* input2) {
+    void add_kernel(float* output, float* input1, float* input2) {
         int dim1 = 4;
         int dim2 = 4;
         int dim3 = 4;
         int dim4 = 64;
-        
+
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
                 for (int k = 0; k < dim3; k++) {
