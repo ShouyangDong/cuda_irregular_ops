@@ -3,10 +3,31 @@ from pycparser import c_ast, c_generator, c_parser
 from smt.util import NodeTransformer
 
 
+class LoopVisitor(c_ast.NodeVisitor):
+    def __init__(self):
+        # self.cache_node = {}
+        self.cache_size = []
+
+    def visit_Compound(self, node):
+        start_cache = False
+        for item in node.block_items:
+            if isinstance(item, c_ast.Pragma) and "__bang" in item.string:
+                # 检测到 #pragma 行，表示需要进行缓存操作
+                start_cache = True
+                # self.cache_node[item.string] = None
+            elif isinstance(item, c_ast.For) and start_cache:
+                # self.cache_node[item.string] = item
+                print(item)
+                self.cache_size.append(item.cond.right.value)
+                start_cache = False  # 重置标志
+        self.generic_visit(node)
+
+
 class CacheTransformationVisitor(NodeTransformer):
-    def __init__(self, space_map):
+    def __init__(self, space_map, cache_size):
         super().__init__()
-        self.space_map = space_map  # 用于指定缓存的位置，如 {"A": "Nram", "B": "Nram"}
+        self.space_map = space_map
+        self.cache_size = cache_size
 
     def visit_FuncDef(self, node):
         """在函数定义节点内创建缓存缓冲区，并添加缓存加载和写回逻辑"""
@@ -15,7 +36,7 @@ class CacheTransformationVisitor(NodeTransformer):
 
     def create_cache_buffers(self, node):
         """根据 space_map 创建 NRAM 缓冲区"""
-        size_param = c_ast.ID(name="size")
+        size_param = c_ast.Constant(type="int", value=self.cache_size[0])
         declarations = []
 
         # 根据 space_map 中的 input 和 output 动态创建 NRAM 缓冲区
@@ -73,7 +94,7 @@ class CacheTransformationVisitor(NodeTransformer):
         new_block_items = []
         start_cache = False
         for item in node.block_items:
-            if isinstance(item, c_ast.Pragma) and "__bang_add" in item.string:
+            if isinstance(item, c_ast.Pragma) and "__bang" in item.string:
                 # 检测到 #pragma 行，表示需要进行缓存操作
                 start_cache = True
             elif isinstance(item, c_ast.For) and start_cache:
@@ -91,7 +112,7 @@ class CacheTransformationVisitor(NodeTransformer):
             else:
                 new_block_items.append(item)
         node.block_items = new_block_items
-        return node
+        return self.generic_visit(node)
 
     def modify_for_loop_body(self, for_node):
         """将 for 循环体内的变量替换为 NRAM 缓冲区变量"""
@@ -151,7 +172,7 @@ class CacheTransformationVisitor(NodeTransformer):
         return c_ast.For(
             init=for_node.init,
             cond=for_node.cond,
-            next=for_node.cond,
+            next=for_node.next,
             stmt=c_ast.Compound(
                 block_items=[
                     c_ast.Assignment(
@@ -171,7 +192,7 @@ class CacheTransformationVisitor(NodeTransformer):
         return c_ast.For(
             init=for_node.init,
             cond=for_node.cond,
-            next=for_node.cond,
+            next=for_node.next,
             stmt=c_ast.Compound(
                 block_items=[
                     c_ast.Assignment(
@@ -188,11 +209,12 @@ class CacheTransformationVisitor(NodeTransformer):
 
 def ast_auto_cache(code, space_map):
     # 解析代码
-    print("[INFO]ast_auto_cache:", code)
     parser = c_parser.CParser()
     ast = parser.parse(code)
     # 进行缓存加载和写回插入
-    transformer = CacheTransformationVisitor(space_map)
+    cache_visitor = LoopVisitor()
+    cache_visitor.visit(ast)
+    transformer = CacheTransformationVisitor(space_map, cache_visitor.cache_size)
     ast = transformer.visit(ast)
 
     # 输出最终代码
@@ -203,9 +225,9 @@ def ast_auto_cache(code, space_map):
 if __name__ == "__main__":
     # 示例代码和 space_map
     code = """
-    void __bang_add(float *C, float *A, float *B, int size) {
+    void __bang_add(float *C, float *A, float *B) {
         #pragma __bang_add(input[Nram, Nram], output[Nram])
-        for (int i_add = 0; i_add < size; i_add++) {
+        for (int i_add = 0; i_add < 128; i_add++) {
             C[i_add] = A[i_add] + B[i_add];
         }
     }
