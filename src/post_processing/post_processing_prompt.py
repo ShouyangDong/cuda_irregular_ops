@@ -425,7 +425,9 @@ for (int i = 0; i < 64; i++) {
 }
 
 for (int i = 0; i < 64; i++) {
-    E[i] = C[i] - D[i];
+    for (int j = 0; j < 128; j++) {
+        E[i*128+j] = C[i*128+j] - D[i*128+j];
+    }
 }
 ```
 
@@ -439,9 +441,12 @@ for (int i = 0; i < 64; i++) {
 for (int i = 0; i < 64; i++) {
     C[i] = C[i] * D[i];
 }
-#pragma operation(sub(input[C, D], output[E]))
+
 for (int i = 0; i < 64; i++) {
-    E[i] = C[i] - D[i];
+    #pragma operation(sub(input[C, D], output[E]))
+    for (int j = 0; j < 128; j++) {
+        E[i*128+j] = C[i*128+j] - D[i*128+j];
+    }
 }
 ```
 
@@ -463,4 +468,5 @@ Please transform the following C++ code by inserting `#pragma operation( )` dire
 ### Notes:
 - The input should be replaced with the actual input C++ code containing loops with element-wise or matrix multiplication operations.
 - The output should focus on identifying and marking operations inside loops that are candidates for SIMD vectorization.
+- The Pragmas must be above the for loops.
 """
