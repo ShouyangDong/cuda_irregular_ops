@@ -3,12 +3,13 @@ import re
 import numpy as np
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from smt.util import NodeTransformer, add_memory_prefix
 
 
 class PragmaToSIMDTransformer(NodeTransformer):
     def __init__(self):
         self.loop_exts = []
+        self.vectorize_var = None
 
     def visit_Compound(self, node):
         """遍历代码块，查找并修改带有 #pragma 的 for 循环"""
@@ -42,6 +43,56 @@ class PragmaToSIMDTransformer(NodeTransformer):
         node.block_items = new_block_items
         return self.generic_visit(node)
 
+    def extract_argments(self, for_node):
+        self.vectorize_var = for_node.init.decls[0].name
+        new_node = self.generic_visit(for_node)
+        self.vectorize_var = None
+
+        def get_body(node):
+            # Base case: if the node is not a `for` loop, return None
+            if not isinstance(node, c_ast.For):
+                return None
+
+            # If the `for` loop has a body, check if it's another `for` loop
+            body = node.stmt
+            if isinstance(body, c_ast.Compound) and body.block_items:
+                # Check if the first item in the block is a `for` loop
+                first_stmt = body.block_items[0]
+                if isinstance(first_stmt, c_ast.For):
+                    # Recurse into the inner `for` loop
+                    return get_body(first_stmt)
+                else:
+                    # Return the body if it's not a nested `for` loop
+                    return first_stmt
+
+            # If there's no body, return None
+            return None
+
+        stmt = get_body(for_node)
+        assert isinstance(stmt, c_ast.Assignment)
+        assert isinstance(stmt.lvalue, c_ast.ArrayRef)
+        args = [
+            c_ast.BinaryOp(op="+", left=stmt.lvalue.name, right=stmt.lvalue.subscript)
+        ]
+        right = stmt.rvalue
+        if isinstance(right, c_ast.ArrayRef):
+            args.append(c_ast.BinaryOp(op="+", left=right.name, right=right.subscript))
+        elif isinstance(right, c_ast.BinaryOp):
+            args.append(
+                c_ast.BinaryOp(op="+", left=right.left.name, right=right.left.subscript)
+            )
+            args.append(
+                c_ast.BinaryOp(
+                    op="+", left=right.right.name, right=right.right.subscript
+                )
+            )
+        return args
+
+    def visit_ID(self, node):
+        if node.name == self.vectorize_var:
+            node.name = str(0)
+        return node
+
     def transform_pragma_loop(self, for_loop, pragma_text):
         def get_args(pragma_text):
             # 使用正则表达式匹配 input 和 output 参数
@@ -59,7 +110,8 @@ class PragmaToSIMDTransformer(NodeTransformer):
         output_params, input_params = get_args(pragma_text)
         assert output_params is not None
         assert input_params is not None
-        args = output_params + input_params
+        args = self.extract_argments(for_loop)
+        # args = output_params + input_params
         # 重置上界列表并访问 for_loop 以填充 self.loop_exts
         self.loop_exts = []
         self.visit(for_loop)  # 递归访问 for_loop 的子节点以触发 visit_For
@@ -80,7 +132,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
                 name=c_ast.ID("__memcpy"),
                 args=c_ast.ExprList(
                     [
-                        *([c_ast.ID(arg) for arg in args]),
+                        *(args),
                         c_ast.Constant(
                             "int",
                             str(4 * np.prod([int(ext) for ext in self.loop_exts])),
@@ -101,7 +153,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
                 name=c_ast.ID("__bang_add"),
                 args=c_ast.ExprList(
                     [
-                        *([c_ast.ID(arg) for arg in args]),
+                        *(args),
                         c_ast.Constant(
                             "int",
                             str(np.prod([int(ext) for ext in self.loop_exts])),
@@ -131,6 +183,12 @@ class PragmaToSIMDTransformer(NodeTransformer):
 
 
 def ast_tensorization(code, target="BANG"):
+    # 定义正则表达式模式匹配 '__nram__' 和 '__wram__' 前缀
+    pattern = re.compile(r"__(nram|wram|gdram)__\s+")
+
+    # 使用 sub 去掉匹配的前缀
+    code = pattern.sub("", code)
+
     # 解析代码
     parser = c_parser.CParser()
     ast = parser.parse(code)
@@ -141,7 +199,10 @@ def ast_tensorization(code, target="BANG"):
 
     # 输出修改后的代码
     generator = c_generator.CGenerator()
-    return generator.visit(ast)
+    tensorized_code = generator.visit(ast)
+    if target == "BANG":
+        return add_memory_prefix(tensorized_code)
+    return tensorized_code
 
 
 if __name__ == "__main__":
@@ -149,9 +210,9 @@ if __name__ == "__main__":
     code = """
     void matmul(float *A, float *B, float *C)
     {
-    float B_wram[32768];
-    float A_nram[512];
-    float C_nram[64];
+    __wram__ float B_wram[32768];
+    __nram__ float A_nram[512];
+    __nram__ float C_nram[64];
     
     #pragma operation(memory(input[B], output[B_wram]))
     for (int col = 0; col < 64; col++) {

@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from smt.util import NodeTransformer, add_memory_prefix
 
 
 class LoopVisitor(c_ast.NodeVisitor):
@@ -224,7 +224,7 @@ class CacheTransformationVisitor(NodeTransformer):
         )
 
 
-def ast_auto_cache(code, space_map):
+def ast_auto_cache(code, space_map, target="BANG"):
     # 解析代码
     parser = c_parser.CParser()
     ast = parser.parse(code)
@@ -236,7 +236,10 @@ def ast_auto_cache(code, space_map):
 
     # 输出最终代码
     generator = c_generator.CGenerator()
-    return generator.visit(ast)
+    cache_code = generator.visit(ast)
+    if target == "BANG":
+        return add_memory_prefix(cache_code)
+    return cache_code
 
 
 if __name__ == "__main__":

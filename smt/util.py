@@ -1,3 +1,5 @@
+import re
+
 from pycparser import c_ast
 
 
@@ -43,3 +45,28 @@ def iter_fields(node):
             child = getattr(node, name)
             index += len(child)
             yield name, child
+
+
+def add_memory_prefix(code):
+    # Define the memory types and their associated prefixes
+    prefix_map = {
+        "_Nram": "__nram__ float",
+        "_Wram": "__wram__ float",
+        "_nram": "__nram__ float",
+        "_wram": "__wram__ float",
+    }
+
+    # Regex pattern to match the variable declarations
+    pattern = r"\bfloat\s+(\w+_(Nram|Wram|nram|wram|Gdram))\b"
+
+    # Function to replace matched float declarations with the appropriate prefix
+    def replacer(match):
+        var_name = match.group(1)
+        suffix = match.group(2)
+        if f"_{suffix}" in prefix_map:
+            return f"{prefix_map[f'_{suffix}']} {var_name}"
+        return match.group(0)
+
+    # Substitute in the code using regex
+    modified_code = re.sub(pattern, replacer, code)
+    return modified_code
