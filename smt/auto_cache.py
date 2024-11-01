@@ -17,7 +17,6 @@ class LoopVisitor(c_ast.NodeVisitor):
                 # self.cache_node[item.string] = None
             elif isinstance(item, c_ast.For) and start_cache:
                 # self.cache_node[item.string] = item
-                print(item)
                 self.cache_size.append(item.cond.right.value)
                 start_cache = False  # 重置标志
         self.generic_visit(node)
@@ -98,15 +97,16 @@ class CacheTransformationVisitor(NodeTransformer):
                 # 检测到 #pragma 行，表示需要进行缓存操作
                 start_cache = True
             elif isinstance(item, c_ast.For) and start_cache:
+                reads, writes = self.extract_index_expression(item)
                 # 插入缓存读取（读操作）
-                read_items = self.insert_cache_read_operations(item)
+                read_items = self.create_read_operations(item, reads)
                 # 插入原始的 for 循环
                 new_block_items.extend(read_items)
                 # 修改循环体中的变量
-                new_item = self.modify_for_loop_body(item)
+                new_item = self.modify_for_loop_body(item, reads, writes)
                 new_block_items.append(new_item)
                 # 插入缓存写回（写操作）
-                write_items = self.insert_cache_write_operations(item)
+                write_items = self.create_write_operations(item, writes)
                 new_block_items.extend(write_items)
                 start_cache = False  # 重置标志
             else:
@@ -114,60 +114,79 @@ class CacheTransformationVisitor(NodeTransformer):
         node.block_items = new_block_items
         return self.generic_visit(node)
 
-    def modify_for_loop_body(self, for_node):
+    def modify_for_loop_body(self, for_node, reads, writes):
         """将 for 循环体内的变量替换为 NRAM 缓冲区变量"""
-        for stmt in for_node.stmt.block_items:
-            if isinstance(stmt, c_ast.Assignment):
-                # 替换左值（例如 C[i_add] -> C_Nram[i_add]）
-                if (
-                    isinstance(stmt.lvalue, c_ast.ArrayRef)
-                    and stmt.lvalue.name.name in self.space_map[0]["output"]
-                ):
-                    stmt.lvalue.name.name += (
-                        "_" + self.space_map[0]["output"][stmt.lvalue.name.name]
-                    )
-
-                # 替换右值的输入变量（例如 A[i_add], B[i_add] -> A_Nram[i_add], B_Nram[i_add]）
-                if isinstance(stmt.rvalue, c_ast.BinaryOp):
-                    for operand in ["left", "right"]:
-                        if isinstance(getattr(stmt.rvalue, operand), c_ast.ArrayRef):
-                            array_ref = getattr(stmt.rvalue, operand)
-                            if array_ref.name.name in self.space_map[0]["input"]:
-                                array_ref.name.name += (
-                                    "_"
-                                    + self.space_map[0]["input"][array_ref.name.name]
-                                )
-        return for_node
-
-    def insert_cache_read_operations(self, for_node):
-        """在 for 循环前插入缓存读取逻辑"""
-        read_operations = []
-        # 遍历 space_map 中的 input 字段并生成加载操作
-        for mapping in self.space_map:
-            for var_name, location in mapping.get("input", {}).items():
-                read_op = self.create_load_loop(
-                    var_name, f"{var_name}_{location}", for_node
+        index = c_ast.ID(name=for_node.init.decls[0].name)
+        inputs = []
+        for var_name, location in self.space_map[0]["input"].items():
+            inputs.append(
+                c_ast.ArrayRef(
+                    name=c_ast.ID(name=f"{var_name}_{location}"), subscript=index
                 )
-                read_operations.append(read_op)
-        return read_operations
-
-    def insert_cache_write_operations(self, for_node):
-        """在 for 循环后插入缓存写回逻辑"""
-        write_operations = []
-
-        # 遍历 space_map 中的 output 字段并生成写回操作
-        for mapping in self.space_map:
-            for var_name, location in mapping.get("output", {}).items():
-                write_op = self.create_write_back_loop(
-                    f"{var_name}_{location}", var_name, for_node
+            )
+        ouptuts = []
+        for var_name, location in self.space_map[0]["output"].items():
+            ouptuts.append(
+                c_ast.ArrayRef(
+                    name=c_ast.ID(name=f"{var_name}_{location}"), subscript=index
                 )
-                write_operations.append(write_op)
+            )
 
-        # 将缓存写回操作插入到 for 循环之后
-        return write_operations
+        stmt = for_node.stmt.block_items[0]
+        assert isinstance(stmt, c_ast.Assignment)
+        right = stmt.rvalue
+        left_value = ouptuts[0]
+        right_value = None
+        if isinstance(right, c_ast.BinaryOp):
+            right_value = c_ast.BinaryOp(op=right.op, left=inputs[0], right=inputs[1])
 
-    def create_load_loop(self, src, dest, for_node):
-        """生成从 src 加载到 dest 的 for 循环"""
+        final_node = c_ast.For(
+            init=for_node.init,
+            cond=for_node.cond,
+            next=for_node.next,
+            stmt=c_ast.Compound(
+                block_items=[
+                    c_ast.Assignment(op="=", lvalue=left_value, rvalue=right_value)
+                ]
+            ),
+        )
+
+        return final_node
+
+    def extract_index_expression(self, for_node):
+        src_index = {}
+        stmt = for_node.stmt.block_items[0]
+        assert isinstance(stmt, c_ast.Assignment)
+        right = stmt.rvalue
+        if isinstance(right, c_ast.BinaryOp):
+            src_index[right.left.name.name] = right.left
+            src_index[right.right.name.name] = right.right
+        return src_index, stmt.lvalue
+
+    def create_read_operations(self, for_loop, src_index):
+        """Insert cache read operations with complex indexing."""
+        reads = []
+        for var_name, location in self.space_map[0]["input"].items():
+            reads.append(
+                self.create_load_loop(
+                    var_name, f"{var_name}_{location}", for_loop, src_index
+                )
+            )
+        return reads
+
+    def create_write_operations(self, for_loop, dest_index):
+        """Insert cache write-back operations with complex indexing."""
+        writes = []
+        for var_name, location in self.space_map[0]["output"].items():
+            writes.append(
+                self.create_write_back_loop(
+                    f"{var_name}_{location}", for_loop, dest_index
+                )
+            )
+        return writes
+
+    def create_load_loop(self, src, dest, for_node, src_index):
+        """Creates a load loop with specified complex index expression."""
         index = c_ast.ID(name=for_node.init.decls[0].name)
         return c_ast.For(
             init=for_node.init,
@@ -180,14 +199,14 @@ class CacheTransformationVisitor(NodeTransformer):
                         lvalue=c_ast.ArrayRef(
                             name=c_ast.ID(name=dest), subscript=index
                         ),
-                        rvalue=c_ast.ArrayRef(name=c_ast.ID(name=src), subscript=index),
+                        rvalue=src_index[src],
                     )
                 ]
             ),
         )
 
-    def create_write_back_loop(self, src, dest, for_node):
-        """生成从 src 写回到 dest 的 for 循环"""
+    def create_write_back_loop(self, src, for_node, index_expr):
+        """Creates a write-back loop with specified complex index expression."""
         index = c_ast.ID(name=for_node.init.decls[0].name)
         return c_ast.For(
             init=for_node.init,
@@ -197,9 +216,7 @@ class CacheTransformationVisitor(NodeTransformer):
                 block_items=[
                     c_ast.Assignment(
                         op="=",
-                        lvalue=c_ast.ArrayRef(
-                            name=c_ast.ID(name=dest), subscript=index
-                        ),
+                        lvalue=index_expr,
                         rvalue=c_ast.ArrayRef(name=c_ast.ID(name=src), subscript=index),
                     )
                 ]
