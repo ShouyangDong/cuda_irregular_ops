@@ -33,6 +33,7 @@ def post_processing_pipeline(code, target):
         code = ast_auto_cache(code, space_maps)
         print("[INFO] cache: ", code)
         code = run_code_decoration(code)
+        print("[INFO] decorate: ", code)
         code = ast_tensorization(code, target)
     return code
 

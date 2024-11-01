@@ -171,7 +171,7 @@ Application Scenario:
 TENSORIZATION_DEMO = """
 Usage Examples:
 // before:
-#pragma operation(memory store to output)
+#pragma operation(memory(input[output_nram], output[output]))
 for (int i = 0; i < 512; ++i) {
     for (int j = 0; j < 512; ++j) {
         output[i * 512 + j] = output_nram[i * 512 + j];
@@ -429,6 +429,14 @@ for (int i = 0; i < 64; i++) {
         E[i*128+j] = C[i*128+j] - D[i*128+j];
     }
 }
+
+for (int i = 0; i < 512; i++) {
+    A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
+}
+
+for (int col = 0; col < 64; col++) {
+    C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
+}
 ```
 
 #### Desired Output C++ Code with Pragmas for SIMD Preparation:
@@ -447,6 +455,16 @@ for (int i = 0; i < 64; i++) {
     for (int j = 0; j < 128; j++) {
         E[i*128+j] = C[i*128+j] - D[i*128+j];
     }
+}
+
+#pragma operation(memory(input[A], output[A_nram]))
+for (int i = 0; i < 512; i++) {
+    A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
+}
+
+#pragma operation(memory(input[C_nram], output[C]))
+for (int col = 0; col < 64; col++) {
+    C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
 }
 ```
 
