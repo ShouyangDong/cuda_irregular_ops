@@ -1,7 +1,8 @@
 import os
 import subprocess
 
-from benchmark.evaluation.cuda_test.result_test import run_test
+from benchmark.evaluation.cuda_test.result_test import run_test as cuda_run_test
+from benchmark.evaluation.mlu_test.result_test import run_test as bang_run_test
 from smt.loop_transformation.loop_recovery import ast_loop_recovery
 from smt.tensorization.detensorization import ast_detensorization
 from src.pre_processing.preprocessing import run_detensorization, run_loop_recovery
@@ -14,13 +15,13 @@ def unitest(file_name, code, target):
         f.close()
     # save code as file
     if target == "CUDA":
-        success, output = run_test(
+        success, output = cuda_run_test(
             base_name, ".benchmark/evaluation/cuda_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
         return success
     elif target == "BANG":
-        success, output = run_test(
+        success, output = bang_run_test(
             base_name, ".benchmark/evaluation/mlu_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
