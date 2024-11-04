@@ -24,7 +24,7 @@ extern "C" void sumpool_kernel(float *output, float *input, int batch_size,
 
   cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDev);
 
-  cnrtDim3_t dim = {1, 1, 4};
+  cnrtDim3_t dim = {4, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
 
   sumpool<<<dim, ktype, queue>>>(d_input, d_output);

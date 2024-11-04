@@ -31,7 +31,7 @@ extern "C" void add_kernel(float *C, float *A, float *B, int size) {
   cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
-    float* d_A;
+  float* d_A;
   float* d_B;
   float* d_C;
 
