@@ -183,11 +183,15 @@ class PragmaToSIMDTransformer(NodeTransformer):
 
 
 def ast_tensorization(code, target="BANG"):
-    # 定义正则表达式模式匹配 '__nram__' 和 '__wram__' 前缀
-    pattern = re.compile(r"__(nram|wram|gdram)__\s+")
+    if target == "BANG":
+        pattern = re.compile(r"__mlu_global__\s+")
+        code = pattern.sub("", code)
 
-    # 使用 sub 去掉匹配的前缀
-    code = pattern.sub("", code)
+        # 定义正则表达式模式匹配 '__nram__' 和 '__wram__' 前缀
+        pattern = re.compile(r"__(nram|wram|gdram)__\s+")
+
+        # 使用 sub 去掉匹配的前缀
+        code = pattern.sub("", code)
 
     # 解析代码
     parser = c_parser.CParser()
@@ -201,7 +205,7 @@ def ast_tensorization(code, target="BANG"):
     generator = c_generator.CGenerator()
     tensorized_code = generator.visit(ast)
     if target == "BANG":
-        return add_memory_prefix(tensorized_code)
+        return "__mlu_global__ " + add_memory_prefix(tensorized_code)
     return tensorized_code
 
 
