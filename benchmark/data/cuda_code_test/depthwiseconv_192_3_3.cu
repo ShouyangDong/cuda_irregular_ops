@@ -37,8 +37,8 @@ extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output,
   cudaMemcpy(d_kernel, kernel, filter_size * sizeof(float),
              cudaMemcpyHostToDevice);
 
-  dim3 blockSize(128);
-  dim3 numBlocks((input_size + blockSize.x - 1) / blockSize.x);
+  dim3 blockSize(190);
+  dim3 numBlocks((output_size + blockSize.x - 1) / blockSize.x);
 
   depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
