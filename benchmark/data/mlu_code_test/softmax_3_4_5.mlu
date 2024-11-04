@@ -31,8 +31,9 @@ extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   softmax<<<dim, ktype, queue>>>(d_A, d_C);
-
+  cnrtQueueSync(queue);
   cnrtMemcpy(C, d_C, size1 * size2 * sizeof(float), cnrtMemcpyDevToHost);
+  cnrtQueueDestroy(queue);
 
   cnrtFree(d_A);
   cnrtFree(d_C);

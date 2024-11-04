@@ -89,7 +89,7 @@ if __name__ == "__main__":
     os.remove(file_name)
 
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, "minpool")
+    function = getattr(lib, "minpool_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),

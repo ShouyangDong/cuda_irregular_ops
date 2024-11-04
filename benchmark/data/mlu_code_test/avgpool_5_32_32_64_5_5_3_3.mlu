@@ -26,7 +26,8 @@ extern "C" void avgpool_kernel(float *output, float *input, int batch_size,
   cnrtQueue_t queue;
   CNRT_CHECK(cnrtSetDevice(0));
   CNRT_CHECK(cnrtQueueCreate(&queue));
-  float *d_input, *d_output;
+  float *d_input;
+  float *d_output;
   int output_H = (input_H - kernel_size) / stride + 1;
   int input_size = batch_size * input_H * input_H * channels;
   int output_size = batch_size * output_H * output_H * channels;
@@ -39,9 +40,10 @@ extern "C" void avgpool_kernel(float *output, float *input, int batch_size,
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
 
   avgpool<<<dim, ktype, queue>>>(d_input, d_output);
-
+  cnrtQueueSync(queue);
   cnrtMemcpy(output, d_output, output_size * sizeof(float),
              cnrtMemcpyDevToHost);
+ cnrtQueueDestroy(queue);
 
   cnrtFree(d_input);
   cnrtFree(d_output);

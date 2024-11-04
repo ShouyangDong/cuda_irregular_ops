@@ -17,7 +17,8 @@ __mlu_global__ void maxpool(float *input0, float *maxpool_21) {
 extern "C" void maxpool_kernel(float *output, float *input, int batch_size,
                                int channels, int input_H, int kernel_size,
                                int stride) {
-  float *d_input, *d_output;
+  float *d_input;
+  float *d_output;
   cnrtQueue_t queue;
   CNRT_CHECK(cnrtSetDevice(0));
   CNRT_CHECK(cnrtQueueCreate(&queue));
@@ -33,9 +34,10 @@ extern "C" void maxpool_kernel(float *output, float *input, int batch_size,
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
 
   maxpool<<<dim, ktype, queue>>>(d_input, d_output);
-
+  cnrtQueueSync(queue);
   cnrtMemcpy(output, d_output, output_size * sizeof(float),
              cnrtMemcpyDevToHost);
+  cnrtQueueDestroy(queue);
 
   cnrtFree(d_input);
   cnrtFree(d_output);

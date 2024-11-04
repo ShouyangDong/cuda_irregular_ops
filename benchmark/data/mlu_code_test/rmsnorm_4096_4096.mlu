@@ -40,9 +40,10 @@ extern "C" void rmsnorm_kernel(float *A, float *B) {
 
   // Launch kernel
   mlu_rms_norm<<<dim, ktype, queue>>>(d_A, d_B);
-
+  cnrtQueueSync(queue);
   // Copy the result back to host
   cnrtMemcpy(B, d_B, num_elements * sizeof(float), cnrtMemcpyDevToHost);
+  cnrtQueueDestroy(queue);
 
   // Free device memory
   cnrtFree(d_A);

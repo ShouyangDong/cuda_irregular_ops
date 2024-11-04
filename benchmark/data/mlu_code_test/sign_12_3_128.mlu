@@ -31,8 +31,10 @@ extern "C" void sign_kernel(float *C, float *A, int size) {
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   sign<<<dim, ktype, queue>>>(d_A, d_C);
-
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
+  cnrtQueueSync(queue);
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);cnrtMemcpyDevToHost);
+  cnrtQueueDestroy(queue);
+  cnrtQueueDestroy(queue);
 
   cnrtFree(d_A);
   cnrtFree(d_C);
