@@ -17,8 +17,8 @@ __mlu_global__ void bmm(float *A, float *B, float *C) {
 
 extern "C" void bmm_kernel(float *A, float *B, float *C) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int batch_size = 4;
   int m = 128;
   int n = 128;

@@ -196,8 +196,8 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
                                   float *attention_weights, float *output) {
 
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
 
   cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;

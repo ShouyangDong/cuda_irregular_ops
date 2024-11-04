@@ -12,8 +12,8 @@ __mlu_global__ void gemv(float *y, float *A, float *B) {
 
 extern "C" void gemv_kernel(float *A, float *B, float *C) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int m = 32;
   int n = 64;
   int num_A = m * n;

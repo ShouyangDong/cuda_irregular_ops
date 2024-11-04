@@ -27,8 +27,8 @@ __mlu_global__ void add(float *lhs, float *rhs, float *add_2265) {
 
 extern "C" void add_kernel(float *C, float *A, float *B, int size) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   float* d_A;
   float* d_B;
   float* d_C;

@@ -23,8 +23,8 @@ extern "C" void conv2d_kernel(float *output, float *input, float *kernel,
                               int input_channels, int output_channels,
                               int kernel_height, int stride) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int output_height = (input_height - kernel_height) / stride + 1;
   int input_size = batch_size * input_height * input_height * input_channels;
   int kernel_size =

@@ -19,8 +19,8 @@ __mlu_global__ void mlu_rms_norm(float *A, float *B) {
 
 extern "C" void rmsnorm_kernel(float *A, float *B) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
 
   cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;

@@ -13,8 +13,8 @@ extern "C" void minpool_kernel(float *output, float *input, int batch_size,
                                int stride) {
   float *d_input, *d_output;
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int output_H = (input_H - kernel_size) / stride + 1;
   int input_size = batch_size * input_H * input_H * channels;
   int output_size = batch_size * output_H * output_H * channels;

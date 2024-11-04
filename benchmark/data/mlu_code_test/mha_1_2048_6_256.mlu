@@ -64,8 +64,8 @@ mlu_multiHeadAttentionForward(float *Q,     //[batch, seq_len, heads, dim]
 extern "C" void multiHeadAttentionForward_kernel(float *Q, float *K, float *V,
                                                  float *output) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
 
   int batch = 1;
   int seq_len = 2048;

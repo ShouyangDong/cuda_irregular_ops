@@ -37,8 +37,8 @@ __mlu_global__ void mlu_layer_norm(float *input, float *gamma, float *beta,
 extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
                                  float *output) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int batch_size = 2;
   int seq_length = 8;
   int d_model = 32;

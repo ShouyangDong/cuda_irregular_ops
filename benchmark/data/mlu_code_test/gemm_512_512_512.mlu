@@ -16,8 +16,8 @@ __mlu_global__ void gemm(float *A, float *B, float *C) {
 
 extern "C" void gemm_kernel(float *A, float *B, float *C) {
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   int m = 512;
   int n = 512;
   int k = 512;

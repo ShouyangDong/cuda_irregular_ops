@@ -31,8 +31,8 @@ __mlu_global__ void relu(float *input0, float *active_relu_295) {
 extern "C" void relu_kernel(float *C, float *A, int size) {
   float *d_A, *d_C;
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   cnrtMalloc((void **)(&d_A), size * sizeof(float));
   cnrtMalloc((void **)(&d_C), size * sizeof(float));
 

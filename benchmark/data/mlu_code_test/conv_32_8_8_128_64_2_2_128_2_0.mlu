@@ -34,8 +34,8 @@ extern "C" void conv2d_kernel(float *output, float *input, float *kernel,
       batch_size * output_height * output_height * output_channels;
   float *d_input, *d_kernel, *d_output;
   cnrtQueue_t queue;
-  cnrtSetDevice(0);
-  cnrtQueueCreate(&queue);
+  CNRT_CHECK(cnrtSetDevice(0));
+  CNRT_CHECK(cnrtQueueCreate(&queue));
   cnrtMalloc((void **)(&d_input), input_size * sizeof(float));
   cnrtMalloc((void **)(&d_kernel), kernel_size * sizeof(float));
   cnrtMalloc((void **)(&d_output), output_size * sizeof(float));
