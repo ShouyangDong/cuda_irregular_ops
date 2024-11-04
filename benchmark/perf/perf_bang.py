@@ -7,10 +7,101 @@ import torch
 import tvm
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
-from bangpy.common import utils
 from toc import compile_bang
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
+
+
+def avgpool_np(data, kernel_stride):
+    """avg pooling with numpy
+    data : numpy.array
+        input array
+
+    kernel : list or tuple
+        The kernel of avgpool
+
+    stride : list or tuple
+        The stride of avgpool
+    """
+    batch, dh, dw, dc = data.shape
+    kh, kw, sh, sw = kernel_stride
+    ch = (dh - kh) // sh + 1
+    cw = (dw - kw) // sw + 1
+    ret = np.zeros((batch, ch, cw, dc))
+    for i in range(ch):
+        for j in range(cw):
+            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
+            ret[:, i, j, :] = np.average(mask, axis=(1, 2))
+    return ret
+
+
+def sumpool_np(data, kernel_stride):
+    """sum pooling with numpy
+    data : numpy.array
+        input array
+
+    kernel : list or tuple
+        The kernel of sumpool
+
+    stride : list or tuple
+        The stride of sumpool
+    """
+    batch, dh, dw, dc = data.shape
+    kh, kw, sh, sw = kernel_stride
+    ch = (dh - kh) // sh + 1
+    cw = (dw - kw) // sw + 1
+    ret = np.zeros((batch, ch, cw, dc))
+    for i in range(ch):
+        for j in range(cw):
+            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
+            ret[:, i, j, :] = np.sum(mask, axis=(1, 2))
+    return ret
+
+
+def maxpool_np(data, kernel_stride):
+    """max pooling with numpy
+    data : numpy.array
+        input array
+
+    kernel : list or tuple
+        The kernel of avgpool
+
+    stride : list or tuple
+        The stride of avgpool
+    """
+    batch, dh, dw, dc = data.shape
+    kh, kw, sh, sw = kernel_stride
+    ch = (dh - kh) // sh + 1
+    cw = (dw - kw) // sw + 1
+    ret = np.zeros((batch, ch, cw, dc))
+    for i in range(ch):
+        for j in range(cw):
+            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
+            ret[:, i, j, :] = np.max(mask, axis=(1, 2))
+    return ret
+
+
+def minpool_np(data, kernel_stride):
+    """min pooling with numpy
+    data : numpy.array
+        input array
+
+    kernel : list or tuple
+        The kernel of avgpool
+
+    stride : list or tuple
+        The stride of avgpool
+    """
+    batch, dh, dw, dc = data.shape
+    kh, kw, sh, sw = kernel_stride
+    ch = (dh - kh) // sh + 1
+    cw = (dw - kw) // sw + 1
+    ret = np.zeros((batch, ch, cw, dc))
+    for i in range(ch):
+        for j in range(cw):
+            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
+            ret[:, i, j, :] = np.min(mask, axis=(1, 2))
+    return ret
 
 
 @tvm.register_func("toc_callback_bang_compile", override=True)
@@ -28,24 +119,21 @@ def toc_callback_bang_compile(code):
 
 def perf_elementwise(name, file, shape):
     op_name = name.split("_")[0]
+
+    @tvm.register_func("toc_callback_bang_postproc", override=True)
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
+        code = code.split("extern")[0]
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = 'extern "C" ' + code
+        return code
+
     if op_name == "add":
-
-        @tvm.register_func("toc_callback_bang_postproc", override=True)
-        def toc_callback_bang_postproc(code):
-            tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
-            if not os.path.exists(file):
-                with open(file, "w", encoding="utf-8") as f:
-                    f.write(code)
-            code = open(file, encoding="utf-8").read()
-            code = code.split("extern")[0]
-
-            code = code.replace(
-                "void " + op_name + "(", "void " + op_name + "_kernel0("
-            )
-            code = 'extern "C" ' + code
-            print(code)
-            return code
-
         input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
         input1 = tsop.tensor(shape, dtype=bangpy.float32, name="input1")
         # Describe Computation
@@ -74,12 +162,11 @@ def perf_elementwise(name, file, shape):
         cost = evaluator(data_lhs_dev, data_rhs_dev, result_arr).mean
         print(f"{name} execution time: {cost * 1000} ms")
     elif op_name == "sign":
-        utils.bang_postproc(path=file)
-        input0 = tensor_op.tensor(shape, dtype=bangpy.float32, name="input0")
+        input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
         # Describe Computation
-        result = bang_op_map[name](input0)
+        result = tsop.sign(input0)
         # Build and get executable module
-        fmlu = tensor_op.BuildBANG([input0], [result], "mlu590-h8", kernel_name=name)
+        fmlu = tsop.BuildBANG([input0], [result], "mlu590-h8", kernel_name=op_name)
         # Generate random test data and run on mlu and cpu
         data_npy = np.random.rand(*shape).astype("float32")
         out_npy = np.sign(data_npy)
@@ -89,14 +176,10 @@ def perf_elementwise(name, file, shape):
         result_arr = bangpy.Array(result_np, dev)
 
         fmlu(data_dev, result_arr)
-        print("-------------------BANG CODE-----------")
-        print(fmlu.get_source())
 
         np.testing.assert_allclose(
             result_arr.numpy(),
             out_npy,
-            rtol=tol[0],
-            atol=tol[1],
             equal_nan=True,
             err_msg="",
             verbose=True,
@@ -111,47 +194,70 @@ def perf_elementwise(name, file, shape):
 
 def perf_pooling(name, file, shape, kernel, stride):
     op_name = name.split("_")[0]
-    poolType = {
-        "avgpool": "avg",
-        "sumpool": "avg",
-        "maxpool": "max",
-        "minpool": "max",
+
+    kh, kw = kernel[0], kernel[1]
+    sh, sw = stride[0], stride[1]
+
+    _op2np = {
+        "avgpool": avgpool_np,
+        "sumpool": sumpool_np,
+        "maxpool": maxpool_np,
+        "minpool": minpool_np,
     }
 
-    @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
-        code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
-        code = 'extern "C" ' + code
-        return code
+    _opTensorOp = {
+        "avgpool": tsop.avgpool,
+        "sumpool": tsop.sumpool,
+        "maxpool": tsop.maxpool,
+        "minpool": tsop.minpool,
+    }
 
-    A = te.placeholder(shape, name="A", dtype="float32")
-    B = topi.nn.pool2d(
-        A,
-        kernel=kernel,
-        stride=stride,
-        dilation=[1, 1],
-        padding=[0, 0, 0, 0],
-        pool_type=poolType[op_name],
-        ceil_mode=False,
-        layout="NHWC",
-        count_include_pad=False,
-    )
-    with tvm.target.Target("bang"):
-        s = topi.bang.schedule_pool(B, layout="NHWC")
+    # @tvm.register_func("toc_callback_bang_postproc", override=True)
+    # def toc_callback_bang_postproc(code):
+    #     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    #     if not os.path.exists(file):
+    #         with open(file, "w", encoding="utf-8") as f:
+    #             f.write(code)
+    #     code = open(file, encoding="utf-8").read()
+    #     code = code.split("extern")[0]
 
-    dev = tvm.device("bang", 0)
+    #     code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+    #     code = 'extern "C" ' + code
+    #     # print(code)
+    #     return code
 
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype="float32"), dev)
-    f = tvm.build(s, [A, B], "bang", name=op_name)
-    f(a, b)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "toc_callback_bang_postproc"
-    tvm._ffi.registry.remove_global_func(func_name)
+    def run_cpu(data, kernel_stride, op):
+        return _op2np[op](data, kernel_stride)
+
+    input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
+    # Describ Computation
+
+    result = _opTensorOp[op_name](input0, kh, kw, sh, sw)
+    # Build ang get executable module
+    fmlu = tsop.BuildBANG([input0], [result], "mlu590-h8", kernel_name=op_name)
+    # Generate random test data and run on mlu and cpu
+
+    def generate_data(shape, dtype):
+        return np.random.uniform(size=shape).astype(dtype)
+
+    data0 = generate_data(shape, "float32")
+    cpu_output = run_cpu(data0, kernel_stride, op_name)
+    result_np = np.zeros(shape=cpu_output.shape, dtype="float32")
+
+    dev = bangpy.device(0)
+    data_dev = bangpy.Array(data0, dev)
+    result_arr = bangpy.Array(result_np, dev)
+
+    fmlu(data_dev, result_arr)
+    print("-------------------BANG CODE-----------")
+    print(fmlu.get_source())
+    # Compare
+    bangpy.assert_allclose(result_arr.numpy(), cpu_output, 0.1, 0)
+    print("验证通过！")
+
+    evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
+    cost = evaluator(data_dev, result_arr).mean * 1e3
+    print(f"{name} execution time: {cost} ms")
 
 
 def perf_bmm(name, file, shape_A, shape_B, shape_C):
@@ -819,7 +925,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/add*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*pool*.mlu")
     )
     counter = 0
 
