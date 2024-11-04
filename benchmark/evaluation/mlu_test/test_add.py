@@ -9,7 +9,7 @@ import numpy as np
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -37,14 +37,13 @@ if __name__ == "__main__":
     # Generate random matrices for testing
     A = np.random.rand(*shape).astype("float32")
     B = np.random.rand(*shape).astype("float32")
-
+    name = base_name.split("_")[0]
     # Perform add using numpy
     result_np = add(A, B)
 
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    file_name = "add.mlu"
     so_name = args.file.replace(".mlu", ".so")
     with open(args.file, "r") as f:
         code = f.read()
@@ -65,18 +64,19 @@ if __name__ == "__main__":
     os.remove(file_name)
 
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, "add_kernel")
+    function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    result_ctypes = np.zeros(shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    function(output_ptr, A_ptr, B_ptr)
+    function(output_ptr, A_ptr, B_ptr, np.prod(shape))
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,

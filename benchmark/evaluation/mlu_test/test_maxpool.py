@@ -9,7 +9,7 @@ import numpy as np
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",

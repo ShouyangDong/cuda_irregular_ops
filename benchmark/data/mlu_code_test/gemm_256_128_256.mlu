@@ -1,4 +1,4 @@
-__mlu_global__ void matmul(float *A, float *B, float *C) {
+__mlu_global__ void gemm(float *A, float *B, float *C) {
   __nram__ float A_nram[16 * 128];
   __wram__ float B_wram[128 * 256];
   __nram__ float C_nram[16 * 256];
@@ -14,7 +14,7 @@ __mlu_global__ void matmul(float *A, float *B, float *C) {
   }
 }
 
-extern "C" void matmul_kernel(float *A, float *B, float *C) {
+extern "C" void gemm_kernel(float *A, float *B, float *C) {
   cnrtQueue_t queue;
   cnrtSetDevice(0);
   cnrtQueueCreate(&queue);
@@ -42,7 +42,7 @@ extern "C" void matmul_kernel(float *A, float *B, float *C) {
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Launch kernel
-  matmul<<<dim, ktype, queue>>>(d_A, d_B, d_C);
+  gemm<<<dim, ktype, queue>>>(d_A, d_B, d_C);
 
   // Copy the result back to host
   cnrtMemcpy(C, d_C, num_C * sizeof(float), cnrtMemcpyDevToHost);
