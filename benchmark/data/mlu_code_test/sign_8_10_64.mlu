@@ -28,8 +28,7 @@ extern "C" void sign_kernel(float *C, float *A, int size) {
 
   sign<<<dim, ktype, queue>>>(d_A, d_C);
   cnrtQueueSync(queue);
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);cnrtMemcpyDevToHost);
-  cnrtQueueDestroy(queue);
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);;
   cnrtQueueDestroy(queue);
 
   cnrtFree(d_A);

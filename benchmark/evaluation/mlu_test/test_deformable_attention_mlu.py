@@ -11,7 +11,7 @@ import torch.nn.functional as F
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["cncc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "--bang-mlu-arch=mtp_592", "-fPIC", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
