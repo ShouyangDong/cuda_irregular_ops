@@ -31,7 +31,7 @@ for file_name in tqdm(files):
     with open(file_name, "r") as f:
         code = f.read()
 
-    with open("./macro/cuda_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
         macro = f.read()
 
     code = macro + code
