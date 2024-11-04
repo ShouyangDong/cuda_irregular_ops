@@ -136,6 +136,7 @@ class PragmaVisitor(NodeTransformer):
 
 
 def smt_double_buffer(code):
+    code = remove_target_prefix(code, target)
     parser = c_parser.CParser()
     ast = parser.parse(code)
     visitor = PragmaVisitor()
@@ -143,7 +144,7 @@ def smt_double_buffer(code):
     output_code = op_template[visitor.inst].substitute(inst=visitor.inst)
     generator = c_generator.CGenerator()
     modify_code = generator.visit(ast)
-    return output_code + modify_code
+    return add_memory_prefix(output_code + modify_code)
 
 
 if __name__ == "__main__":

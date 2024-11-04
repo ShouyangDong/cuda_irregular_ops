@@ -69,4 +69,40 @@ def add_memory_prefix(code):
 
     # Substitute in the code using regex
     modified_code = re.sub(pattern, replacer, code)
-    return modified_code
+    return (
+        "__mlu_global__ " + modified_code
+        if "__mlu_global__ " not in modified_code
+        else modified_code
+    )
+
+
+def remove_target_prefix(code, target):
+    if target == "BANG":
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__mlu_global__\s+", "", code)
+
+        # 使用正则表达式移除 `__nram__` 关键字，仅保留 `float` 声明
+        code = re.sub(r"\b__nram__\s+", "", code)
+
+        # 移除所有 C/C++ 样式的注释
+        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
+
+    elif target == "CUDA":
+        # 移除 `extern "C"`
+        code = re.sub(r'extern "C"\s+', "", code)
+
+        # 移除 `__global__` 修饰符
+        code = re.sub(r"__global__\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
+
+        # 移除 `__launch_bounds__(\d+)`
+        code = re.sub(r"\b__restrict__\b", "", code)
+
+        # 移除所有 C/C++ 样式的注释
+        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
+    return code

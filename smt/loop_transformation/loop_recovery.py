@@ -2,7 +2,7 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from smt.util import NodeTransformer, remove_target_prefix
 
 # TODO(dongshouyang): Add more varaibles
 ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
@@ -71,42 +71,17 @@ class LoopRecoveryVisitor(NodeTransformer):
 
 def ast_loop_recovery(code, target="CUDA"):
     ParaVar = update_dim(code)
+    code = remove_target_prefix(code, target)
     builtin_map = {}
     if target == "CUDA":
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
-
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__global__\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"\b__restrict__\b", "", code)
-
-        # 移除所有 C/C++ 样式的注释
-        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
 
     elif target == "BANG":
         for builtin_var in mlu_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
-
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
-
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__mlu_global__\s+", "", code)
-
-        # 使用正则表达式移除 `__nram__` 关键字，仅保留 `float` 声明
-        code = re.sub(r"\b__nram__\s+", "", code)
-
-        # 移除所有 C/C++ 样式的注释
-        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
 
     # insert the parallel loop
     parser = c_parser.CParser()

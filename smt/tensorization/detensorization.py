@@ -2,7 +2,7 @@ import json
 
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from smt.util import NodeTransformer, remove_target_prefix
 
 file_name = "documents/op_tensorization.json"
 
@@ -57,6 +57,7 @@ def ast_detensorization(code, target):
     - Implement additional error checking for the input parameters.
     - Extend the visitor to handle more complex loop structures.
     """
+    code = remove_target_prefix(code, target)
     if target == "BANG":
         parser = c_parser.CParser()
         ast = parser.parse(code)

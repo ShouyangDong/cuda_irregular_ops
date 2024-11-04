@@ -1,5 +1,3 @@
-import re
-
 from pycparser import c_ast, c_generator, c_parser
 
 from smt.util import NodeTransformer, add_memory_prefix
@@ -227,9 +225,7 @@ class CacheTransformationVisitor(NodeTransformer):
 
 
 def ast_auto_cache(code, space_map, target="BANG"):
-    if target == "BANG":
-        pattern = re.compile(r"__mlu_global__\s+")
-        code = pattern.sub("", code)
+    code = remove_target_prefix(code, target)
 
     # 解析代码
     parser = c_parser.CParser()
@@ -244,7 +240,7 @@ def ast_auto_cache(code, space_map, target="BANG"):
     generator = c_generator.CGenerator()
     cache_code = generator.visit(ast)
     if target == "BANG":
-        return "__mlu_global__ " + add_memory_prefix(cache_code)
+        return add_memory_prefix(cache_code)
     else:
         return "__global__ " + cache_code
 

@@ -1,8 +1,6 @@
-import re
-
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer, add_memory_prefix
+from smt.util import NodeTransformer, add_memory_prefix, remove_target_prefix
 
 builtin_var = {"CUDA": ["threadIdxx", "blockIdxx"], "BANG": ["coreId", "clusterId"]}
 
@@ -58,9 +56,7 @@ class LoopVisitor(c_ast.NodeVisitor):
 
 def ast_thread_binding(code, target="BANG"):
 
-    if target == "BANG":
-        pattern = re.compile(r"__mlu_global__\s+")
-        code = pattern.sub("", code)
+    code = remove_target_prefix(code, target)
 
     # 解析代码
     parser = c_parser.CParser()
@@ -80,7 +76,7 @@ def ast_thread_binding(code, target="BANG"):
     binding_code = generator.visit(ast)
 
     if target == "BANG":
-        return "__mlu_global__ " + add_memory_prefix(binding_code)
+        return add_memory_prefix(binding_code)
     else:
         return "__global__ " + binding_code
 
