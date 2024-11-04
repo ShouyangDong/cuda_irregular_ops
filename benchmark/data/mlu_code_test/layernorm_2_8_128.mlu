@@ -60,7 +60,7 @@ extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
   cnrtMemcpy(d_beta, beta, d_model * sizeof(float), cnrtMemcpyHostToDev);
 
   // Define the function type
-  cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Launch kernel

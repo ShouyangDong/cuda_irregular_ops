@@ -44,7 +44,7 @@ extern "C" void conv2d_kernel(float *output, float *input, float *kernel,
   cnrtMemcpy(d_kernel, kernel, kernel_size * sizeof(float),
              cnrtMemcpyHostToDev);
 
-  cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   conv2d<<<dim, ktype, queue>>>(d_input, d_kernel, d_output);

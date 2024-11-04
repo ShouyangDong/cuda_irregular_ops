@@ -39,7 +39,7 @@ extern "C" void bmm_kernel(float *A, float *B, float *C) {
   cnrtMemcpy(d_B, B, num_B * sizeof(float), cnrtMemcpyHostToDev);
 
   // Define the function type
-  cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Launch kernel

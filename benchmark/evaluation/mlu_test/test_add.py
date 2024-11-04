@@ -9,7 +9,7 @@ import numpy as np
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["cncc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["cncc", "-shared", "--bang-mlu-arch=mtp_592", "-fPIC", "-o3", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -35,8 +35,10 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
-    A = np.random.rand(*shape).astype("float32")
-    B = np.random.rand(*shape).astype("float32")
+    # A = np.random.rand(*shape).astype("float32")
+    # B = np.random.rand(*shape).astype("float32")
+    A = np.ones(shape).astype("float32")
+    B = np.ones(shape).astype("float32")
     name = base_name.split("_")[0]
     # Perform add using numpy
     result_np = add(A, B)

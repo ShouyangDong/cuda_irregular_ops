@@ -21,7 +21,7 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob("./cuda_code_test/*.cu")
+files = glob.glob(os.path.join(os.getcwd(),)
 counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)

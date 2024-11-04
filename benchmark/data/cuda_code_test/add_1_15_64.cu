@@ -5,7 +5,9 @@ __global__ void __launch_bounds__(960)
 }
 
 extern "C" void add_kernel(float *C, float *A, float *B, int size) {
-  float *d_A, *d_B, *d_C;
+  float* d_A;
+  float* d_B;
+  float* d_C;
 
   cudaMalloc(&d_A, size * sizeof(float));
   cudaMalloc(&d_B, size * sizeof(float));

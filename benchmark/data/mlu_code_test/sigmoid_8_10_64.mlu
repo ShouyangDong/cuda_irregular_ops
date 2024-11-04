@@ -24,7 +24,7 @@ extern "C" void sigmoid_kernel(float *C, float *A, int size) {
 
   cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
 
-  cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   sigmoid<<<dim, ktype, queue>>>(d_A, d_C);

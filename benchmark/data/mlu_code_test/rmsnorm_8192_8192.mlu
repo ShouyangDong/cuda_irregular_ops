@@ -22,7 +22,7 @@ extern "C" void rmsnorm_kernel(float *A, float *B) {
   cnrtSetDevice(0);
   cnrtQueueCreate(&queue);
 
-  cnrtDim3_t dim = {1, 4, 4};
+  cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Allocate memory on the device

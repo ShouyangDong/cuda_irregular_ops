@@ -41,7 +41,9 @@ def falcon_postprocess_pipeline(code, file_name, target):
     if target == "CUDA":
         host_code = """
         extern "C" void add_kernel(float *C, float *A, float *B, int size) {
-        float *d_A, *d_B, *d_C;
+        float* d_A;
+  float* d_B;
+  float* d_C;
 
         cudaMalloc(&d_A, size * sizeof(float));
         cudaMalloc(&d_B, size * sizeof(float));
@@ -67,7 +69,9 @@ def falcon_postprocess_pipeline(code, file_name, target):
         cnrtQueue_t queue;
         cnrtSetDevice(0);
         cnrtQueueCreate(&queue);
-        float *d_A, *d_B, *d_C;
+        float* d_A;
+  float* d_B;
+  float* d_C;
 
         cnrtMalloc((void **)(&d_A), size * sizeof(float));
         cnrtMalloc((void **)(&d_B), size * sizeof(float));
@@ -76,7 +80,7 @@ def falcon_postprocess_pipeline(code, file_name, target):
         cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
         cnrtMemcpy(d_B, B, size * sizeof(float), cnrtMemcpyHostToDev);
 
-        cnrtDim3_t dim = {1, 4, 4};
+        cnrtDim3_t dim = {16, 1, 1};
         cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
         add<<<dim, ktype, queue>>>(d_A, d_B, d_C);
