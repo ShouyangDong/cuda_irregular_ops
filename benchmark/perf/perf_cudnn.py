@@ -309,7 +309,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(),"benchmark/data/cuda_code_test/*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
     counter = 0
 
     for file in files:

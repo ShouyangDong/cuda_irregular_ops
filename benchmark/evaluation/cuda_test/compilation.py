@@ -26,7 +26,9 @@ counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
     so_name = base_name.replace("cu", "so")
-    so_name = os.path.join(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/"), so_name)
+    so_name = os.path.join(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/"), so_name
+    )
 
     with open(file_name, "r") as f:
         code = f.read()

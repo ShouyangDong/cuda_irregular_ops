@@ -1,57 +1,111 @@
 import glob
 import os
 
+import bangpy
 import numpy as np
 import torch
 import tvm
 import tvm.topi.testing
+from bangpy import tensor_op as tsop
+from bangpy.common import utils
+from toc import compile_bang
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
 
 
+@tvm.register_func("toc_callback_bang_compile", override=True)
+def toc_callback_bang_compile(code):
+    cnfatbin = compile_bang(
+        code,
+        "mtp_592",
+        cncc_args=None,
+        cnas_args=["-fno-soft-pipeline", "-fno-if-conversion"],
+        opt_level="O3",
+        output_file=None,
+    )
+    return cnfatbin
+
+
 def perf_elementwise(name, file, shape):
-    x = te.placeholder(shape, name="x", dtype="float32")
-    y = te.placeholder(shape, name="y", dtype="float32")
     op_name = name.split("_")[0]
-
-    @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
-        code = open(file).read()
-        code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
-        code = 'extern "C" ' + code
-        return code
-
-    dev = tvm.cuda(0)
     if op_name == "add":
-        C = topi.add(x, y)
-        with tvm.target.Target("cuda"):
-            s = tvm.topi.testing.get_elemwise_schedule("cuda")(C)
-        foo = tvm.build(s, [x, y, C], "cuda", name=op_name)
 
-        a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-        b = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-        c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-        foo(a, b, c)
-        time_f = foo.time_evaluator(op_name, dev, number=20, repeat=100)
-        cost = time_f(a, b, c)
-        print(f"{name} execution time: {cost.mean * 1000} ms")
-        func_name = "tvm_callback_cuda_postproc"
-        tvm._ffi.registry.remove_global_func(func_name)
+        @tvm.register_func("toc_callback_bang_postproc", override=True)
+        def toc_callback_bang_postproc(code):
+            tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+            if not os.path.exists(file):
+                with open(file, "w", encoding="utf-8") as f:
+                    f.write(code)
+            code = open(file, encoding="utf-8").read()
+            code = code.split("extern")[0]
 
+            code = code.replace(
+                "void " + op_name + "(", "void " + op_name + "_kernel0("
+            )
+            code = 'extern "C" ' + code
+            print(code)
+            return code
+
+        input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
+        input1 = tsop.tensor(shape, dtype=bangpy.float32, name="input1")
+        # Describe Computation
+        result = tsop.add(input0, input1)
+        # Build and get executable module
+        fmlu = tsop.BuildBANG(
+            [input0, input1], [result], "mlu590-h8", kernel_name=op_name
+        )
+        # Generate random test data and run on mlu and cpu
+        data_lhs = np.random.rand(*shape).astype("float32")
+        data_rhs = np.random.rand(*shape).astype("float32")
+        result_np = np.zeros(shape=shape, dtype="float32")
+        dev = bangpy.device(0)
+        data_lhs_dev = bangpy.Array(data_lhs, dev)
+        data_rhs_dev = bangpy.Array(data_rhs, dev)
+        result_arr = bangpy.Array(result_np, dev)
+
+        fmlu(data_lhs_dev, data_rhs_dev, result_arr)
+        mlu_output = result_arr
+        cpu_output = np.add(data_lhs, data_rhs)
+        bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
+        print("验证通过！")
+        print("-------------------BANG CODE-----------")
+        print(fmlu.get_source())
+        evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
+        cost = evaluator(data_lhs_dev, data_rhs_dev, result_arr).mean
+        print(f"{name} execution time: {cost * 1000} ms")
     elif op_name == "sign":
-        C = topi.sign(x)
-        with tvm.target.Target("cuda"):
-            s = tvm.topi.testing.get_injective_schedule("cuda")(C)
+        utils.bang_postproc(path=file)
+        input0 = tensor_op.tensor(shape, dtype=bangpy.float32, name="input0")
+        # Describe Computation
+        result = bang_op_map[name](input0)
+        # Build and get executable module
+        fmlu = tensor_op.BuildBANG([input0], [result], "mlu590-h8", kernel_name=name)
+        # Generate random test data and run on mlu and cpu
+        data_npy = np.random.rand(*shape).astype("float32")
+        out_npy = np.sign(data_npy)
+        result_np = np.random.uniform(size=shape).astype("float32")
+        dev = bangpy.device(0)
+        data_dev = bangpy.Array(data_npy, dev)
+        result_arr = bangpy.Array(result_np, dev)
 
-        foo = tvm.build(s, [x, C], "cuda", name=op_name)
-        time_f = foo.time_evaluator(op_name, dev, number=20, repeat=100)
-        a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-        c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-        foo(a, c)
-        cost = time_f(a, c)
-        print(f"{name} execution time: {cost.mean * 1000} ms")
-        func_name = "tvm_callback_cuda_postproc"
+        fmlu(data_dev, result_arr)
+        print("-------------------BANG CODE-----------")
+        print(fmlu.get_source())
+
+        np.testing.assert_allclose(
+            result_arr.numpy(),
+            out_npy,
+            rtol=tol[0],
+            atol=tol[1],
+            equal_nan=True,
+            err_msg="",
+            verbose=True,
+        )
+        print("验证通过！")
+        evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
+        cost = evaluator(data_dev, result_arr).mean * 1e3
+        print(f"{name} execution time: {cost} ms")
+        func_name = "toc_callback_bang_postproc"
         tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -65,7 +119,7 @@ def perf_pooling(name, file, shape, kernel, stride):
     }
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -84,19 +138,19 @@ def perf_pooling(name, file, shape, kernel, stride):
         layout="NHWC",
         count_include_pad=False,
     )
-    with tvm.target.Target("cuda"):
-        s = topi.cuda.schedule_pool(B, layout="NHWC")
+    with tvm.target.Target("bang"):
+        s = topi.bang.schedule_pool(B, layout="NHWC")
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
 
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype="float32"), dev)
-    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f = tvm.build(s, [A, B], "bang", name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -107,28 +161,28 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     op_name = name.split("_")[0]
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
         code = 'extern "C" ' + code
         return code
 
-    C = topi.cuda.batch_matmul(A, B)
-    with tvm.target.Target("cuda"):
-        s = topi.cuda.schedule_batch_matmul(C)
+    C = topi.bang.batch_matmul(A, B)
+    with tvm.target.Target("bang"):
+        s = topi.bang.schedule_batch_matmul(C)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
 
     a = tvm.nd.array(np.random.rand(*shape_A).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape_B).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape_C).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f = tvm.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -137,7 +191,7 @@ def perf_activation(name, file, shape):
     A = te.placeholder(shape, dtype="float32", name="A")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -150,12 +204,12 @@ def perf_activation(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        if prod < 1024:
+        if prod < 4:
             max_threads = prod
             ib.scope_attr(tx, "thread_extent", max_threads)
 
         else:
-            max_threads = 1024
+            max_threads = 4
             max_block = (
                 prod // max_threads
                 if prod % max_threads == 0
@@ -178,24 +232,24 @@ def perf_activation(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(B.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f = tvm.build(s, [A, B], "bang", name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
@@ -215,12 +269,12 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        if prod < 1024:
+        if prod < 4:
             max_threads = prod
             ib.scope_attr(tx, "thread_extent", max_threads)
 
         else:
-            max_threads = 1024
+            max_threads = 4
             max_block = (
                 prod // max_threads
                 if prod % max_threads == 0
@@ -245,26 +299,26 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         dtype="float32",
     )
 
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(C.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     data_dev = tvm.nd.array(data_np, dev)
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = tvm.build(s, [A, B, C], "cuda", name="conv2d")
+    func = tvm.build(s, [A, B, C], "bang", name="conv2d")
     func(data_dev, kernel_dev, result_dev)
     time_f = func.time_evaluator("conv2d", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
     print(f"{name} execution time: {cost} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
@@ -284,12 +338,12 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        if prod < 1024:
+        if prod < 4:
             max_threads = prod
             ib.scope_attr(tx, "thread_extent", max_threads)
 
         else:
-            max_threads = 1024
+            max_threads = 4
             max_block = (
                 prod // max_threads
                 if prod % max_threads == 0
@@ -314,20 +368,20 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         dtype="float32",
     )
 
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(C.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     data_dev = tvm.nd.array(data_np, dev)
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = tvm.build(s, [A, B, C], "cuda", name="conv2d")
+    func = tvm.build(s, [A, B, C], "bang", name="conv2d")
     func(data_dev, kernel_dev, result_dev)
     time_f = func.time_evaluator("conv2d", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
     print(f"{name} execution time: {cost} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -341,7 +395,7 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -354,8 +408,8 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -373,19 +427,19 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(C.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f = tvm.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -399,7 +453,7 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -412,8 +466,8 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -431,19 +485,19 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(C.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f = tvm.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -457,7 +511,7 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -470,8 +524,8 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -489,19 +543,19 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(C.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "cuda", name=op_name)
+    f = tvm.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -517,7 +571,7 @@ def perf_layernorm(name, file, shape):
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -530,8 +584,8 @@ def perf_layernorm(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -550,20 +604,20 @@ def perf_layernorm(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(D.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C, D], "cuda", name=op_name)
+    f = tvm.build(s, [A, B, C, D], "bang", name=op_name)
     f(a, b, c, d)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -572,7 +626,7 @@ def perf_rmsnorm(name, file, shape):
     A = te.placeholder(shape, dtype="float32", name="A")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -585,8 +639,8 @@ def perf_rmsnorm(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -602,23 +656,23 @@ def perf_rmsnorm(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(B.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = tvm.build(s, [A, B], "cuda", name=op_name)
+    f = tvm.build(s, [A, B], "bang", name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_deformable(name, file, shape):
-    op_name = "cuda_deformable_attention"
+    op_name = "bang_deformable_attention"
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
@@ -642,7 +696,7 @@ def perf_deformable(name, file, shape):
     D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(op_name + "(", op_name + "_kernel(")
@@ -655,8 +709,8 @@ def perf_deformable(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -675,21 +729,21 @@ def perf_deformable(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(out_D.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(N, S, M, D).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(4, 2).astype("int32"), dev)
     c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
     e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
-    f = tvm.build(s, [A, shape_pl, B, C, out_D], "cuda", name=op_name)
+    f = tvm.build(s, [A, shape_pl, B, C, out_D], "bang", name=op_name)
     f(a, b, c, d, e)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d, e)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
@@ -705,7 +759,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
     @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
+    def toc_callback_bang_postproc(code, target):
         code = open(file).read()
         code = code.split("extern")[0]
         code = code.replace(
@@ -720,8 +774,8 @@ def perf_scaled_dot_product_attention(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -745,27 +799,27 @@ def perf_scaled_dot_product_attention(name, file, shape):
         out_buffers=[D_buff],
         dtype="float32",
     )
-    with tvm.target.Target("cuda"):
+    with tvm.target.Target("bang"):
         s = te.create_schedule(D.op)
 
-    dev = tvm.cuda(0)
+    dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
 
-    f = tvm.build(s, [A, B, C, D], "cuda", name="multi_head_attention")
+    f = tvm.build(s, [A, B, C, D], "bang", name="multi_head_attention")
     f(a, b, c, d)
     time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "tvm_callback_cuda_postproc"
+    func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/deformable*.cu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/add*.mlu")
     )
     counter = 0
 
