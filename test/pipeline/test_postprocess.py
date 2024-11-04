@@ -23,14 +23,15 @@ def unitest(file_name, code, target):
     # save code as file
     if target == "CUDA":
         success, output = cuda_run_test(
-            base_name, ".benchmark/evaluation/cuda_test/test_add.py"
+            base_name, "benchmark/evaluation/cuda_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
         return success
     elif target == "BANG":
         success, output = bang_run_test(
-            base_name, ".benchmark/evaluation/mlu_test/test_add.py"
+            base_name, "benchmark/evaluation/mlu_test/test_add.py"
         )
+        print("[INFO]************output: ", output)
         _ = subprocess.run(["rm", base_name])
         return success
     return False
@@ -106,9 +107,9 @@ def falcon_postprocess_pipeline(code, file_name, target):
 
         if not unitest(file_name, cache_code + host_code, target):
             cache_code = ast_auto_cache(code, space_maps)
-        print("[INFO] decorate code: ", cache_code)
+        print("[INFO] cache code: ", cache_code)
         code = run_code_decoration(cache_code)
-
+        print("[INFO] tensor_decorate code: ", code)
         final_code = run_tensorization(code, target)
         if not unitest(file_name, final_code + host_code, target):
             final_code = ast_auto_cache(code, space_maps)

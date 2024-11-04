@@ -1,5 +1,7 @@
-from pycparser import c_ast, c_generator, c_parser
 import re
+
+from pycparser import c_ast, c_generator, c_parser
+
 from smt.util import NodeTransformer, add_memory_prefix
 
 builtin_var = {"CUDA": ["threadIdxx", "blockIdxx"], "BANG": ["coreId", "clusterId"]}

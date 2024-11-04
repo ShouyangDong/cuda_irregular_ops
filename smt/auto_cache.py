@@ -1,7 +1,8 @@
+import re
+
 from pycparser import c_ast, c_generator, c_parser
 
 from smt.util import NodeTransformer, add_memory_prefix
-import re
 
 
 class LoopVisitor(c_ast.NodeVisitor):

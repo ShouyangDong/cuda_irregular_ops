@@ -16,13 +16,13 @@ def unitest(file_name, code, target):
     # save code as file
     if target == "CUDA":
         success, output = cuda_run_test(
-            base_name, ".benchmark/evaluation/cuda_test/test_add.py"
+            base_name, "benchmark/evaluation/cuda_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
         return success
     elif target == "BANG":
         success, output = bang_run_test(
-            base_name, ".benchmark/evaluation/mlu_test/test_add.py"
+            base_name, "benchmark/evaluation/mlu_test/test_add.py"
         )
         _ = subprocess.run(["rm", base_name])
         return success
