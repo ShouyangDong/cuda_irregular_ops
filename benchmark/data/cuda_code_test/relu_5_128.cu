@@ -4,7 +4,8 @@ __global__ void __launch_bounds__(640)
 }
 
 extern "C" void relu_kernel(float *C, float *A, int size) {
-  float *d_A, *d_C;
+  float *d_A;
+  float *d_C;
 
   cudaMalloc(&d_A, size * sizeof(float));
   cudaMalloc(&d_C, size * sizeof(float));

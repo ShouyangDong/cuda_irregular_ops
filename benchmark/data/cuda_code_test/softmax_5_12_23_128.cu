@@ -24,7 +24,8 @@ __global__ void __launch_bounds__(1024)
 }
 
 extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
-  float *d_A, *d_C;
+  float *d_A;
+  float *d_C;
 
   cudaMalloc(&d_A, size1 * size2 * sizeof(float));
   cudaMalloc(&d_C, size1 * size2 * sizeof(float));

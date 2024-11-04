@@ -19,14 +19,17 @@ __mlu_global__ void sigmoid(float *input0,
 }
 
 extern "C" void sigmoid_kernel(float *C, float *A, int size) {
-  float *d_A, *d_C;
+  float *d_A;
+  float *d_C;
   cnrtQueue_t queue;
   CNRT_CHECK(cnrtSetDevice(0));
-  CNRT_CHECK(cnrtQueueCreate(&queue));
+
   cnrtMalloc((void **)(&d_A), size * sizeof(float));
   cnrtMalloc((void **)(&d_C), size * sizeof(float));
 
-  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
+  cnrtMemcpy(d_A, A, size * sizeof(float), 
+ cnrtMemcpyHostToDev);
+  CNRT_CHECK(cnrtQueueCreate(&queue));
 
   cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;

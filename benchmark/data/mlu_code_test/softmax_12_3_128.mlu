@@ -17,7 +17,8 @@ __mlu_global__ void softmax(float *A, float *output) {
 }
 
 extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
-  float *d_A, *d_C;
+  float *d_A;
+  float *d_C;
   cnrtQueue_t queue;
   CNRT_CHECK(cnrtSetDevice(0));
   CNRT_CHECK(cnrtQueueCreate(&queue));

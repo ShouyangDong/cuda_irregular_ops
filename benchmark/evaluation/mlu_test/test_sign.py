@@ -46,10 +46,12 @@ if __name__ == "__main__":
     code = macro + code
 
     file_name = args.file.replace(base_name.replace(".mlu", ""), base_name + "_bak.mlu")
+
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
     success, output = run_compilation(so_name, file_name)
+
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     expected_output = ref_program(input_array)
 
     # 创建输出数组
-    output_array = np.zeros_like(input_array)
+    output_array = np.zeros(shape, dtype=np.float32)
 
     # 将输入数组和输出数组转换为C指针类型
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))

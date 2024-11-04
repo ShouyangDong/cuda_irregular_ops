@@ -1,75 +1,53 @@
 #include <bang.h>
 
-#define EPS 1e-7
-#define LEN 1024
-
-__mlu_entry__ void Kernel(float* dst, float* source1, float* source2) {
-  __nram__ float dest[LEN];
-  __nram__ float src1[LEN];
-  __nram__ float src2[LEN];
-  __memcpy(src1, source1 + (clusterId * 4 + coreId) * 64, 64 * sizeof(float), GDRAM2NRAM);
-  __memcpy(src2, source2 + (clusterId * 4 + coreId) * 64, 64 * sizeof(float), GDRAM2NRAM);
-  __bang_add(dest, src1, src2, 64);
-  __memcpy(dst + (clusterId * 4 + coreId) * 64, dest, 64 * sizeof(float), NRAM2GDRAM);
+__mlu_global__ void sign(float *input0, float *active_sign_207) {
+  __nram__ float input0_local_nram[640];
+  if ((clusterId * 4 + coreId) < 8) {
+    __memcpy(((float *)input0_local_nram + (0)),
+             ((float *)input0 +
+              (((((int)clusterId) * 2560) + (((int)coreId) * 640)))),
+             2560, GDRAM2NRAM);
+    __bang_active_sign(((float *)input0_local_nram + (0)),
+                       ((float *)input0_local_nram + (0)), 640);
+    __memcpy(((float *)active_sign_207 +
+              (((((int)clusterId) * 2560) + (((int)coreId) * 640)))),
+             ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
+  }
 }
 
-int main(void)
-{
+//extern "C" void sign_kernel(float *C, float *A, int size) {
+int main(void){
+  int size = 5120;
+  float *d_A, *d_C;
+  float* A = (float*)malloc(size * sizeof(float));
+  float* C = (float*)malloc(size * sizeof(float));
+
+
+  for (int i = 0; i < size; i++) {
+    A[i] = -1;
+  }
   cnrtQueue_t queue;
   CNRT_CHECK(cnrtSetDevice(0));
   CNRT_CHECK(cnrtQueueCreate(&queue));
+  cnrtMalloc((void **)(&d_A), size * sizeof(float));
+  cnrtMalloc((void **)(&d_C), size * sizeof(float));
+
+  cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
 
   cnrtDim3_t dim = {16, 1, 1};
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
-  cnrtNotifier_t start, end;
-  CNRT_CHECK(cnrtNotifierCreate(&start));
-  CNRT_CHECK(cnrtNotifierCreate(&end));
-
-  float* host_dst = (float*)malloc(LEN * sizeof(float));
-  float* host_src1 = (float*)malloc(LEN * sizeof(float));
-  float* host_src2 = (float*)malloc(LEN * sizeof(float));
-
-  for (int i = 0; i < LEN; i++) {
-    host_src1[i] = i;
-    host_src2[i] = i;
-  }
-
-  float* mlu_dst;
-  float* mlu_src1;
-  float* mlu_src2;
-  CNRT_CHECK(cnrtMalloc((void**)&mlu_dst, LEN * sizeof(float)));
-  CNRT_CHECK(cnrtMalloc((void**)&mlu_src1, LEN * sizeof(float)));
-  CNRT_CHECK(cnrtMalloc((void**)&mlu_src2, LEN * sizeof(float)));
-
-  CNRT_CHECK(cnrtMemcpy(mlu_src1, host_src1, LEN * sizeof(float), cnrtMemcpyHostToDev));
-  CNRT_CHECK(cnrtMemcpy(mlu_src2, host_src2, LEN * sizeof(float), cnrtMemcpyHostToDev));
-
-  CNRT_CHECK(cnrtPlaceNotifier(start, queue));
-  Kernel<<<dim, ktype, queue>>>(mlu_dst, mlu_src1, mlu_src2);
-  CNRT_CHECK(cnrtPlaceNotifier(end, queue));
-
+  sign<<<dim, ktype, queue>>>(d_A, d_C);
   cnrtQueueSync(queue);
-  CNRT_CHECK(cnrtMemcpy(host_dst, mlu_dst, LEN * sizeof(float), cnrtMemcpyDevToHost));
+  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);;
 
-  for (int i = 0; i < LEN; i++) {
-    if (fabsf(host_dst[i] - 2 * i) > EPS) {
-      printf("%f expected, but %f got!\n", (float)(2 * i), host_dst[i]);
+  for (int i = 0; i < 5120; i++) {
+    if (C[i] == 1) {
+      printf("%f expected, but %f got!\n", (float)(1), C[i]);
     }
   }
+  cnrtQueueDestroy(queue);
 
-  float timeTotal;
-  CNRT_CHECK(cnrtNotifierDuration(start, end, &timeTotal));
-  printf("Total Time: %.3f ms\n", timeTotal / 1000.0);
-
-  CNRT_CHECK(cnrtQueueDestroy(queue));
-
-  cnrtFree(mlu_dst);
-  cnrtFree(mlu_src1);
-  cnrtFree(mlu_src2);
-  free(host_dst);
-  free(host_src1);
-  free(host_src2);
-
-  return 0;
+  cnrtFree(d_A);
+  cnrtFree(d_C);
 }
