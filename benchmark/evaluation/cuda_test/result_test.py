@@ -24,7 +24,7 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(),"./cuda_code_test/*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(),"benchmark/data/cuda_code_test/*.cu"))
     counter = 0
 
     for file in tqdm(files):
@@ -32,48 +32,48 @@ if __name__ == "__main__":
         name = base_name.split("_")[0]
         if name == "deformable":
             success, output = run_test(
-                file, "./cuda_test/test_deformable_attention_cuda.py"
+                file, "benchmark/evaluation/cuda_test/test_deformable_attention_cuda.py"
             )
         elif name == "layernorm":
-            success, output = run_test(file, "./cuda_test/test_layer_norm_cuda.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_layer_norm_cuda.py")
         elif name == "mha":
-            success, output = run_test(file, "./cuda_test/test_mha_cuda.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_mha_cuda.py")
         elif name == "rmsnorm":
-            success, output = run_test(file, "./cuda_test/test_rms_norm_cuda.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_rms_norm_cuda.py")
         elif name == "gemm":
-            success, output = run_test(file, "./cuda_test/test_gemm.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_gemm.py")
         elif name == "gemv":
-            success, output = run_test(file, "./cuda_test/test_gemv.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_gemv.py")
         elif name == "bmm":
-            success, output = run_test(file, "./cuda_test/test_bmm.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_bmm.py")
         elif name == "conv1d":
-            success, output = run_test(file, "./cuda_test/test_conv1d.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_conv1d.py")
         elif name == "conv2d":
-            success, output = run_test(file, "./cuda_test/test_conv2d.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_conv2d.py")
         elif name == "conv2dnchw":
-            success, output = run_test(file, "./cuda_test/test_conv2d.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_conv2d.py")
         elif name == "depthwiseconv":
-            success, output = run_test(file, "./cuda_test/test_depthwiseconv.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_depthwiseconv.py")
         elif name == "add":
-            success, output = run_test(file, "./cuda_test/test_add.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_add.py")
         elif name == "sign":
-            success, output = run_test(file, "./cuda_test/test_sign.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_sign.py")
         elif name == "avgpool":
-            success, output = run_test(file, "./cuda_test/test_avgpool.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_avgpool.py")
         elif name == "maxpool":
-            success, output = run_test(file, "./cuda_test/test_maxpool.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_maxpool.py")
         elif name == "minpool":
-            success, output = run_test(file, "./cuda_test/test_minpool.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_minpool.py")
         elif name == "sumpool":
-            success, output = run_test(file, "./cuda_test/test_sumpool.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_sumpool.py")
         elif name == "relu":
-            success, output = run_test(file, "./cuda_test/test_relu.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_relu.py")
         elif name == "sigmoid":
-            success, output = run_test(file, "./cuda_test/test_sigmoid.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_sigmoid.py")
         elif name == "gelu":
-            success, output = run_test(file, "./cuda_test/test_gelu.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_gelu.py")
         elif name == "softmax":
-            success, output = run_test(file, "./cuda_test/test_softmax.py")
+            success, output = run_test(file, "benchmark/evaluation/cuda_test/test_softmax.py")
         else:
             raise RuntimeError("The file is not tested")
 
