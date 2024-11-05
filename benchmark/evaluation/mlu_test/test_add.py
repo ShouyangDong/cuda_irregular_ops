@@ -3,37 +3,55 @@ import ctypes
 import os
 import subprocess
 
+import os
+
+import bangpy
 import numpy as np
+import toc
+import torch
+import tvm
+import tvm.topi.testing
+from bangpy import tensor_op as tsop
+from toc import compile_bang
+from tvm import te, topi
+from tvm.topi.utils import get_const_tuple
 
+from toc import Environment
 
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "cncc",
-                "-shared",
-                "--bang-mlu-arch=mtp_592",
-                "-fPIC",
-                "-o",
-                so_name,
-                file_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+env = Environment("cambricon/mlu590-h8")
 
+def verify_add(name, file, shape):
+    op_name = name.split("_")[0]
+    @tvm.register_func("toc_callback_bang_postproc")
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
+        return code
 
-# Define the add function using numpy
-def add(A, B):
-    return np.add(A, B)
+    input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
+    input1 = tsop.tensor(shape, dtype=bangpy.float32, name="input1")
+    # Describe Computation
+    result = tsop.add(input0, input1)
+    # Build and get executable module
+    fmlu = tsop.BuildBANG(
+        [input0, input1], [result], "mlu590-h8", kernel_name=op_name
+    )
+    # Generate random test data and run on mlu and cpu
+    data_lhs = np.random.rand(*shape).astype("float32")
+    data_rhs = np.random.rand(*shape).astype("float32")
+    result_np = np.zeros(shape=shape, dtype="float32")
+    dev = bangpy.device(0)
+    data_lhs_dev = bangpy.Array(data_lhs, dev)
+    data_rhs_dev = bangpy.Array(data_rhs, dev)
+    result_arr = bangpy.Array(result_np, dev)
 
+    fmlu(data_lhs_dev, data_rhs_dev, result_arr)
+    mlu_output = result_arr
+    cpu_output = np.add(data_lhs, data_rhs)
+    bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -42,58 +60,5 @@ if __name__ == "__main__":
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Generate random matrices for testing
-    A = np.random.rand(*shape).astype("float32")
-    B = np.random.rand(*shape).astype("float32")
-    name = base_name.split("_")[0]
-    # Perform add using numpy
-    result_np = add(A, B)
-
-    # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    so_name = args.file.replace(".mlu", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(os.path.join(os.getcwd(), "benchmark/macro/mlu_macro.txt"), "r") as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(base_name.replace(".mlu", ""), base_name + "_bak.mlu")
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
-
-    # Load the shared library with the add function
-    success, output = run_compilation(so_name, file_name)
-    os.remove(file_name)
-
-    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, name + "_kernel")
-    # 定义函数参数和返回类型
-    function.argtypes = [
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.c_int,
-    ]
-    function.restype = None
-    # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros(shape, dtype=np.float32)
-    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    function(output_ptr, A_ptr, B_ptr, np.prod(shape))
-    # Check if the results match
-    np.testing.assert_allclose(
-        result_ctypes,
-        result_np,
-        rtol=1e-03,
-        atol=1e-03,
-        equal_nan=True,
-        err_msg="",
-        verbose=True,
-    )
+    verify_add(base_name, args.file, shape)
     print("验证通过！")
-    result = subprocess.run(["rm", so_name])

@@ -1,4 +1,4 @@
-__mlu_global__ void deformable(float *value_,
+extern "C" __mlu_global__ void deformable(float *value_,
                                              int *value_spatial_shapes_,
                                              float *sampling_locations_,
                                              float *attention_weights_,
@@ -190,59 +190,3 @@ __mlu_global__ void deformable(float *value_,
   }
 }
 
-extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
-                                  float *sampling_locations,
-                                  float *attention_weights, float *output) {
-
-  cnrtQueue_t queue;
-  CNRT_CHECK(cnrtSetDevice(0));
-  CNRT_CHECK(cnrtQueueCreate(&queue));
-
-  cnrtDim3_t dim = {16, 1, 1};
-  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
-
-  // Allocate memory on the device
-  float *d_value, *d_sampling_locations, *d_attention_weights, *d_output;
-  int *d_value_spatial_shapes;
-  int n = 1;
-  int l = 4;
-  int lq = 200;
-  int s = 13101;
-  int m = 8;
-  int d = 512;
-  int p = 4;
-
-  cnrtMalloc((void **)(&d_value), n * s * m * d * sizeof(float));
-  cnrtMalloc((void **)(&d_value_spatial_shapes), l * 2 * sizeof(int));
-  cnrtMalloc((void **)(&d_sampling_locations),
-             n * lq * m * l * p * 2 * sizeof(float));
-  cnrtMalloc((void **)(&d_attention_weights),
-             n * lq * m * l * p * sizeof(float));
-  cnrtMalloc((void **)(&d_output), n * lq * m * d * sizeof(float));
-
-  // Copy data from host to device
-  cnrtMemcpy(d_value, value, n * s * m * d * sizeof(float),
-             cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_value_spatial_shapes, value_spatial_shapes, l * 2 * sizeof(int),
-             cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_sampling_locations, sampling_locations,
-             n * lq * m * l * p * 2 * sizeof(float), cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_attention_weights, attention_weights,
-             n * lq * m * l * p * sizeof(float), cnrtMemcpyHostToDev);
-
-  // Launch kernel
-  deformable<<<dim, ktype, queue>>>(
-      d_value, d_value_spatial_shapes, d_sampling_locations,
-      d_attention_weights, d_output);
-
-  // Copy the result back to host
-  cnrtMemcpy(output, d_output, n * lq * m * d * sizeof(float),
-             cnrtMemcpyDevToHost);
-
-  // Free device memory
-  cnrtFree(d_value);
-  cnrtFree(d_value_spatial_shapes);
-  cnrtFree(d_sampling_locations);
-  cnrtFree(d_attention_weights);
-  cnrtFree(d_output);
-}

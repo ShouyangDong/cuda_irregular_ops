@@ -16,7 +16,7 @@ def pre_processing_pipeline(code, target):
 
 if __name__ == "__main__":
     func_content = """
-    __mlu_global__ void tanh(float* input0, float* active_tanh_210) {
+    extern "C" __mlu_global__ void tanh(float* input0, float* active_tanh_210) {
         __nram__ float input0_local_nram[640];
         __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
         __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     code = pre_processing_pipeline(func_content, target="CUDA")
     print(code)
     code = """
-    __mlu_global__ void add(float* lhs, float* rhs, float* add_1935) {
+    extern "C" __mlu_global__ void add(float* lhs, float* rhs, float* add_1935) {
         __nram__ float lhs_local_nram[2048];
         __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);
         __memcpy(((float *)lhs_local_nram + (1024)), ((float *)rhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);

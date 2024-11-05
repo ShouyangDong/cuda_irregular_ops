@@ -1,4 +1,4 @@
-__mlu_global__ void maxpool(float *input0, float *maxpool_21) {
+extern "C" __mlu_global__ void maxpool(float *input0, float *maxpool_21) {
   __nram__ float input0_local_nram[1664];
   if (((int)coreId) < 1) {
     __memcpy(((float *)input0_local_nram + (0)),
@@ -14,31 +14,3 @@ __mlu_global__ void maxpool(float *input0, float *maxpool_21) {
   }
 }
 
-extern "C" void maxpool_kernel(float *output, float *input, int batch_size,
-                               int channels, int input_H, int kernel_size,
-                               int stride) {
-  float *d_input;
-  float *d_output;
-  cnrtQueue_t queue;
-  CNRT_CHECK(cnrtSetDevice(0));
-  CNRT_CHECK(cnrtQueueCreate(&queue));
-  int output_H = (input_H - kernel_size) / stride + 1;
-  int input_size = batch_size * input_H * input_H * channels;
-  int output_size = batch_size * output_H * output_H * channels;
-  cnrtMalloc((void **)(&d_input), input_size * sizeof(float));
-  cnrtMalloc((void **)(&d_output), output_size * sizeof(float));
-
-  cnrtMemcpy(d_input, input, input_size * sizeof(float), cnrtMemcpyHostToDev);
-
-  cnrtDim3_t dim = {4, 1, 1};
-  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;
-
-  maxpool<<<dim, ktype, queue>>>(d_input, d_output);
-  cnrtQueueSync(queue);
-  cnrtMemcpy(output, d_output, output_size * sizeof(float),
-             cnrtMemcpyDevToHost);
-  cnrtQueueDestroy(queue);
-
-  cnrtFree(d_input);
-  cnrtFree(d_output);
-}

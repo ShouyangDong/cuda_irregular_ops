@@ -1,4 +1,4 @@
-__mlu_global__ void relu(float *input0, float *active_relu_234) {
+extern "C" __mlu_global__ void relu(float *input0, float *active_relu_234) {
   __nram__ float input0_local_nram[384];
   if (((((int)clusterId) * 4) + ((int)coreId)) < 12) {
     __memcpy(((float *)input0_local_nram + (0)),
@@ -17,27 +17,3 @@ __mlu_global__ void relu(float *input0, float *active_relu_234) {
   }
 }
 
-extern "C" void relu_kernel(float *C, float *A, int size) {
-  float *d_A;
-  float *d_C;
-  cnrtQueue_t queue;
-  CNRT_CHECK(cnrtSetDevice(0));
-
-  cnrtMalloc((void **)(&d_A), size * sizeof(float));
-  cnrtMalloc((void **)(&d_C), size * sizeof(float));
-
-  cnrtMemcpy(d_A, A, size * sizeof(float), 
- cnrtMemcpyHostToDev);
-  CNRT_CHECK(cnrtQueueCreate(&queue));
-
-  cnrtDim3_t dim = {16, 1, 1};
-  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
-
-  relu<<<dim, ktype, queue>>>(d_A, d_C);
-  cnrtQueueSync(queue);
-  cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
-  cnrtQueueDestroy(queue);
-
-  cnrtFree(d_A);
-  cnrtFree(d_C);
-}

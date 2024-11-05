@@ -18,7 +18,7 @@ def run_transcompile_code(code, source, target):
 
 if __name__ == "__main__":
     cuda_code = """
-    __mlu_global__ void add(float* lhs, float* rhs, float* add_1935) {
+    extern "C" __mlu_global__ void add(float* lhs, float* rhs, float* add_1935) {
     __nram__ float lhs_local_nram[2048];
     __memcpy(((float *)lhs_local_nram + (0)), ((float *)lhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);
     __memcpy(((float *)lhs_local_nram + (1024)), ((float *)rhs + ((((int)coreId) * 1024))), 4096, GDRAM2NRAM);

@@ -1,4 +1,4 @@
-__mlu_global__ void gemm(float *A, float *B, float *C) {
+extern "C" __mlu_global__ void gemm(float *A, float *B, float *C) {
   __nram__ float A_nram[32 * 512];
   __wram__ float B_wram[512 * 256];
   __nram__ float C_nram[32 * 256];
@@ -14,41 +14,3 @@ __mlu_global__ void gemm(float *A, float *B, float *C) {
   }
 }
 
-extern "C" void gemm_kernel(float *A, float *B, float *C) {
-  cnrtQueue_t queue;
-  CNRT_CHECK(cnrtSetDevice(0));
-  CNRT_CHECK(cnrtQueueCreate(&queue));
-  int m = 512;
-  int n = 512;
-  int k = 256;
-  int num_A = m * n;
-  int num_B = n * k;
-  int num_C = m * k;
-
-  // Allocate memory on the device
-  float *d_A;
-  cnrtMalloc((void **)(&d_A), num_A * sizeof(float));
-  float *d_B;
-  cnrtMalloc((void **)(&d_B), num_B * sizeof(float));
-  float *d_C;
-  cnrtMalloc((void **)(&d_C), num_C * sizeof(float));
-
-  // Copy data from host to device
-  cnrtMemcpy(d_A, A, num_A * sizeof(float), cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_B, B, num_B * sizeof(float), cnrtMemcpyHostToDev);
-
-  // Define the function type
-  cnrtDim3_t dim = {16, 1, 1};
-  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
-
-  // Launch kernel
-  gemm<<<dim, ktype, queue>>>(d_A, d_B, d_C);
-
-  // Copy the result back to host
-  cnrtMemcpy(C, d_C, num_C * sizeof(float), cnrtMemcpyDevToHost);
-
-  // Free device memory
-  cnrtFree(d_A);
-  cnrtFree(d_B);
-  cnrtFree(d_C);
-}

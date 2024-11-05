@@ -1,6 +1,6 @@
 
 
-__mlu_global__ void layernorm(float *input, float *gamma, float *beta,
+extern "C" __mlu_global__ void layernorm(float *input, float *gamma, float *beta,
                                    float *output) {
   __nram__ float diff[128];
   __nram__ float mean[128];
@@ -36,45 +36,3 @@ __mlu_global__ void layernorm(float *input, float *gamma, float *beta,
   }
 }
 
-extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
-                                 float *output) {
-  cnrtQueue_t queue;
-  CNRT_CHECK(cnrtSetDevice(0));
-  CNRT_CHECK(cnrtQueueCreate(&queue));
-  int batch_size = 1;
-  int seq_length = 8;
-  int d_model = 128;
-  int num_elements = batch_size * seq_length * d_model;
-
-  // Allocate memory on the device
-  float *d_input;
-  cnrtMalloc((void **)(&d_input), num_elements * sizeof(float));
-  float *d_gamma;
-  cnrtMalloc((void **)(&d_gamma), d_model * sizeof(float));
-  float *d_beta;
-  cnrtMalloc((void **)(&d_beta), d_model * sizeof(float));
-  float *d_output;
-  cnrtMalloc((void **)(&d_output), num_elements * sizeof(float));
-
-  // Copy data from host to device
-  cnrtMemcpy(d_input, input, num_elements * sizeof(float), cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_gamma, gamma, d_model * sizeof(float), cnrtMemcpyHostToDev);
-  cnrtMemcpy(d_beta, beta, d_model * sizeof(float), cnrtMemcpyHostToDev);
-
-  // Define the function type
-  cnrtDim3_t dim = {16, 1, 1};
-  cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
-
-  // Launch kernel
-  layernorm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
-
-  // Copy the result back to host
-  cnrtMemcpy(output, d_output, num_elements * sizeof(float),
-             cnrtMemcpyDevToHost);
-
-  // Free device memory
-  cnrtFree(d_input);
-  cnrtFree(d_gamma);
-  cnrtFree(d_beta);
-  cnrtFree(d_output);
-}

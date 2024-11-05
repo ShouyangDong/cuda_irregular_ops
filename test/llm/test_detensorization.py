@@ -68,7 +68,7 @@ def run_detensorization(code, target):
 
 if __name__ == "__main__":
     code = """
-    __mlu_global__ void tanh(float* input0, float* active_tanh_210) {
+    extern "C" __mlu_global__ void tanh(float* input0, float* active_tanh_210) {
         __nram__ float input0_local_nram[640];
         __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
         __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
