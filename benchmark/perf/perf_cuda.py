@@ -827,7 +827,7 @@ if __name__ == "__main__":
                 name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
             )
 
-        elif name == "conv2dnchw_1":
+        elif name == "conv2dnchw":
             data_shape = base_name.split("_")[1:5]
             data_shape = [int(intg) for intg in data_shape]
             kernel_shape = base_name.split("_")[5:9]
