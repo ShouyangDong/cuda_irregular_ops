@@ -16,8 +16,7 @@ from toc import compile_bang
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
 
-from toc import Environment
-env = Environment("cambricon/mlu590-h8")
+
 
 def ref_program(x):
     # 对最后一个维度进行softmax操作
@@ -28,12 +27,16 @@ def ref_program(x):
 def verify_softmax(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-    @tvm.register_func
-    def toc_callback_bang_postproc(code, file):
+    from toc import Environment
+    env = Environment("cambricon/mlu590-h8")
+    
+    @tvm.register_func("toc_callback_bang_postproc")
+    def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
         if not os.path.exists(file):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         return code
 
     def test_activation(A, B):

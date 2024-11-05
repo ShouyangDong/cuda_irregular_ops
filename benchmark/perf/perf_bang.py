@@ -132,10 +132,9 @@ def perf_elementwise(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     if op_name == "add":
@@ -222,10 +221,9 @@ def perf_pooling(name, file, shape, kernel, stride):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def run_cpu(data, kernel_stride, op):
@@ -272,10 +270,9 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def bmm(A, B, C):
@@ -329,10 +326,9 @@ def perf_activation(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_activation(A, B):
@@ -385,10 +381,9 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     # generate data
@@ -446,9 +441,9 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     @tvm.register_func
     def toc_callback_bang_postproc(code, target):
         code = open(file).read()
-        code = code.split("extern")[0]
+
         code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
-        code = 'extern "C" ' + code
+
         return code
 
     # generate data
@@ -527,10 +522,9 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_gemv(A, B, C):
@@ -591,10 +585,9 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_conv1d(A, B, C):
@@ -655,10 +648,9 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_depthwise_conv2d(A, B, C):
@@ -721,10 +713,9 @@ def perf_layernorm(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_layernorm(A, B, C, D):
@@ -782,10 +773,9 @@ def perf_rmsnorm(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_rmsnorm(A, B):
@@ -858,10 +848,9 @@ def perf_deformable(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_deformable(A, B, C, D, E):
@@ -927,10 +916,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
-        code = code.split("extern")[0]
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        code = 'extern "C" ' + code
+
         return code
 
     def test_scaled_dot_product_attention(A, B, C, D, seq_len, num_heads, head_dim):
@@ -984,7 +972,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/softmax*.mlu")
     )
     counter = 0
 

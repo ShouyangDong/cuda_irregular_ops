@@ -16,12 +16,13 @@ from toc import compile_bang
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
 
-from toc import Environment
 
-env = Environment("cambricon/mlu590-h8")
 
 def verify_add(name, file, shape):
+    from toc import Environment
+    env = Environment("cambricon/mlu590-h8")
     op_name = name.split("_")[0]
+
     @tvm.register_func("toc_callback_bang_postproc")
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -29,6 +30,7 @@ def verify_add(name, file, shape):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(code)
         code = open(file, encoding="utf-8").read()
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         return code
 
     input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
