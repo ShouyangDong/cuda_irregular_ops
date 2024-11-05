@@ -3,9 +3,9 @@ import os
 
 import bangpy
 import numpy as np
+import toc
 import torch
 import tvm
-import toc
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
 from toc import compile_bang
@@ -353,11 +353,13 @@ def perf_activation(name, file, shape):
     func_name = "toc_callback_bang_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
+
 def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
     op_name = "conv2d"
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -506,6 +508,7 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -572,6 +575,7 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -638,6 +642,7 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -706,6 +711,7 @@ def perf_layernorm(name, file, shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -769,6 +775,7 @@ def perf_rmsnorm(name, file, shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -847,6 +854,7 @@ def perf_deformable(name, file, shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
@@ -918,6 +926,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
     from toc import Environment
 
     env = Environment("cambricon/mlu590-h8")
+
     @tvm.register_func
     def toc_callback_bang_postproc(code):
         tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")

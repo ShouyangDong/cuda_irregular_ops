@@ -72,7 +72,6 @@ class BM25(object):
         return stop_words
 
     def _build_param(self):
-
         def _cal_param(reader_obj):
             f = []  # 列表的每一个元素是一个dict，dict存储着一个文档中每个词的出现次数
             df = {}  # 存储每个词及出现了该词的文档数量
