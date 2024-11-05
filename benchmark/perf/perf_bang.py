@@ -5,6 +5,7 @@ import bangpy
 import numpy as np
 import torch
 import tvm
+import toc
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
 from toc import compile_bang
@@ -291,12 +292,20 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
 def perf_activation(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
+    from toc import Environment
+
+    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -306,19 +315,9 @@ def perf_activation(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        if prod < 4:
-            max_threads = prod
-            ib.scope_attr(tx, "thread_extent", max_threads)
 
-        else:
-            max_threads = 4
-            max_block = (
-                prod // max_threads
-                if prod % max_threads == 0
-                else prod // max_threads + 1
-            )
-            ib.scope_attr(tx, "thread_extent", max_threads)
-            ib.scope_attr(bx, "thread_extent", max_block)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -334,19 +333,17 @@ def perf_activation(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(B.op)
+    s = te.create_schedule(B.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = tvm.build(s, [A, B], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B], name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-    func_name = "toc_callback_bang_postproc"
-    tvm._ffi.registry.remove_global_func(func_name)
 
 
 def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
@@ -921,7 +918,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*pool*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/sigmoid*.mlu")
     )
     counter = 0
 
