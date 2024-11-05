@@ -919,12 +919,15 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
     env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(
-            "multi_head_attention" + "(", "multi_head_attention" + "_kernel("
-        )
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -954,7 +957,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
         lambda ins, outs: test_scaled_dot_product_attention(
             ins[0], ins[1], ins[2], outs[0], shape[1], shape[2], shape[3]
         ),
-        name="multi_head_attention",
+        name="mha",
         in_buffers=[A_buff, B_buff, C_buff],
         out_buffers=[D_buff],
         dtype="float32",
@@ -968,9 +971,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
     c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     with toc.build_config(env):
-        f = toc.build(s, [A, B, C, D], "bang", name="multi_head_attention")
+        f = toc.build(s, [A, B, C, D], name="mha")
     f(a, b, c, d)
-    time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
+    time_f = f.time_evaluator("mha", dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
     print(f"{name} execution time: {cost.mean * 1000} ms")
     func_name = "toc_callback_bang_postproc"
@@ -979,7 +982,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/deformable*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/mha*.mlu")
     )
     counter = 0
 

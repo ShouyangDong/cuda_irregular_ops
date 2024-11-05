@@ -1,7 +1,6 @@
 
 
-__mlu_global__ void
-mlu_multiHeadAttentionForward(float *Q,     //[batch, seq_len, heads, dim]
+__mlu_global__ void mha(float *Q,     //[batch, seq_len, heads, dim]
                               float *K,     //[batch, seq_len, heads, dim]
                               float *V,     //[batch, seq_len, heads, dim]
                               float *output //[batch, seq_len, heads, dim]
@@ -96,7 +95,7 @@ extern "C" void multiHeadAttentionForward_kernel(float *Q, float *K, float *V,
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Launch kernel
-  mlu_multiHeadAttentionForward<<<dim, ktype, queue>>>(d_Q, d_K, d_V, d_output);
+  multi_head_attention(<<<dim, ktype, queue>>>(d_Q, d_K, d_V, d_output);
 
   // Copy the result back to host
   cnrtMemcpy(output, d_output, num_elements * sizeof(float),
