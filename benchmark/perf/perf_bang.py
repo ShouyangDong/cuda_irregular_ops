@@ -280,7 +280,7 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     a = tvm.nd.array(np.random.rand(*shape_A).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape_B).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape_C).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "bang", name=op_name)
+    f = toc.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -344,14 +344,24 @@ def perf_activation(name, file, shape):
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
     print(f"{name} execution time: {cost.mean * 1000} ms")
-
+    func_name = "toc_callback_bang_postproc"
+    tvm._ffi.registry.remove_global_func(func_name)
 
 def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
+    from toc import Environment
+
+    env = Environment("cambricon/mlu590-h8")
+    op_name = "conv2d"
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -368,19 +378,9 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        if prod < 4:
-            max_threads = prod
-            ib.scope_attr(tx, "thread_extent", max_threads)
 
-        else:
-            max_threads = 4
-            max_block = (
-                prod // max_threads
-                if prod % max_threads == 0
-                else prod // max_threads + 1
-            )
-            ib.scope_attr(tx, "thread_extent", max_threads)
-            ib.scope_attr(bx, "thread_extent", max_block)
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -398,15 +398,16 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         dtype="float32",
     )
 
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(C.op)
+    s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
     data_dev = tvm.nd.array(data_np, dev)
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = tvm.build(s, [A, B, C], "bang", name="conv2d")
+    with toc.build_config(env):
+        func = toc.build(s, [A, B, C], name="conv2d")
+
     func(data_dev, kernel_dev, result_dev)
     time_f = func.time_evaluator("conv2d", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
@@ -475,7 +476,7 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = tvm.build(s, [A, B, C], "bang", name="conv2d")
+    func = toc.build(s, [A, B, C], "bang", name="conv2d")
     func(data_dev, kernel_dev, result_dev)
     time_f = func.time_evaluator("conv2d", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
@@ -533,7 +534,7 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "bang", name=op_name)
+    f = toc.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -591,7 +592,7 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "bang", name=op_name)
+    f = toc.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -649,7 +650,7 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C], "bang", name=op_name)
+    f = toc.build(s, [A, B, C], "bang", name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -711,7 +712,7 @@ def perf_layernorm(name, file, shape):
     b = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    f = tvm.build(s, [A, B, C, D], "bang", name=op_name)
+    f = toc.build(s, [A, B, C, D], "bang", name=op_name)
     f(a, b, c, d)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
@@ -761,7 +762,7 @@ def perf_rmsnorm(name, file, shape):
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = tvm.build(s, [A, B], "bang", name=op_name)
+    f = toc.build(s, [A, B], "bang", name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
@@ -837,7 +838,7 @@ def perf_deformable(name, file, shape):
     c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
     e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
-    f = tvm.build(s, [A, shape_pl, B, C, out_D], "bang", name=op_name)
+    f = toc.build(s, [A, shape_pl, B, C, out_D], "bang", name=op_name)
     f(a, b, c, d, e)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d, e)
@@ -907,7 +908,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
     c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
 
-    f = tvm.build(s, [A, B, C, D], "bang", name="multi_head_attention")
+    f = toc.build(s, [A, B, C, D], "bang", name="multi_head_attention")
     f(a, b, c, d)
     time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
@@ -918,7 +919,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/sigmoid*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/conv2d*.mlu")
     )
     counter = 0
 
@@ -966,7 +967,7 @@ if __name__ == "__main__":
             kernel_shape = base_name.split("_")[5:9]
             kernel_shape = [int(intg) for intg in kernel_shape]
             stride_h = stride_w = int(base_name.split("_")[9])
-            pad_h = pad_w = int(base_name.split("_")[10].replace(".cu", ""))
+            pad_h = pad_w = int(base_name.split("_")[10].replace(".mlu", ""))
 
             batch_size, input_height, input_width, input_channel = data_shape
             output_channel, kernel_height, kernel_width, _ = kernel_shape
