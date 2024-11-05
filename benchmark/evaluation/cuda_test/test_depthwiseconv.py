@@ -104,10 +104,13 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr, kernel_ptr)
+    function(input_ptr, kernel_ptr, output_ptr, input_height, kernel_size, input_channels)
     # Check if the results match
     np.testing.assert_allclose(
         output_ctypes,
