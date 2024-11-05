@@ -1,4 +1,4 @@
-__mlu_global__ void mlu_rms_norm(float *A, float *B) {
+__mlu_global__ void rmsnorm(float *A, float *B) {
   __nram__ float local_A[2048];
   __nram__ float A_square[2048];
   __nram__ float sum[128];
@@ -39,7 +39,7 @@ extern "C" void rmsnorm_kernel(float *A, float *B) {
   // Define the function type
 
   // Launch kernel
-  mlu_rms_norm<<<dim, ktype, queue>>>(d_A, d_B);
+  rmsnorm<<<dim, ktype, queue>>>(d_A, d_B);
   cnrtQueueSync(queue);
   // Copy the result back to host
   cnrtMemcpy(B, d_B, num_elements * sizeof(float), cnrtMemcpyDevToHost);

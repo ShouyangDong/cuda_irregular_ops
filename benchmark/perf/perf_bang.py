@@ -979,7 +979,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/layernorm*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/deformable*.mlu")
     )
     counter = 0
 
