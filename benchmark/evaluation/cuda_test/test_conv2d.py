@@ -158,7 +158,7 @@ if __name__ == "__main__":
         kernel_ptr,
         data_shape[0],
         data_shape[1],
-        data_shape[2],
+        data_shape[3],
         kernel_shape[0],
         kernel_shape[1],
         stride_h,
