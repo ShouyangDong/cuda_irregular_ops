@@ -618,7 +618,7 @@ def perf_rmsnorm(name, file, shape):
 
 
 def perf_deformable(name, file, shape):
-    op_name = "cuda_deformable_attention"
+    op_name = "deformable"
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(

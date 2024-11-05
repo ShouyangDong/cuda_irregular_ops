@@ -1,3 +1,4 @@
+import argparse
 import ctypes
 import os
 import subprocess
@@ -67,16 +68,15 @@ def deformable_attention_pytorch(
 
 
 if __name__ == "__main__":
-    N, M, D = (
-        1,
-        8,
-        256,
-    )  # batch size, number of heads, depth
-    Lq, L, P = (
-        100,
-        4,
-        4,
-    )  # query length, levels, points to sample. models/deformable_detr.py says 100 length query for COCO.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    name = base_name.split("_")[0]
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
+    N, M, D = shape[:3]
+    Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
         [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
     )
@@ -94,11 +94,22 @@ if __name__ == "__main__":
         value, shapes, sampling_locations, attention_weights
     )
 
-    name = "deformable_attention"
-    file_name = "deformable_attention.cu"
-    so_name = "deformable_attention_cuda.so"
+    so_name = args.file.replace(".cu", ".so")
+    with open(args.file, "r") as f:
+        code = f.read()
+        f.close()
 
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
+        macro = f.read()
+        f.close()
+    code = macro + code
+
+    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    with open(file_name, mode="w") as f:
+        f.write(code)
+        f.close()
     success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
@@ -125,14 +136,14 @@ if __name__ == "__main__":
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
-    level_start_index_ptr = (
-        level_start_index.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
-    )
     sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
     attention_weights_ptr = attention_weights.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
+    )
+    level_start_index_ptr = level_start_index.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_int)
     )
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数

@@ -1,5 +1,5 @@
 __global__ void __launch_bounds__(64)
-    cuda_deformable_attention(float *__restrict__ attention_weights_,
+    deformable(float *__restrict__ attention_weights_,
                               float *__restrict__ output_,
                               float *__restrict__ sampling_locations_,
                               float *__restrict__ value_,
@@ -163,9 +163,10 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
              n * lq * m * l * p * sizeof(float), cudaMemcpyHostToDevice);
 
   // Define grid and block dimensions
-  dim3 block(200, 1, 8);
+  dim3 blockSize(d / 4);
+  dim3 numBlocks(lq, n, m);
   // Launch kernel
-  cuda_deformable_attention<<<block, 64>>>(
+  deformable<<<numBlocks, blockSize>>>(
       d_attention_weights, d_output, d_sampling_locations, d_value,
       d_value_level_start_index, d_value_spatial_shapes);
 
