@@ -24,7 +24,7 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/conv2d*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/conv2dnchw*.cu"))
     counter = 0
 
     for file in tqdm(files):
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             )
         elif name == "conv2dnchw":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_conv2d.py"
+                file, "benchmark/evaluation/cuda_test/test_conv2dNCHW.py"
             )
         elif name == "depthwiseconv":
             success, output = run_test(

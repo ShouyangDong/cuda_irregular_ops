@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     kernel_shape = base_name.split("_")[5:9]
     kernel_shape = [int(intg) for intg in kernel_shape]
-    stride_h = stride_w = int(base_nam.split(".")[0].split("_")[9])
+    stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
     pad = int(base_name.split(".")[0].split("_")[10])
     dtype = "float32"
     wtype = "float32"
@@ -102,6 +102,12 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
@@ -110,11 +116,21 @@ if __name__ == "__main__":
     result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
-    function(input_ptr, kernel_ptr, output_ptr)
+    function(
+        output_ptr,
+        input_ptr,
+        kernel_ptr,
+        data_shape[0],
+        data_shape[2],
+        data_shape[1],
+        kernel_shape[0],
+        kernel_shape[2],
+        stride_h,
+    )
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
-        output_np,
+        result_ctypes,
+        result_cpu,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
