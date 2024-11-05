@@ -1,6 +1,6 @@
 
 
-__mlu_global__ void mlu_layer_norm(float *input, float *gamma, float *beta,
+__mlu_global__ void layernorm(float *input, float *gamma, float *beta,
                                    float *output) {
   __nram__ float diff[32];
   __nram__ float mean[32];
@@ -66,7 +66,7 @@ extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
   cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
 
   // Launch kernel
-  mlu_layer_norm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
+  layernorm<<<dim, ktype, queue>>>(d_input, d_gamma, d_beta, d_output);
 
   // Copy the result back to host
   cnrtMemcpy(output, d_output, num_elements * sizeof(float),

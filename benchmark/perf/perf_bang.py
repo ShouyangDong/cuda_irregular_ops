@@ -264,10 +264,15 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     op_name = name.split("_")[0]
 
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -280,7 +285,8 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
     a = tvm.nd.array(np.random.rand(*shape_A).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape_B).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape_C).astype("float32"), dev)
-    f = toc.build(s, [A, B, C], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -425,6 +431,9 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         code = 'extern "C" ' + code
         return code
 
+    from toc import Environment
+
+    env = Environment("cambricon/mlu590-h8")
     # generate data
     data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
     kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
@@ -476,7 +485,8 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = toc.build(s, [A, B, C], "bang", name="conv2d")
+    with toc.build_config(env):
+        func = toc.build(s, [A, B, C], name="conv2d")
     func(data_dev, kernel_dev, result_dev)
     time_f = func.time_evaluator("conv2d", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
@@ -493,12 +503,19 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -534,7 +551,8 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = toc.build(s, [A, B, C], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -551,12 +569,19 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -592,7 +617,8 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = toc.build(s, [A, B, C], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -609,12 +635,19 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -650,7 +683,8 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    f = toc.build(s, [A, B, C], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c)
@@ -669,12 +703,19 @@ def perf_layernorm(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -712,7 +753,8 @@ def perf_layernorm(name, file, shape):
     b = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    f = toc.build(s, [A, B, C, D], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C, D], name=op_name)
     f(a, b, c, d)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
@@ -724,12 +766,19 @@ def perf_layernorm(name, file, shape):
 def perf_rmsnorm(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -762,7 +811,8 @@ def perf_rmsnorm(name, file, shape):
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    f = toc.build(s, [A, B], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, B], name=op_name)
     f(a, b)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b)
@@ -794,12 +844,19 @@ def perf_deformable(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
-    def toc_callback_bang_postproc(code, target):
-        code = open(file).read()
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
         code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
+
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         code = 'extern "C" ' + code
         return code
 
@@ -838,7 +895,8 @@ def perf_deformable(name, file, shape):
     c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
     e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
-    f = toc.build(s, [A, shape_pl, B, C, out_D], "bang", name=op_name)
+    with toc.build_config(env):
+        f = toc.build(s, [A, shape_pl, B, C, out_D], name=op_name)
     f(a, b, c, d, e)
     time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
     cost = time_f(a, b, c, d, e)
@@ -857,7 +915,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
+    from toc import Environment
 
+    env = Environment("cambricon/mlu590-h8")
     @tvm.register_func
     def toc_callback_bang_postproc(code, target):
         code = open(file).read()
@@ -907,8 +967,8 @@ def perf_scaled_dot_product_attention(name, file, shape):
     b = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-
-    f = toc.build(s, [A, B, C, D], "bang", name="multi_head_attention")
+    with toc.build_config(env):
+        f = toc.build(s, [A, B, C, D], "bang", name="multi_head_attention")
     f(a, b, c, d)
     time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
     cost = time_f(a, b, c, d)
@@ -919,7 +979,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/conv2d*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/layernorm*.mlu")
     )
     counter = 0
 
