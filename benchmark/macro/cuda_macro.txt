@@ -3,3 +3,4 @@
 #include <float.h>
 #include <cuda_runtime.h>
 #include <cuda.h>
+#include <cmath>
