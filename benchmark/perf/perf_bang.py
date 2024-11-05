@@ -212,26 +212,24 @@ def perf_pooling(name, file, shape, kernel, stride):
         "minpool": tsop.minpool,
     }
 
-    # @tvm.register_func("toc_callback_bang_postproc", override=True)
-    # def toc_callback_bang_postproc(code):
-    #     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
-    #     if not os.path.exists(file):
-    #         with open(file, "w", encoding="utf-8") as f:
-    #             f.write(code)
-    #     code = open(file, encoding="utf-8").read()
-    #     code = code.split("extern")[0]
+    @tvm.register_func("toc_callback_bang_postproc", override=True)
+    def toc_callback_bang_postproc(code):
+        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+        if not os.path.exists(file):
+            with open(file, "w", encoding="utf-8") as f:
+                f.write(code)
+        code = open(file, encoding="utf-8").read()
+        code = code.split("extern")[0]
 
-    #     code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-    #     code = 'extern "C" ' + code
-    #     # print(code)
-    #     return code
+        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = 'extern "C" ' + code
+        return code
 
     def run_cpu(data, kernel_stride, op):
         return _op2np[op](data, kernel_stride)
 
     input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
     # Describ Computation
-
     result = _opTensorOp[op_name](input0, kh, kw, sh, sw)
     # Build ang get executable module
     fmlu = tsop.BuildBANG([input0], [result], "mlu590-h8", kernel_name=op_name)
@@ -249,8 +247,6 @@ def perf_pooling(name, file, shape, kernel, stride):
     result_arr = bangpy.Array(result_np, dev)
 
     fmlu(data_dev, result_arr)
-    print("-------------------BANG CODE-----------")
-    print(fmlu.get_source())
     # Compare
     bangpy.assert_allclose(result_arr.numpy(), cpu_output, 0.1, 0)
     print("验证通过！")
