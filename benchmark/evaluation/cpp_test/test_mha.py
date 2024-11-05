@@ -27,15 +27,7 @@ def run_compilation(so_name, file_name):
 
 
 def ref_program(q, k, v, causal=False):
-    score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
-    if causal:
-        mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
-        mask = mask.masked_fill(mask == 1, torch.finfo(q.dtype).min)
-        mask = mask.to(q.device, q.dtype)
-        score = score + mask
-    attn = F.softmax(score, dim=-1)
-    output = torch.matmul(attn, v)
-    return output
+    return F.scaled_dot_product_attention(q, k, v)
 
 
 if __name__ == "__main__":
