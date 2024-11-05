@@ -12,6 +12,10 @@ from toc import compile_bang
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
 
+from toc import Environment
+
+env = Environment("cambricon/mlu590-h8")
+
 
 def avgpool_np(data, kernel_stride):
     """avg pooling with numpy
@@ -157,8 +161,6 @@ def perf_elementwise(name, file, shape):
         cpu_output = np.add(data_lhs, data_rhs)
         bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
         print("验证通过！")
-        print("-------------------BANG CODE-----------")
-        print(fmlu.get_source())
         evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
         cost = evaluator(data_lhs_dev, data_rhs_dev, result_arr).mean
         print(f"{name} execution time: {cost * 1000} ms")
@@ -276,12 +278,33 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
         code = 'extern "C" ' + code
         return code
 
-    C = topi.bang.batch_matmul(A, B)
-    with tvm.target.Target("bang"):
-        s = topi.bang.schedule_batch_matmul(C)
+    def bmm(A, B, C):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
 
+        ib.scope_attr(tx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", 4)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        with ib.for_range(0, n, name="i") as i:
+            Cptr[i] = Aptr[i] + Bptr[i]
+        body = ib.get()
+        return body  # cpu compute
+
+    C = te.extern(
+        shape_C,
+        [A, B],
+        lambda ins, outs: bmm(ins[0], ins[1], outs[0]),
+        name="bmm",
+        dtype="float32",
+    )
     dev = tvm.device("bang", 0)
-
+    s = te.create_schedule(C.op)
     a = tvm.nd.array(np.random.rand(*shape_A).astype("float32"), dev)
     b = tvm.nd.array(np.random.rand(*shape_B).astype("float32"), dev)
     c = tvm.nd.array(np.random.rand(*shape_C).astype("float32"), dev)
@@ -298,9 +321,6 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
 def perf_activation(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -355,9 +375,7 @@ def perf_activation(name, file, shape):
 
 
 def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
-    from toc import Environment
 
-    env = Environment("cambricon/mlu590-h8")
     op_name = "conv2d"
 
     @tvm.register_func
@@ -433,9 +451,6 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         code = 'extern "C" ' + code
         return code
 
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
     # generate data
     data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
     kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
@@ -479,8 +494,7 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         dtype="float32",
     )
 
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(C.op)
+    s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
     data_dev = tvm.nd.array(data_np, dev)
@@ -505,9 +519,6 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -547,8 +558,8 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(C.op)
+
+    s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -572,9 +583,6 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -614,8 +622,8 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(C.op)
+
+    s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -639,9 +647,6 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -681,8 +686,8 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(C.op)
+
+    s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -708,9 +713,6 @@ def perf_layernorm(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -751,8 +753,8 @@ def perf_layernorm(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(D.op)
+
+    s = te.create_schedule(D.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -772,9 +774,6 @@ def perf_layernorm(name, file, shape):
 def perf_rmsnorm(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -812,8 +811,8 @@ def perf_rmsnorm(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(B.op)
+
+    s = te.create_schedule(B.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -851,9 +850,6 @@ def perf_deformable(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -894,8 +890,8 @@ def perf_deformable(name, file, shape):
         name=op_name,
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(out_D.op)
+
+    s = te.create_schedule(out_D.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(N, S, M, D).astype("float32"), dev)
@@ -923,9 +919,6 @@ def perf_scaled_dot_product_attention(name, file, shape):
     B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
     C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
     D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -971,8 +964,8 @@ def perf_scaled_dot_product_attention(name, file, shape):
         out_buffers=[D_buff],
         dtype="float32",
     )
-    with tvm.target.Target("bang"):
-        s = te.create_schedule(D.op)
+
+    s = te.create_schedule(D.op)
 
     dev = tvm.device("bang", 0)
     a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
@@ -991,7 +984,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/mha*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu")
     )
     counter = 0
 
