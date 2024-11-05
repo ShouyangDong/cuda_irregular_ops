@@ -32,7 +32,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
-    name = base_name.split("_")[0]
+    name = "gelu"
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     so_name = args.file.replace(".cu", ".so")
@@ -57,6 +57,7 @@ if __name__ == "__main__":
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
     ]
     function.restype = None
     # 创建输入数组
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(output_ptr, input_ptr)
+    function(output_ptr, input_ptr, np.prod(shape))
     # 验证结果
 
     np.testing.assert_allclose(
