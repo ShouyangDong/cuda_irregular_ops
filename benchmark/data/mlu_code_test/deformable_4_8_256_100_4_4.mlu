@@ -1,4 +1,4 @@
-__mlu_global__ void mlu_deformable_attention(float *value_,
+__mlu_global__ void deformable(float *value_,
                                              int *value_spatial_shapes_,
                                              float *sampling_locations_,
                                              float *attention_weights_,
@@ -232,7 +232,7 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
              n * lq * m * l * p * sizeof(float), cnrtMemcpyHostToDev);
 
   // Launch kernel
-  mlu_deformable_attention<<<dim, ktype, queue>>>(
+  deformable<<<dim, ktype, queue>>>(
       d_value, d_value_spatial_shapes, d_sampling_locations,
       d_attention_weights, d_output);
 
