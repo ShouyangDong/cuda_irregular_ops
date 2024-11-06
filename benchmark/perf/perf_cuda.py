@@ -8,6 +8,8 @@ import tvm.topi.testing
 from tvm import te, topi
 from tvm.topi.utils import get_const_tuple
 
+from benchmark.source.deformable_cuda import deformable_attention_tvmscript_gpu
+
 
 def perf_elementwise(name, file, shape):
     x = te.placeholder(shape, name="x", dtype="float32")
@@ -263,6 +265,8 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
 
 
 def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
+    print(file)
+
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
         code = open(file).read()
@@ -322,9 +326,9 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     kernel_dev = tvm.nd.array(kernel_np, dev)
     result_np = np.zeros(output_shape, dtype="float32")
     result_dev = tvm.nd.array(result_np, dev)
-    func = tvm.build(s, [A, B, C], "cuda", name="conv2d")
+    func = tvm.build(s, [A, B, C], "cuda", name="conv2dnchw")
     func(data_dev, kernel_dev, result_dev)
-    time_f = func.time_evaluator("conv2d", dev, number=20)
+    time_f = func.time_evaluator("conv2dnchw", dev, number=20)
     cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
     print(f"{name} execution time: {cost} ms")
     func_name = "tvm_callback_cuda_postproc"
@@ -530,8 +534,8 @@ def perf_layernorm(name, file, shape):
         ib = tvm.tir.ir_builder.create()
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
+        ib.scope_attr(tx, "thread_extent", prod)
+        ib.scope_attr(bx, "thread_extent", 1)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
@@ -619,6 +623,15 @@ def perf_rmsnorm(name, file, shape):
 
 def perf_deformable(name, file, shape):
     op_name = "deformable"
+
+    @tvm.register_func
+    def tvm_callback_cuda_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace(op_name + "(", op_name + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
+
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
@@ -629,66 +642,51 @@ def perf_deformable(name, file, shape):
     )
     S = sum([(H * W).item() for H, W in shapes])
 
-    A = te.placeholder([N, S, M, D], dtype="float32", name="A")
-    B = te.placeholder([N, Lq, M, L, P, 2], dtype="float32", name="B")
-    C = te.placeholder([N, Lq, M, L, P], dtype="float32", name="C")
-    shape_pl = te.placeholder([4, 2], dtype="int32", name="shape")
-    output_shape = [N, Lq, M * D]
+    value = torch.rand(N, S, M, D) * 0.01
+    sampling_locations = torch.rand(N, Lq, M, L, P, 2)
+    attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    shape_buffer = tvm.tir.decl_buffer(shape_pl.shape, "int32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
-    D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
-
-    @tvm.register_func
-    def tvm_callback_cuda_postproc(code, target):
-        code = open(file).read()
-        code = code.split("extern")[0]
-        code = code.replace(op_name + "(", op_name + "_kernel(")
-        code = 'extern "C" ' + code
-        return code
-
-    def test_deformable(A, B, C, D, E):
-        n = A.shape[0]
-        prod = np.prod(A.shape[:-1])
-        ib = tvm.tir.ir_builder.create()
-        tx = te.thread_axis("threadIdx.x")
-        bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 1024)
-        ib.scope_attr(bx, "thread_extent", 256)
-
-        Aptr = ib.buffer_ptr(A)
-        Bptr = ib.buffer_ptr(B)
-        Cptr = ib.buffer_ptr(C)
-        Dptr = ib.buffer_ptr(D)
-
-        with ib.for_range(0, n, name="i") as i:
-            Dptr[i] = Aptr[i] + Bptr[i] + Cptr[i]
-        body = ib.get()
-        return body
-
-    out_D = te.extern(
-        output_shape,
-        [A, shape_pl, B, C],
-        lambda ins, outs: test_deformable(ins[0], ins[1], ins[2], ins[3], outs[0]),
-        name=op_name,
-        dtype="float32",
+    specialized = deformable_attention_tvmscript_gpu.specialize(
+        dict(
+            zip(
+                deformable_attention_tvmscript_gpu.params,
+                [
+                    tvm.tir.decl_buffer(x.shape)
+                    for x in [
+                        value,
+                        shapes,
+                        level_start_index,
+                        sampling_locations,
+                        attention_weights,
+                    ]
+                ],
+            )
+        )
     )
-    with tvm.target.Target("cuda"):
-        s = te.create_schedule(out_D.op)
-
-    dev = tvm.cuda(0)
-    a = tvm.nd.array(np.random.rand(N, S, M, D).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(4, 2).astype("int32"), dev)
-    c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
-    d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
-    e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
-    f = tvm.build(s, [A, shape_pl, B, C, out_D], "cuda", name=op_name)
-    f(a, b, c, d, e)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b, c, d, e)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
+    f = tvm.build(specialized, target="cuda", name="deformable")
+    dev = tvm.cuda()
+    output = tvm.nd.array(
+        np.zeros(
+            (
+                value.shape[0],
+                sampling_locations.shape[1],
+                value.shape[2] * value.shape[3],
+            ),
+            "float32",
+        ),
+        device=dev,
+    )
+    timer = f.time_evaluator(f.entry_name, dev, number=10, repeat=10)
+    report = timer(
+        tvm.nd.array(value, device=dev),
+        tvm.nd.array(shapes.int(), device=dev),
+        tvm.nd.array(level_start_index.int(), device=dev),
+        tvm.nd.array(sampling_locations, device=dev),
+        tvm.nd.array(attention_weights, device=dev),
+        output,
+    )
+    print(f"TVMScript GPU: {report.mean*1000:.3f}ms")
     func_name = "tvm_callback_cuda_postproc"
     tvm._ffi.registry.remove_global_func(func_name)
 
@@ -707,11 +705,13 @@ def perf_scaled_dot_product_attention(name, file, shape):
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
         code = open(file).read()
-        code = code.split("extern")[0]
+        code = code.split('extern "C"')[0]
         code = code.replace(
-            "multi_head_attention" + "(", "multi_head_attention" + "_kernel("
+            "scaled_dot_product_attention" + "(",
+            "scaled_dot_product_attention" + "_kernel(",
         )
         code = 'extern "C" ' + code
+        print(code)
         return code
 
     def test_scaled_dot_product_attention(A, B, C, D, seq_len, num_heads, head_dim):
@@ -740,7 +740,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
         lambda ins, outs: test_scaled_dot_product_attention(
             ins[0], ins[1], ins[2], outs[0], shape[1], shape[2], shape[3]
         ),
-        name="multi_head_attention",
+        name="scaled_dot_product_attention",
         in_buffers=[A_buff, B_buff, C_buff],
         out_buffers=[D_buff],
         dtype="float32",
@@ -754,9 +754,11 @@ def perf_scaled_dot_product_attention(name, file, shape):
     c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
 
-    f = tvm.build(s, [A, B, C, D], "cuda", name="multi_head_attention")
+    f = tvm.build(s, [A, B, C, D], "cuda", name="scaled_dot_product_attention")
     f(a, b, c, d)
-    time_f = f.time_evaluator("multi_head_attention", dev, number=20, repeat=100)
+    time_f = f.time_evaluator(
+        "scaled_dot_product_attention", dev, number=20, repeat=100
+    )
     cost = time_f(a, b, c, d)
     print(f"{name} execution time: {cost.mean * 1000} ms")
     func_name = "tvm_callback_cuda_postproc"
@@ -764,12 +766,11 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/deformable*.cu")
-    )
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/mha*.cu"))
     counter = 0
 
     for file in files:
+        print("[INFO] file name: ", file)
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "add" or name == "sign":
@@ -801,7 +802,7 @@ if __name__ == "__main__":
             shape_C = [1, shape[0], shape[2]]
             perf_bmm(name, file, shape_A, shape_B, shape_C)
 
-        elif name in ["relu", "sigmoid", "gelu", "softmax"]:
+        elif name in ["relu", "sigmoid", "softmax"]:
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_activation(base_name, file, shape)
@@ -827,23 +828,24 @@ if __name__ == "__main__":
                 name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
             )
 
-        elif name == "conv2dnchw":
-            data_shape = base_name.split("_")[1:5]
-            data_shape = [int(intg) for intg in data_shape]
-            kernel_shape = base_name.split("_")[5:9]
-            kernel_shape = [int(intg) for intg in kernel_shape]
-            stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
-            pad = int(base_name.split(".")[0].split("_")[10])
+        # elif name == "conv2dnchw":
+        #    data_shape = base_name.split("_")[1:5]
+        #    data_shape = [int(intg) for intg in data_shape]
+        #    kernel_shape = base_name.split("_")[5:9]
+        #    kernel_shape = [int(intg) for intg in kernel_shape]
+        #    stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
+        #    pad = int(base_name.split(".")[0].split("_")[10])
 
-            perf_conv2d_nchw(
-                base_name,
-                data_shape,
-                kernel_shape[1],
-                kernel_shape[0],
-                kernel_shape[2],
-                stride_h,
-                pad,
-            )
+        #    perf_conv2d_nchw(
+        #        base_name,
+        #        file,
+        #        data_shape,
+        #        kernel_shape[1],
+        #        kernel_shape[0],
+        #        kernel_shape[2],
+        #        stride_h,
+        #        pad,
+        #    )
 
         elif name == "gemv":
             shapes = base_name.split(".")[0]
@@ -888,6 +890,6 @@ if __name__ == "__main__":
             perf_deformable(base_name, file, shape)
 
         elif name == "mha":
-            shapes = base_name.split(".")[0]
-            shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_scaled_dot_product_attention(base_name, file, shape)
+           shapes = base_name.split(".")[0]
+           shape = [int(intg) for intg in shapes.split("_")[1:]]
+           perf_scaled_dot_product_attention(base_name, file, shape)

@@ -1,10 +1,8 @@
 __global__ void scaled_dot_product_attention(float *Q, float *K, float *V,
-                                             float *output, int batch,
-                                             int seq_len, int heads, int dim) {
+                                             float *output) {
 
-  extern __shared__ float
-      score[]; // 使用共享内存存储 score, 大小为 heads * heads
-  float scaling_factor = 1.0f / sqrtf((float)dim);
+  __shared__ float score[144]; // 使用共享内存存储 score, 大小为 heads * heads
+  float scaling_factor = 1.0f / sqrtf((float)512);
   int i = blockIdx.x;  // batch index
   int j = blockIdx.y;  // query index within sequence length
   int m = threadIdx.x; // head index
@@ -63,10 +61,8 @@ extern "C" void mha_kernel(float *queries, float *keys, float *values,
   dim3 grid(batch_size, seq_len);
   dim3 block(num_heads);
 
-  int shared_mem_size = num_heads * num_heads * sizeof(float);
-  scaled_dot_product_attention<<<grid, block, shared_mem_size>>>(
-      d_queries, d_keys, d_values, d_output, batch_size, seq_len, num_heads,
-      head_dim);
+  scaled_dot_product_attention<<<grid, block>>>(d_queries, d_keys, d_values,
+                                                d_output);
 
   cudaMemcpy(output, d_output, size * sizeof(float), cudaMemcpyDeviceToHost);
 
