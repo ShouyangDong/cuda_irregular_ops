@@ -1,25 +1,16 @@
 import argparse
-import ctypes
-import os
-import subprocess
-
 import os
 
 import bangpy
 import numpy as np
-import toc
-import torch
 import tvm
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
-from toc import compile_bang
-from tvm import te, topi
-from tvm.topi.utils import get_const_tuple
-
 
 
 def verify_add(name, file, shape):
     from toc import Environment
+
     env = Environment("cambricon/mlu590-h8")
     op_name = name.split("_")[0]
 
@@ -38,9 +29,7 @@ def verify_add(name, file, shape):
     # Describe Computation
     result = tsop.add(input0, input1)
     # Build and get executable module
-    fmlu = tsop.BuildBANG(
-        [input0, input1], [result], "mlu590-h8", kernel_name=op_name
-    )
+    fmlu = tsop.BuildBANG([input0, input1], [result], "mlu590-h8", kernel_name=op_name)
     # Generate random test data and run on mlu and cpu
     data_lhs = np.random.rand(*shape).astype("float32")
     data_rhs = np.random.rand(*shape).astype("float32")
@@ -54,6 +43,7 @@ def verify_add(name, file, shape):
     mlu_output = result_arr
     cpu_output = np.add(data_lhs, data_rhs)
     bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

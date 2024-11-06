@@ -8,11 +8,9 @@ import torch
 import tvm
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
-from toc import compile_bang
-from tvm import te, topi
+from toc import Environment, compile_bang
+from tvm import te
 from tvm.topi.utils import get_const_tuple
-
-from toc import Environment
 
 env = Environment("cambricon/mlu590-h8")
 

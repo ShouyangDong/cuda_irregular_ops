@@ -1,6 +1,5 @@
 import argparse
 import ctypes
-import math
 import os
 import subprocess
 from ctypes import CDLL

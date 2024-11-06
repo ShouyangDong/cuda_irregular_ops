@@ -1,39 +1,30 @@
 import argparse
-import ctypes
-import os
-import subprocess
-
 import os
 
 import bangpy
 import numpy as np
 import toc
-import torch
 import tvm
 import tvm.topi.testing
-from bangpy import tensor_op as tsop
-from toc import compile_bang
-from tvm import te, topi
+from tvm import te
 from tvm.topi.utils import get_const_tuple
 
 
 def verify_sign(name, file, shape):
     from toc import Environment
+
     env = Environment("cambricon/mlu590-h8")
-    
+
     @tvm.register_func("toc_callback_bang_postproc")
     def toc_callback_bang_postproc(code):
-        if not os.path.exists(file):
-            with open(file, "w", encoding="utf-8") as f:
-                f.write(code)
-        code = open(file, encoding="utf-8").read()
+        with open(file, "r") as f:
+            code = f.read()
+            f.close()
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         return code
 
-
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-
 
     def test_activation(A, B):
         n = A.shape[0]
@@ -70,6 +61,8 @@ def verify_sign(name, file, shape):
     f(a, b)
     bangpy.assert_allclose(b.numpy(), np.sign(data))
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
