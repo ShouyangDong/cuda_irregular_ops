@@ -19,10 +19,14 @@ __global__ void __launch_bounds__(64)
     height_width[1] = value_spatial_shapes_[((i * 2) + 1)];
     for (int k = 0; k < 4; ++k) {
       xy[1] = sampling_locations_[(
-          (((((int)blockIdx.x) * 256) + (((int)blockIdx.z) * 32)) + (i * 8)) +
+          ((((((int)blockIdx.y) * 25600) + (((int)blockIdx.x) * 256)) +
+            (((int)blockIdx.z) * 32)) +
+           (i * 8)) +
           (k * 2))];
       xy[0] = sampling_locations_[(
-          ((((((int)blockIdx.x) * 256) + (((int)blockIdx.z) * 32)) + (i * 8)) +
+          (((((((int)blockIdx.y) * 25600) + (((int)blockIdx.x) * 256)) +
+             (((int)blockIdx.z) * 32)) +
+            (i * 8)) +
            (k * 2)) +
           1)];
       xy_grid[0] = ((xy[0] * ((float)height_width[0])) - 5.000000e-01f);
@@ -40,7 +44,8 @@ __global__ void __launch_bounds__(64)
       } else {
         for (int ii_d_2 = 0; ii_d_2 < 4; ++ii_d_2) {
           corner_values[ii_d_2] =
-              value_[((((((value_level_start_index_[i] * 2048) +
+              value_[(((((((((int)blockIdx.y) * 26830848) +
+                           (value_level_start_index_[i] * 2048)) +
                           ((xy_rounded[0] * height_width[1]) * 2048)) +
                          (xy_rounded[2] * 2048)) +
                         (((int)blockIdx.z) * 256)) +
@@ -57,7 +62,8 @@ __global__ void __launch_bounds__(64)
       } else {
         for (int ii_d_4 = 0; ii_d_4 < 4; ++ii_d_4) {
           corner_values[(ii_d_4 + 4)] =
-              value_[((((((value_level_start_index_[i] * 2048) +
+              value_[(((((((((int)blockIdx.y) * 26830848) +
+                           (value_level_start_index_[i] * 2048)) +
                           ((xy_rounded[0] * height_width[1]) * 2048)) +
                          (xy_rounded[3] * 2048)) +
                         (((int)blockIdx.z) * 256)) +
@@ -74,7 +80,8 @@ __global__ void __launch_bounds__(64)
       } else {
         for (int ii_d_6 = 0; ii_d_6 < 4; ++ii_d_6) {
           corner_values[(ii_d_6 + 8)] =
-              value_[((((((value_level_start_index_[i] * 2048) +
+              value_[(((((((((int)blockIdx.y) * 26830848) +
+                           (value_level_start_index_[i] * 2048)) +
                           ((xy_rounded[1] * height_width[1]) * 2048)) +
                          (xy_rounded[2] * 2048)) +
                         (((int)blockIdx.z) * 256)) +
@@ -91,7 +98,8 @@ __global__ void __launch_bounds__(64)
       } else {
         for (int ii_d_8 = 0; ii_d_8 < 4; ++ii_d_8) {
           corner_values[(ii_d_8 + 12)] =
-              value_[((((((value_level_start_index_[i] * 2048) +
+              value_[(((((((((int)blockIdx.y) * 26830848) +
+                           (value_level_start_index_[i] * 2048)) +
                           ((xy_rounded[1] * height_width[1]) * 2048)) +
                          (xy_rounded[3] * 2048)) +
                         (((int)blockIdx.z) * 256)) +
@@ -115,14 +123,16 @@ __global__ void __launch_bounds__(64)
                  (xy_grid[0] - ((float)xy_rounded[0]))) *
                 (xy_grid[1] - ((float)xy_rounded[2])))) *
               attention_weights_[(
-                  (((((int)blockIdx.x) * 128) + (((int)blockIdx.z) * 16)) +
+                  ((((((int)blockIdx.y) * 12800) + (((int)blockIdx.x) * 128)) +
+                    (((int)blockIdx.z) * 16)) +
                    (i * 4)) +
                   k)]));
       }
     }
   }
   for (int ii_d_10 = 0; ii_d_10 < 4; ++ii_d_10) {
-    output_[((((((int)blockIdx.x) * 2048) + (((int)blockIdx.z) * 256)) +
+    output_[(((((((int)blockIdx.y) * 204800) + (((int)blockIdx.x) * 2048)) +
+               (((int)blockIdx.z) * 256)) +
               (((int)threadIdx.x) * 4)) +
              ii_d_10)] = attention_sum[ii_d_10];
   }
@@ -135,7 +145,7 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
   // Allocate memory on the device
   float *d_value, *d_sampling_locations, *d_attention_weights, *d_output;
   int *d_value_spatial_shapes, *d_value_level_start_index;
-  int n = 1;
+  int n = 4;
   int l = 4;
   int lq = 100;
   int s = 13101;

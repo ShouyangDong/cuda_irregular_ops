@@ -142,8 +142,8 @@ if __name__ == "__main__":
     attention_weights_ptr = attention_weights.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
-    level_start_index_ptr = level_start_index.numpy().ctypes.data_as(
-        ctypes.POINTER(ctypes.c_int)
+    level_start_index_ptr = (
+        level_start_index.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
     )
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
@@ -156,14 +156,6 @@ if __name__ == "__main__":
         output_ptr,
     )
     # 验证结果
-    np.testing.assert_allclose(
-        output_array,
-        torch_da.numpy(),
-        rtol=1e-03,
-        atol=1e-03,
-        equal_nan=True,
-        err_msg="",
-        verbose=True,
-    )
+    np.testing.assert_allclose(output_array, torch_da.numpy(), atol=1e-6, rtol=1e-6)
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

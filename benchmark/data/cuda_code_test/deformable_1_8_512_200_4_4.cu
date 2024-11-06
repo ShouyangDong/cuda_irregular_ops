@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(64)
+__global__ void __launch_bounds__(128)
     deformable(float *__restrict__ attention_weights_,
                float *__restrict__ output_,
                float *__restrict__ sampling_locations_,
@@ -19,10 +19,10 @@ __global__ void __launch_bounds__(64)
     height_width[1] = value_spatial_shapes_[((i * 2) + 1)];
     for (int k = 0; k < 4; ++k) {
       xy[1] = sampling_locations_[(
-          (((((int)blockIdx.x) * 512) + (((int)blockIdx.z) * 32)) + (i * 8)) +
+          (((((int)blockIdx.x) * 256) + (((int)blockIdx.z) * 32)) + (i * 8)) +
           (k * 2))];
       xy[0] = sampling_locations_[(
-          ((((((int)blockIdx.x) * 512) + (((int)blockIdx.z) * 32)) + (i * 8)) +
+          ((((((int)blockIdx.x) * 256) + (((int)blockIdx.z) * 32)) + (i * 8)) +
            (k * 2)) +
           1)];
       xy_grid[0] = ((xy[0] * ((float)height_width[0])) - 5.000000e-01f);
