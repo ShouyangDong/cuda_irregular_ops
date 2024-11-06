@@ -11,6 +11,14 @@ from tvm import te
 env = Environment("cambricon/mlu590-h8")
 
 
+def ref_program(x, gamma, beta, eps=1e-5):
+    mean = np.mean(x, axis=-1, keepdims=True)
+    std = np.std(x, axis=-1, keepdims=True)
+    x_normalized = (x - mean) / (std + eps)
+    out = gamma * x_normalized + beta
+    return out
+
+
 def verify_layernorm(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
@@ -60,17 +68,28 @@ def verify_layernorm(name, file, shape):
     s = te.create_schedule(D.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
-    c = tvm.nd.array(np.random.rand(*shape[-1:]).astype("float32"), dev)
+    input_array = np.random.uniform(size=shape).astype("float32")
+    gamma_array = np.random.uniform(size=shape[-1:]).astype("float32")
+    beta_array = np.random.uniform(size=shape[-1:]).astype("float32")
+    expected_output = ref_program(input_array, gamma_array, beta_array)
+
+    a = tvm.nd.array(input_array, dev)
+    b = tvm.nd.array(gamma_array, dev)
+    c = tvm.nd.array(beta_array, dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, B, C, D], name=op_name)
     f(a, b, c, d)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b, c, d)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
 
+    np.testing.assert_allclose(
+        d.numpy(),
+        expected_output,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
 
 

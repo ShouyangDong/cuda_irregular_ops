@@ -9,7 +9,8 @@ from toc import Environment
 from tvm import te
 
 env = Environment("cambricon/mlu590-h8")
-import numpy as np
+
+import torch
 import torch.nn.functional as F
 
 
@@ -71,18 +72,28 @@ def verify_scaled_dot_product_attention(name, file, shape):
     s = te.create_schedule(D.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    c = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    query = torch.randn(shape).to(torch.float32)
+    key = torch.randn(shape).to(torch.float32)
+    value = torch.randn(shape).to(torch.float32)
+    expected_output = ref_program(query, key, value)
+
+    a = tvm.nd.array(query.numpy(), dev)
+    b = tvm.nd.array(key.numpy(), dev)
+    c = tvm.nd.array(value.numpy(), dev)
     d = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, B, C, D], name="mha")
     f(a, b, c, d)
-    time_f = f.time_evaluator("mha", dev, number=20, repeat=100)
-    cost = time_f(a, b, c, d)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
-
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    np.testing.assert_allclose(
+        d.numpy(),
+        expected_output,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":

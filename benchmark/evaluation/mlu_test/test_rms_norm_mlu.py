@@ -56,16 +56,24 @@ def perf_rmsnorm(name, file, shape):
     s = te.create_schedule(B.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
+    input_array = np.random.uniform(size=shape).astype("float32")
+    expected_output = ref_program(torch.from_numpy(input_array))
+
+    a = tvm.nd.array(input_array, dev)
     b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, B], name=op_name)
     f(a, b)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
-
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    np.testing.assert_allclose(
+        b.numpy(),
+        expected_output,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":

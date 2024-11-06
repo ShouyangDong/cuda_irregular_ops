@@ -132,10 +132,20 @@ def verify_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         func = toc.build(s, [A, B, C], name="conv2d")
 
     func(data_dev, kernel_dev, result_dev)
-    time_f = func.time_evaluator("conv2d", dev, number=20)
-    cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
-    print(f"{name} execution time: {cost} ms")
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+
+    # cpu compute
+    result_cpu = cpu_conv(data_np, kernel_np, stride, stride, pad)
+    # Check if the results match
+    np.testing.assert_allclose(
+        result_dev.numpy(),
+        result_cpu,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":

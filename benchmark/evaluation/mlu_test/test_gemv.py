@@ -57,16 +57,29 @@ def verify_gemv(name, file, shape, kernel_shape, output_shape):
     s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
+    # Define the input matrix A and vector x
+    a = np.random.rand(*shape).astype("float32")
+    x = np.random.rand(*kernel_shape).astype("float32")
+    y_np = np.matmul(A, x)
+    
+    a = tvm.nd.array(a, dev)
+    b = tvm.nd.array(x, dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b, c)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    # Perform gemv using numpy
+    
+    np.testing.assert_allclose(
+        c.numpy(),
+        y_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":

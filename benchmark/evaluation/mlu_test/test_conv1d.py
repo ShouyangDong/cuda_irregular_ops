@@ -57,16 +57,28 @@ def verify_conv1d(name, file, shape, kernel_shape, output_shape):
     s = te.create_schedule(C.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(*shape).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(*kernel_shape).astype("float32"), dev)
+    input_array = np.random.rand(*shape).astype("float32")
+    kernel = np.random.rand(*kernel_shape).astype("float32")
+    a = tvm.nd.array(input_array, dev)
+    b = tvm.nd.array(kernel, dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, B, C], name=op_name)
     f(a, b, c)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b, c)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+
+    # Calculate the result using numpy for comparison
+    output_np = np.convolve(input_array, kernel, mode="valid")
+    # Check if the results match
+    np.testing.assert_allclose(
+        c.numpy(),
+        output_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":

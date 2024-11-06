@@ -103,9 +103,6 @@ def verify_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
     with toc.build_config(env):
         func = toc.build(s, [A, B, C], name="conv2d")
     func(data_dev, kernel_dev, result_dev)
-    time_f = func.time_evaluator("conv2d", dev, number=20)
-    cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
-    print(f"{name} execution time: {cost} ms")
 
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
 

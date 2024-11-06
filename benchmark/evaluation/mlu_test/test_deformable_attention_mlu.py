@@ -11,8 +11,6 @@ from tvm import te
 
 env = Environment("cambricon/mlu590-h8")
 
-import numpy as np
-import torch
 import torch.nn.functional as F
 
 
@@ -128,10 +126,19 @@ def verify_deformable(name, file, shape):
     with toc.build_config(env):
         f = toc.build(s, [A, shape_pl, B, C, out_D], name=op_name)
     f(a, b, c, d, e)
-    time_f = f.time_evaluator(op_name, dev, number=20, repeat=100)
-    cost = time_f(a, b, c, d, e)
-    print(f"{name} execution time: {cost.mean * 1000} ms")
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    torch_da = deformable_attention_pytorch(
+        value, shapes, sampling_locations, attention_weights
+    )
+    np.testing.assert_allclose(
+        e.numpy(),
+        torch_da.numpy(),
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
 
 
 if __name__ == "__main__":
