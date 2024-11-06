@@ -12,4 +12,3 @@ extern "C" __mlu_global__ void maxpool(float *input0, float *maxpool_36) {
         ((float *)input0_local_nram + (49280)), 26624, NRAM2GDRAM);
   }
 }
-

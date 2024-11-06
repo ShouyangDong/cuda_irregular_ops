@@ -13,4 +13,3 @@ extern "C" __mlu_global__ void avgpool(float *input0, float *avgpool_26) {
              ((float *)input0_local_nram + (1600)), 256, NRAM2GDRAM);
   }
 }
-

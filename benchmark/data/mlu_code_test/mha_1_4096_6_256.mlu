@@ -1,9 +1,9 @@
 
 
 extern "C" __mlu_global__ void mha(float *Q,     //[batch, seq_len, heads, dim]
-                              float *K,     //[batch, seq_len, heads, dim]
-                              float *V,     //[batch, seq_len, heads, dim]
-                              float *output //[batch, seq_len, heads, dim]
+                                   float *K,     //[batch, seq_len, heads, dim]
+                                   float *V,     //[batch, seq_len, heads, dim]
+                                   float *output //[batch, seq_len, heads, dim]
 ) {
   __nram__ float score[6 * 6];
   __nram__ float dinominator[6];
@@ -59,4 +59,3 @@ extern "C" __mlu_global__ void mha(float *Q,     //[batch, seq_len, heads, dim]
     }
   }
 }
-

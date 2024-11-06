@@ -1,10 +1,10 @@
 __global__ void __launch_bounds__(64)
     deformable(float *__restrict__ attention_weights_,
-                              float *__restrict__ output_,
-                              float *__restrict__ sampling_locations_,
-                              float *__restrict__ value_,
-                              int *__restrict__ value_level_start_index_,
-                              int *__restrict__ value_spatial_shapes_) {
+               float *__restrict__ output_,
+               float *__restrict__ sampling_locations_,
+               float *__restrict__ value_,
+               int *__restrict__ value_level_start_index_,
+               int *__restrict__ value_spatial_shapes_) {
   float attention_sum[4];
   int height_width[2];
   float xy[2];

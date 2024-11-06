@@ -12,4 +12,3 @@ extern "C" __mlu_global__ void relu(float *input0, float *active_relu_204) {
              ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
   }
 }
-

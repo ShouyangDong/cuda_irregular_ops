@@ -24,4 +24,3 @@ extern "C" __mlu_global__ void relu(float *input0, float *active_relu_144) {
     }
   }
 }
-

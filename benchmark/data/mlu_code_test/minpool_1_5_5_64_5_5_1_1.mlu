@@ -13,4 +13,3 @@ extern "C" __mlu_global__ void minpool(float *input0, float *minpool_52) {
              ((float *)input0_local_nram + (1600)), 256, NRAM2GDRAM);
   }
 }
-

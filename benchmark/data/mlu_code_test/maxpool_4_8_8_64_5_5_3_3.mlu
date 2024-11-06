@@ -7,4 +7,3 @@ extern "C" __mlu_global__ void maxpool(float *input0, float *maxpool_14) {
   __memcpy(((float *)maxpool_14 + ((((int)coreId) * 256))),
            ((float *)input0_local_nram + (4096)), 1024, NRAM2GDRAM);
 }
-

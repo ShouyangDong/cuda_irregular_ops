@@ -17,4 +17,3 @@ extern "C" __mlu_global__ void conv2d(float *data, float *kernel,
             (((((int)clusterId) * 2304) + (((int)coreId) * 576)))),
            ((float *)kernel_local_nram + (8192)), 2304, NRAM2GDRAM);
 }
-

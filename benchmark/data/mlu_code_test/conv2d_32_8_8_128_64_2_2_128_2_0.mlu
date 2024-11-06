@@ -21,4 +21,3 @@ extern "C" __mlu_global__ void conv2d(float *data, float *kernel,
              ((float *)kernel_local_nram + (65536)), 4096, NRAM2GDRAM);
   }
 }
-

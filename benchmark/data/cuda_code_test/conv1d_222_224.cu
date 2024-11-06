@@ -11,7 +11,7 @@ __global__ void conv1d(float *input, float *kernel, float *output) {
 extern "C" void conv1d_kernel(float *output, float *input, float *kernel,
                               int input_size, int output_size) {
   float *d_input, *d_kernel, *d_output;
-  int kernel_size = input_size - output_size + 1 ;
+  int kernel_size = input_size - output_size + 1;
   cudaMalloc(&d_input, input_size * sizeof(float));
   cudaMalloc(&d_kernel, kernel_size * sizeof(float));
   cudaMalloc(&d_output, output_size * sizeof(float));

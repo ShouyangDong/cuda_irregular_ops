@@ -17,4 +17,3 @@ extern "C" __mlu_global__ void sigmoid(float *input0,
              ((float *)input0_local_nram + (0)), 20, NRAM2GDRAM);
   }
 }
-

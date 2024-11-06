@@ -1,5 +1,5 @@
-extern "C" __mlu_global__ void layernorm(float *input, float *gamma, float *beta,
-                                   float *output) {
+extern "C" __mlu_global__ void layernorm(float *input, float *gamma,
+                                         float *beta, float *output) {
   __nram__ float diff[32];
   __nram__ float mean[32];
   __nram__ float variance[32];
@@ -33,4 +33,3 @@ extern "C" __mlu_global__ void layernorm(float *input, float *gamma, float *beta
     }
   }
 }
-

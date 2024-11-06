@@ -9,4 +9,3 @@ extern "C" __mlu_global__ void gemv(float *y, float *A, float *B) {
     y[i] = local_A[0];
   }
 }
-

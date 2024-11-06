@@ -1,7 +1,6 @@
 // Forward declaration of the device function
 __device__ float geluf(float x);
 
-
 __device__ float geluf(float x) {
   return 0.5 * x * (1 + tanh(sqrt(2 / M_PI) * (x + 0.044715 * pow(x, 3))));
 }

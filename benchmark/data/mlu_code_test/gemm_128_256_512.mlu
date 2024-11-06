@@ -13,4 +13,3 @@ extern "C" __mlu_global__ void gemm(float *A, float *B, float *C) {
     }
   }
 }
-

@@ -7,4 +7,3 @@ extern "C" __mlu_global__ void minpool(float *input0, float *minpool_18) {
   __memcpy(((float *)minpool_18 + ((((int)coreId) * 256))),
            ((float *)input0_local_nram + (4096)), 1024, NRAM2GDRAM);
 }
-

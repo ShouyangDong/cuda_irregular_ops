@@ -34,4 +34,3 @@ extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_945) {
     }
   }
 }
-

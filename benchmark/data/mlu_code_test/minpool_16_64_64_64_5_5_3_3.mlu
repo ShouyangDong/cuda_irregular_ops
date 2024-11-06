@@ -17,4 +17,3 @@ extern "C" __mlu_global__ void minpool(float *input0, float *minpool_17) {
     }
   }
 }
-

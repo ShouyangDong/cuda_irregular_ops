@@ -1,8 +1,8 @@
 extern "C" __mlu_global__ void deformable(float *value_,
-                                             int *value_spatial_shapes_,
-                                             float *sampling_locations_,
-                                             float *attention_weights_,
-                                             float *output_) {
+                                          int *value_spatial_shapes_,
+                                          float *sampling_locations_,
+                                          float *attention_weights_,
+                                          float *output_) {
   __nram__ float attention_sum[2048];
   __nram__ float value_offset[1];
   __nram__ float height_width[2];
@@ -190,4 +190,3 @@ extern "C" __mlu_global__ void deformable(float *value_,
     }
   }
 }
-

@@ -15,4 +15,3 @@ extern "C" __mlu_global__ void softmax(float *A, float *output) {
     __memcpy(output + 128 * i, dest, 128 * sizeof(float), NRAM2GDRAM);
   }
 }
-

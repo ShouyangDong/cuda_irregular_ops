@@ -16,4 +16,3 @@ extern "C" __mlu_global__ void rmsnorm(float *A, float *B) {
              NRAM2GDRAM);
   }
 }
-

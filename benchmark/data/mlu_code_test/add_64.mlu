@@ -12,4 +12,3 @@ extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_135) {
       ((float *)add_135 + (((((int)clusterId) * 16) + (((int)coreId) * 4)))),
       ((float *)lhs_local_nram + (0)), 16, NRAM2GDRAM);
 }
-

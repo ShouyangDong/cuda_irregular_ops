@@ -19,4 +19,3 @@ extern "C" __mlu_global__ void maxpool(float *input0, float *maxpool_14) {
     }
   }
 }
-

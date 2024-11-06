@@ -22,4 +22,3 @@ extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_1605) {
              ((float *)lhs_local_nram + (0)), 1024, NRAM2GDRAM);
   }
 }
-

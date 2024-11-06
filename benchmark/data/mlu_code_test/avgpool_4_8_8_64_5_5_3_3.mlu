@@ -7,4 +7,3 @@ extern "C" __mlu_global__ void avgpool(float *input0, float *avgpool_27) {
   __memcpy(((float *)avgpool_27 + ((((int)coreId) * 256))),
            ((float *)input0_local_nram + (4096)), 1024, NRAM2GDRAM);
 }
-
