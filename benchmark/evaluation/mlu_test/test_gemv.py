@@ -61,7 +61,7 @@ def verify_gemv(name, file, shape, kernel_shape, output_shape):
     a = np.random.rand(*shape).astype("float32")
     x = np.random.rand(*kernel_shape).astype("float32")
     y_np = np.matmul(A, x)
-    
+
     a = tvm.nd.array(a, dev)
     b = tvm.nd.array(x, dev)
     c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
@@ -70,7 +70,7 @@ def verify_gemv(name, file, shape, kernel_shape, output_shape):
     f(a, b, c)
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
     # Perform gemv using numpy
-    
+
     np.testing.assert_allclose(
         c.numpy(),
         y_np,

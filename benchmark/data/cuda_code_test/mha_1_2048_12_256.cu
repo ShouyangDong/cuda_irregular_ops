@@ -1,56 +1,75 @@
-__global__ void multi_head_attention(const float *__restrict__ queries,
-                                     const float *__restrict__ keys,
-                                     const float *__restrict__ values,
-                                     float *__restrict__ output, int seq_len,
-                                     int num_heads, int head_dim) {
+__global__ void scaled_dot_product_attention(float *Q, float *K, float *V,
+                                             float *output, int batch,
+                                             int seq_len, int heads, int dim) {
 
-  int tid = blockIdx.x * blockDim.x + threadIdx.x;
+  extern __shared__ float
+      score[]; // 使用共享内存存储 score, 大小为 heads * heads
+  float scaling_factor = 1.0f / sqrtf((float)dim);
+  int i = blockIdx.x;  // batch index
+  int j = blockIdx.y;  // query index within sequence length
+  int m = threadIdx.x; // head index
+                       // The dimension 1, 2048, 12, 256
 
-  if (tid < seq_len * num_heads * head_dim) {
-    int head_id = (tid / head_dim) % num_heads;
-    int seq_id = tid / (num_heads * head_dim);
-    int dim_id = tid % head_dim;
-
-    // Perform scaled dot-product attention
-    float attn_score = 0.0f;
-    for (int i = 0; i < head_dim; ++i) {
-      attn_score +=
-          queries[seq_id * num_heads * head_dim + head_id * head_dim + i] *
-          keys[seq_id * num_heads * head_dim + head_id * head_dim + dim_id];
+  for (int n = 0; n < 12; n++) {
+    score[m * 12 + n] = 0.0;
+    for (int p = 0; p < 256; p++) {
+      score[m * 12 + n] += Q[i * 2048 * 12 * 256 + j * 12 * 256 + m * 256 + p] *
+                           K[i * 2048 * 12 * 256 + j * 12 * 256 + n * 256 + p];
     }
+  }
 
-    attn_score /= sqrtf((float)head_dim);
+  // score
+  for (int n_sc = 0; n_sc < 12; n_sc++) {
+    score[m * 12 + n_sc] = score[m * 12 + n_sc] * scaling_factor;
+  }
 
-    // Softmax over attention scores is skipped in this simple example for
-    // simplicity.
+  // The Softmax code:
 
-    // Compute weighted values
-    for (int i = 0; i < head_dim; ++i) {
-      output[seq_id * num_heads * head_dim + head_id * head_dim + i] +=
-          attn_score *
-          values[seq_id * num_heads * head_dim + head_id * head_dim + i];
+  float sum = 0;
+
+  for (int i_ex = 0; i_ex < 12; ++i_ex) {
+    score[m * 12 + i_ex] = expf(score[m * 12 + i_ex]);
+  }
+  for (int i_sf = 0; i_sf < 12; ++i_sf) {
+    sum += score[m * 12 + i_sf];
+  }
+  for (int k_sf = 0; k_sf < 12; ++k_sf) {
+    score[m * 12 + k_sf] = score[m * 12 + k_sf] / sum;
+  }
+
+  // The final Matmul
+  for (int n_fl = 0; n_fl < 256; ++n_fl) {
+    output[i * 2048 * 12 * 256 + j * 12 * 256 + m * 256 + n_fl] = 0.0;
+    for (int k_fl = 0; k_fl < 12; ++k_fl) {
+      output[i * 2048 * 12 * 256 + j * 12 * 256 + m * 256 + n_fl] +=
+          score[m * 12 + k_fl] *
+          V[i * 2048 * 12 * 256 + j * 12 * 256 + k_fl * 256 + n_fl];
     }
   }
 }
 
-extern "C" void mha_kernel(const float *queries, const float *keys,
-                           const float *values, float *output, int batch_size,
-                           int seq_len, int num_heads, int head_dim) {
+extern "C" void mha_kernel(float *queries, float *keys, float *values,
+                           float *output, int batch_size, int seq_len,
+                           int num_heads, int head_dim) {
+
   int size = batch_size * seq_len * num_heads * head_dim;
   float *d_queries, *d_keys, *d_values, *d_output;
   cudaMalloc(&d_queries, size * sizeof(float));
   cudaMalloc(&d_keys, size * sizeof(float));
   cudaMalloc(&d_values, size * sizeof(float));
   cudaMalloc(&d_output, size * sizeof(float));
-  cudaMemcpy(&d_queries, queries, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_keys, keys, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(&d_values, values, size * sizeof(float), cudaMemcpyHostToDevice);
 
-  int blockSize = 256;
-  int gridSize = (seq_len * num_heads * head_dim + blockSize - 1) / blockSize;
+  cudaMemcpy(d_queries, queries, size * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_keys, keys, size * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_values, values, size * sizeof(float), cudaMemcpyHostToDevice);
 
-  multi_head_attention<<<gridSize, blockSize>>>(
-      d_queries, d_keys, d_values, d_output, seq_len, num_heads, head_dim);
+  dim3 grid(batch_size, seq_len);
+  dim3 block(num_heads);
+
+  int shared_mem_size = num_heads * num_heads * sizeof(float);
+  scaled_dot_product_attention<<<grid, block, shared_mem_size>>>(
+      d_queries, d_keys, d_values, d_output, batch_size, seq_len, num_heads,
+      head_dim);
 
   cudaMemcpy(output, d_output, size * sizeof(float), cudaMemcpyDeviceToHost);
 

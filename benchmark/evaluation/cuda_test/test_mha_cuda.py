@@ -49,9 +49,9 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     dtype = torch.float32
 
-    query = torch.randn(shape).to(dtype)
-    key = torch.randn(shape).to(dtype)
-    value = torch.randn(shape).to(dtype)
+    query = torch.randn(shape).to(dtype).contiguous()
+    key = torch.randn(shape).to(dtype).contiguous()
+    value = torch.randn(shape).to(dtype).contiguous()
 
     so_name = args.file.replace(".cu", ".so")
     with open(args.file, "r") as f:
@@ -70,6 +70,7 @@ if __name__ == "__main__":
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
+    # 获取函数句柄
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
@@ -85,7 +86,6 @@ if __name__ == "__main__":
     function.restype = None
     # 创建输入数组
     expected_output = ref_program(query, key, value)
-
     # 创建输出数组
     output_array = np.zeros_like(query.numpy())
     # 将输入数组和输出数组转换为C指针类型
@@ -93,13 +93,15 @@ if __name__ == "__main__":
     input_ptr_k = key.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     input_ptr_v = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    # 调用C函数
+
+    # 调用CUDA kernel
     function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr, *shape)
     # 验证结果
 
+    # 验证结果
     np.testing.assert_allclose(
         output_array,
-        expected_output,
+        expected_output.numpy(),
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
