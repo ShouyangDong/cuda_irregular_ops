@@ -6,8 +6,11 @@ import toc
 import torch
 import tvm
 import tvm.topi.testing
+from toc import Environment
 from tvm import te
 from tvm.topi.utils import get_const_tuple
+
+env = Environment("cambricon/mlu590-h8")
 
 
 def ref_program(x):
@@ -18,9 +21,6 @@ def ref_program(x):
 def verify_relu(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func("toc_callback_bang_postproc")
     def toc_callback_bang_postproc(code):
@@ -75,6 +75,7 @@ def verify_relu(name, file, shape):
         err_msg="",
         verbose=True,
     )
+    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
 
 
 if __name__ == "__main__":

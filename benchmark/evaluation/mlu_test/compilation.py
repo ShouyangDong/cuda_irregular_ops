@@ -29,7 +29,6 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-print()
 files = glob.glob(os.path.join(os.getcwd(), "./benchmark/data/mlu_code_test/*.mlu"))
 counter = 0
 for file_name in tqdm(files):

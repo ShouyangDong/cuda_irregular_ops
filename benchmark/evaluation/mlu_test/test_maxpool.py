@@ -1,7 +1,14 @@
 import argparse
 import os
 
+import bangpy
 import numpy as np
+import tvm
+import tvm.topi.testing
+from bangpy import tensor_op as tsop
+from toc import Environment
+
+env = Environment("cambricon/mlu590-h8")
 
 
 def maxpool_np(data, kernel_stride):
@@ -36,9 +43,6 @@ def verify_pooling(name, file, shape, kernel, stride):
 
     kh, kw = kernel[0], kernel[1]
     sh, sw = stride[0], stride[1]
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
     op_name = name.split("_")[0]
 
     @tvm.register_func("toc_callback_bang_postproc")
@@ -82,5 +86,5 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shape]
     kernel_stride = base_name.split(".")[0].split("_")[5:]
     kernel_stride = [int(intg) for intg in kernel_stride]
-    verify_pooling(base_name, file, shape, kernel_stride[:2], kernel_stride[2:])
+    verify_pooling(base_name, args.file, shape, kernel_stride[:2], kernel_stride[2:])
     print("验证通过！")

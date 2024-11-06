@@ -6,8 +6,11 @@ import numpy as np
 import toc
 import tvm
 import tvm.topi.testing
+from toc import Environment
 from tvm import te
 from tvm.topi.utils import get_const_tuple
+
+env = Environment("cambricon/mlu590-h8")
 
 
 def verify_sign(name, file, shape):

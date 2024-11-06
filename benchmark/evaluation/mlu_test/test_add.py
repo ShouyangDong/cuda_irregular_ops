@@ -6,21 +6,19 @@ import numpy as np
 import tvm
 import tvm.topi.testing
 from bangpy import tensor_op as tsop
+from toc import Environment
+
+env = Environment("cambricon/mlu590-h8")
 
 
 def verify_add(name, file, shape):
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
     op_name = name.split("_")[0]
 
     @tvm.register_func("toc_callback_bang_postproc")
     def toc_callback_bang_postproc(code):
-        tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
-        if not os.path.exists(file):
-            with open(file, "w", encoding="utf-8") as f:
-                f.write(code)
-        code = open(file, encoding="utf-8").read()
+        with open(file, "r") as f:
+            code = f.read()
+            f.close()
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
         return code
 
@@ -43,6 +41,7 @@ def verify_add(name, file, shape):
     mlu_output = result_arr
     cpu_output = np.add(data_lhs, data_rhs)
     bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
+    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
 
 
 if __name__ == "__main__":

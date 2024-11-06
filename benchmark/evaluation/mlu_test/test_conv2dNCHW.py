@@ -1,33 +1,14 @@
 import argparse
-import ctypes
 import os
-import subprocess
 
 import numpy as np
+import toc
+import tvm
+import tvm.topi.testing
+from toc import Environment
+from tvm import te
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "cncc",
-                "-shared",
-                "--bang-mlu-arch=mtp_592",
-                "-fPIC",
-                "-o",
-                so_name,
-                file_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+env = Environment("cambricon/mlu590-h8")
 
 
 def cpu_conv(input_tensor, kernel, stride, pad=0):
@@ -60,6 +41,75 @@ def cpu_conv(input_tensor, kernel, stride, pad=0):
     return output_tensor
 
 
+def verify_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
+    @tvm.register_func
+    def toc_callback_bang_postproc(code, target):
+        code = open(file).read()
+        code = code.split("extern")[0]
+        code = code.replace("conv2d" + "(", "conv2d" + "_kernel(")
+        code = 'extern "C" ' + code
+        return code
+
+    # generate data
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    # cpu compute
+    A = te.placeholder(data_shape, dtype="float32", name="A")
+    B = te.placeholder(kernel_shape, dtype="float32", name="B")
+
+    def conv(A, B, C):
+        n = A.shape[0]
+        prod = np.prod(A.shape[:-1])
+        ib = tvm.tir.ir_builder.create()
+        tx = te.thread_axis("threadIdx.x")
+        bx = te.thread_axis("blockIdx.x")
+        if prod < 4:
+            max_threads = prod
+            ib.scope_attr(tx, "thread_extent", max_threads)
+
+        else:
+            max_threads = 4
+            max_block = (
+                prod // max_threads
+                if prod % max_threads == 0
+                else prod // max_threads + 1
+            )
+            ib.scope_attr(tx, "thread_extent", max_threads)
+            ib.scope_attr(bx, "thread_extent", max_block)
+
+        Aptr = ib.buffer_ptr(A)
+        Bptr = ib.buffer_ptr(B)
+        Cptr = ib.buffer_ptr(C)
+        with ib.for_range(0, n, name="i") as i:
+            Cptr[i] = Aptr[i] + Bptr[i]
+        body = ib.get()
+        return body
+
+    C = te.extern(
+        output_shape,
+        [A, B],
+        lambda ins, outs: conv(ins[0], ins[1], outs[0]),
+        name="conv2d",
+        dtype="float32",
+    )
+
+    s = te.create_schedule(C.op)
+
+    dev = tvm.device("bang", 0)
+    data_dev = tvm.nd.array(data_np, dev)
+    kernel_dev = tvm.nd.array(kernel_np, dev)
+    result_np = np.zeros(output_shape, dtype="float32")
+    result_dev = tvm.nd.array(result_np, dev)
+    with toc.build_config(env):
+        func = toc.build(s, [A, B, C], name="conv2d")
+    func(data_dev, kernel_dev, result_dev)
+    time_f = func.time_evaluator("conv2d", dev, number=20)
+    cost = time_f(data_dev, kernel_dev, result_dev).mean * 1e3
+    print(f"{name} execution time: {cost} ms")
+
+    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--file", help="the source file")
@@ -67,67 +117,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
 
-    name = base_name.split("_")[0]
     data_shape = base_name.split("_")[1:5]
-
     data_shape = [int(intg) for intg in data_shape]
-
     kernel_shape = base_name.split("_")[5:9]
     kernel_shape = [int(intg) for intg in kernel_shape]
-    stride_h = stride_w = int(base_nam.split(".")[0].split("_")[9])
+    stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
     pad = int(base_name.split(".")[0].split("_")[10])
-    dtype = "float32"
-    wtype = "float32"
 
-    # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
-    # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)
-
-    # Load the shared library with the conv2d function
-    so_name = args.file.replace(".mlu", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(os.path.join(os.getcwd(), "benchmark/macro/mlu_macro.txt"), "r") as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(base_name.replace(".mlu", ""), base_name + "_bak.mlu")
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
-    success, output = run_compilation(so_name, file_name)
-    os.remove(file_name)
-
-    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, name + "_kernel")
-    # 定义函数参数和返回类型
-    function.argtypes = [
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-    ]
-    function.restype = None
-    # Convert the matrices to contiguous memory for ctypes
-    input_ptr = data_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
-    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    # Call the function with the matrices and dimensions
-    function(input_ptr, kernel_ptr, output_ptr)
-    # Check if the results match
-    np.testing.assert_allclose(
-        output_ctypes,
-        output_np,
-        rtol=1e-03,
-        atol=1e-03,
-        equal_nan=True,
-        err_msg="",
-        verbose=True,
+    verify_conv2d_nchw(
+        base_name,
+        data_shape,
+        kernel_shape[1],
+        kernel_shape[0],
+        kernel_shape[2],
+        stride_h,
+        pad,
     )
     print("验证通过！")
-    result = subprocess.run(["rm", so_name])

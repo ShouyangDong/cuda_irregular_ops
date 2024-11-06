@@ -5,7 +5,10 @@ import numpy as np
 import toc
 import tvm
 import tvm.topi.testing
+from toc import Environment
 from tvm import te
+
+env = Environment("cambricon/mlu590-h8")
 
 
 # Define the batch matrix multiplication function using numpy
@@ -14,10 +17,7 @@ def batch_matmul(A, B):
 
 
 def verify_bmm(name, file, shape_A, shape_B, shape_C):
-    from toc import Environment
 
-    env = Environment("cambricon/mlu590-h8")
-    # 创建随机张量
     A = te.placeholder(shape_A, name="A", dtype="float32")
     B = te.placeholder(shape_B, name="B", dtype="float32")
     op_name = name.split("_")[0]
@@ -57,8 +57,8 @@ def verify_bmm(name, file, shape_A, shape_B, shape_C):
     )
     dev = tvm.device("bang", 0)
     s = te.create_schedule(C.op)
-    a = np.random.rand(batch_size, matrix_dim_i, matrix_dim_j).astype("float32")
-    b = np.random.rand(batch_size, matrix_dim_j, matrix_dim_k).astype("float32")
+    a = np.random.rand(*shape_A).astype("float32")
+    b = np.random.rand(*shape_B).astype("float32")
 
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(a, b)

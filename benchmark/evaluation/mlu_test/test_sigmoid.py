@@ -5,20 +5,20 @@ import numpy as np
 import toc
 import tvm
 import tvm.topi.testing
+from toc import Environment
 from tvm import te
 from tvm.topi.utils import get_const_tuple
+
+env = Environment("cambricon/mlu590-h8")
 
 
 def ref_program(x):
     return 1 / (1 + np.exp(-x))
 
 
-def verify_softmax(name, file, shape):
+def verify_sigmoid(name, file, shape):
     op_name = name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
 
     @tvm.register_func("toc_callback_bang_postproc")
     def toc_callback_bang_postproc(code):
@@ -73,6 +73,7 @@ def verify_softmax(name, file, shape):
         err_msg="",
         verbose=True,
     )
+    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
 
 
 if __name__ == "__main__":
