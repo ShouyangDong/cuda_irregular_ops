@@ -5,7 +5,6 @@ from src.loop_transformation.loop_transformation import (
     run_loop_fusion,
     run_split_annotation,
 )
-from src.post_processing.post_processing import post_processing_pipeline
 from src.pre_processing.preprocessing import run_detensorization, run_loop_recovery
 
 
@@ -22,11 +21,21 @@ def run_transcompile_code(code, source, target):
         if not unitest(file_name, modi_code + host_code, target):
             modi_code = ast_detensorization(code, target)
 
-    code = run_loop_fusion(code)
-    code = run_split_annotation(code)
-    code = run_apply_split(code)
-    code = post_processing_pipeline(code, target)
-    return code
+    fusion_code = run_loop_fusion(modi_code)
+    if not unitest(file_name, fusion_code, target):
+        fusion_code = ast_loop_fusion(modi_code)
+
+    code = run_split_annotation(fusion_code)
+
+    split_code = run_apply_split(code)
+    if not unitest(file_name, split_code, target):
+        split_code = ast_apply_split(code)
+
+    final_code = run_thread_binding(split_code, target)
+    if not unitest(file_name, final_code + host_code, target):
+        final_code = ast_thread_binding(split_code, target)
+
+    return final_code
 
 
 if __name__ == "__main__":

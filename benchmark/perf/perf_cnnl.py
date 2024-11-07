@@ -1,3 +1,4 @@
+import csv
 import glob
 import os
 import timeit
@@ -29,6 +30,7 @@ def perf_elementwise(name, shape):
         execution_time = timeit.timeit(test_sign, number=100)
         print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_pooling(name, shape, kernel, stride):
 
@@ -95,6 +97,7 @@ def perf_pooling(name, shape, kernel, stride):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_bmm(name, shape_A, shape_B):
 
     # 创建随机张量
@@ -111,6 +114,7 @@ def perf_bmm(name, shape_A, shape_B):
     execution_time = timeit.timeit(test_gemm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_activation(name, shape):
 
@@ -134,6 +138,7 @@ def perf_activation(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_conv2d_nchw(name, shape, kernel, stride):
 
     input_tensor = torch.randn(16, 3, 224, 224).mlu()
@@ -150,6 +155,7 @@ def perf_conv2d_nchw(name, shape, kernel, stride):
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
 
@@ -172,6 +178,7 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_gemv(name, shape):
 
     # 创建随机矩阵和向量 M, N = 1000, 1000
@@ -187,6 +194,7 @@ def perf_gemv(name, shape):
     execution_time = timeit.timeit(test_gemv, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_conv1d(name, shape):
 
@@ -206,6 +214,7 @@ def perf_conv1d(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_depthwise_conv2d(name, shape):
 
     # 创建输入张量
@@ -224,6 +233,7 @@ def perf_depthwise_conv2d(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_layernorm(name, shape):
 
     # 创建输入张量
@@ -240,6 +250,7 @@ def perf_layernorm(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_rmsnorm(name, shape):
 
     # 创建输入张量
@@ -255,6 +266,7 @@ def perf_rmsnorm(name, shape):
     execution_time = timeit.timeit(test_rmsnorm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_deformable(name, shape):
     N, M, D = shape[:3]
@@ -291,6 +303,7 @@ def perf_deformable(name, shape):
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
+
 def perf_scaled_dot_product_attention(name, shape):
 
     # Optionally use the context manager to ensure one of the fused kernels is run
@@ -306,6 +319,7 @@ def perf_scaled_dot_product_attention(name, shape):
     execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 if __name__ == "__main__":
     files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu"))
@@ -326,7 +340,9 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            execution_time = perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
+            execution_time = perf_pooling(
+                base_name, shape, kernel_stride[0], kernel_stride[2]
+            )
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
@@ -418,6 +434,6 @@ if __name__ == "__main__":
     transposed_data.insert(0, header)
 
     # 保存为CSV文件
-    with open('benchmark/perf/cnnl_output.csv', 'w', newline='') as file:
+    with open("benchmark/perf/cnnl_output.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(transposed_data)

@@ -1,7 +1,8 @@
+import csv
 import glob
 import os
 import timeit
-import csv
+
 import torch
 import torch.nn.functional as F
 
@@ -14,11 +15,9 @@ def perf_elementwise(name, shape):
 
     def test_add():
         z = torch.add(x, y)
-        
 
     def test_sign():
         z = torch.sign(x)
-        
 
     op_name = name.split("_")[0]
     if op_name == "add":
@@ -30,6 +29,7 @@ def perf_elementwise(name, shape):
         execution_time = timeit.timeit(test_sign, number=100)
         print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_pooling(name, shape, kernel, stride):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -89,12 +89,12 @@ def perf_pooling(name, shape, kernel, stride):
 
     def test_pool():
         output = pool(x)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_pool, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_bmm(name, shape_A, shape_B):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -106,12 +106,12 @@ def perf_bmm(name, shape_A, shape_B):
         # 执行矩阵乘法操作 (GEMM)
         C = torch.matmul(A, B)
         # 确保 CUDA 操作完成
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_activation(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -128,12 +128,12 @@ def perf_activation(name, shape):
 
     def test_activation():
         output = activation(x)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_activation, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_conv2d_nchw(name, shape, kernel, stride):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -145,12 +145,12 @@ def perf_conv2d_nchw(name, shape, kernel, stride):
 
     def test_conv2d():
         output = conv_layer(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -166,12 +166,12 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
 
     def test_conv2d():
         output = conv_layer(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_gemv(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -182,12 +182,12 @@ def perf_gemv(name, shape):
     def test_gemv():
         output = torch.matmul(matrix, vector)
         # 或者使用 matrix @ vector
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemv, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_conv1d(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -200,12 +200,12 @@ def perf_conv1d(name, shape):
 
     def test_conv1d():
         output = conv_layer(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv1d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_depthwise_conv2d(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -218,12 +218,12 @@ def perf_depthwise_conv2d(name, shape):
 
     def test_depthwise_conv2d():
         output = depthwise_conv_layer(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_layernorm(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -234,12 +234,12 @@ def perf_layernorm(name, shape):
 
     def test_layernorm():
         output = layer_norm(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_layernorm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_rmsnorm(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -250,12 +250,12 @@ def perf_rmsnorm(name, shape):
 
     def test_rmsnorm():
         output = rmsnorm(input_tensor)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_rmsnorm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_deformable(name, shape):
     N, M, D = shape[:3]
@@ -285,12 +285,12 @@ def perf_deformable(name, shape):
             64,
         )
         # necessary because kernel launches are async
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_deformable, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 def perf_scaled_dot_product_attention(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -301,12 +301,12 @@ def perf_scaled_dot_product_attention(name, shape):
 
     def test_scaled_dot_product_attention():
         output = F.scaled_dot_product_attention(query, key, value)
-        
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
+
 
 if __name__ == "__main__":
     files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
@@ -327,7 +327,9 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            execution_time = perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
+            execution_time = perf_pooling(
+                base_name, shape, kernel_stride[0], kernel_stride[2]
+            )
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
@@ -419,6 +421,6 @@ if __name__ == "__main__":
     transposed_data.insert(0, header)
 
     # 保存为CSV文件
-    with open('benchmark/perf/oneAPI_output.csv', 'w', newline='') as file:
+    with open("benchmark/perf/oneAPI_output.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(transposed_data)
