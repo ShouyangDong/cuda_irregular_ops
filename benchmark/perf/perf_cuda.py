@@ -766,7 +766,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/mha*.cu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/mha*.cu")
+    )
     counter = 0
 
     for file in files:
@@ -890,6 +892,6 @@ if __name__ == "__main__":
             perf_deformable(base_name, file, shape)
 
         elif name == "mha":
-           shapes = base_name.split(".")[0]
-           shape = [int(intg) for intg in shapes.split("_")[1:]]
-           perf_scaled_dot_product_attention(base_name, file, shape)
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_scaled_dot_product_attention(base_name, file, shape)
