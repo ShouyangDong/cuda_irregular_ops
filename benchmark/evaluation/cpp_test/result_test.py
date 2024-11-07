@@ -35,14 +35,14 @@ if __name__ == "__main__":
                 file,
                 os.path.join(
                     os.getcwd(),
-                    "benchmark/evaluation/cpp_test/test_deformable_attention_cpp.py",
+                    "benchmark/evaluation/cpp_test/test_deformable_attention.py",
                 ),
             )
         elif name == "layernorm":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_layer_norm_cpp.py"
+                    os.getcwd(), "benchmark/evaluation/cpp_test/test_layer_norm.py"
                 ),
             )
         elif name == "mha":
@@ -54,7 +54,7 @@ if __name__ == "__main__":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_rms_norm_cpp.py"
+                    os.getcwd(), "benchmark/evaluation/cpp_test/test_rms_norm.py"
                 ),
             )
         elif name == "gemm":

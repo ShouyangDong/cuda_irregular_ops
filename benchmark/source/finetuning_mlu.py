@@ -1,12 +1,10 @@
 import logging
 import os
 import sys
-import numpy as np
 
 import bangpy as bp
-from bangpy import tcp
-from bangpy import autotuning
-from bangpy import enabled_targets
+import numpy as np
+from bangpy import autotuning, tcp
 
 # TARGET = enabled_targets()
 TARGET = "mlu590-h8"

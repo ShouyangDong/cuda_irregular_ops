@@ -103,7 +103,7 @@ def verify_deformable(name, file, shape):
         Dptr = ib.buffer_ptr(D)
         Eptr = ib.buffer_ptr(E)
         with ib.for_range(0, n, name="i") as i:
-            Eptr[i] = Aptr[i] + Bptr[i] + Cptr[i] + Dptr[i] 
+            Eptr[i] = Aptr[i] + Bptr[i] + Cptr[i] + Dptr[i]
         body = ib.get()
         return body
 
@@ -125,7 +125,7 @@ def verify_deformable(name, file, shape):
     output = tvm.nd.array(np.zeros(output_shape, "float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, shape_pl, B, C, out_D], name=op_name)
-    f(a, b,  d, e, output)
+    f(a, b, d, e, output)
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights

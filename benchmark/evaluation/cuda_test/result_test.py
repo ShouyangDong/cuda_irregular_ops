@@ -32,19 +32,19 @@ if __name__ == "__main__":
         name = base_name.split("_")[0]
         if name == "deformable":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_deformable_attention_cuda.py"
+                file, "benchmark/evaluation/cuda_test/test_deformable_attention.py"
             )
         elif name == "layernorm":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_layer_norm_cuda.py"
+                file, "benchmark/evaluation/cuda_test/test_layer_norm.py"
             )
         elif name == "mha":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_mha_cuda.py"
+                file, "benchmark/evaluation/cuda_test/test_mha.py"
             )
         elif name == "rmsnorm":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_rms_norm_cuda.py"
+                file, "benchmark/evaluation/cuda_test/test_rms_norm.py"
             )
         elif name == "gemm":
             success, output = run_test(

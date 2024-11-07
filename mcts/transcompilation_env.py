@@ -1,4 +1,3 @@
-import logging
 import tempfile
 from functools import partial
 

@@ -36,28 +36,26 @@ if __name__ == "__main__":
                 file,
                 os.path.join(
                     os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_deformable_attention_mlu.py",
+                    "benchmark/evaluation/mlu_test/test_deformable_attention.py",
                 ),
             )
         elif name == "layernorm":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_layer_norm_mlu.py"
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_layer_norm.py"
                 ),
             )
         elif name == "mha":
             success, output = run_test(
                 file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_mha_mlu.py"
-                ),
+                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_mha.py"),
             )
         elif name == "rmsnorm":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_rms_norm_mlu.py"
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_rms_norm.py"
                 ),
             )
         elif name == "gemm":
