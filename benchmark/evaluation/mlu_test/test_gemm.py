@@ -57,9 +57,8 @@ def verify_gmm(name, file, shape_A, shape_B, shape_C):
     )
     dev = tvm.device("bang", 0)
     s = te.create_schedule(C.op)
-    a = np.random.rand(*shape_A).astype("float32")
-    b = np.random.rand(*shape_B).astype("float32")
-
+    a = np.ones(shape_A).astype("float32") * 0.1
+    b = np.ones(shape_B).astype("float32") * 0.1
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(a, b)
 
@@ -90,8 +89,8 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    shape_A = [1, shape[0], shape[1]]
-    shape_B = [1, shape[2], shape[1]]
-    shape_C = [1, shape[0], shape[2]]
+    shape_A = [shape[0], shape[1]]
+    shape_B = [shape[1], shape[2]]
+    shape_C = [shape[0], shape[2]]
     verify_gmm(base_name, args.file, shape_A, shape_B, shape_C)
     print("验证通过！")

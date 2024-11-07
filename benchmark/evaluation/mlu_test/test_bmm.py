@@ -57,9 +57,8 @@ def verify_bmm(name, file, shape_A, shape_B, shape_C):
     )
     dev = tvm.device("bang", 0)
     s = te.create_schedule(C.op)
-    a = np.random.rand(*shape_A).astype("float32")
-    b = np.random.rand(*shape_B).astype("float32")
-
+    a = np.ones(shape_A).astype("float32")
+    b = np.ones(shape_B).astype("float32")
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(a, b)
 
@@ -91,7 +90,7 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
     shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
-    shape_B = [batch_size, matrix_dim_k, matrix_dim_j]
+    shape_B = [batch_size, matrix_dim_j, matrix_dim_k]
     shape_C = [batch_size, matrix_dim_i, matrix_dim_k]
     verify_bmm(base_name, args.file, shape_A, shape_B, shape_C)
     print("验证通过！")

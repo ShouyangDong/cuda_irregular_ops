@@ -25,7 +25,7 @@ def run_test(file_name, test_file):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/mha*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu")
     )
     counter = 0
     for file in tqdm(files):

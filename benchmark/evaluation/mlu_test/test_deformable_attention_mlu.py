@@ -10,7 +10,6 @@ from toc import Environment
 from tvm import te
 
 env = Environment("cambricon/mlu590-h8")
-
 import torch.nn.functional as F
 
 
@@ -63,10 +62,11 @@ def verify_deformable(name, file, shape):
     shapes = torch.as_tensor(
         [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
     )
-    level_start_index = torch.cat(
-        (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
-    )
     S = sum([(H * W).item() for H, W in shapes])
+    value = torch.rand(N, S, M, D) * 0.01
+    sampling_locations = torch.rand(N, Lq, M, L, P, 2)
+    attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
 
     A = te.placeholder([N, S, M, D], dtype="float32", name="A")
     B = te.placeholder([N, Lq, M, L, P, 2], dtype="float32", name="B")
@@ -95,15 +95,15 @@ def verify_deformable(name, file, shape):
         tx = te.thread_axis("threadIdx.x")
         bx = te.thread_axis("blockIdx.x")
         ib.scope_attr(tx, "thread_extent", 4)
-        ib.scope_attr(bx, "thread_extent", 4)
+        ib.scope_attr(bx, "thread_extent", N)
 
         Aptr = ib.buffer_ptr(A)
         Bptr = ib.buffer_ptr(B)
         Cptr = ib.buffer_ptr(C)
         Dptr = ib.buffer_ptr(D)
-
+        Eptr = ib.buffer_ptr(E)
         with ib.for_range(0, n, name="i") as i:
-            Dptr[i] = Aptr[i] + Bptr[i] + Cptr[i]
+            Eptr[i] = Aptr[i] + Bptr[i] + Cptr[i] + Dptr[i] 
         body = ib.get()
         return body
 
@@ -118,20 +118,20 @@ def verify_deformable(name, file, shape):
     s = te.create_schedule(out_D.op)
 
     dev = tvm.device("bang", 0)
-    a = tvm.nd.array(np.random.rand(N, S, M, D).astype("float32"), dev)
-    b = tvm.nd.array(np.random.rand(4, 2).astype("int32"), dev)
-    c = tvm.nd.array(np.random.rand(N, Lq, M, L, P, 2).astype("float32"), dev)
-    d = tvm.nd.array(np.random.rand(N, Lq, M, L, P).astype("float32"), dev)
-    e = tvm.nd.array(np.random.rand(N, Lq, M * D).astype("float32"), dev)
+    a = tvm.nd.array(value, dev)
+    b = tvm.nd.array(shapes.int(), dev)
+    d = tvm.nd.array(sampling_locations, dev)
+    e = tvm.nd.array(attention_weights, dev)
+    output = tvm.nd.array(np.zeros(output_shape, "float32"), dev)
     with toc.build_config(env):
         f = toc.build(s, [A, shape_pl, B, C, out_D], name=op_name)
-    f(a, b, c, d, e)
+    f(a, b,  d, e, output)
     tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights
     )
     np.testing.assert_allclose(
-        e.numpy(),
+        output.numpy(),
         torch_da.numpy(),
         rtol=1e-03,
         atol=1e-03,
