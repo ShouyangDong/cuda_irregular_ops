@@ -7,7 +7,7 @@ extern "C" __mlu_global__ void bmm(float *A, float *B, float *C) {
       __memcpy(A_nram, A + (clusterId * 4 + coreId) * 16 * 256, 16 * 256 * 4,
                GDRAM2NRAM);
       __memcpy(B_wram, B, 256 * 256 * 4, GDRAM2WRAM);
-      __bang_mlp(C_nram, A_nram, B_wram, 16, 256);
+      __bang_matmul(C_nram, A_nram, B_wram, 16, 256, 256);
       __memcpy(C + (clusterId * 4 + coreId) * 16 * 256, C_nram, 16 * 256 * 4,
                NRAM2GDRAM);
     }
