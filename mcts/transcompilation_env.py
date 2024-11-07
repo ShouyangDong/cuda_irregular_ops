@@ -11,9 +11,6 @@ from softmax import Softmax
 from tvm import meta_schedule as ms
 from tvm.target import Target
 
-logging.basicConfig()
-logging.getLogger("tvm.meta_schedule").setLevel(logging.INFO)
-
 ActionSpace = [
     ms.schedule_rule.AutoBind(),
     ms.schedule_rule.AutoInline(

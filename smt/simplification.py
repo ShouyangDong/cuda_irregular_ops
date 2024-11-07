@@ -43,6 +43,16 @@ class SimplifyConstants(NodeTransformer):
         else:
             return self.generic_visit(node)
 
+    def visit_If(self, node):
+        if (
+            isinstance(node.cond, c_ast.BinaryOp)
+            and node.cond.op == "<"
+            and node.cond.right.value == "4"
+            and (node.cond.left.name == "coreId" or node.cond.left.name == "clusterId")
+        ):
+            return self.generic_visit(node.iftrue.block_items[0])
+        return self.generic_visit(node)
+
 
 def simplify_code(source_code):
     # 解析 C 代码
@@ -55,3 +65,30 @@ def simplify_code(source_code):
     visitor.visit(ast)
     # 生成简化后的 C 代码
     return generator.visit(ast)
+
+
+if __name__ == "__main__":
+    c_code = """
+    int factorial(int result) {
+        if(coreId < 2) {
+            for (int j = 0; j < 10; j++) {
+                result += j;
+            }
+        }
+        return result;
+    }
+    """
+    code = simplify_code(c_code)
+    print(code)
+    c_code = """
+    int factorial(int result) {
+        if(clusterId < 4) {
+            for (int j = 0; j < 10; j++) {
+                result += j;
+            }
+        }
+        return result;
+    }
+    """
+    code = simplify_code(c_code)
+    print(code)
