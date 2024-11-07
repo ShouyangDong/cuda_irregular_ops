@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.simplification import simplify_code
+from falcon.smt.simplification import simplify_code
 from falcon.smt.util import NodeTransformer
 
 

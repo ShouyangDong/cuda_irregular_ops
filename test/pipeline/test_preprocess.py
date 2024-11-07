@@ -3,8 +3,8 @@ import subprocess
 
 from benchmark.evaluation.cuda_test.result_test import run_test as cuda_run_test
 from benchmark.evaluation.mlu_test.result_test import run_test as bang_run_test
-from smt.loop_transformation.loop_recovery import ast_loop_recovery
-from smt.tensorization.detensorization import ast_detensorization
+from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
+from falcon.smt.tensorization.detensorization import ast_detensorization
 from falcon.src.pre_processing.preprocessing import run_detensorization, run_loop_recovery
 
 

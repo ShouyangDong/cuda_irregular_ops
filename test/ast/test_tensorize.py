@@ -1,4 +1,4 @@
-from smt.tensorization.tensorization import ast_tensorization
+from falcon.smt.tensorization.tensorization import ast_tensorization
 
 if __name__ == "__main__":
     code = """

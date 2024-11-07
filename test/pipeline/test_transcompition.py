@@ -1,5 +1,5 @@
-from smt.loop_transformation.loop_recovery import ast_loop_recovery
-from smt.tensorization.detensorization import ast_detensorization
+from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
+from falcon.smt.tensorization.detensorization import ast_detensorization
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
     run_loop_fusion,

@@ -1,4 +1,4 @@
-from smt.auto_cache import ast_auto_cache
+from falcon.smt.auto_cache import ast_auto_cache
 
 if __name__ == "__main__":
     code = """

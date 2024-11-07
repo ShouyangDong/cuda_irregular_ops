@@ -1,4 +1,4 @@
-from smt.software_pipeline import smt_double_buffer
+from falcon.smt.software_pipeline import smt_double_buffer
 
 if __name__ == "__main__":
     code = """void add(float* INPUT0, float* INPUT1, float* OUTPUT) {

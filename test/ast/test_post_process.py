@@ -1,9 +1,9 @@
 import json
 
-from smt.auto_cache import ast_auto_cache
-from smt.const_inline import constant_inline
-from smt.tensorization.tensorization import ast_tensorization
-from smt.thread_binding import ast_thread_binding
+from falcon.smt.auto_cache import ast_auto_cache
+from falcon.smt.const_inline import constant_inline
+from falcon.smt.tensorization.tensorization import ast_tensorization
+from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.post_processing.post_processing import (
     replace_operation_with_intrinsic,
     run_code_decoration,
