@@ -2,11 +2,11 @@ import re
 
 import openai
 
-from src.post_processing.post_processing_prompt import (
+from falcon.src.post_processing.post_processing_prompt import (
     DOUBLE_BUFFER_DEMO,
     DOUBLE_BUFFER_PROMPT,
 )
-from src.prompt.prompt import SYSTEM_PROMPT
+from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"

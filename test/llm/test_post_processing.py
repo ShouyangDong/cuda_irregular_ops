@@ -1,4 +1,4 @@
-from src.post_processing.post_processing import post_processing_pipeline
+from falcon.src.post_processing.post_processing import post_processing_pipeline
 
 if __name__ == "__main__":
     code = """

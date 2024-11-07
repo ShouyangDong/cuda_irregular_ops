@@ -1,4 +1,4 @@
-from src.pre_processing.preprocessing import pre_processing_pipeline
+from falcon.src.pre_processing.preprocessing import pre_processing_pipeline
 
 if __name__ == "__main__":
     func_content = """

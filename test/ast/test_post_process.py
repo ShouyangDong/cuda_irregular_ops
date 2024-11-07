@@ -4,7 +4,7 @@ from smt.auto_cache import ast_auto_cache
 from smt.const_inline import constant_inline
 from smt.tensorization.tensorization import ast_tensorization
 from smt.thread_binding import ast_thread_binding
-from src.post_processing.post_processing import (
+from falcon.src.post_processing.post_processing import (
     replace_operation_with_intrinsic,
     run_code_decoration,
 )

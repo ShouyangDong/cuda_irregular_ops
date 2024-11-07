@@ -1,10 +1,10 @@
-from src.loop_transformation.loop_transformation import (
+from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
     run_loop_fusion,
     run_split_annotation,
 )
-from src.post_processing.post_processing import post_processing_pipeline
-from src.pre_processing.preprocessing import pre_processing_pipeline
+from falcon.src.post_processing.post_processing import post_processing_pipeline
+from falcon.src.pre_processing.preprocessing import pre_processing_pipeline
 
 
 def run_transcompile_code(code, source, target):

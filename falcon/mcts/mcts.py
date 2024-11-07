@@ -10,7 +10,7 @@ from absl import app, flags
 from jax import vmap
 from utils import convert_tree_to_graph
 
-from mcts.transcompilation_env import build_env
+from falcon.mcts.transcompilation_env import build_env
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
 

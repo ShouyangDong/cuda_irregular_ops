@@ -2,7 +2,7 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from falcon.smt.util import NodeTransformer
 
 # TODO(dongshouyang): Add more varaibles
 ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}

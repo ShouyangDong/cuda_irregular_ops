@@ -6,7 +6,7 @@ from benchmark.evaluation.cuda_test.result_test import run_test as cuda_run_test
 from benchmark.evaluation.mlu_test.result_test import run_test as bang_run_test
 from smt.auto_cache import ast_auto_cache
 from smt.thread_binding import ast_thread_binding
-from src.post_processing.post_processing import (
+from falcon.src.post_processing.post_processing import (
     replace_operation_with_intrinsic,
     run_cache_process,
     run_code_decoration,

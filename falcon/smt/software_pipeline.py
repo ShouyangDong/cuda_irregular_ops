@@ -74,7 +74,7 @@ op_template = {
 }
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer
+from falcon.smt.util import NodeTransformer
 
 
 class PragmaVisitor(NodeTransformer):

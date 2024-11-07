@@ -2,7 +2,7 @@ import json
 
 from pycparser import c_ast, c_generator, c_parser
 
-from smt.util import NodeTransformer, remove_target_prefix
+from falcon.smt.util import NodeTransformer, remove_target_prefix
 
 file_name = "documents/op_tensorization.json"
 

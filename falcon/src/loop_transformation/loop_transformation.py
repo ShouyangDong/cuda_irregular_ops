@@ -2,8 +2,8 @@ import re
 
 import openai
 
-from src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT
-from src.loop_transformation.pass_prompt import (
+from falcon.src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT
+from falcon.src.loop_transformation.pass_prompt import (
     LOOP_FUSION_DEMO,
     LOOP_FUSION_PROMPT,
     LOOP_REORDER_DEMO,
@@ -11,7 +11,7 @@ from src.loop_transformation.pass_prompt import (
     LOOP_SPLIT_DEMO,
     LOOP_SPLIT_PROMPT,
 )
-from src.prompt.prompt import SYSTEM_PROMPT
+from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
