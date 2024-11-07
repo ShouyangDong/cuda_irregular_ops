@@ -1,3 +1,4 @@
+import csv
 import glob
 import os
 import timeit
@@ -29,6 +30,7 @@ def perf_elementwise(name, shape):
     elif op_name == "sign":
         execution_time = timeit.timeit(test_sign, number=100)
         print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_pooling(name, shape, kernel, stride):
@@ -94,6 +96,7 @@ def perf_pooling(name, shape, kernel, stride):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_pool, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_bmm(name, shape_A, shape_B):
@@ -111,6 +114,7 @@ def perf_bmm(name, shape_A, shape_B):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_activation(name, shape):
@@ -133,6 +137,7 @@ def perf_activation(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_activation, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_conv2d_nchw(name, shape, kernel, stride):
@@ -150,6 +155,7 @@ def perf_conv2d_nchw(name, shape, kernel, stride):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
@@ -171,6 +177,7 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_gemv(name, shape):
@@ -187,6 +194,7 @@ def perf_gemv(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemv, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_conv1d(name, shape):
@@ -205,6 +213,7 @@ def perf_conv1d(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv1d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_depthwise_conv2d(name, shape):
@@ -223,6 +232,7 @@ def perf_depthwise_conv2d(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_layernorm(name, shape):
@@ -239,6 +249,7 @@ def perf_layernorm(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_layernorm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_rmsnorm(name, shape):
@@ -255,6 +266,7 @@ def perf_rmsnorm(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_rmsnorm, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_deformable(name, shape):
@@ -290,6 +302,7 @@ def perf_deformable(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_deformable, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 def perf_scaled_dot_product_attention(name, shape):
@@ -306,26 +319,31 @@ def perf_scaled_dot_product_attention(name, shape):
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
     print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
 
 
 if __name__ == "__main__":
     files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
     counter = 0
-
+    execution_time = 0
+    table = []
+    times = []
     for file in files:
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "add" or name == "sign":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_elementwise(base_name, shape)
+            execution_time = perf_elementwise(base_name, shape)
 
         elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
             shape = base_name.split("_")[1:5]
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            perf_pooling(base_name, shape, kernel_stride[0], kernel_stride[2])
+            execution_time = perf_pooling(
+                base_name, shape, kernel_stride[0], kernel_stride[2]
+            )
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
@@ -333,19 +351,19 @@ if __name__ == "__main__":
             batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
             shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
             shape_B = [batch_size, matrix_dim_j, matrix_dim_k]
-            perf_bmm(name, shape_A, shape_B)
+            execution_time = perf_bmm(name, shape_A, shape_B)
 
         elif name == "gemm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             shape_A = [shape[0], shape[1]]
             shape_B = [shape[1], shape[2]]
-            perf_bmm(name, shape_A, shape_B)
+            execution_time = perf_bmm(name, shape_A, shape_B)
 
         elif name in ["relu", "sigmoid", "gelu", "softmax"]:
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_activation(base_name, shape)
+            execution_time = perf_activation(base_name, shape)
 
         elif name == "conv2dnchw":
             data_shape = base_name.split("_")[1:5]
@@ -355,7 +373,7 @@ if __name__ == "__main__":
             stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
             pad = int(base_name.split(".")[0].split("_")[10])
 
-            perf_conv2d_nchw(
+            execution_time = perf_conv2d_nchw(
                 base_name,
                 data_shape,
                 kernel_shape[1],
@@ -368,37 +386,55 @@ if __name__ == "__main__":
         elif name == "gemv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_gemv(base_name, shape)
+            execution_time = perf_gemv(base_name, shape)
 
         elif name == "conv1d":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_conv1d(base_name, shape)
+            execution_time = perf_conv1d(base_name, shape)
 
         elif name == "depthwiseconv_1":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
-            perf_depthwise_conv2d(base_name, shape)
+            execution_time = perf_depthwise_conv2d(base_name, shape)
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_layernorm(base_name, shape)
+            execution_time = perf_layernorm(base_name, shape)
 
         elif name == "rmsnorm":
-            shapes = base_name.split(".")[0]
-            shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_rmsnorm(base_name, shape)
-
+            # shapes = base_name.split(".")[0]
+            # shape = [int(intg) for intg in shapes.split("_")[1:]]
+            # execution_time = perf_rmsnorm(base_name, shape)
+            continue
+            times.append(0)
         elif name == "deformable":
             # shapes = base_name.split(".")[0]
             # shape = [int(intg) for intg in shapes.split("_")[1:]]
             # perf_deformable(base_name, shape)
             # FIXME: incompatible pytorch version with RMSNorm
             continue
+            times.append(0)
 
         elif name == "mha":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            perf_scaled_dot_product_attention(base_name, shape)
+            execution_time = perf_scaled_dot_product_attention(base_name, shape)
+        times.append(execution_time)
+
+    table.append(files)
+    table.append(times)
+
+    # 转置数据
+    transposed_data = list(zip(*table))
+
+    # 添加标题行
+    header = ["file", "time(ms)"]
+    transposed_data.insert(0, header)
+
+    # 保存为CSV文件
+    with open("benchmark/perf/cudnn_output.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(transposed_data)
