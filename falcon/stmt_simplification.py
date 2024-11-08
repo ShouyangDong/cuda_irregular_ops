@@ -1,16 +1,16 @@
+import re
+
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.smt.util import NodeTransformer
 
 
-class MergeForLoopsVisitor(NodeTransformer):
+class MergeLoopsAndIfsVisitor(NodeTransformer):
     def __init__(self):
         self.loop_vars = []
 
     def visit_Compound(self, node):
-        """查找并合并连续的 for 循环"""
-        if not node.block_items or node.block_items == 1:
-            return node
+        """查找并合并连续的 for 循环和 if 语句"""
         new_block_items = []
         i = 0
         while i < len(node.block_items):
@@ -32,7 +32,7 @@ class MergeForLoopsVisitor(NodeTransformer):
                 while (
                     i < len(node.block_items)
                     and isinstance(node.block_items[i], c_ast.For)
-                    and self.is_similar_loop(current_node, node.block_items[i])
+                    and self.nodes_equal(current_node, node.block_items[i])
                 ):
                     loop_var = self.get_loop_variable(node.block_items[i])
                     if loop_var:
@@ -55,8 +55,37 @@ class MergeForLoopsVisitor(NodeTransformer):
 
                 # 将合并的循环添加到新的 block_items
                 new_block_items.append(combined_for)
+            # 检查是否是 if 语句，且下一个节点也是 if 语句
+            elif (
+                isinstance(current_node, c_ast.If)
+                and i + 1 < len(node.block_items)
+                and isinstance(node.block_items[i + 1], c_ast.If)
+                and self.nodes_equal(current_node, node.block_items[i + 1])
+            ):
+                combined_body = []
+
+                # 遍历连续的相似的 if 语句
+                while (
+                    i < len(node.block_items)
+                    and isinstance(node.block_items[i], c_ast.If)
+                    and self.nodes_equal(current_node, node.block_items[i])
+                ):
+                    # 合并 if 语句的主体内容
+                    if node.block_items[i].iftrue:
+                        combined_body.extend(node.block_items[i].iftrue.block_items)
+                    i += 1  # 继续检查下一个节点
+
+                # 创建合并后的 if 语句
+                combined_if = c_ast.If(
+                    cond=current_node.cond,
+                    iftrue=c_ast.Compound(block_items=combined_body),
+                    iffalse=None,
+                )
+
+                # 将合并的 if 语句添加到新的 block_items
+                new_block_items.append(combined_if)
             else:
-                # 非 for 循环节点直接添加
+                # 非 for 循环或 if 语句节点直接添加
                 new_block_items.append(current_node)
                 i += 1
 
@@ -94,13 +123,22 @@ class MergeForLoopsVisitor(NodeTransformer):
             node.name = self.loop_vars[0]
         return node
 
+    def nodes_equal(self, node1, node2):
+        """递归地比较两个 AST 节点是否相同"""
+        generator = c_generator.CGenerator()
+        output_code = generator.visit(node1)
+        generator = c_generator.CGenerator()
+        output_code = generator.visit(node2)
+        return output_code == output_code
+
 
 def ast_stmt_simplification(code):
+    code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
     # 解析代码并应用合并
     parser = c_parser.CParser()
     ast = parser.parse(code)
     # 使用 MergeForLoopsVisitor 进行遍历和合并
-    merge_visitor = MergeForLoopsVisitor()
+    merge_visitor = MergeLoopsAndIfsVisitor()
     ast = merge_visitor.visit(ast)
 
     # 输出修改后的代码
@@ -109,7 +147,7 @@ def ast_stmt_simplification(code):
 
 
 if __name__ == "__main__":
-    # 示例使用
+    # # 示例使用
     code = """
     void add(float *lhs, float *rhs, float *add_1515)
     {
@@ -202,4 +240,51 @@ if __name__ == "__main__":
     }
     """
     code = ast_stmt_simplification(code)
+    print(code)
+
+    c_code = """
+    void sign(float *input0, float *active_sign_147)
+    {
+        for (int clusterId = 0; clusterId < 4; ++clusterId)
+        {
+            for (int coreId = 0; coreId < 4; ++coreId)
+            {
+                float input0_local_nram[25];
+                for (int i0_outer_outer_outer = 0; i0_outer_outer_outer < 3; ++i0_outer_outer_outer)
+                {
+                    if ((((i0_outer_outer_outer * 16) + (((int) clusterId) * 4)) + ((int) coreId)) < 45)
+                    {
+                        int src_offset = ((i0_outer_outer_outer * 400) + (((int) clusterId) * 100)) + (((int) coreId) * 25);
+                        int dst_offset = 0;
+                        for (int i = 0; i < 25; ++i)
+                        {
+                            input0_local_nram[dst_offset + i] = input0[src_offset + i];
+                        }
+                    }
+                    if ((((i0_outer_outer_outer * 16) + (((int) clusterId) * 4)) + ((int) coreId)) < 45)
+                    {
+                        // Detensorizing the __bang_active_sign
+                        for (int i = 0; i < 25; ++i)
+                        {
+                            if (input0_local_nram[i] >= 0)
+                                input0_local_nram[i] = 1.0f;
+                            else
+                                input0_local_nram[i] = -1.0f;
+                        }
+                    }
+                    if ((((i0_outer_outer_outer * 16) + (((int) clusterId) * 4)) + ((int) coreId)) < 45)
+                    {
+                        int src_offset = 0;
+                        int dst_offset = ((i0_outer_outer_outer * 400) + (((int) clusterId) * 100)) + (((int) coreId) * 25);
+                        for (int i = 0; i < 25; ++i)
+                        {
+                            active_sign_147[dst_offset + i] = input0_local_nram[src_offset + i];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    """
+    code = ast_stmt_simplification(c_code)
     print(code)
