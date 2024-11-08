@@ -82,4 +82,5 @@ def unit_test(file_name, code):
 
     # 运行测试
     success, output = run_test(file_name, test_file)
+    print("[INFO] unittest: ", output)
     return success
