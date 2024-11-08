@@ -94,7 +94,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_read_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
             code = match.group(1) if match else code
 
         for key, value in space_map["output"].items():
@@ -104,7 +104,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_write_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
             code = match.group(1) if match else code
     return code
 

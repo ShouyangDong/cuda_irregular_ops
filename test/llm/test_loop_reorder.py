@@ -31,9 +31,9 @@ def run_loop_reorder(code):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
     if match:
-        code_content = match.group(1)
+        code_content = match.group(1).strip()
         return code_content
     return None
 

@@ -51,9 +51,9 @@ def run_thread_binding(code, target):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
     if match:
-        code_content = match.group(1)
+        code_content = match.group(1).strip()
         return code_content
     return None
 
@@ -202,7 +202,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_read_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
             code = match.group(1) if match else code
         for key, value in space_map["output"].items():
             cache_write_prompt = generate_cache_write_prompt(key, value, code)
@@ -211,7 +211,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_write_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
             code = match.group(1) if match else code
     return code
 
@@ -239,9 +239,9 @@ def tensorization(op, code, document):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
     if match:
-        code_content = match.group(1)
+        code_content = match.group(1).strip()
         return code_content
     return None
 
@@ -274,10 +274,10 @@ def run_code_decoration(code):
 
     content = decoration_completion.choices[0].message["content"]
 
-    match = re.search(r"\`\`\`(.*?)\`\`\`", content, re.DOTALL)
+    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
     if match:
-        code_content = match.group(1)
-        return code_content.replace("cpp", "")
+        code_content = match.group(1).strip()
+        return code_content
     return None
 
 
