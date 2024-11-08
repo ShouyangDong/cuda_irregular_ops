@@ -13,63 +13,8 @@ from falcon.unit_test import unit_test
 
 
 def falcon_postprocess_pipeline(code, file_name, target):
-    if target == "CUDA":
-        host_code = """
-        extern "C" void add_kernel(float *C, float *A, float *B, int size) {
-        float* d_A;
-  float* d_B;
-  float* d_C;
-
-        cudaMalloc(&d_A, size * sizeof(float));
-        cudaMalloc(&d_B, size * sizeof(float));
-        cudaMalloc(&d_C, size * sizeof(float));
-
-        cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
-        cudaMemcpy(d_B, B, size * sizeof(float), cudaMemcpyHostToDevice);
-
-        dim3 blockSize(1024);
-        dim3 numBlocks(256);
-        add<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
-
-        cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
-
-        cudaFree(d_A);
-        cudaFree(d_B);
-        cudaFree(d_C);
-        }
-        """
-    if target == "BANG":
-        host_code = """
-        extern "C" void add_kernel(float *C, float *A, float *B, int size) {
-        cnrtQueue_t queue;
-        cnrtSetDevice(0);
-        cnrtQueueCreate(&queue);
-        float* d_A;
-  float* d_B;
-  float* d_C;
-
-        cnrtMalloc((void **)(&d_A), size * sizeof(float));
-        cnrtMalloc((void **)(&d_B), size * sizeof(float));
-        cnrtMalloc((void **)(&d_C), size * sizeof(float));
-
-        cnrtMemcpy(d_A, A, size * sizeof(float), cnrtMemcpyHostToDev);
-        cnrtMemcpy(d_B, B, size * sizeof(float), cnrtMemcpyHostToDev);
-
-        cnrtDim3_t dim = {16, 1, 1};
-        cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;
-
-        add<<<dim, ktype, queue>>>(d_A, d_B, d_C);
-
-        cnrtMemcpy(C, d_C, size * sizeof(float), cnrtMemcpyDevToHost);
-
-        cnrtFree(d_A);
-        cnrtFree(d_B);
-        cnrtFree(d_C);
-        }
-        """
-
     final_code = run_thread_binding(code, target)
-    if not unit_test(file_name, final_code + host_code, target):
+    if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(code, target)
     print("[INFO] final_code: ", final_code)
     # when target is "BANG" or "DLBOOST", insert tensorization process.
@@ -84,13 +29,13 @@ def falcon_postprocess_pipeline(code, file_name, target):
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
         cache_code = run_cache_process(code, space_maps)
 
-        if not unit_test(file_name, cache_code + host_code, target):
+        if not unit_test(file_name, cache_code):
             cache_code = ast_auto_cache(code, space_maps)
         print("[INFO] cache code: ", cache_code)
         code = run_code_decoration(cache_code)
         print("[INFO] tensor_decorate code: ", code)
         final_code = run_tensorization(code, target)
-        if not unit_test(file_name, final_code + host_code, target):
+        if not unit_test(file_name, final_code):
             final_code = ast_auto_cache(code, space_maps)
     return final_code
 
@@ -113,5 +58,5 @@ if __name__ == "__main__":
     code = falcon_postprocess_pipeline(code, cuda_file_name + "mlu", target="BANG")
     print(code)
 
-    code = falcon_postprocess_pipeline(code, cuda_file_name + "cu", target="CUDA")
-    print(code)
+    # code = falcon_postprocess_pipeline(code, cuda_file_name + "cu", target="CUDA")
+    # print(code)

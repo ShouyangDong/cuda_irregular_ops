@@ -63,7 +63,7 @@ Example:
 #### CUDA C Code:
 
 ```cuda
-__global__ void vector_add(float* A, float* B, float* C, int N) {
+extern "C" __global__ void vector_add(float* A, float* B, float* C, int N) {
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     if (index < N) {
         C[index] = A[index] + B[index];
