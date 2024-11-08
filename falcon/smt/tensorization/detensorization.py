@@ -4,7 +4,7 @@ from pycparser import c_ast, c_generator, c_parser
 
 from falcon.smt.util import NodeTransformer, remove_target_prefix
 
-file_name = "documents/op_tensorization.json"
+file_name = "falcon/documents/op_tensorization.json"
 
 
 class Detensorizer(NodeTransformer):

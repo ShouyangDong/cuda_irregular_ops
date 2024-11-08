@@ -256,7 +256,7 @@ def get_operation_words(pragma_line):
 
 
 def run_tensorization(code, target):
-    op_dict = json.load(open("./documents/bang_c_op_map.json", "r"))
+    op_dict = json.load(open("./falcon/documents/bang_c_op_map.json", "r"))
     op_list = get_operation_words(code)
     for op in op_list:
         op = "memcpy" if "memory" in op else op
@@ -296,7 +296,7 @@ def post_processing_pipeline(code, target):
         op_pragma = {}
         if target == "BANG":
             op_pragma = json.load(
-                open("./documents/operation_bang_C_instruction_map.json", "r")
+                open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
         code = run_cache_process(code, space_maps)

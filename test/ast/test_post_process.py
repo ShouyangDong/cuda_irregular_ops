@@ -26,7 +26,7 @@ def post_processing_pipeline(code, target):
         op_pragma = {}
         if target == "BANG":
             op_pragma = json.load(
-                open("./documents/operation_bang_C_instruction_map.json", "r")
+                open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
         print("[INFO] intrinsic: ", code)

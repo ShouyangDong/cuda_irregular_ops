@@ -13,29 +13,7 @@ from falcon.src.post_processing.post_processing import (
     run_tensorization,
     run_thread_binding,
 )
-
-
-def unitest(file_name, code, target):
-    base_name = os.path.basename(file_name)
-    with open(base_name, mode="w") as f:
-        f.write(code)
-        f.close()
-    # save code as file
-    if target == "CUDA":
-        success, output = cuda_run_test(
-            base_name, "benchmark/evaluation/cuda_test/test_add.py"
-        )
-        _ = subprocess.run(["rm", base_name])
-        return success
-    elif target == "BANG":
-        success, output = bang_run_test(
-            base_name, "benchmark/evaluation/mlu_test/test_add.py"
-        )
-        print("[INFO]************output: ", output)
-        _ = subprocess.run(["rm", base_name])
-        return success
-    return False
-
+from falcon.unit_test import unit_test
 
 def falcon_postprocess_pipeline(code, file_name, target):
     if target == "CUDA":
@@ -94,7 +72,7 @@ def falcon_postprocess_pipeline(code, file_name, target):
         """
 
     final_code = run_thread_binding(code, target)
-    if not unitest(file_name, final_code + host_code, target):
+    if not unit_test(file_name, final_code + host_code, target):
         final_code = ast_thread_binding(code, target)
     print("[INFO] final_code: ", final_code)
     # when target is "BANG" or "DLBOOST", insert tensorization process.
@@ -104,18 +82,18 @@ def falcon_postprocess_pipeline(code, file_name, target):
         op_pragma = {}
         if target == "BANG":
             op_pragma = json.load(
-                open("./documents/operation_bang_C_instruction_map.json", "r")
+                open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
         cache_code = run_cache_process(code, space_maps)
 
-        if not unitest(file_name, cache_code + host_code, target):
+        if not unit_test(file_name, cache_code + host_code, target):
             cache_code = ast_auto_cache(code, space_maps)
         print("[INFO] cache code: ", cache_code)
         code = run_code_decoration(cache_code)
         print("[INFO] tensor_decorate code: ", code)
         final_code = run_tensorization(code, target)
-        if not unitest(file_name, final_code + host_code, target):
+        if not unit_test(file_name, final_code + host_code, target):
             final_code = ast_auto_cache(code, space_maps)
     return final_code
 
