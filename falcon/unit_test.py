@@ -45,6 +45,9 @@ def run_test(file_name, test_file):
 
 
 def unit_test(file_name, code):
+    if code is None:
+        return False
+
     # 创建临时目录
     tmp_dir = "./tmp"
     os.makedirs(tmp_dir, exist_ok=True)
@@ -66,7 +69,7 @@ def unit_test(file_name, code):
     if target == "cuda":
         with open(os.path.join("benchmark/data/cuda_code_test", filename), "r") as f:
             host_code = f.read()
-            f.close()  
+            f.close()
         code = re.sub(r'extern "C"\s+', "", code)
         code = device_code + host_code
 

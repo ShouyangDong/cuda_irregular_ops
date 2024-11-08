@@ -10,7 +10,7 @@ from falcon.src.post_processing.post_processing_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-4-turbo"""
+model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -94,7 +94,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_read_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
+            match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
             code = match.group(1) if match else code
 
         for key, value in space_map["output"].items():
@@ -104,7 +104,7 @@ def run_cache_process(code, space_maps):
                 messages=[{"role": "user", "content": cache_write_prompt}],
             )
             content = transformation_completion.choices[0].message["content"]
-            match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
+            match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
             code = match.group(1) if match else code
     return code
 

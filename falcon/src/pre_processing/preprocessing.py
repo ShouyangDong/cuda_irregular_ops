@@ -14,7 +14,7 @@ from falcon.src.pre_processing.preprocessing_prompt import (
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
 
-model_name = """gpt-4-turbo"""
+model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -56,7 +56,7 @@ def run_loop_recovery(code, target):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
         return code_content
@@ -93,7 +93,7 @@ def detensorization(op, code, document):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
         return code_content
@@ -115,7 +115,6 @@ def run_detensorization(code, target):
     code = detensorization("__memcpy", code, op_dict["__memcpy"])
     for inst in instructions:
         code = detensorization(inst, code, op_dict[inst])
-    print("[INOF]***********code: ", code)
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     return code

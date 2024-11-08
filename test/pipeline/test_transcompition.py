@@ -12,41 +12,47 @@ from falcon.src.pre_processing.preprocessing import (
 from falcon.unit_test import unit_test
 
 
-def run_transcompile_code(code, source, target):
-    device_code = code.split("extern")[0]
-    host_code = "extern" + code.split("extern")[1]
+def run_transcompile_code(file_name, source, target):
+    with open(file_name, "r") as f:
+        device_code = f.read()
+        f.close()
 
+    # preprocess
     code = run_loop_recovery(device_code, target)
-    if not unit_test(file_name, device_code + host_code, target):
-        code = ast_loop_recovery(device_code, target)
+    if not unit_test(file_name, device_code):
+        code = ast_loop_recovery(device_code, source)
 
-    if target in ["BANG"]:
-        modi_code = run_detensorization(code, target)
-        if not unit_test(file_name, modi_code + host_code, target):
-            modi_code = ast_detensorization(code, target)
+    print("[INFO]*********loop recovery: ", code)
+    if source in ["BANG"]:
+        try:
+            modi_code = run_detensorization(code, source)
+        except:
+            modi_code = None
 
+        if not unit_test(file_name, modi_code):
+            modi_code = ast_detensorization(code, source)
+
+    print("[INFO]***********detensorization: ", modi_code)
+    # loop transformation
     fusion_code = run_loop_fusion(modi_code)
-    if not unit_test(file_name, fusion_code, target):
+    if not unit_test(file_name, fusion_code):
         fusion_code = ast_loop_fusion(modi_code)
 
+    print("[INFO]***********fusion: ", modi_code)
     code = run_split_annotation(fusion_code)
-
     split_code = run_apply_split(code)
-    if not unit_test(file_name, split_code, target):
+    if not unit_test(file_name, split_code):
         split_code = ast_apply_split(code)
 
+    # postprocessing
     final_code = run_thread_binding(split_code, target)
-    if not unit_test(file_name, final_code + host_code, target):
+    if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(split_code, target)
 
     return final_code
 
 
 if __name__ == "__main__":
-    file_path = "benchmark/data/mlu_code_test/add_4_4_4_64.mlu"
-    with open(file_path, "r") as f:
-        code = f.read()
-        f.close()
-
-    code = run_transcompile_code(code, source="BANG", target="CUDA")
+    file_name = "benchmark/data/mlu_code_test/add_4_4_4_64.mlu"
+    code = run_transcompile_code(file_name, source="BANG", target="CUDA")
     print(code)

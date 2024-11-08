@@ -8,7 +8,7 @@ from falcon.src.loop_transformation.pass_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-4-turbo"""
+model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -31,7 +31,7 @@ def run_apply_split(code):
     )
 
     content = transformation_completion.choices[0].message["content"]
-    match = re.search(r'```[a-zA-Z]*\n(.*?)```', content, re.S)
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
         return code_content
