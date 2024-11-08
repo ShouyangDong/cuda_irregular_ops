@@ -1,5 +1,5 @@
 
-extern "C" void avgpool_kernel(float *output, float *x) {
+extern "C" void avgpool_kernel(float *x, float *output) {
   int N = 4;
   int H = 8;
   int W = 8;

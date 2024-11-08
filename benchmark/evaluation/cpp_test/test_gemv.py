@@ -63,7 +63,7 @@ if __name__ == "__main__":
         f.close()
     # Load the shared library with the batch matrix multiplication function
     success, output = run_compilation(so_name, file_name)
-    print(output)
+
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(y_ptr, A_ptr, x_ptr)
+    function(A_ptr, x_ptr, y_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         y_ctypes,

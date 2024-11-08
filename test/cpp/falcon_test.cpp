@@ -1,6 +1,6 @@
 
 
-void bmm_kernel(float *result, float *A, float *B) {
+void bmm_kernel(float *A, float *B, float *result) {
     uint8_t arr_a[16];
     uint8_t arr_b[16];
     uint32_t arr_src[4];

@@ -98,7 +98,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(output_ptr, input_ptr)
+    function(input_ptr, output_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         output_array,

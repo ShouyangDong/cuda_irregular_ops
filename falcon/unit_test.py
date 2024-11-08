@@ -62,6 +62,14 @@ def unit_test(file_name, code):
 
     # 生成目标文件名
     filename = filename_no_ext + file_type
+
+    if target == "cuda":
+        with open(os.path.join("benchmark/data/cuda_code_test", filename), "r") as f:
+            host_code = f.read()
+            f.close()  
+        code = re.sub(r'extern "C"\s+', "", code)
+        code = device_code + host_code
+
     with open(os.path.join(tmp_dir, os.path.basename(filename)), mode="w") as f:
         f.write(code)
 

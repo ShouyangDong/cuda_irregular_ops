@@ -2,7 +2,7 @@ from falcon.smt.tensorization.tensorization import ast_tensorization
 
 if __name__ == "__main__":
     code = """
-    void add_kernel(float *output, float *input1, float *input2)
+    void add_kernel(float *input1, float *input2, float *output)
     {
         __nram__ float input1_Nram[64];
         __nram__ float input2_Nram[64];

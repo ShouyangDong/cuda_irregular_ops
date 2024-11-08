@@ -1,5 +1,5 @@
-extern "C" void depthwiseconv_kernel(float *output, float *input,
-                                     float *kernel) {
+extern "C" void depthwiseconv_kernel(float *input,
+                                     float *kernel, float *output) {
   for (int c = 0; c < 128; ++c) {
     for (int i = 0; i < 254; ++i) {
       for (int j = 0; j < 254; ++j) {

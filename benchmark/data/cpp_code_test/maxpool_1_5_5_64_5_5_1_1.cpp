@@ -1,4 +1,4 @@
-extern "C" void maxpool_kernel(float *output, float *x) {
+extern "C" void maxpool_kernel(float *x, float *output) {
   int N = 1;
   int H = 5;
   int W = 5;

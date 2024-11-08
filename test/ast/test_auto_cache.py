@@ -2,7 +2,7 @@ from falcon.smt.auto_cache import ast_auto_cache
 
 if __name__ == "__main__":
     code = """
-    void add_kernel(float *output, float *input1, float *input2)
+    void add_kernel(float *input1, float *input2, float *output)
     {
         for (int k = 0; k < 4; k++)
         {

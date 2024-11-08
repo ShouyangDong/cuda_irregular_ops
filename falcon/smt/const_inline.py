@@ -76,7 +76,7 @@ def constant_inline(code):
 if __name__ == "__main__":
     # 示例代码
     code = """
-    void add_kernel(float *output, float *input1, float *input2)
+    void add_kernel(float *input1, float *input2, float *output)
     {
     float input1_Nram[size];
     float input2_Nram[size];

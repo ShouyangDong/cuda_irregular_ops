@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # Call the function with the matrices and dimensions
     result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    function(output_ptr, A_ptr, B_ptr)
+    function(A_ptr, B_ptr, output_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,
