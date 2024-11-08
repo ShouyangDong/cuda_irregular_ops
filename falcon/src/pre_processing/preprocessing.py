@@ -117,6 +117,7 @@ def run_detensorization(code, target):
         code = detensorization(inst, code, op_dict[inst])
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
+    code = ast_buffer_inline(code)
     return code
 
 
