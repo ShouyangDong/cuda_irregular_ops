@@ -1,4 +1,5 @@
 from pycparser import c_ast, c_generator, c_parser
+from falcon.smt.util import NodeTransformer
 
 
 class LoopNestFusionVisitor(c_ast.NodeVisitor):
@@ -14,7 +15,12 @@ class LoopNestFusionVisitor(c_ast.NodeVisitor):
                 node.next = fused_loop.next
                 node.stmt = fused_loop.stmt
                 self.update_loop_index(node.stmt, outer_var=node.init.decls[0].name, inner_var=nested_loop.init.decls[0].name, inner_bound=nested_loop.cond.right.value)
-        
+                # 更新初始化部分，将变量名改为 i_j_fused
+                node.init.decls[0].name = node.init.decls[0].name + "_" + nested_loop.init.decls[0].name + "_fused"
+                node.init.decls[0].type.declname = node.init.decls[0].name
+                node.cond.left.name = node.init.decls[0].name
+                node.next.expr.name = node.init.decls[0].name
+
         # 递归访问子节点
         self.generic_visit(node)
 
@@ -38,23 +44,36 @@ class LoopNestFusionVisitor(c_ast.NodeVisitor):
         return fused_loop
 
     def update_loop_index(self, node, outer_var, inner_var, inner_bound):
-        # 更新循环体中的索引表达式，将 i + (10 * j) 转换为单一索引 i
+        # 更新循环体中的索引表达式，将 i + (10 * j) 转换为单一索引 i_j_fused
         class IndexUpdater(c_ast.NodeVisitor):
             def visit_ArrayRef(self, array_node):
                 if isinstance(array_node.subscript, c_ast.BinaryOp) and array_node.subscript.op == '+':
-                    right = array_node.subscript.left
-                    left = array_node.subscript.right
+                    left = array_node.subscript.left
+                    right = array_node.subscript.right
                     if (
-                        isinstance(left, c_ast.ID) and left.name == inner_var
-                        and isinstance(right, c_ast.BinaryOp) and right.op == '*'
-                        and isinstance(right.right, c_ast.Constant) and right.right.value == str(inner_bound)
-                        and isinstance(right.left, c_ast.ID) and right.left.name == outer_var
+                        isinstance(right, c_ast.ID) and right.name == inner_var
+                        and isinstance(left, c_ast.BinaryOp) and left.op == '*'
+                        and isinstance(left.right, c_ast.Constant) and left.right.value == str(inner_bound)
+                        and isinstance(left.left, c_ast.ID) and left.left.name == outer_var
                     ):
-                        # 替换索引为单一变量 i
-                        fused_index = c_ast.ID(name=outer_var)
+                        # 替换索引为单一变量 i_j_fused
+                        fused_index = c_ast.ID(name=outer_var + "_" + inner_var +"_fused")
                         array_node.subscript = fused_index
+                #TODO:add check
+                # elif isinstance(array_node.subscript, c_ast.BinaryOp) and array_node.subscript.op == '*':
+                #     left = array_node.subscript.left
+                #     right = array_node.subscript.right
+                #     if (
+                #         isinstance(left, c_ast.ID) and left.name == outer_var
+                #         and isinstance(right, c_ast.Constant) and right.value == str(inner_bound)
+                #     ):
+                #         print(left)
+                #         # 替换索引为单一变量 i_j_fused
+                #         fused_index = c_ast.ID(name=outer_var + "_" + inner_var +"_fused")
+                #         array_node.subscript = fused_index    
+
                 self.generic_visit(array_node)
-    
+
         updater = IndexUpdater()
         updater.visit(node)
 
@@ -83,3 +102,21 @@ if __name__ == "__main__":
     # 合并循环后的最终代码
     final_code = ast_loop_fusion(c_code)
     print(final_code)
+
+
+    # c_code = """
+    # void add(float *lhs, float *rhs, float *add_1935)
+    # {
+    #     for (int coreId = 0; coreId < 4; ++coreId)
+    #     {
+    #         for (int i = 0; i < 1024; i++)
+    #         {
+    #         (((float *) add_1935) + (((int) coreId) * 1024))[i] = (((float *) lhs) + (((int) coreId) * 1024))[i] + (((float *) rhs) + (((int) coreId) * 1024))[i];
+    #         }
+
+    #     }
+    # }
+    # """
+    # # 合并循环后的最终代码
+    # final_code = ast_loop_fusion(c_code)
+    # print(final_code)

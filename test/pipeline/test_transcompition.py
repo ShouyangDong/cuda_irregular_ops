@@ -10,7 +10,7 @@ from falcon.src.pre_processing.preprocessing import (
     run_loop_recovery,
 )
 from falcon.unit_test import unit_test
-
+from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
 
 def run_transcompile_code(file_name, source, target):
     with open(file_name, "r") as f:
