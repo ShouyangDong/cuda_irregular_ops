@@ -5,8 +5,12 @@ from falcon.src.loop_transformation.loop_transformation import (
     run_loop_fusion,
     run_split_annotation,
 )
-from falcon.src.pre_processing.preprocessing import run_detensorization, run_loop_recovery
+from falcon.src.pre_processing.preprocessing import (
+    run_detensorization,
+    run_loop_recovery,
+)
 from falcon.unit_test import unit_test
+
 
 def run_transcompile_code(code, source, target):
     device_code = code.split("extern")[0]

@@ -3,6 +3,7 @@ import re
 
 import openai
 
+from falcon.simplification import simplify_code
 from falcon.src.pre_processing.preprocessing_prompt import (
     DETENSORIZATION_PROMPT_BANG,
     LOOP_RECOVERY_DEMO_BANG,
@@ -11,6 +12,7 @@ from falcon.src.pre_processing.preprocessing_prompt import (
     LOOP_RECOVERY_PROMPT_CUDA,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
+from falcon.stmt_simplification import ast_stmt_simplification
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
@@ -113,6 +115,8 @@ def run_detensorization(code, target):
     code = detensorization("__memcpy", code, op_dict["__memcpy"])
     for inst in instructions:
         code = detensorization(inst, code, op_dict[inst])
+    code = simplify_code(code)
+    code = ast_stmt_simplification(code)
     return code
 
 

@@ -48,7 +48,7 @@ def unit_test(file_name, code):
     # 创建临时目录
     tmp_dir = "./tmp"
     os.makedirs(tmp_dir, exist_ok=True)
-    
+
     # 去掉扩展名
     filename_no_ext, _ = os.path.splitext(file_name)
 

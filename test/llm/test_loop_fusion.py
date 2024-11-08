@@ -2,7 +2,10 @@ import re
 
 import openai
 
-from falcon.src.loop_transformation.pass_prompt import LOOP_FUSION_DEMO, LOOP_FUSION_PROMPT
+from falcon.src.loop_transformation.pass_prompt import (
+    LOOP_FUSION_DEMO,
+    LOOP_FUSION_PROMPT,
+)
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""

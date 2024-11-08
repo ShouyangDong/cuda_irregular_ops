@@ -1,5 +1,6 @@
 {
     "__memcpy": "void memcpy(float* dst, float* src, int size, char direction) {for(int i=0; i<size/4; i++) {dst[i]=src[i];}}",
     "__bang_add": "void bang_add(float* C, float* A, float* B, int size) {for(int i=0; i < size; i++){C[i]=A[i] + B[i];}}",
-    "__bang_active_tanh": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = tanh(A[i]);}}"
+    "__bang_active_tanh": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = tanh(A[i]);}}",
+    "__bang_active_sign": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = sign(A[i]);}}"
 }
