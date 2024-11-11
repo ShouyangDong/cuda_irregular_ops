@@ -72,7 +72,6 @@ class SimplifyConstants(NodeTransformer):
 
 
 def simplify_code(source_code):
-    print(source_code)
     # 移除所有 C/C++ 样式的注释
     source_code = re.sub(r"//.*?\n|/\*.*?\*/", "", source_code, flags=re.S)
     # 解析 C 代码

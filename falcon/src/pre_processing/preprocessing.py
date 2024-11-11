@@ -3,6 +3,7 @@ import re
 
 import openai
 
+from falcon.buffer_inline import ast_buffer_inline
 from falcon.simplification import simplify_code
 from falcon.src.pre_processing.preprocessing_prompt import (
     DETENSORIZATION_PROMPT_BANG,
@@ -13,7 +14,7 @@ from falcon.src.pre_processing.preprocessing_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.buffer_inline import ast_buffer_inline
+
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"

@@ -1,7 +1,14 @@
 from pycparser import c_ast, c_generator, c_parser
 
+from falcon.smt.util import NodeTransformer
 
-class LoopNestFusionVisitor(c_ast.NodeVisitor):
+
+class LoopNestFusionVisitor(NodeTransformer):
+    def __init__(self):
+        self.outer_var = None
+        self.inner_var = None
+        self.inner_bound = None
+
     def visit_For(self, node):
         # 检查当前 for 循环是否包含嵌套的 for 循环
         if isinstance(node.stmt, c_ast.Compound) and len(node.stmt.block_items) == 1:
@@ -13,25 +20,61 @@ class LoopNestFusionVisitor(c_ast.NodeVisitor):
                 node.cond = fused_loop.cond
                 node.next = fused_loop.next
                 node.stmt = fused_loop.stmt
-                self.update_loop_index(
-                    node.stmt,
-                    outer_var=node.init.decls[0].name,
-                    inner_var=nested_loop.init.decls[0].name,
-                    inner_bound=nested_loop.cond.right.value,
-                )
-                # 更新初始化部分，将变量名改为 i_j_fused
-                node.init.decls[0].name = (
-                    node.init.decls[0].name
-                    + "_"
-                    + nested_loop.init.decls[0].name
-                    + "_fused"
-                )
-                node.init.decls[0].type.declname = node.init.decls[0].name
-                node.cond.left.name = node.init.decls[0].name
-                node.next.expr.name = node.init.decls[0].name
 
-        # 递归访问子节点
-        self.generic_visit(node)
+                self.outer_var = node.init.decls[0].name
+                self.inner_var = nested_loop.init.decls[0].name
+                self.inner_bound = nested_loop.cond.right.value
+
+                # 更新初始化部分，将变量名改为 i_j_fused
+                fused_name = (
+                    f"{node.init.decls[0].name}_{nested_loop.init.decls[0].name}_fused"
+                )
+                node.init.decls[0].name = fused_name
+                node.init.decls[0].type.declname = fused_name
+                node.cond.left.name = fused_name
+                node.next.expr.name = fused_name
+                return self.generic_visit(node)
+
+        return self.generic_visit(node)
+
+    def visit_BinaryOp(self, node):
+        if node.op == "+":
+            left = node.left
+            right = node.right
+            if (
+                isinstance(right, c_ast.ID)
+                and right.name == self.inner_var
+                and isinstance(left, c_ast.BinaryOp)
+                and left.op == "*"
+                and isinstance(left.right, c_ast.Constant)
+                and left.right.value == self.inner_bound
+                and isinstance(left.left, c_ast.ID)
+                and left.left.name == self.outer_var
+            ):
+                # 替换为融合变量
+                fused_index = c_ast.ID(name=f"{self.outer_var}_{self.inner_var}_fused")
+                return fused_index
+        return self.generic_visit(node)
+
+    def visit_ArrayRef(self, node):
+        if (
+            isinstance(node.name, c_ast.BinaryOp)
+            and node.subscript.name == self.inner_var
+        ):
+            right = node.name.right
+            if (
+                isinstance(right, c_ast.BinaryOp)
+                and right.left.expr.name == self.outer_var
+                and right.op == "*"
+                and isinstance(right.right, c_ast.Constant)
+                and right.right.value == self.inner_bound
+            ):
+                fused_index = c_ast.ID(name=f"{self.outer_var}_{self.inner_var}_fused")
+                node.subscript = fused_index
+                node.name = node.name.left
+            return node
+
+        return self.generic_visit(node)
 
     def fuse_loops(self, outer_loop, inner_loop):
         # 创建新的循环变量和边界，合并两个循环
@@ -53,55 +96,6 @@ class LoopNestFusionVisitor(c_ast.NodeVisitor):
             init=fused_init, cond=fused_cond, next=fused_next, stmt=fused_stmt
         )
         return fused_loop
-
-    def update_loop_index(self, node, outer_var, inner_var, inner_bound):
-        # 更新循环体中的索引表达式，将 i + (10 * j) 转换为单一索引 i_j_fused
-        class IndexUpdater(c_ast.NodeVisitor):
-            def visit_ArrayRef(self, array_node):
-                if (
-                    isinstance(array_node.subscript, c_ast.BinaryOp)
-                    and array_node.subscript.op == "+"
-                ):
-                    left = array_node.subscript.left
-                    right = array_node.subscript.right
-                    if (
-                        isinstance(right, c_ast.ID)
-                        and right.name == inner_var
-                        and isinstance(left, c_ast.BinaryOp)
-                        and left.op == "*"
-                        and isinstance(left.right, c_ast.Constant)
-                        and left.right.value == str(inner_bound)
-                        and isinstance(left.left, c_ast.ID)
-                        and left.left.name == outer_var
-                    ):
-                        # 替换索引为单一变量 i_j_fused
-                        fused_index = c_ast.ID(
-                            name=outer_var + "_" + inner_var + "_fused"
-                        )
-                        array_node.subscript = fused_index
-
-                elif (
-                    isinstance(array_node.name, c_ast.BinaryOp)
-                    and array_node.subscript.name == inner_var
-                ):
-                    right = array_node.name.right
-                    if (
-                        isinstance(right, c_ast.BinaryOp)
-                        and right.left.expr.name == outer_var
-                        and right.op == "*"
-                        and isinstance(right.right, c_ast.Constant)
-                        and right.right.value == str(inner_bound)
-                    ):
-                        fused_index = c_ast.ID(
-                            name=outer_var + "_" + inner_var + "_fused"
-                        )
-                        array_node.subscript = fused_index
-                        array_node.name = array_node.name.left
-
-                self.generic_visit(array_node)
-
-        updater = IndexUpdater()
-        updater.visit(node)
 
 
 def ast_loop_fusion(c_code):

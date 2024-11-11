@@ -27,14 +27,10 @@ def run_transcompile_code(file_name, source, target):
         code = ast_loop_recovery(device_code, source)
 
     print("[INFO]*********loop recovery: ", code)
-    if source in ["BANG"]:
-        try:
-            modi_code = run_detensorization(code, source)
-        except:
-            modi_code = None
 
-        if not unit_test(file_name, modi_code):
-            modi_code = ast_detensorization(code, source)
+    modi_code = run_detensorization(code, source)
+    if not unit_test(file_name, modi_code):
+        modi_code = ast_detensorization(code, source)
 
     print("[INFO]***********detensorization: ", modi_code)
     # loop transformation
