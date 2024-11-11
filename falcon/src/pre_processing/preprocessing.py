@@ -13,7 +13,7 @@ from falcon.src.pre_processing.preprocessing_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
-
+from falcon.buffer_inline import ast_buffer_inline
 model_name = """gpt-3.5-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
@@ -111,10 +111,14 @@ def extract_bang_instructions(code):
 def run_detensorization(code, target):
     op_dict = json.load(open("./falcon/documents/bang_c_user_guide.json", "r"))
     instructions = extract_bang_instructions(code)
-    # First, detensorize memory
-    code = detensorization("__memcpy", code, op_dict["__memcpy"])
-    for inst in instructions:
-        code = detensorization(inst, code, op_dict[inst])
+    if "__memcpy" in code:
+        # First, detensorize memory
+        code = detensorization("__memcpy", code, op_dict["__memcpy"])
+
+    if instructions is not None:
+        for inst in instructions:
+            code = detensorization(inst, code, op_dict[inst])
+
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)
