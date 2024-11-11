@@ -6,6 +6,13 @@ from falcon.smt.util import NodeTransformer
 
 
 class SimplifyConstants(NodeTransformer):
+    def __init__(self):
+        self.for_loop_map = {}
+
+    def visit_For(self, node):
+        self.for_loop_map[node.init.decls[0].name] = node.cond.right.value
+        return self.generic_visit(node)
+
     def visit_BinaryOp(self, node):
         # 检查是否是乘法操作
         if node.op == "*":
@@ -49,10 +56,18 @@ class SimplifyConstants(NodeTransformer):
         if (
             isinstance(node.cond, c_ast.BinaryOp)
             and node.cond.op == "<"
-            and node.cond.right.value == "4"
-            and (node.cond.left.name == "coreId" or node.cond.left.name == "clusterId")
+            and isinstance(node.cond.left, c_ast.ID)
+            and node.cond.left.name in self.for_loop_map
+            and self.for_loop_map[node.cond.left.name] == node.cond.right.value
         ):
-            return self.generic_visit(node.iftrue.block_items[0])
+            # TODO:this may be a special case
+            #  or (
+            #     isinstance(node.cond, c_ast.BinaryOp)
+            #     and node.cond.op == "<"
+            #     and node.cond.right.value == "4"
+            #     and (node.cond.left.name == "coreId" or node.cond.left.name == "clusterId")
+            # ):
+            return node.iftrue.block_items
         return self.generic_visit(node)
 
 

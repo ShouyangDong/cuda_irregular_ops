@@ -2,6 +2,7 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
+from falcon.simplification import simplify_code
 from falcon.smt.util import NodeTransformer, remove_target_prefix
 
 # TODO(dongshouyang): Add more varaibles
@@ -89,7 +90,9 @@ def ast_loop_recovery(code, target="CUDA"):
     generator = c_generator.CGenerator()
     visitor = LoopRecoveryVisitor(builtin_map)
     visitor.visit(ast)
-    return generator.visit(ast)
+    code = generator.visit(ast)
+    code = simplify_code(code)
+    return code
 
 
 if __name__ == "__main__":
