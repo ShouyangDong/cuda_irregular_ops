@@ -1,7 +1,7 @@
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.smt.util import NodeTransformer
-
+from falcon.simplification import simplify_code
 
 class LoopNestFusionVisitor(NodeTransformer):
     def __init__(self):
@@ -107,35 +107,54 @@ def ast_loop_fusion(c_code):
     visitor = LoopNestFusionVisitor()
     # 访问 AST，合并可以合并的嵌套 for 循环
     visitor.visit(ast)
-    return generator.visit(ast)
+    code = generator.visit(ast)
+    code = simplify_code(code)
+    return code
 
 
 if __name__ == "__main__":
     # 含有嵌套 for 循环的 C 代码
-    c_code = """
-    void multiply_matrices(int* a, int* b, int* result) {
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                result[i * 10 + j] = a[i * 10 + j] * b[i * 10 + j];
-            }
-        }
-    }
-    """
-    # 合并循环后的最终代码
-    final_code = ast_loop_fusion(c_code)
-    print(final_code)
+    # c_code = """
+    # void multiply_matrices(int* a, int* b, int* result) {
+    #     for (int i = 0; i < 10; i++) {
+    #         for (int j = 0; j < 10; j++) {
+    #             result[i * 10 + j] = a[i * 10 + j] * b[i * 10 + j];
+    #         }
+    #     }
+    # }
+    # """
+    # # 合并循环后的最终代码
+    # final_code = ast_loop_fusion(c_code)
+    # print(final_code)
+
+    # c_code = """
+    # void add(float *lhs, float *rhs, float *add_1935)
+    # {
+    #     for (int coreId = 0; coreId < 4; ++coreId)
+    #     {
+    #         for (int i = 0; i < 1024; i++)
+    #         {
+    #         (((float *) add_1935) + (((int) coreId) * 1024))[i] = (((float *) lhs) + (((int) coreId) * 1024))[i] + (((float *) rhs) + (((int) coreId) * 1024))[i];
+    #         }
+
+    #     }
+    # }
+    # """
+    # # 合并循环后的最终代码
+    # final_code = ast_loop_fusion(c_code)
+    # print(final_code)
 
     c_code = """
-    void add(float *lhs, float *rhs, float *add_1935)
+    void add(float *A, float *B, float *T_add)
     {
-        for (int coreId = 0; coreId < 4; ++coreId)
+        for (int blockIdxx_threadIdxx_fused = 0; blockIdxx_threadIdxx_fused < 262144; ++blockIdxx_threadIdxx_fused)
         {
-            for (int i = 0; i < 1024; i++)
+            if (blockIdxx_threadIdxx_fused < 4096)
             {
-            (((float *) add_1935) + (((int) coreId) * 1024))[i] = (((float *) lhs) + (((int) coreId) * 1024))[i] + (((float *) rhs) + (((int) coreId) * 1024))[i];
+                T_add[(((int) blockIdxx) * 1024) + ((int) threadIdxx)] = A[(((int) blockIdxx) * 1024) + ((int) threadIdxx)] + B[(((int) blockIdxx) * 1024) + ((int) threadIdxx)];
             }
-
         }
+
     }
     """
     # 合并循环后的最终代码

@@ -47,8 +47,7 @@ class SimplifyConstants(NodeTransformer):
             ):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) - int(node.right.value)
-                return c_ast.Constant("int", value=str(result))
-
+                return c_ast.Constant("int", value=str(result)) 
         else:
             return self.generic_visit(node)
 
@@ -70,6 +69,34 @@ class SimplifyConstants(NodeTransformer):
             return node.iftrue.block_items
         return self.generic_visit(node)
 
+    def visit_For(self, node):
+        if isinstance(node.stmt, c_ast.Compound):
+            if len(node.stmt.block_items) == 1:
+                if isinstance(node.stmt.block_items[0], c_ast.If):
+                    stmt = node.stmt.block_items[0]
+                    if stmt.iffalse is None:
+                        if (
+                            isinstance(stmt.cond, c_ast.BinaryOp)
+                            and stmt.cond.op == "<"
+                        ):
+                            # 获取上限值
+                            if_upper_bound = stmt.cond.right.value
+                            
+                            if (
+                                isinstance(node.cond, c_ast.BinaryOp)
+                                and node.cond.op == "<"
+                            ):
+                                if int(node.cond.right.value) > int(if_upper_bound):
+                                    # 用找到的 `if` 语句中的值替换 `for` 循环中的上限值
+                                    node.cond.right.value = if_upper_bound
+                                    node.stmt = stmt.iftrue
+                                    return self.generic_visit(node)
+        return self.generic_visit(node)
+
+    def visit_Cast(self, node):
+        if node.to_type.type.type.names[0] == "int" and isinstance(node.expr, c_ast.ID):
+            return node.expr
+        return self.generic_visit(node)
 
 def simplify_code(source_code):
     # 移除所有 C/C++ 样式的注释
@@ -154,6 +181,40 @@ if __name__ == "__main__":
                 }
             }
         }
+    }
+    """
+    code = simplify_code(c_code)
+    print(code)
+
+    c_code = """
+    void add(float *A, float *B, float *T_add)
+    {
+    for (int blockIdxx_threadIdxx_fused = 0; blockIdxx_threadIdxx_fused < 262144; ++blockIdxx_threadIdxx_fused)
+    {
+        if (blockIdxx_threadIdxx_fused < 4096)
+        {
+        T_add[blockIdxx_threadIdxx_fused] = A[blockIdxx_threadIdxx_fused] + B[blockIdxx_threadIdxx_fused];
+        }
+    }
+    }
+    """
+    code = simplify_code(c_code)
+    print(code)
+
+    c_code = """
+    void add(float *A, float *B, float *T_add)
+    {
+    for (int blockIdxx = 0; blockIdxx < 256; ++blockIdxx)
+    {
+        for (int threadIdxx = 0; threadIdxx < 1024; ++threadIdxx)
+        {
+        if (((blockIdxx * 1024) + threadIdxx) < 4096)
+        {
+            T_add[(((int) blockIdxx) * 1024) + ((int) threadIdxx)] = A[(((int) blockIdxx) * 1024) + ((int) threadIdxx)] + B[(((int) blockIdxx) * 1024) + ((int) threadIdxx)];
+        }
+        }
+
+    }
     }
     """
     code = simplify_code(c_code)
