@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 
 test_file_map = {
@@ -54,7 +55,7 @@ def unit_test(file_name, code):
 
     # 去掉扩展名
     filename_no_ext, _ = os.path.splitext(file_name)
-
+    print("filename: ", filename_no_ext)
     # 判断文件类型并设置目标
     if "__mlu_global" in code:
         target, file_type = "mlu", ".mlu"
@@ -69,10 +70,11 @@ def unit_test(file_name, code):
     op_name = os.path.basename(filename_no_ext).split("_")[0]
 
     if target == "cuda":
-        with open(os.path.join("benchmark/data/cuda_code_test", filename), "r") as f:
+        with open(filename, "r") as f:
             host_code = f.read()
+            host_code = "extern" + host_code.split("extern")[1]
             f.close()
-        code = re.sub(r'extern "C"\s+', "", code)
+        device_code = re.sub(r'extern "C"\s+', "", code)
         code = device_code + host_code
 
     elif target == "cpp":

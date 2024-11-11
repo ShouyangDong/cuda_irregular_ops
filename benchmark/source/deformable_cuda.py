@@ -11,7 +11,8 @@ def deformable_attention_pytorch(
     value, value_spatial_shapes, sampling_locations, attention_weights
 ):
     """Pytorch implementation of deformable attention from
-    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py"""
+    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py
+    """
     # for debug and test only,
     # need to use cuda version instead
     N_, S_, M_, D_ = value.shape
@@ -649,9 +650,9 @@ def deformable_attention_tvmscript_gpu(
                                         )
                                     ) * attention_weights_[batch, j, i_m, i, k]
                         for ii_d in range(4):
-                            output_[
-                                batch, j, i_m * d + io_d * 4 + ii_d
-                            ] = attention_sum[ii_d]
+                            output_[batch, j, i_m * d + io_d * 4 + ii_d] = (
+                                attention_sum[ii_d]
+                            )
 
 
 def benchmark_gpu(
