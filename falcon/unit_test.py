@@ -73,14 +73,17 @@ def unit_test(file_name, code):
         code = re.sub(r'extern "C"\s+', "", code)
         code = device_code + host_code
 
-    with open(os.path.join(tmp_dir, os.path.basename(filename)), mode="w") as f:
+    tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
+    with open(tmp_file_name, mode="w") as f:
         f.write(code)
 
     # 提取操作名称，并生成测试文件路径
     op_name = os.path.basename(filename_no_ext).split("_")[0]
     test_file = test_file_map.get(op_name, "").format(target=target)
 
+    print("[INFO] file_name: ", tmp_file_name)
+    print("[INFO] unittest: ", test_file)
     # 运行测试
-    success, output = run_test(file_name, test_file)
+    success, output = run_test(tmp_file_name, test_file)
     print("[INFO] unittest: ", output)
     return success

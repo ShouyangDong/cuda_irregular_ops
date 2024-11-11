@@ -1,16 +1,26 @@
+from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
+from falcon.smt.loop_transformation.loop_split import ast_loop_split
 from falcon.smt.tensorization.detensorization import ast_detensorization
+from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
     run_loop_fusion,
     run_split_annotation,
+)
+from falcon.src.post_processing.post_processing import (
+    replace_operation_with_intrinsic,
+    run_cache_process,
+    run_code_decoration,
+    run_tensorization,
+    run_thread_binding,
 )
 from falcon.src.pre_processing.preprocessing import (
     run_detensorization,
     run_loop_recovery,
 )
 from falcon.unit_test import unit_test
-from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
+
 
 def run_transcompile_code(file_name, source, target):
     with open(file_name, "r") as f:
@@ -38,12 +48,14 @@ def run_transcompile_code(file_name, source, target):
     if not unit_test(file_name, fusion_code):
         fusion_code = ast_loop_fusion(modi_code)
 
-    print("[INFO]***********fusion: ", modi_code)
+    print("[INFO]***********fusion: ", fusion_code)
     code = run_split_annotation(fusion_code)
+    print("[INFO]***********split annotate: ", code)
     split_code = run_apply_split(code)
+    print("[INFO]***********split: ", code)
     if not unit_test(file_name, split_code):
-        split_code = ast_apply_split(code)
-
+        split_code = ast_loop_split(code)
+    print("[INFO]***********split: ", split_code)
     # postprocessing
     final_code = run_thread_binding(split_code, target)
     if not unit_test(file_name, final_code):
