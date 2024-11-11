@@ -24,7 +24,9 @@ class InlineTransformer(NodeTransformer):
                 prev_stmt = new_block_items[-1]
 
                 # 检查是否可以内联
-                if isinstance(prev_stmt, c_ast.Assignment) and self.is_dependency(prev_stmt, stmt):
+                if isinstance(prev_stmt, c_ast.Assignment) and self.is_dependency(
+                    prev_stmt, stmt
+                ):
                     # 内联当前语句到前一个语句
                     inlined_stmt = self.create_inlined_stmt(prev_stmt, stmt)
                     new_block_items[-1] = inlined_stmt  # 更新最后一个语句为内联后的语句
@@ -45,19 +47,21 @@ class InlineTransformer(NodeTransformer):
     def is_dependency(self, stmt1, stmt2):
         """检查 stmt1 的输出是否是 stmt2 的输入"""
         # 确认 stmt1 的左值是否被 stmt2 右值引用
-        return self.nodes_equal(stmt1.lvalue, stmt2.rvalue) or self.contains_reference(stmt2.rvalue, stmt1.lvalue)
+        return self.nodes_equal(stmt1.lvalue, stmt2.rvalue) or self.contains_reference(
+            stmt2.rvalue, stmt1.lvalue
+        )
 
     def create_inlined_stmt(self, stmt1, stmt2):
         """创建一个新的内联语句，将 stmt2 的右值更新为 stmt1 的左值"""
         # 创建一个新的内联赋值语句
         inlined_stmt = c_ast.Assignment(
-            op="=",
-            lvalue=stmt2.lvalue,
-            rvalue=stmt2.rvalue
+            op="=", lvalue=stmt2.lvalue, rvalue=stmt2.rvalue
         )
 
         # 将 stmt2 的右值中的引用替换为 stmt1 的右值
-        inlined_stmt.rvalue = self.replace_node(stmt2.rvalue, stmt1.lvalue, stmt1.rvalue)
+        inlined_stmt.rvalue = self.replace_node(
+            stmt2.rvalue, stmt1.lvalue, stmt1.rvalue
+        )
         return inlined_stmt
 
     def replace_node(self, node, target, replacement):
@@ -82,6 +86,7 @@ class InlineTransformer(NodeTransformer):
         generator = c_generator.CGenerator()
         return generator.visit(node1) == generator.visit(node2)
 
+
 class UnusedMemoryRemover(NodeTransformer):
     def visit_Compound(self, node):
         """遍历 Compound 节点，删除未使用的内存分配语句"""
@@ -95,23 +100,30 @@ class UnusedMemoryRemover(NodeTransformer):
             stmt = block_items[i]
             # 如果是内存分配语句，并且其变量未被后续语句引用，则删除该语句
             if isinstance(stmt, c_ast.Decl) and isinstance(stmt.type, c_ast.ArrayDecl):
-                if not any(self.contains_reference(later_stmt, stmt.name) for later_stmt in block_items[i+1:]):
+                if not any(
+                    self.contains_reference(later_stmt, stmt.name)
+                    for later_stmt in block_items[i + 1 :]
+                ):
                     continue  # 跳过未使用的内存分配语句
             if isinstance(stmt, c_ast.Decl) and isinstance(stmt.type, c_ast.TypeDecl):
                 if isinstance(stmt.type.type, c_ast.ArrayDecl):
-                    if not any(self.contains_reference(later_stmt, stmt.name) for later_stmt in block_items[i+1:]):
+                    if not any(
+                        self.contains_reference(later_stmt, stmt.name)
+                        for later_stmt in block_items[i + 1 :]
+                    ):
                         continue  # 删除未使用的数组声明
             new_block_items.append(stmt)
         return new_block_items
 
     def contains_reference(self, node, target):
         """检查节点是否包含对目标的引用"""
-        if hasattr(node, 'name') and node.name == target:
+        if hasattr(node, "name") and node.name == target:
             return True
         for _, child in node.children():
             if self.contains_reference(child, target):
                 return True
         return False
+
 
 def ast_buffer_inline(code):
     # 解析代码
