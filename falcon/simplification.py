@@ -47,7 +47,7 @@ class SimplifyConstants(NodeTransformer):
             ):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) - int(node.right.value)
-                return c_ast.Constant("int", value=str(result)) 
+                return c_ast.Constant("int", value=str(result))
         else:
             return self.generic_visit(node)
 
@@ -81,12 +81,12 @@ class SimplifyConstants(NodeTransformer):
                         ):
                             # 获取上限值
                             if_upper_bound = stmt.cond.right.value
-                            
+
                             if (
                                 isinstance(node.cond, c_ast.BinaryOp)
                                 and node.cond.op == "<"
                             ):
-                                if int(node.cond.right.value) > int(if_upper_bound):
+                                if int(node.cond.right.value) >= int(if_upper_bound):
                                     # 用找到的 `if` 语句中的值替换 `for` 循环中的上限值
                                     node.cond.right.value = if_upper_bound
                                     node.stmt = stmt.iftrue
@@ -97,6 +97,7 @@ class SimplifyConstants(NodeTransformer):
         if node.to_type.type.type.names[0] == "int" and isinstance(node.expr, c_ast.ID):
             return node.expr
         return self.generic_visit(node)
+
 
 def simplify_code(source_code):
     # 移除所有 C/C++ 样式的注释
