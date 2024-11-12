@@ -80,7 +80,7 @@ def unit_test(file_name, code):
     elif target == "cpp":
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel(")
         code = 'extern "C" ' + code if "extern" not in code else code
-    
+
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
     with open(tmp_file_name, mode="w") as f:
         f.write(code)

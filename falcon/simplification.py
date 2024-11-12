@@ -23,6 +23,7 @@ class SimplifyConstants(NodeTransformer):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) * int(node.right.value)
                 return c_ast.Constant("int", value=str(result))
+            return self.generic_visit(node)
         elif node.op == "+":
             # 如果两个操作数都是常量，则可以进行简化
             if isinstance(node.left, c_ast.Constant) and isinstance(
@@ -31,7 +32,7 @@ class SimplifyConstants(NodeTransformer):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) + int(node.right.value)
                 return c_ast.Constant("int", value=str(result))
-
+            return self.generic_visit(node)
         if node.op == "/":
             # 如果两个操作数都是常量，则可以进行简化
             if isinstance(node.left, c_ast.Constant) and isinstance(
@@ -40,6 +41,7 @@ class SimplifyConstants(NodeTransformer):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) // int(node.right.value)
                 return c_ast.Constant("int", value=str(result))
+            return self.generic_visit(node)
         elif node.op == "-":
             # 如果两个操作数都是常量，则可以进行简化
             if isinstance(node.left, c_ast.Constant) and isinstance(
@@ -48,6 +50,7 @@ class SimplifyConstants(NodeTransformer):
                 # 计算并返回新的常量节点
                 result = int(node.left.value) - int(node.right.value)
                 return c_ast.Constant("int", value=str(result))
+            return self.generic_visit(node)
         else:
             return self.generic_visit(node)
 
@@ -220,3 +223,30 @@ if __name__ == "__main__":
     """
     code = simplify_code(c_code)
     print(code)
+
+    cuda_code = """
+    softmax(float* A, float* T_softmax_norm) {
+        if (threadIdx.x < 5) {
+            int rowStart = threadIdx.x * 128;
+
+            float maxVal = A[rowStart];
+            for (int i = 1; i < 128; ++i) {
+                if (A[rowStart + i] > maxVal) {
+                    maxVal = A[rowStart + i];
+                }
+            }
+
+            float denom = 0.0f;
+            for (int i = 0; i < 128; ++i) {
+                T_softmax_norm[rowStart + i] = expf(A[rowStart + i] - maxVal);
+                denom += T_softmax_norm[rowStart + i];
+            }
+
+            for (int i = 0; i < 128; ++i) {
+                T_softmax_norm[rowStart + i] /= denom;
+            }
+        }
+    }
+    """
+    converted_code = simplify_code(cuda_code)
+    print(converted_code)

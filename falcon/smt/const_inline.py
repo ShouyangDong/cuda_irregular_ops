@@ -29,7 +29,8 @@ class ConstInlineTransformer(NodeTransformer):
         ):
             self.constants[node.name] = node.init
             return None  # 返回 None 以删除该声明
-        return node
+
+        return self.generic_visit(node)
 
     def visit_ID(self, node):
         """将变量替换为对应的常量值或表达式"""
@@ -63,7 +64,6 @@ def constant_inline(code):
     # 解析代码
     parser = c_parser.CParser()
     ast = parser.parse(code)
-
     # 进行转换
     transformer = ConstInlineTransformer()
     ast = transformer.visit(ast)
@@ -74,7 +74,7 @@ def constant_inline(code):
 
 
 if __name__ == "__main__":
-    # 示例代码
+    # # 示例代码
     code = """
     void add_kernel(float *input1, float *input2, float *output)
     {
@@ -94,6 +94,40 @@ if __name__ == "__main__":
         output[index] = input1[index] + input2[index];
         }
     }
+    }
+    """
+    code = constant_inline(code)
+    print(code)
+
+    code = """
+    void softmax(float *A, float *T_softmax_norm)
+    {
+    for (int threadIdxx = 0; threadIdxx < 5; ++threadIdxx)
+    {
+        int rowStart = threadIdxx * 128;
+        float maxVal = A[rowStart];
+        for (int i = 1; i < 128; ++i)
+        {
+        if (A[rowStart + i] > maxVal)
+        {
+            maxVal = A[rowStart + i];
+        }
+        }
+
+        float denom = 0.0f;
+        for (int i = 0; i < 128; ++i)
+        {
+        T_softmax_norm[rowStart + i] = expf();
+        denom += T_softmax_norm[rowStart + i];
+        }
+
+        for (int i = 0; i < 128; ++i)
+        {
+        T_softmax_norm[rowStart + i] /= denom;
+        }
+
+    }
+
     }
     """
     code = constant_inline(code)

@@ -1,7 +1,7 @@
 from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.loop_transformation.loop_split import ast_loop_split
-from falcon.smt.tensorization.detensorization import ast_detensorization
+from falcon.smt.stmt_split import ast_stmt_split
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
@@ -9,10 +9,7 @@ from falcon.src.loop_transformation.loop_transformation import (
     run_split_annotation,
 )
 from falcon.src.post_processing.post_processing import run_thread_binding
-from falcon.src.pre_processing.preprocessing import (
-    run_detensorization,
-    run_loop_recovery,
-)
+from falcon.src.pre_processing.preprocessing import run_loop_recovery
 from falcon.unit_test import unit_test
 
 
@@ -27,10 +24,7 @@ def run_transcompile_code(file_name, source, target):
         code = ast_loop_recovery(device_code, source)
 
     print("[INFO]*********loop recovery: ", code)
-    modi_code = run_detensorization(code, source)
-    if not unit_test(file_name, modi_code):
-        modi_code = ast_detensorization(code, source)
-
+    modi_code = ast_stmt_split(code)
     print("[INFO]***********detensorization: ", modi_code)
     # loop transformation
     fusion_code = run_loop_fusion(modi_code)
