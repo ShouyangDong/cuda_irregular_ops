@@ -76,6 +76,20 @@ def add_memory_prefix(code):
     )
 
 
+def add_parallel_variable_prefix(code):
+    code = re.sub(r"threadIdxx", "threadIdx.x", code)
+    code = re.sub(r"threadIdxy", "threadIdx.y", code)
+    code = re.sub(r"threadIdxz", "threadIdx.z", code)
+    code = re.sub(r"blockIdxx", "blockIdx.x", code)
+    code = re.sub(r"blockIdxy", "blockIdx.y", code)
+    code = re.sub(r"blockIdxz", "blockIdx.z", code)
+    return (
+        "__global__ " + modified_code
+        if "__global__ " not in modified_code
+        else modified_code
+    )
+
+
 def remove_target_prefix(code, target):
     if target == "BANG":
         # 移除 `extern "C"`

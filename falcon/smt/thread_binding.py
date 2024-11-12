@@ -1,6 +1,11 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import NodeTransformer, add_memory_prefix, remove_target_prefix
+from falcon.smt.util import (
+    NodeTransformer,
+    add_memory_prefix,
+    add_parallel_variable_prefix,
+    remove_target_prefix,
+)
 
 builtin_var = {"CUDA": ["threadIdxx", "blockIdxx"], "BANG": ["coreId", "clusterId"]}
 builtin_dim = {
@@ -108,7 +113,7 @@ def ast_thread_binding(code, target="BANG"):
     if target == "BANG":
         return add_memory_prefix(binding_code)
     else:
-        return "__global__ " + binding_code
+        return add_parallel_variable_prefix(binding_code)
 
 
 if __name__ == "__main__":
