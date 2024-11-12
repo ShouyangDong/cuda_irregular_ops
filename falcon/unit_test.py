@@ -55,7 +55,6 @@ def unit_test(file_name, code):
 
     # 去掉扩展名
     filename_no_ext, _ = os.path.splitext(file_name)
-    print("filename: ", filename_no_ext)
     # 判断文件类型并设置目标
     if "__mlu_global" in code:
         target, file_type = "mlu", ".mlu"
@@ -86,9 +85,6 @@ def unit_test(file_name, code):
         f.write(code)
 
     test_file = test_file_map.get(op_name, "").format(target=target)
-
-    print("[INFO] file_name: ", tmp_file_name)
-    print("[INFO] unittest: ", test_file)
     # 运行测试
     success, output = run_test(tmp_file_name, test_file)
     print("[INFO] unittest: ", output)

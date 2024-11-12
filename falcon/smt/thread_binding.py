@@ -35,7 +35,7 @@ class ThreadBindingTransformer(NodeTransformer):
             thread_var = self._generate_thread_var(extend, 4)
             new_node = self._generate_new_node(thread_var, node)
             self.binding_map[loop_var] = thread_var
-            return new_node
+            return self.generic_visit(new_node)
 
         elif self.target == "CUDA" and self.current_depth == 1:
             thread_var = self._generate_thread_var(extend, 1024)
@@ -204,6 +204,19 @@ if __name__ == "__main__":
             for (int j = 0; j < 128; ++j)
             {
                 T_softmax_norm[(k * 128) + j] /= denom;
+            }
+        }
+    }
+    """
+    output_code = ast_thread_binding(code, target="BANG")
+    print(output_code)
+
+    code = """
+    void add(float *A, float *B, float *T_add)
+    {
+        for (int k = 0; k < 4; k++) {
+            for (int j = 0; j < 1024; j++) {
+            T_add[k * 1024 + j] = A[k * 1024 + j] + B[k * 1024 + j];
             }
         }
     }

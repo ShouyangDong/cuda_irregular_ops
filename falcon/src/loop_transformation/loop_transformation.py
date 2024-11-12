@@ -3,7 +3,7 @@ import re
 import openai
 
 from falcon.simplification import simplify_code
-from falcon.src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT
+from falcon.src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT, SPLIT_PRAGMA_DEMO
 from falcon.src.loop_transformation.pass_prompt import (
     LOOP_FUSION_DEMO,
     LOOP_FUSION_PROMPT,
@@ -14,7 +14,7 @@ from falcon.src.loop_transformation.pass_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
-model_name = """gpt-3.5-turbo"""
+model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
 openai.api_base = "https://api.keya.pw/v1"
 
@@ -73,10 +73,12 @@ def run_split_annotation(code):
     PROMPT = """
     {SYSTEM_PROMPT}
     {SPLIT_PRAGMA_PROMPT}
+    {SPLIT_PRAGMA_DEMO}
     """
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
 
     PROMPT = PROMPT.replace("{SPLIT_PRAGMA_PROMPT}", SPLIT_PRAGMA_PROMPT)
+    PROMPT = PROMPT.replace("{SPLIT_PRAGMA_DEMO}", SPLIT_PRAGMA_DEMO)
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
