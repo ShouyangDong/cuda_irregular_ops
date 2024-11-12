@@ -69,7 +69,10 @@ def unit_test(file_name, code):
     op_name = os.path.basename(filename_no_ext).split("_")[0]
 
     if target == "cuda":
-        with open(filename, "r") as f:
+        with open(
+            os.path.join("benchmark/data/cuda_code_test", os.path.basename(filename)),
+            "r",
+        ) as f:
             host_code = f.read()
             host_code = "extern" + host_code.split("extern")[1]
             f.close()
