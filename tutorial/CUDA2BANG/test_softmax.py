@@ -41,9 +41,11 @@ def run_transcompile_code(file_name, source, target):
     print("[INFO]***********split: ", split_code)
     # postprocessing
     final_code = run_thread_binding(split_code, target)
+    print("[Binding code]: ", final_code)
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(split_code, target)
 
+    print(final_code)
     return final_code
 
 
