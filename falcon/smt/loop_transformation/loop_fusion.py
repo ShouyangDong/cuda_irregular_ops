@@ -74,7 +74,6 @@ class LoopNestFusionVisitor(NodeTransformer):
                 node.subscript = fused_index
                 node.name = node.name.left
             return node
-
         return self.generic_visit(node)
 
     def fuse_loops(self, outer_loop, inner_loop):
@@ -115,35 +114,35 @@ def ast_loop_fusion(c_code):
 
 if __name__ == "__main__":
     # 含有嵌套 for 循环的 C 代码
-    # c_code = """
-    # void multiply_matrices(int* a, int* b, int* result) {
-    #     for (int i = 0; i < 10; i++) {
-    #         for (int j = 0; j < 10; j++) {
-    #             result[i * 10 + j] = a[i * 10 + j] * b[i * 10 + j];
-    #         }
-    #     }
-    # }
-    # """
-    # # 合并循环后的最终代码
-    # final_code = ast_loop_fusion(c_code)
-    # print(final_code)
+    c_code = """
+    void multiply_matrices(int* a, int* b, int* result) {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                result[i * 10 + j] = a[i * 10 + j] * b[i * 10 + j];
+            }
+        }
+    }
+    """
+    # 合并循环后的最终代码
+    final_code = ast_loop_fusion(c_code)
+    print(final_code)
 
-    # c_code = """
-    # void add(float *lhs, float *rhs, float *add_1935)
-    # {
-    #     for (int coreId = 0; coreId < 4; ++coreId)
-    #     {
-    #         for (int i = 0; i < 1024; i++)
-    #         {
-    #         (((float *) add_1935) + (((int) coreId) * 1024))[i] = (((float *) lhs) + (((int) coreId) * 1024))[i] + (((float *) rhs) + (((int) coreId) * 1024))[i];
-    #         }
+    c_code = """
+    void add(float *lhs, float *rhs, float *add_1935)
+    {
+        for (int coreId = 0; coreId < 4; ++coreId)
+        {
+            for (int i = 0; i < 1024; i++)
+            {
+            (((float *) add_1935) + (((int) coreId) * 1024))[i] = (((float *) lhs) + (((int) coreId) * 1024))[i] + (((float *) rhs) + (((int) coreId) * 1024))[i];
+            }
 
-    #     }
-    # }
-    # """
-    # # 合并循环后的最终代码
-    # final_code = ast_loop_fusion(c_code)
-    # print(final_code)
+        }
+    }
+    """
+    # 合并循环后的最终代码
+    final_code = ast_loop_fusion(c_code)
+    print(final_code)
 
     c_code = """
     void add(float *A, float *B, float *T_add)

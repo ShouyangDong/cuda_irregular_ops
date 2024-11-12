@@ -10,51 +10,59 @@ class SimplifyConstants(NodeTransformer):
         self.for_loop_map = {}
 
     def visit_For(self, node):
-        self.for_loop_map[node.init.decls[0].name] = node.cond.right.value
+        if isinstance(node.cond.right, c_ast.Constant):
+            self.for_loop_map[node.init.decls[0].name] = node.cond.right.value
+
+        # 检查for循环中的条件表达式是否可以被简化
+        if isinstance(node.cond, c_ast.BinaryOp) and node.cond.op == "<":
+            if isinstance(node.cond.right, c_ast.BinaryOp):
+                # 尝试折叠常量表达式，例如 256 * 1024
+                if isinstance(node.cond.right.left, c_ast.Constant) and isinstance(
+                    node.cond.right.right, c_ast.Constant
+                ):
+                    result = self.visit_BinaryOp(node.cond.right)
+                    node.cond.right = result
+
+        # 处理for循环中的if语句，尝试将其合并到for循环的条件中
+        if isinstance(node.stmt, c_ast.Compound) and len(node.stmt.block_items) == 1:
+            if isinstance(node.stmt.block_items[0], c_ast.If):
+                if_node = node.stmt.block_items[0]
+                if (
+                    isinstance(if_node.cond, c_ast.BinaryOp)
+                    and if_node.cond.op == "<"
+                    and isinstance(if_node.cond.left, c_ast.ID)
+                    and if_node.cond.left.name == node.init.decls[0].name
+                    and isinstance(if_node.cond.right, c_ast.Constant)
+                    and isinstance(node.cond.right, c_ast.Constant)
+                    and int(if_node.cond.right.value) <= int(node.cond.right.value)
+                ):
+                    # 合并if条件到for循环中
+                    node.cond.right = if_node.cond.right
+                    node.stmt = if_node.iftrue
+
         return self.generic_visit(node)
 
     def visit_BinaryOp(self, node):
-        # 检查是否是乘法操作
-        if node.op == "*":
-            # 如果两个操作数都是常量，则可以进行简化
+        # 检查是否是可以简化的二元操作符
+        if node.op in ("*", "+", "-", "/"):
             if isinstance(node.left, c_ast.Constant) and isinstance(
                 node.right, c_ast.Constant
             ):
-                # 计算并返回新的常量节点
-                result = int(node.left.value) * int(node.right.value)
+                left_val = int(node.left.value)
+                right_val = int(node.right.value)
+                if node.op == "*":
+                    result = left_val * right_val
+                elif node.op == "+":
+                    result = left_val + right_val
+                elif node.op == "-":
+                    result = left_val - right_val
+                elif node.op == "/":
+                    result = left_val // right_val if right_val != 0 else 0  # 避免除零
                 return c_ast.Constant("int", value=str(result))
-            return self.generic_visit(node)
-        elif node.op == "+":
-            # 如果两个操作数都是常量，则可以进行简化
-            if isinstance(node.left, c_ast.Constant) and isinstance(
-                node.right, c_ast.Constant
-            ):
-                # 计算并返回新的常量节点
-                result = int(node.left.value) + int(node.right.value)
-                return c_ast.Constant("int", value=str(result))
-            return self.generic_visit(node)
-        if node.op == "/":
-            # 如果两个操作数都是常量，则可以进行简化
-            if isinstance(node.left, c_ast.Constant) and isinstance(
-                node.right, c_ast.Constant
-            ):
-                # 计算并返回新的常量节点
-                result = int(node.left.value) // int(node.right.value)
-                return c_ast.Constant("int", value=str(result))
-            return self.generic_visit(node)
-        elif node.op == "-":
-            # 如果两个操作数都是常量，则可以进行简化
-            if isinstance(node.left, c_ast.Constant) and isinstance(
-                node.right, c_ast.Constant
-            ):
-                # 计算并返回新的常量节点
-                result = int(node.left.value) - int(node.right.value)
-                return c_ast.Constant("int", value=str(result))
-            return self.generic_visit(node)
-        else:
-            return self.generic_visit(node)
+        return self.generic_visit(node)
 
     def visit_If(self, node):
+        # 访问if语句，尝试检查是否可以优化
         if (
             isinstance(node.cond, c_ast.BinaryOp)
             and node.cond.op == "<"
@@ -62,42 +70,16 @@ class SimplifyConstants(NodeTransformer):
             and node.cond.left.name in self.for_loop_map
             and self.for_loop_map[node.cond.left.name] == node.cond.right.value
         ):
-            # TODO:this may be a special case
-            #  or (
-            #     isinstance(node.cond, c_ast.BinaryOp)
-            #     and node.cond.op == "<"
-            #     and node.cond.right.value == "4"
-            #     and (node.cond.left.name == "coreId" or node.cond.left.name == "clusterId")
-            # ):
             return node.iftrue.block_items
         return self.generic_visit(node)
 
-    def visit_For(self, node):
-        if isinstance(node.stmt, c_ast.Compound):
-            if len(node.stmt.block_items) == 1:
-                if isinstance(node.stmt.block_items[0], c_ast.If):
-                    stmt = node.stmt.block_items[0]
-                    if stmt.iffalse is None:
-                        if (
-                            isinstance(stmt.cond, c_ast.BinaryOp)
-                            and stmt.cond.op == "<"
-                        ):
-                            # 获取上限值
-                            if_upper_bound = stmt.cond.right.value
-
-                            if (
-                                isinstance(node.cond, c_ast.BinaryOp)
-                                and node.cond.op == "<"
-                            ):
-                                if int(node.cond.right.value) >= int(if_upper_bound):
-                                    # 用找到的 `if` 语句中的值替换 `for` 循环中的上限值
-                                    node.cond.right.value = if_upper_bound
-                                    node.stmt = stmt.iftrue
-                                    return self.generic_visit(node)
-        return self.generic_visit(node)
-
     def visit_Cast(self, node):
-        if node.to_type.type.type.names[0] == "int" and isinstance(node.expr, c_ast.ID):
+        # 尝试移除无用的类型转换
+        if (
+            isinstance(node.to_type.type.type, c_ast.IdentifierType)
+            and node.to_type.type.type.names[0] == "int"
+            and isinstance(node.expr, c_ast.ID)
+        ):
             return node.expr
         return self.generic_visit(node)
 
@@ -119,25 +101,15 @@ def simplify_code(source_code):
 
 if __name__ == "__main__":
     c_code = """
-    int factorial(int result) {
-        if(coreId < 2) {
-            for (int j = 0; j < 10; j++) {
-                result += j;
-            }
+    void add(float *A, float *B, float *T_add)
+    {
+    for (int i_j_fuse = 0; i_j_fuse < 256 * 1024; ++i_j_fuse)
+    {
+        if (i_j_fuse < 4096)
+        {
+        T_add[i_j_fuse] = A[i_j_fuse] + B[i_j_fuse];
         }
-        return result;
     }
-    """
-    code = simplify_code(c_code)
-    print(code)
-    c_code = """
-    int factorial(int result) {
-        if(clusterId < 4) {
-            for (int j = 0; j < 10; j++) {
-                result += j;
-            }
-        }
-        return result;
     }
     """
     code = simplify_code(c_code)

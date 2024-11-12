@@ -2,6 +2,7 @@ import re
 
 import openai
 
+from falcon.simplification import simplify_code
 from falcon.src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT
 from falcon.src.loop_transformation.pass_prompt import (
     LOOP_FUSION_DEMO,
@@ -39,7 +40,7 @@ def run_loop_fusion(code):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
-        return code_content
+        return simplify_code(code_content)
     return None
 
 

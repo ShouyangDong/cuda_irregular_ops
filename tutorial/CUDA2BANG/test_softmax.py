@@ -1,14 +1,24 @@
+import json
+
+from falcon.smt.auto_cache import ast_auto_cache
 from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.loop_transformation.loop_split import ast_loop_split
 from falcon.smt.stmt_split import ast_stmt_split
+from falcon.smt.tensorization.tensorization import ast_tensorization
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
     run_loop_fusion,
     run_split_annotation,
 )
-from falcon.src.post_processing.post_processing import run_thread_binding
+from falcon.src.post_processing.post_processing import (
+    replace_operation_with_intrinsic,
+    run_cache_process,
+    run_code_decoration,
+    run_tensorization,
+    run_thread_binding,
+)
 from falcon.src.pre_processing.preprocessing import run_loop_recovery
 from falcon.unit_test import unit_test
 
@@ -45,7 +55,25 @@ def run_transcompile_code(file_name, source, target):
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(split_code, target)
 
-    print(final_code)
+    code = run_code_decoration(final_code)
+    print("[INFO] decorate code: ", code)
+    op_pragma = {}
+    if target == "BANG":
+        op_pragma = json.load(
+            open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
+        )
+    code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
+    cache_code = run_cache_process(code, space_maps)
+
+    if not unit_test(file_name, cache_code):
+        cache_code = ast_auto_cache(code, space_maps)
+    print("[INFO] cache code: ", cache_code)
+    code = run_code_decoration(cache_code)
+    print("[INFO] tensor_decorate code: ", code)
+    final_code = run_tensorization(code, target)
+    if not unit_test(file_name, final_code):
+        final_code = ast_tensorization(code, space_maps)
+
     return final_code
 
 
