@@ -58,7 +58,7 @@ def run_transcompile_code(file_name, source, target):
     final_code = run_thread_binding(split_code, target)
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(split_code, target)
-
+    print("[Binding]*******binding code: ", final_code)
     code = run_code_decoration(final_code)
     print("[INFO] decorate code: ", code)
     op_pragma = {}
