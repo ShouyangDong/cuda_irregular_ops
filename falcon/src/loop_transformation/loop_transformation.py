@@ -3,7 +3,10 @@ import re
 import openai
 
 from falcon.simplification import simplify_code
-from falcon.src.loop_transformation.decorate_pragma import SPLIT_PRAGMA_PROMPT, SPLIT_PRAGMA_DEMO
+from falcon.src.loop_transformation.decorate_pragma import (
+    SPLIT_PRAGMA_DEMO,
+    SPLIT_PRAGMA_PROMPT,
+)
 from falcon.src.loop_transformation.pass_prompt import (
     LOOP_FUSION_DEMO,
     LOOP_FUSION_PROMPT,
