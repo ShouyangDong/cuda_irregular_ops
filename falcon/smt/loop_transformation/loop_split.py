@@ -1,3 +1,5 @@
+import re
+
 from pycparser import c_ast, c_generator, c_parser
 
 
@@ -26,7 +28,9 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
             if isinstance(subnode, c_ast.Pragma) and "loop_split" in subnode.string:
                 # 提取因子值
                 pragma_content = subnode.string.strip()
-                self.factor = int(pragma_content.split("(")[-1].split(")")[0])
+                self.factor = int(
+                    re.search(r"\((?:factor=)?(\d+)\)", pragma_content).group(1)
+                )
 
                 # 检查下一节点是否为 `for` 循环
                 if index + 1 < len(blocks) and isinstance(blocks[index + 1], c_ast.For):
@@ -134,6 +138,7 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 + self.axis_name
                 + "_in"
             )
+        self.generic_visit(node)
 
 
 def ast_loop_split(code):
@@ -169,6 +174,47 @@ if __name__ == "__main__":
                 T_add[((i * 1024) + j)] = (A[((i * 1024) + j)] + B[((i * 1024) + j)]);
             }
         }
+    }
+    """
+    final_node = ast_loop_split(code)
+    print(final_node)
+
+    code = """
+    void softmax(float *A, float *T_softmax_norm)
+    {
+    for (int threadIdxx = 0; threadIdxx < 5; ++threadIdxx)
+    {
+        float maxVal = A[threadIdxx * 128];
+        
+        #pragma loop_split(factor=4)
+        for (int i = 1; i < 128; ++i)
+        {
+        if (A[(threadIdxx * 128) + i] > maxVal)
+        {
+            maxVal = A[(threadIdxx * 128) + i];
+        }
+        }
+
+        float denom = 0.0f;
+
+        #pragma loop_split(factor=4)
+        for (int i = 0; i < 128; ++i)
+        {
+        T_softmax_norm[(threadIdxx * 128) + i] = expf(A[(threadIdxx * 128) + i] - maxVal);
+        }
+
+        #pragma loop_split(factor=4)
+        for (int i = 0; i < 128; ++i)
+        {
+        denom += T_softmax_norm[(threadIdxx * 128) + i];
+        }
+
+        #pragma loop_split(factor=4)
+        for (int i = 0; i < 128; ++i)
+        {
+        T_softmax_norm[(threadIdxx * 128) + i] /= denom;
+        }
+    }
     }
     """
     final_node = ast_loop_split(code)

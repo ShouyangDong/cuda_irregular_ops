@@ -39,7 +39,9 @@ def parse_markdown(file_path):
 
 if __name__ == "__main__":
     # 输入 Markdown 文件路径
-    markdown_file = "cntoolkit_3.5.2_cambricon_bang_c_4.5.1.md"  # 替换为您的 Markdown 文件路径
+    markdown_file = (
+        "cntoolkit_3.5.2_cambricon_bang_c_4.5.1.md"  # 替换为您的 Markdown 文件路径
+    )
 
     # 解析 Markdown 文件
     titles_and_paragraphs = parse_markdown(markdown_file)

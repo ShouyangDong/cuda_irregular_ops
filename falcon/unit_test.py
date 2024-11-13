@@ -1,7 +1,7 @@
 import os
 import re
-import subprocess
 import shutil
+import subprocess
 
 test_file_map = {
     "deformable": "benchmark/evaluation/{target}_test/test_deformable_attention.py",
