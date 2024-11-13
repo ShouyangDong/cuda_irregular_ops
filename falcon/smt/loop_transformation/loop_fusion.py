@@ -14,7 +14,9 @@ class LoopNestFusionVisitor(NodeTransformer):
         # 检查当前 for 循环是否包含嵌套的 for 循环
         if isinstance(node.stmt, c_ast.Compound) and len(node.stmt.block_items) == 1:
             nested_loop = node.stmt.block_items[0]
-            if isinstance(nested_loop, c_ast.For):
+            if isinstance(nested_loop, c_ast.For) and isinstance(
+                node.next, c_ast.UnaryOp
+            ):
                 # 合并嵌套的 for 循环
                 fused_loop = self.fuse_loops(node, nested_loop)
                 node.init = fused_loop.init
