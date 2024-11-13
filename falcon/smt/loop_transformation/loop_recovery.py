@@ -3,8 +3,8 @@ import re
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.simplification import simplify_code
-from falcon.smt.util import NodeTransformer, remove_target_prefix
 from falcon.smt.const_inline import constant_inline
+from falcon.smt.util import NodeTransformer, remove_target_prefix
 
 ParaVar = {
     "threadIdx.x": 1024,
@@ -118,36 +118,36 @@ def ast_loop_recovery(code, target="CUDA"):
 
 
 if __name__ == "__main__":
-    # cuda_code = """
-    # void add(float*  A, float*  B, float*  T_add) {
-    #     if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
-    #         T_add[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = (A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] + B[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
-    #     }
-    # }
-    # """
-    # converted_code = ast_loop_recovery(cuda_code, "CUDA")
-    # print(converted_code)
+    cuda_code = """
+    void add(float*  A, float*  B, float*  T_add) {
+        if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
+            T_add[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] = (A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] + B[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
+        }
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)
 
-    # bang_code = """
-    # void matmul_kernel(float *A, float *B, float *C) {
-    #     for (int col = 0; col < 128; col++) {
-    #         C[(clusterId * 4 + coreId) * 128 + col] = 0.0f;
-    #         for (int i = 0; i < 128; i++) {
-    #             C[(clusterId * 4 + coreId) * 128 + col] += A[(clusterId * 4 + coreId) * 128 + i] * B[i * 128 + col];
-    #         }
-    #     }
-    # }
-    # """
-    # converted_code = ast_loop_recovery(bang_code, "BANG")
-    # print(converted_code)
+    bang_code = """
+    void matmul_kernel(float *A, float *B, float *C) {
+        for (int col = 0; col < 128; col++) {
+            C[(clusterId * 4 + coreId) * 128 + col] = 0.0f;
+            for (int i = 0; i < 128; i++) {
+                C[(clusterId * 4 + coreId) * 128 + col] += A[(clusterId * 4 + coreId) * 128 + i] * B[i * 128 + col];
+            }
+        }
+    }
+    """
+    converted_code = ast_loop_recovery(bang_code, "BANG")
+    print(converted_code)
 
-    # cuda_code = """
-    # extern "C" __global__ void __launch_bounds__(960) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
-    #     T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
-    # }
-    # """
-    # converted_code = ast_loop_recovery(cuda_code, "CUDA")
-    # print(converted_code)
+    cuda_code = """
+    extern "C" __global__ void __launch_bounds__(960) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
+        T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)
 
     cuda_code = """
     __global__ void gemm(float *A, float *B, float *C) {

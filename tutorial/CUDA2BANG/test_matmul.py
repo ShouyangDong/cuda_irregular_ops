@@ -8,7 +8,6 @@ from falcon.src.loop_transformation.loop_transformation import (
     run_loop_fusion,
     run_split_annotation,
 )
-from falcon.src.post_processing.post_processing import run_thread_binding
 from falcon.src.post_processing.post_processing import (
     replace_operation_with_intrinsic,
     run_cache_process,

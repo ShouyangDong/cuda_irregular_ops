@@ -8,6 +8,19 @@ from falcon.smt.util import NodeTransformer
 class MergeLoopsAndIfsVisitor(NodeTransformer):
     def __init__(self):
         self.loop_vars = []
+        self.loop_bounds = {}
+
+    def visit_For(self, node):
+        if isinstance(node.cond.right, c_ast.Constant) and isinstance(
+            node.init, c_ast.DeclList
+        ):
+            if node.cond.op == "<":
+                self.loop_bounds[node.init.decls[0].name] = (
+                    int(node.cond.right.value) - 1
+                )
+            elif node.cond.op == "<=":
+                self.loop_bounds[node.init.decls[0].name] = int(node.cond.right.value)
+        return self.generic_visit(node)
 
     def visit_Compound(self, node):
         """查找并合并连续的 for 循环和 if 语句"""
@@ -131,6 +144,66 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
         output_code = generator.visit(node2)
         return output_code == output_code
 
+    def visit_If(self, node):
+        # 检查 if 条件是否恒为真
+        if self.is_condition_always_true(node.cond):
+            # 如果条件恒为真，将 if 语句替换为其主体内容
+            return node.iftrue.block_items
+        # 否则，保留 if 语句
+        return self.generic_visit(node)
+
+    def is_condition_always_true(self, condition):
+        # 只处理简单的 `<` 和 `<=` 情况
+        if isinstance(condition, c_ast.BinaryOp) and condition.op in ("<", "<="):
+            left, right = condition.left, condition.right
+            # 判断右侧是否为一个常量
+            if isinstance(right, c_ast.Constant):
+                # 检查左侧是否包含循环变量及范围，并确定条件恒真
+                return self.is_left_expression_in_bounds(left, int(right.value))
+        return False
+
+    def is_left_expression_in_bounds(self, expr, bound):
+        # 递归检查表达式的最大可能值是否小于给定的界限
+        expr_bound = self.get_expression_bound(expr)
+        return expr_bound is not None and expr_bound < bound
+
+    def get_expression_bound(self, expr):
+        # 计算表达式的最大可能值，用于判断是否在上界之内
+        if isinstance(expr, c_ast.ID):
+            # 获取变量的范围上界
+            return self.get_variable_bound(expr.name)
+        elif isinstance(expr, c_ast.Constant):
+            # 如果是常量，返回其值
+            return int(expr.value)
+        elif isinstance(expr, c_ast.BinaryOp):
+            left_bound = self.get_expression_bound(expr.left)
+            right_bound = self.get_expression_bound(expr.right)
+            if expr.op == "+":
+                # 处理加法操作
+                if left_bound is not None and right_bound is not None:
+                    return left_bound + right_bound
+            elif expr.op == "*":
+                # 处理乘法操作
+                if left_bound is not None and right_bound is not None:
+                    return left_bound * right_bound
+            elif expr.op == "-":
+                # 处理减法操作
+                if left_bound is not None and right_bound is not None:
+                    return left_bound - right_bound
+            elif expr.op == "/":
+                # 处理除法操作，避免除以零
+                if (
+                    left_bound is not None
+                    and right_bound is not None
+                    and right_bound != 0
+                ):
+                    return left_bound // right_bound  # 整数除法
+        return None
+
+    def get_variable_bound(self, var_name):
+        # 返回循环变量的上界（假设这些变量的范围是已知的）
+        return self.loop_bounds.get(var_name, None)
+
 
 def ast_stmt_simplification(code):
     code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
@@ -147,7 +220,7 @@ def ast_stmt_simplification(code):
 
 
 if __name__ == "__main__":
-    # # 示例使用
+    # 示例使用
     code = """
     void add(float *lhs, float *rhs, float *add_1515)
     {
@@ -283,6 +356,25 @@ if __name__ == "__main__":
                     }
                 }
             }
+        }
+    }
+    """
+    code = ast_stmt_simplification(c_code)
+    print(code)
+
+    c_code = """
+    void add(float *A, float *B, float *T_add)
+    {
+        for (int k = 0; k < 16; k++)
+        {
+            for (int j = 0; j < 256; j++)
+            {
+                if (((k * 256) + j) < 4096)
+                {
+                    T_add[(k * 256) + j] = A[(k * 256) + j] + B[(k * 256) + j];
+                }
+            }
+
         }
     }
     """

@@ -3,6 +3,7 @@ import re
 import openai
 
 from falcon.simplification import simplify_code
+from falcon.smt.const_inline import constant_inline
 from falcon.src.loop_transformation.decorate_pragma import (
     SPLIT_PRAGMA_DEMO,
     SPLIT_PRAGMA_PROMPT,
@@ -16,6 +17,7 @@ from falcon.src.loop_transformation.pass_prompt import (
     LOOP_SPLIT_PROMPT,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
+from falcon.stmt_simplification import ast_stmt_simplification
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
@@ -117,5 +119,7 @@ def run_apply_split(code):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
+        code_content = constant_inline(code_content)
+        code_content = ast_stmt_simplification(code_content)
         return code_content
     return None
