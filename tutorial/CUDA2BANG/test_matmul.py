@@ -9,9 +9,12 @@ from falcon.src.loop_transformation.loop_transformation import (
     run_split_annotation,
 )
 from falcon.src.post_processing.post_processing import run_thread_binding
-from falcon.src.pre_processing.preprocessing import (
-    run_detensorization,
-    run_loop_recovery,
+from falcon.src.post_processing.post_processing import (
+    replace_operation_with_intrinsic,
+    run_cache_process,
+    run_code_decoration,
+    run_tensorization,
+    run_thread_binding,
 )
 from falcon.unit_test import unit_test
 
@@ -23,7 +26,6 @@ def run_transcompile_code(file_name, source, target):
 
     device_code = device_code.split("extern")[0]
     # preprocess
-    print(device_code)
     code = run_loop_recovery(device_code, target)
     if not unit_test(file_name, device_code):
         code = ast_loop_recovery(device_code, source)
@@ -76,5 +78,5 @@ def run_transcompile_code(file_name, source, target):
 
 if __name__ == "__main__":
     file_name = "benchmark/data/cuda_code_test/gemm_32_128_128.cu"
-    code = run_transcompile_code(file_name, source="BANG", target="CUDA")
+    code = run_transcompile_code(file_name, source="CUDA", target="BANG")
     print(code)
