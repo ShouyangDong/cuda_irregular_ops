@@ -26,6 +26,19 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
                     node.stmt = c_ast.Compound(block_items=[inner_loop])
 
 
+def ast_loop_reorder(code):
+    # Parse the C code
+    parser = c_parser.CParser()
+    ast = parser.parse(c_code)
+    generator = c_generator.CGenerator()
+    # Custom visitor instance
+    visitor = LoopReorderVisitor("i", "j")
+
+    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+    visitor.visit(ast)
+    return generator.visit(ast)
+
+
 if __name__ == "__main__":
     c_code = """
     int factorial(int result) {
@@ -37,14 +50,5 @@ if __name__ == "__main__":
         return result;
     }
     """
-    # Parse the C code
-    parser = c_parser.CParser()
-    ast = parser.parse(c_code)
-    generator = c_generator.CGenerator()
-    print(generator.visit(ast))
-    # Custom visitor instance
-    visitor = LoopReorderVisitor("i", "j")
-
-    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
-    visitor.visit(ast)
-    print(generator.visit(ast))
+    code = ast_loop_reorder(c_code)
+    print(code)

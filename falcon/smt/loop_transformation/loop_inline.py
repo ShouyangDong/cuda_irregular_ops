@@ -42,27 +42,32 @@ class LoopMerger(NodeTransformer):
         )
 
 
-# Sample C code
-code = """
-void main(float* arr1, float* arr2, int n) {
-    for (int i = 0; i < n; i++) {
-        arr1[i] = arr1[i] * 2;
+def ast_loop_inline(code):
+    # Parse the code and apply loop merging
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+
+    # Apply loop merging transformation
+    merger = LoopMerger()
+    merged_ast = merger.visit(ast)
+
+    # Generate and print optimized code
+    generator = c_generator.CGenerator()
+    return generator.visit(merged_ast)
+
+
+if __name__ == "__main__":
+
+    # Sample C code
+    code = """
+    void main(float* arr1, float* arr2, int n) {
+        for (int i = 0; i < n; i++) {
+            arr1[i] = arr1[i] * 2;
+        }
+        for (int j = 0; j < n; j++) {
+            arr2[j] = arr2[j] + 3;
+        }
     }
-    for (int j = 0; j < n; j++) {
-        arr2[j] = arr2[j] + 3;
-    }
-}
-"""
-
-# Parse the code and apply loop merging
-parser = c_parser.CParser()
-ast = parser.parse(code)
-
-# Apply loop merging transformation
-merger = LoopMerger()
-merged_ast = merger.visit(ast)
-
-# Generate and print optimized code
-generator = c_generator.CGenerator()
-optimized_code = generator.visit(merged_ast)
-print(optimized_code)
+    """
+    code = ast_loop_inline(code)
+    print(code)

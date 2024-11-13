@@ -7,6 +7,8 @@ import numpy as np
 import tvm
 from jax import jit, lax
 
+from falcon.mcts.actions import actions as ActionSpace
+
 ActionSpace = []
 GFLOPS = 64 * 1280 * 2 / 1e9
 A_Length = len(ActionSpace)
@@ -64,8 +66,6 @@ class TvmGo:
         self.mod_name = mod_name
         self.best_reward = 0.01
         self.best_optimizer_ids = None
-        self.best_optimizer_space_ids = None
-        self.best_optimizer_space_num = 0
 
     def pick_best_annotation(self, actions):
         with tempfile.TemporaryDirectory() as work_dir:

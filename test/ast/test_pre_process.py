@@ -1,5 +1,5 @@
 from falcon.simplification import simplify_code
-from falcon.smt.loop_inline import ast_inline
+from falcon.smt.loop_inline import ast_loop_inline
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.tensorization.detensorization import ast_detensorization
 from falcon.stmt_simplification import ast_stmt_simplification
@@ -10,7 +10,7 @@ def pre_processing_pipeline(code, target):
     code = ast_detensorization(code, target)
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
-    code = ast_inline(code)
+    code = ast_loop_inline(code)
     return code
 
 
