@@ -2,5 +2,10 @@
     "__memcpy": "void memcpy(float* dst, float* src, int size, char direction) {for(int i=0; i<size/4; i++) {dst[i]=src[i];}}",
     "__bang_add": "void bang_add(float* C, float* A, float* B, int size) {for(int i=0; i < size; i++){C[i]=A[i] + B[i];}}",
     "__bang_active_tanh": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = tanh(A[i]);}}",
-    "__bang_active_sign": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = sign(A[i]);}}"
+    "__bang_active_sign": "void bang_active_sign(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = sign(A[i]);}}",
+    "__bang_write_zero": "void bang_write_zero(float* C, int size) {for(int i = 0; i < size; i++) {C[i] = 0.0f;}}",
+    "__bang_sumpool": "void bang_sumpool(float *dst, float *src, int channel, int height, int width, int kernel_height, int kernel_width) {for (int c = 0; c < channel; c++) {for (int i = 0; i < height / kernel_height; i++) {for (int j = 0; j < width / kernel_width; j++) {float sum = 0;for (int kh = 0; kh < kernel_height; kh++) {for (int kw = 0; kw < kernel_width; kw++) {int h = i * kernel_height + kh;int w = j * kernel_width + kw;sum += src[c * height * width + h * width + w];}}dst[c * height / kernel_height * width / kernel_width + i * width / kernel_width + j] = sum;}}}}",
+    "__memset_nram": "void memset_nram(float *dst, int size, float value){for(int i = 0; i < size; i++) {dst[i] = value;}}",
+    "__bang_div": "void bang_div(float* dest, float* src1, float* dinominator, float* addition, int size){for(int i = 0; i < size; i++){dest[i] = src1[i] / dinominator[i];}}",
+    "__bang_active_exp": "void bang_active_exp(float* dst, float* src, int size){for(int i = 0; i < size; i++){dst[i] = expf(src[i]);}}"
 }

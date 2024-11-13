@@ -32,7 +32,7 @@ class Detensorizer(NodeTransformer):
             body = seq_def.ext[0].body
             return self.visit(body.block_items[0])
         else:
-            return node
+            return self.generic_visit(node)
 
     def visit_ID(self, node):
         if node.name in self.parameter_mappings:
@@ -95,6 +95,34 @@ if __name__ == "__main__":
         __memcpy(((float *)input0_local_nram + (0)), ((float *)input0 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), 2560, GDRAM2NRAM);
         __bang_active_tanh(((float *)input0_local_nram + (0)), ((float *)input0_local_nram + (0)), 640);
         __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
+    }
+    """
+    code = ast_detensorization(code, "BANG")
+    print(code)
+    code = """
+    void softmax(float *A, float *output)
+    {
+        for (int clusterId = 0; clusterId < 4; ++clusterId)
+        {
+            for (int coreId = 0; coreId < 4; ++coreId)
+            {
+                float dest[128];
+                float dinominator[128];
+                float dinominator_temp[128];
+                float src1[128];
+                float addition[128];
+                for (int i = (clusterId * 4) + coreId; i < 5; i += 16)
+                {
+                    __memcpy(src1, A + (i * 128), 512, GDRAM2NRAM);
+                    __bang_active_exp(src1, src1, 128);
+                    __bang_write_zero(dinominator, 128);
+                    __bang_sumpool(dinominator, src1, 1, 1, 128, 1, 128, 1, 1);
+                    __memset_nram(dinominator_temp, 128, dinominator[0]);
+                    __bang_div(dest, src1, dinominator_temp, addition, 128);
+                    __memcpy(output + (128 * i), dest, 512, NRAM2GDRAM);
+                }
+            }
+        }
     }
     """
     code = ast_detensorization(code, "BANG")
