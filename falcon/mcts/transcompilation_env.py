@@ -41,24 +41,20 @@ def dynamic_action_selection(cur_action_ids):
 class TvmGo:
     def __init__(
         self,
-        mod,
-        mod_name,
-        tvm_tgt,
-        inputs,
+        file_name
+        target,
         action_len=A_Length,
         optimizer_len=11,
         goal_reward=False,
         timeout=None,
     ):
         self.timeout = timeout
-        self.mod = mod
-        self.tvm_tgt = tvm_tgt
+        self.file_name = file_name
         self.action_len = action_len
         self.optimizer_len = optimizer_len
-        self.inputs = inputs
-        self.mod_name = mod_name
         self.best_reward = 0.01
         self.best_optimizer_ids = None
+        self.target = target
 
     def pick_best_annotation(self, actions):
         with tempfile.TemporaryDirectory() as work_dir:
@@ -83,10 +79,10 @@ class TvmGo:
         The function returns a new `ProgramState` object, which represents the new program
         state after applying the action."""
         code = self.pick_best_annotation(actions)
-        with open(file_name, "w", encoding="utf-8") as f:
+        with open(self.file_name, "w", encoding="utf-8") as f:
                 f.write(code)
-                
-        score = objective(file_name, self.tvm_tgt)
+
+        score = objective(self.file_name, self.target)
         return code, score
 
     @jit
@@ -154,22 +150,12 @@ def ref_program(x):
 
 
 def build_env():
-
-    dev = tvm.device("cuda", 0)
-    a_np = np.random.uniform(size=(64, 1280)).astype("float32")
-    buff_a = tvm.nd.array(a_np, dev)
-    buff_c = tvm.nd.array(np.zeros((64, 1280), dtype="float32"), dev)
-    inputs = [buff_a, buff_c]
-    tvm_tgt = Target("nvidia/nvidia-a100", host="llvm")
-    name = "softmax"
-
-    inputs = [buff_a, buff_c]
     action_len = len(ActionSpace)
     optimizer_len = 8
     tvm_env = TvmGo(
-        Softmax,
+        file_name,
         name,
-        tvm_tgt,
+        target,
         inputs,
         action_len=action_len,
         optimizer_len=optimizer_len,
@@ -178,23 +164,15 @@ def build_env():
 
 
 def _test():
-
-    dev = tvm.device("cuda", 0)
-    a_np = np.random.uniform(size=(64, 1280)).astype("float32")
-    buff_a = tvm.nd.array(a_np, dev)
-    buff_c = tvm.nd.array(np.zeros((64, 1280), dtype="float32"), dev)
-    inputs = [buff_a, buff_c]
-    tvm_tgt = Target("nvidia/nvidia-a100", host="llvm")
-    name = "softmax"
-
-    inputs = [buff_a, buff_c]
+    file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
+    source = "CUDA"
+    target = "BANG"
     action_len = len(ActionSpace)
     optimizer_len = 8
     tvm_env = TvmGo(
-        Softmax,
         name,
-        tvm_tgt,
-        inputs,
+        source,
+        target,
         action_len=action_len,
         optimizer_len=optimizer_len,
     )
