@@ -1,11 +1,11 @@
 {
-    "__memcpy": "void memcpy(float* dst, float* src, int size, char direction) {for(int i=0; i<size/4; i++) {dst[i]=src[i];}}",
-    "__bang_add": "void bang_add(float* C, float* A, float* B, int size) {for(int i=0; i < size; i++){C[i]=A[i] + B[i];}}",
-    "__bang_active_tanh": "void bang_active_tanh(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = tanh(A[i]);}}",
-    "__bang_active_sign": "void bang_active_sign(float* C, float* A, int size) {for(int i = 0; i < size; i++) {C[i] = sign(A[i]);}}",
-    "__bang_write_zero": "void bang_write_zero(float* C, int size) {for(int i = 0; i < size; i++) {C[i] = 0.0f;}}",
-    "__bang_sumpool": "void bang_sumpool(float *dst, float *src, int channel, int height, int width, int kernel_height, int kernel_width) {for (int c = 0; c < channel; c++) {for (int i = 0; i < height / kernel_height; i++) {for (int j = 0; j < width / kernel_width; j++) {float sum = 0;for (int kh = 0; kh < kernel_height; kh++) {for (int kw = 0; kw < kernel_width; kw++) {int h = i * kernel_height + kh;int w = j * kernel_width + kw;sum += src[c * height * width + h * width + w];}}dst[c * height / kernel_height * width / kernel_width + i * width / kernel_width + j] = sum;}}}}",
-    "__memset_nram": "void memset_nram(float *dst, int size, float value){for(int i = 0; i < size; i++) {dst[i] = value;}}",
-    "__bang_div": "void bang_div(float* dest, float* src1, float* dinominator, float* addition, int size){for(int i = 0; i < size; i++){dest[i] = src1[i] / dinominator[i];}}",
-    "__bang_active_exp": "void bang_active_exp(float* dst, float* src, int size){for(int i = 0; i < size; i++){dst[i] = expf(src[i]);}}"
+    "__memcpy": "void memcpy(float* dst, float* src, int size, char direction) {for(int i_mem=0; i_mem<size/4; i_mem++) {dst[i_mem]=src[i_mem];}}",
+    "__bang_add": "void bang_add(float* C, float* A, float* B, int size) {for(int i_add=0; i_add < size; i_add++){C[i_add]=A[i_add] + B[i_add];}}",
+    "__bang_active_tanh": "void bang_active_tanh(float* C, float* A, int size) {for(int i_tah = 0; i_tah < size; i_tah++) {C[i_tah] = tanh(A[i_tah]);}}",
+    "__bang_active_sign": "void bang_active_sign(float* C, float* A, int size) {for(int i_sgn = 0; i_sgn < size; i_sgn++) {C[i_sgn] = sign(A[i_sgn]);}}",
+    "__bang_write_zero": "void bang_write_zero(float* C, int size) {for(int i_zro = 0; i_zro < size; i_zro++) {C[i_zro] = 0.0f;}}",
+    "__bang_sumpool": "void bang_sumpool(float *dst, float *src, int channel, int height, int width, int kernel_height, int kernel_width) {for (int sum_c = 0; sum_c < channel; sum_c++) {for (int sum_i = 0; sum_i < height / kernel_height; sum_i++) {for (int sum_j = 0; sum_j < width / kernel_width; sum_j++) {float sum = 0;for (int kh = 0; kh < kernel_height; kh++) {for (int kw = 0; kw < kernel_width; kw++) {int h = sum_i * kernel_height + kh;int w = sum_j * kernel_width + kw;sum += src[sum_c * height * width + h * width + w];}}dst[sum_c * height / kernel_height * width / kernel_width + sum_i * width / kernel_width + sum_j] = sum;}}}}",
+    "__memset_nram": "void memset_nram(float *dst, int size, float value){for(int i_set = 0; i_set < size; i_set++) {dst[i_set] = value;}}",
+    "__bang_div": "void bang_div(float* dest, float* src1, float* dinominator, float* addition, int size){for(int i_div = 0; i_div < size; i_div++){dest[i_div] = src1[i_div] / dinominator[i_div];}}",
+    "__bang_active_exp": "void bang_active_exp(float* dst, float* src, int size){for(int i_exp = 0; i_exp < size; i_exp++){dst[i_exp] = expf(src[i_exp]);}}"
 }

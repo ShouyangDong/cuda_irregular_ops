@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import shutil
 
 test_file_map = {
     "deformable": "benchmark/evaluation/{target}_test/test_deformable_attention.py",
@@ -91,4 +92,5 @@ def unit_test(file_name, code):
     # 运行测试
     success, output = run_test(tmp_file_name, test_file)
     print("[INFO] unittest: ", output)
+    shutil.rmtree(tmp_dir)
     return success

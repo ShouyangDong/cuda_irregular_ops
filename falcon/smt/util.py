@@ -83,11 +83,7 @@ def add_parallel_variable_prefix(code):
     code = re.sub(r"blockIdxx", "blockIdx.x", code)
     code = re.sub(r"blockIdxy", "blockIdx.y", code)
     code = re.sub(r"blockIdxz", "blockIdx.z", code)
-    return (
-        "__global__ " + modified_code
-        if "__global__ " not in modified_code
-        else modified_code
-    )
+    return "__global__ " + code if "__global__ " not in code else code
 
 
 def remove_target_prefix(code, target):
