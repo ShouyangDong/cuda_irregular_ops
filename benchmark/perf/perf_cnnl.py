@@ -2,9 +2,8 @@ import csv
 import glob
 import os
 import timeit
-import csv
+
 import torch
-import torch_mlu
 import torch.nn.functional as F
 
 

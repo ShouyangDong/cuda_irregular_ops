@@ -7,31 +7,24 @@ import numpy as np
 import tvm
 from jax import jit, lax
 
+from benchmark.perf import perf_bang, perf_cuda
 from falcon.mcts.actions import actions as ActionSpace
 
-ActionSpace = []
 GFLOPS = 64 * 1280 * 2 / 1e9
 A_Length = len(ActionSpace)
 
 
-def objective(mod, target, name, inputs):
+def objective(file_name, target):
     """We design an objective function. If compile and runtime error happens,
     then the score is quiet large.
     """
+    if target == "CUDA":
+        time_ms = perf_bang(file_name)
+    elif target == "BANG":
+        time_ms = perf_bang(file_name)
 
-    try:
-        myfunc = tvm.build(mod, target=target, name=name)
-    except:
+    if time_ms is None
         return 0.0
-
-    try:
-        myfunc(*inputs)
-    except:
-        return 0.0
-    evaluator = myfunc.time_evaluator(
-        myfunc.entry_name, tvm.device("cuda", 0), number=100
-    )
-    time_ms = evaluator(*inputs).mean * 1e3
     return GFLOPS / (time_ms / 1e3)
 
 
@@ -53,7 +46,7 @@ class TvmGo:
         tvm_tgt,
         inputs,
         action_len=A_Length,
-        optimizer_len=7,
+        optimizer_len=11,
         goal_reward=False,
         timeout=None,
     ):
@@ -89,9 +82,12 @@ class TvmGo:
         with specific parameters to apply the given scheduling rule (`action`) to the module.
         The function returns a new `ProgramState` object, which represents the new program
         state after applying the action."""
-        best_mod = self.pick_best_annotation(actions)
-        score = objective(best_mod, self.tvm_tgt, self.mod_name, self.inputs)
-        return best_mod, score
+        code = self.pick_best_annotation(actions)
+        with open(file_name, "w", encoding="utf-8") as f:
+                f.write(code)
+                
+        score = objective(file_name, self.tvm_tgt)
+        return code, score
 
     @jit
     def step(self, action_id, env_state):
