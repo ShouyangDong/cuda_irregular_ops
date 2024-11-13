@@ -20,8 +20,10 @@ def run_transcompile_code(file_name, source, target):
     with open(file_name, "r") as f:
         device_code = f.read()
         f.close()
+
     device_code = device_code.split("extern")[0]
     # preprocess
+    print(device_code)
     code = run_loop_recovery(device_code, target)
     if not unit_test(file_name, device_code):
         code = ast_loop_recovery(device_code, source)
@@ -51,10 +53,28 @@ def run_transcompile_code(file_name, source, target):
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(split_code, target)
 
+    code = run_code_decoration(final_code)
+    print("[INFO] decorate code: ", code)
+    op_pragma = {}
+    if target == "BANG":
+        op_pragma = json.load(
+            open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
+        )
+    code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
+    cache_code = run_cache_process(code, space_maps)
+
+    if not unit_test(file_name, cache_code):
+        cache_code = ast_auto_cache(code, space_maps)
+    print("[INFO] cache code: ", cache_code)
+    code = run_code_decoration(cache_code)
+    print("[INFO] tensor_decorate code: ", code)
+    final_code = run_tensorization(code, target)
+    if not unit_test(file_name, final_code):
+        final_code = ast_tensorization(code, space_maps)
     return final_code
 
 
 if __name__ == "__main__":
-    file_name = "benchmark/data/cuda_code_test/gemm_128_128_128.cu"
+    file_name = "benchmark/data/cuda_code_test/gemm_32_128_128.cu"
     code = run_transcompile_code(file_name, source="BANG", target="CUDA")
     print(code)

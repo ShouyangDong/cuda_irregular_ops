@@ -6,9 +6,25 @@ from falcon.simplification import simplify_code
 from falcon.smt.util import NodeTransformer, remove_target_prefix
 
 # TODO(dongshouyang): Add more varaibles
-ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
+ParaVar = {
+    "threadIdx.x": 1024,
+    "blockIdx.x": 256,
+    "coreId": 4,
+    "clusterId": 4,
+    "threadIdx.y": 1024,
+    "blockIdx.y": 256,
+    "threadIdx.z": 1024,
+    "blockIdx.z": 256,
+}
 
-cuda_paravar = ["threadIdx.x", "threadIdx.y", "blockIdx.x", "blockIdx.y"]
+cuda_paravar = [
+    "threadIdx.x",
+    "threadIdx.y",
+    "threadIdx.z",
+    "blockIdx.x",
+    "blockIdx.y",
+    "blockIdx.z",
+]
 mlu_paravar = ["coreId", "clusterId"]
 
 
@@ -64,10 +80,15 @@ class LoopRecoveryVisitor(NodeTransformer):
         return node
 
     def visit_StructRef(self, node):
-        assert node.name.name in ["threadIdx", "blockIdx"]
-        name = node.name.name
-        filed = node.field.name
-        return c_ast.ID(name=name + filed)
+        if node.name.name in ["threadIdx", "blockIdx"]:
+            name = node.name.name
+            filed = node.field.name
+            return c_ast.ID(name=name + filed)
+        elif node.name.name in ["blockDim"]:
+            name = node.name.name + node.field.name
+            return c_ast.Constant("int", value=str(1024))
+        else:
+            return self.generic_visit(node)
 
 
 def ast_loop_recovery(code, target="CUDA"):
@@ -122,6 +143,23 @@ if __name__ == "__main__":
     cuda_code = """
     extern "C" __global__ void __launch_bounds__(960) add(float* __restrict__ A, float* __restrict__ B, float* __restrict__ T_add) {
         T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
+    }
+    """
+    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)
+
+    cuda_code = """
+    __global__ void gemm(float *A, float *B, float *C) {
+        int row = blockIdx.x * blockDim.x + threadIdx.x;
+        int col = blockIdx.y * blockDim.y + threadIdx.y;
+
+        if (row < 32 && col < 128) {
+            float sum = 0.0f;
+            for (int i = 0; i < 128; i++) {
+            sum += A[row * 128 + i] * B[i * 128 + col];
+            }
+            C[row * 128 + col] = sum;
+        }
     }
     """
     converted_code = ast_loop_recovery(cuda_code, "CUDA")
