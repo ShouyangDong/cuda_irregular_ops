@@ -1,6 +1,8 @@
 {
-    "matmul": "#pragma intrinsic(__bang_mlp(input[Nram, Wram], output[Nram]))",
+    "matmul": "#pragma intrinsic(__bang_matmul(input[Nram, Wram], output[Nram]))",
     "add": "#pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))",
     "sub": "#pragma intrinsic(__bang_sub(input[Nram, Nram], output[Nram]))",
-    "mul": "#pragma intrinsic(__bang_mul(input[Nram, Nram], output[Nram]))"
+    "mul": "#pragma intrinsic(__bang_mul(input[Nram, Nram], output[Nram]))",
+    "exp": "#pragma intrinsic(__bang_active_exp(input[Nram], output[Nram]))",
+    "div": "#pragma intrinsic(__bang_div(input[Nram, Nram], output[Nram]))"
 }
