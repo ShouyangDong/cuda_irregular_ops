@@ -9,3 +9,20 @@ The overall workflow involves:
 3. **Post-processing**: Converting the processed C code back into platform-specific code, this time adding SIMD (Single Instruction, Multiple Data) instructions where applicable. Final optimizations are applied to maximize performance on the target hardware. 
 
 This repository streamlines the translation process across different processor architectures, ensuring efficient computation on deep learning processors through both architecture-specific and generic optimizations.
+
+# Install
+Install is similar to tvm. First, fill in USE_CUDA and USE_LLVM in cmake/config.cmake, like this:
+
+set(USE_LLVM "/path/to/llvm-config --link-static")
+set(HIDE_PRIVATE_SYMBOLS ON)
+set(USE_CUDA /usr/local/cuda)
+
+Furthermore, to optimize the MCTS algorithm, the following Python packages are necessary:
+```
+pip install chex jax mctx
+```
+
+# Language reference
+Still in progress.
+
+See test cases and tutorials.
