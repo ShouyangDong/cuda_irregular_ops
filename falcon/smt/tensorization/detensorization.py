@@ -127,3 +127,24 @@ if __name__ == "__main__":
     """
     code = ast_detensorization(code, "BANG")
     print(code)
+
+    bang_code = """
+    extern "C" __mlu_global__ void gemm(float *A, float *B, float *C) {
+        __nram__ float A_nram[8 * 128];
+        __wram__ float B_wram[128 * 128];
+        __nram__ float C_nram[8 * 128];
+        if (clusterId < 4) {
+            if (coreId < 4) {
+            __memcpy(A_nram, A + (clusterId * 4 + coreId) * 8 * 128, 8 * 128 * 4,
+                    GDRAM2NRAM);
+            __memcpy(B_wram, B, 128 * 128 * 4, GDRAM2WRAM);
+
+            __bang_matmul(C_nram, A_nram, B_wram, 8, 128, 128);
+            __memcpy(C + (clusterId * 4 + coreId) * 8 * 128, C_nram, 8 * 128 * 4,
+                    NRAM2GDRAM);
+            }
+        }
+    }
+    """
+    converted_code = ast_detensorization(bang_code, "BANG")
+    print(converted_code)

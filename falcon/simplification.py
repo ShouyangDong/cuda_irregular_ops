@@ -43,6 +43,12 @@ class SimplifyConstants(NodeTransformer):
         return self.generic_visit(node)
 
     def visit_BinaryOp(self, node):
+        # 首先递归地化简左右子节点
+        if isinstance(node.left, c_ast.BinaryOp):
+            node.left = self.visit_BinaryOp(node.left)
+        if isinstance(node.right, c_ast.BinaryOp):
+            node.right = self.visit_BinaryOp(node.right)
+
         # 检查是否是可以简化的二元操作符
         if node.op in ("*", "+", "-", "/"):
             if isinstance(node.left, c_ast.Constant) and isinstance(
@@ -59,6 +65,7 @@ class SimplifyConstants(NodeTransformer):
                 elif node.op == "/":
                     result = left_val // right_val if right_val != 0 else 0  # 避免除零
                 return c_ast.Constant("int", value=str(result))
+
         return self.generic_visit(node)
 
     def visit_If(self, node):
