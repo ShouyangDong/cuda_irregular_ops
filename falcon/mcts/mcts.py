@@ -83,7 +83,7 @@ def _run_demo(rng_key: chex.PRNGKey):
     raw_value = jnp.sum(jax.nn.softmax(prior_logits) * qvalues, axis=-1)
 
     root = mctx.RootFnOutput(
-        prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
+        prior_logits=prior_logits,
         value=jnp.ones([batch_size], dtype=jnp.float32),
         # The embedding will hold the state index.
         embedding=states_init,
@@ -104,7 +104,6 @@ def _run_demo(rng_key: chex.PRNGKey):
 
 def main(_):
     rng_key = jax.random.PRNGKey(FLAGS.seed)
-    #   jitted_run_demo =  jax.jit(_run_demo)
     print("Starting search.")
     policy_output = _run_demo(rng_key)
     batch_index = 0

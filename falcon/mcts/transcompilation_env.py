@@ -23,7 +23,7 @@ def objective(file_name, target):
     elif target == "BANG":
         time_ms = perf_bang(file_name)
 
-    if time_ms is None
+    if time_ms is None:
         return 0.0
     return GFLOPS / (time_ms / 1e3)
 
