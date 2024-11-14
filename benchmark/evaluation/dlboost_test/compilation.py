@@ -30,7 +30,7 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob("./dl_boost_test/*.cpp")
+files = glob.glob("benchmark/data/dlboost_code_test/*.cpp")
 counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
@@ -39,7 +39,7 @@ for file_name in tqdm(files):
         code = f.read()
         f.close()
 
-    with open("./macro/dlboost_macro.txt", "r") as f:
+    with open("benchmark/macro/dlboost_macro.txt", "r") as f:
         macro = f.read()
 
     code = macro + code
@@ -49,7 +49,7 @@ for file_name in tqdm(files):
         f.close()
 
     so_name = base_name.replace("cpp", "so")
-    so_name = os.path.join("./dl_boost_test/", so_name)
+    so_name = os.path.join("benchmark/data/dlboost_code_test/", so_name)
 
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
