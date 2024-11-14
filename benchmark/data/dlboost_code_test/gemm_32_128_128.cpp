@@ -7,10 +7,8 @@ extern "C" void gemm_kernel(float *A, float *B, float *result) {
       uint32_t sum = 0;
       for (int local_s = 0; local_s < 8; local_s++) {
         for (int local_i = 0; local_i < 16; local_i++) {
-          arr_a[local_i] =
-              (uint8_t)A[i * 32 * 128 + j * 128 + local_s * 16 + local_i];
-          arr_b[local_i] =
-              (uint8_t)B[i * 128 * 128 + (local_s * 16 + local_i) * 128 + k];
+          arr_a[local_i] = (uint8_t)A[j * 128 + local_s * 16 + local_i];
+          arr_b[local_i] = (uint8_t)B[(local_s * 16 + local_i) * 128 + k];
         }
         for (int i_src = 0; i_src < 4; i_src++) {
           arr_src[i_src] = (uint32_t)0;
@@ -25,7 +23,7 @@ extern "C" void gemm_kernel(float *A, float *B, float *result) {
           sum += val[i];
         }
       }
-      result[i * 32 * 128 + j * 128 + k] = float(sum);
+      result[j * 128 + k] = float(sum);
     }
   }
 }
