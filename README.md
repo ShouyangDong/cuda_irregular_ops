@@ -12,11 +12,11 @@ This repository streamlines the translation process across different processor a
 
 # Install
 Install is similar to tvm. First, fill in USE_CUDA and USE_LLVM in cmake/config.cmake, like this:
-
+```
 set(USE_LLVM "/path/to/llvm-config --link-static")
 set(HIDE_PRIVATE_SYMBOLS ON)
 set(USE_CUDA /usr/local/cuda)
-
+```
 Furthermore, to optimize the MCTS algorithm, the following Python packages are necessary:
 ```
 pip install chex jax mctx
