@@ -4,5 +4,9 @@
     "sub": "#pragma intrinsic(__bang_sub(input[Nram, Nram], output[Nram]))",
     "mul": "#pragma intrinsic(__bang_mul(input[Nram, Nram], output[Nram]))",
     "exp": "#pragma intrinsic(__bang_active_exp(input[Nram], output[Nram]))",
-    "div": "#pragma intrinsic(__bang_div(input[Nram, Nram], output[Nram]))"
+    "div": "#pragma intrinsic(__bang_div(input[Nram, Nram], output[Nram]))",
+    "maxpool": "#pragma intrinsic(__bang_maxpool(input[Nram], output[Nram]))",
+    "sumpool": "#pragma intrinsic(__bang_sumpool(input[Nram], output[Nram]))",
+    "avgpool": "#pragma intrinsic(__bang_avgpool(input[Nram], output[Nram]))",
+    "minpool": "#pragma intrinsic(__bang_minpool(input[Nram], output[Nram]))"
 }
