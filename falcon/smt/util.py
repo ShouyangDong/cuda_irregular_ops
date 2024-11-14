@@ -87,32 +87,27 @@ def add_parallel_variable_prefix(code):
 
 
 def remove_target_prefix(code, target):
-    if target == "BANG":
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
+    patterns = {
+        "BANG": [
+            (r'extern "C"\s+', ""),  # 移除 `extern "C"`
+            (r"__mlu_global__\s+", ""),  # 移除 `__mlu_global__`
+            (r"\b__nram__\s+", ""),  # 移除 `__nram__`
+            (r"\b__wram__\s+", ""),  # 移除 `__wram__`
+            (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
+        ],
+        "CUDA": [
+            (r'extern "C"\s+', ""),  # 移除 `extern "C"`
+            (r"__global__\s+", ""),  # 移除 `__global__`
+            (r"__launch_bounds__\(\d+\)\s+", ""),  # 移除 `__launch_bounds__`
+            (r"\b__restrict__\b", ""),  # 移除 `__restrict__`
+            (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
+        ],
+    }
 
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__mlu_global__\s+", "", code)
+    # 获取对应 `target` 的模式列表，若无则返回原始代码
+    if target in patterns:
+        for pattern, replacement, *flags in patterns[target]:
+            # 处理可选的标志 `flags`
+            code = re.sub(pattern, replacement, code, flags=flags[0] if flags else 0)
 
-        # 使用正则表达式移除 `__nram__` 关键字，仅保留 `float` 声明
-        code = re.sub(r"\b__nram__\s+", "", code)
-
-        # 移除所有 C/C++ 样式的注释
-        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
-
-    elif target == "CUDA":
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
-
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__global__\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"\b__restrict__\b", "", code)
-
-        # 移除所有 C/C++ 样式的注释
-        code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
     return code

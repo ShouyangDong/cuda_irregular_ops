@@ -5,6 +5,7 @@ from pycparser import c_ast, c_generator, c_parser
 from falcon.simplification import simplify_code
 from falcon.smt.const_inline import constant_inline
 from falcon.smt.util import NodeTransformer, remove_target_prefix
+from falcon.stmt_simplification import ast_stmt_simplification
 
 ParaVar = {
     "threadIdx.x": 1024,
@@ -114,6 +115,7 @@ def ast_loop_recovery(code, target="CUDA"):
     code = generator.visit(ast)
     code = simplify_code(code)
     code = constant_inline(code)
+    code = ast_stmt_simplification(code)
     return code
 
 
@@ -164,4 +166,25 @@ if __name__ == "__main__":
     }
     """
     converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    print(converted_code)
+
+    bang_code = """
+    extern "C" __mlu_global__ void gemm(float *A, float *B, float *C) {
+        __nram__ float A_nram[8 * 128];
+        __wram__ float B_wram[128 * 128];
+        __nram__ float C_nram[8 * 128];
+        if (clusterId < 4) {
+            if (coreId < 4) {
+            __memcpy(A_nram, A + (clusterId * 4 + coreId) * 8 * 128, 8 * 128 * 4,
+                    GDRAM2NRAM);
+            __memcpy(B_wram, B, 128 * 128 * 4, GDRAM2WRAM);
+
+            __bang_matmul(C_nram, A_nram, B_wram, 8, 128, 128);
+            __memcpy(C + (clusterId * 4 + coreId) * 8 * 128, C_nram, 8 * 128 * 4,
+                    NRAM2GDRAM);
+            }
+        }
+    }
+    """
+    converted_code = ast_loop_recovery(bang_code, "BANG")
     print(converted_code)

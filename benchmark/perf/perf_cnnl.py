@@ -6,6 +6,8 @@ import timeit
 import torch
 import torch.nn.functional as F
 
+import torch_mlu  # noqa  # isort: skip
+
 
 def perf_elementwise(name, shape):
     x = torch.randn(shape).mlu()

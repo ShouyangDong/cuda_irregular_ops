@@ -22,7 +22,7 @@ def run_transcompile_code(file_name, source, target):
         f.close()
 
     # preprocess
-    code = run_loop_recovery(device_code, target)
+    code = run_loop_recovery(device_code, source)
     if not unit_test(file_name, device_code):
         code = ast_loop_recovery(device_code, source)
 
