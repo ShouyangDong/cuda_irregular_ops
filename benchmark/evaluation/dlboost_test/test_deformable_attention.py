@@ -81,6 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
+    name = base_name.split("_")[0]
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     N, M, D = shape[:3]
@@ -102,13 +103,12 @@ if __name__ == "__main__":
         value, shapes, sampling_locations, attention_weights
     )
 
-    name = "deformable_attention"
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
 
-    with open("./macro/dlboost_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code

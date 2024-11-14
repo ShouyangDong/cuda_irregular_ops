@@ -41,6 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="the source file")
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
+    name = base_name.split("_")[0]
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
@@ -53,13 +54,12 @@ if __name__ == "__main__":
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    file_name = "add.cpp"
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()
         f.close()
 
-    with open("./macro/dlboost_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
@@ -72,7 +72,6 @@ if __name__ == "__main__":
     # Load the shared library with the add function
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
-
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
@@ -83,7 +82,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    result_ctypes = np.zeros(shape, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     function(A_ptr, B_ptr, output_ptr)
     # Check if the results match
