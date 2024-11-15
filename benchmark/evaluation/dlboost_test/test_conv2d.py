@@ -117,8 +117,8 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
+    data_np= np.ones(data_shape).astype(dtype)
+    kernel_np = np.ones(kernel_shape).astype(dtype)
     # cpu compute
     result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
