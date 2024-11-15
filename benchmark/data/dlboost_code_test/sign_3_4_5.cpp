@@ -9,9 +9,9 @@ float signf(float input) {
   }
 }
 extern "C" void sign_kernel(float *input, float *output) {
-  for (size_t i = 0; i < 3; i++) {
-    for (size_t j = 0; j < 4; j++) {
-      for (size_t k = 0; k < 5; k++) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 4; j++) {
+      for (int k = 0; k < 5; k++) {
         output[i * 4 * 5 + j * 5 + k] = signf(input[i * 4 * 5 + j * 5 + k]);
       }
     }
