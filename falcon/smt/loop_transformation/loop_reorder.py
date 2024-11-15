@@ -1,5 +1,7 @@
-from pycparser import c_parser, c_ast, c_generator
 import random
+
+from pycparser import c_ast, c_generator, c_parser
+
 
 class LoopReorderVisitor(c_ast.NodeVisitor):
     def __init__(self):

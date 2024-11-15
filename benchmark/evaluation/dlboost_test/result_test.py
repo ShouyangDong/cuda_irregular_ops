@@ -24,7 +24,7 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob("benchmark/data/dlboost_code_test/gemm*.cpp")
+    files = glob.glob("benchmark/data/dlboost_code_test/bmm*.cpp")
     counter = 0
 
     for file in tqdm(files):

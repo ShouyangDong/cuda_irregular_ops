@@ -3,11 +3,8 @@ import re
 import openai
 
 from falcon.src.pre_processing.preprocessing_prompt import (
-    LOOP_RECOVERY_DEMO_BANG,
-    LOOP_RECOVERY_DEMO_CUDA,
-    LOOP_RECOVERY_PROMPT_BANG,
-    LOOP_RECOVERY_PROMPT_CUDA,
-)
+    LOOP_RECOVERY_DEMO_BANG, LOOP_RECOVERY_DEMO_CUDA,
+    LOOP_RECOVERY_PROMPT_BANG, LOOP_RECOVERY_PROMPT_CUDA)
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""

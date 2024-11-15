@@ -3,11 +3,8 @@ import re
 import openai
 
 from falcon.src.post_processing.post_processing_prompt import (
-    THREAD_BINDING_DEMO_BANG,
-    THREAD_BINDING_DEMO_CUDA,
-    THREAD_BINDING_PROMPT_BANG,
-    THREAD_BINDING_PROMPT_CUDA,
-)
+    THREAD_BINDING_DEMO_BANG, THREAD_BINDING_DEMO_CUDA,
+    THREAD_BINDING_PROMPT_BANG, THREAD_BINDING_PROMPT_CUDA)
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""

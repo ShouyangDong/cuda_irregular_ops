@@ -46,8 +46,8 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
-    A = np.random.rand(batch_size, matrix_dim_i, matrix_dim_j).astype("float32")
-    B = np.random.rand(batch_size, matrix_dim_j, matrix_dim_k).astype("float32")
+    A = np.ones((batch_size, matrix_dim_i, matrix_dim_j)).astype("float32")
+    B = np.ones((batch_size, matrix_dim_j, matrix_dim_k)).astype("float32")
 
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(A, B)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    file_name = "bmm.cpp"
+
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
         code = f.read()

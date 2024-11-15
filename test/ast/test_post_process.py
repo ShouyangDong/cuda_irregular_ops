@@ -5,9 +5,7 @@ from falcon.smt.const_inline import constant_inline
 from falcon.smt.tensorization.tensorization import ast_tensorization
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.post_processing.post_processing import (
-    replace_operation_with_intrinsic,
-    run_code_decoration,
-)
+    replace_operation_with_intrinsic, run_code_decoration)
 
 
 def post_processing_pipeline(code, target):

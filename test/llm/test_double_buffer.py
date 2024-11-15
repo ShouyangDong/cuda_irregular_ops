@@ -3,9 +3,7 @@ import re
 import openai
 
 from falcon.src.post_processing.post_processing_prompt import (
-    DOUBLE_BUFFER_DEMO,
-    DOUBLE_BUFFER_PROMPT,
-)
+    DOUBLE_BUFFER_DEMO, DOUBLE_BUFFER_PROMPT)
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
