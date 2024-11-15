@@ -7,7 +7,7 @@ extern "C" void gemv_kernel(float *A, float *x, float *y) {
     int32_t sum = 0;
     // 使用VNNI指令进行乘加操作
     __m128i acc = _mm_setzero_si128(); // 初始化累加器为0
-    for (int local_s = 0; local_s < 16; ++local_s) {
+    for (int local_s = 0; local_s < 14; ++local_s) {
       // 将浮点数组A和x量化到int8类型
       for (int j = 0; j < 16; ++j) {
         arr_a[j] = A[i * 224 + local_s * 16 + j];

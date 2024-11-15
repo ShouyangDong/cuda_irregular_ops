@@ -14,7 +14,7 @@ def run_compilation(so_name, file_name):
                 "g++",
                 "-shared",
                 "-fPIC",
-                "-mavx512vnni",
+                "-march=icelake-server",
                 "-O3",
                 file_name,
                 "-o",
@@ -59,6 +59,8 @@ if __name__ == "__main__":
         f.write(code)
         f.close()
     success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型

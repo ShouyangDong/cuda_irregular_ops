@@ -12,8 +12,10 @@ extern "C" void gemm_kernel(float *A, float *B, float *result) {
       for (int local_s = 0; local_s < 2; local_s++) {
         // 将浮点数组A和B量化到int8类型
         for (int local_i = 0; local_i < 64; local_i++) {
-          arr_a[local_i] = static_cast<uint8_t>(A[j * 128 + local_s * 64 + local_i]);
-          arr_b[local_i] = static_cast<uint8_t>(B[(local_s * 64 + local_i) * 6 + k]);
+          arr_a[local_i] =
+              static_cast<uint8_t>(A[j * 128 + local_s * 64 + local_i]);
+          arr_b[local_i] =
+              static_cast<uint8_t>(B[(local_s * 64 + local_i) * 128 + k]);
         }
 
         // 加载量化后的数据到512位SIMD寄存器中
@@ -31,7 +33,7 @@ extern "C" void gemm_kernel(float *A, float *B, float *result) {
       for (int i = 0; i < 16; ++i) {
         sum += arr_d[i];
       }
-    
+
       // 反量化并存储到输出矩阵result中
       result[j * 128 + k] = static_cast<float>(sum);
     }

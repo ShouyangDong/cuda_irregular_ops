@@ -58,9 +58,9 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     dtype = torch.float32
 
-    query = torch.randn(shape).to(dtype)
-    key = torch.randn(shape).to(dtype)
-    value = torch.randn(shape).to(dtype)
+    query = torch.ones(shape).to(dtype)
+    key = torch.ones(shape).to(dtype)
+    value = torch.ones(shape).to(dtype)
 
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:

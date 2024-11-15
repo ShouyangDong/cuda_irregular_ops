@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <immintrin.h>
-#include <iostream>
-#include <cassert>
-#include <cstdint>
+#include <time.h>
+#include <stdint.h>
+#include <math.h>
+#include <float.h>

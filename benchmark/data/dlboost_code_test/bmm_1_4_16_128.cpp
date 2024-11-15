@@ -10,7 +10,7 @@ extern "C" void bmm_kernel(float *A, float *B, float *result) {
       // 将浮点数组A和B量化到int8类型
       for (int local_i = 0; local_i < 16; ++local_i) {
         arr_a[local_i] = static_cast<int8_t>(A[j * 16 + local_i]);
-        arr_b[local_i] = static_cast<int8_t>(B[local_i * 6 + k]);
+        arr_b[local_i] = static_cast<int8_t>(B[local_i * 128 + k]);
       }
 
       // 使用VNNI指令进行乘加操作
