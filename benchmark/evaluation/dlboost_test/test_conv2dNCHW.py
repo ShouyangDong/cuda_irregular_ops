@@ -35,7 +35,6 @@ def cpu_conv(input_tensor, kernel, stride, pad=0):
     # 获取输入张量和卷积核的维度
     N, C, H, W = input_tensor.shape
     out_channels, in_channels, kernel_height, kernel_width = kernel.shape
-
     # 计算输出张量的空间维度
     out_height = (H - kernel_height) // stride + 1
     out_width = (W - kernel_width) // stride + 1
@@ -67,7 +66,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     base_name = os.path.basename(args.file)
-    name = base_name.split("_")[0]
+
     name = base_name.split("_")[0]
     data_shape = base_name.split("_")[1:5]
 
@@ -75,7 +74,7 @@ if __name__ == "__main__":
 
     kernel_shape = base_name.split("_")[5:9]
     kernel_shape = [int(intg) for intg in kernel_shape]
-    stride_h = stride_w = int(base_nam.split(".")[0].split("_")[9])
+    stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
     pad = int(base_name.split(".")[0].split("_")[10])
     dtype = "float32"
     wtype = "float32"
@@ -92,7 +91,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open("benchmark/macro/dlboost_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
@@ -122,8 +121,8 @@ if __name__ == "__main__":
     function(input_ptr, kernel_ptr, output_ptr)
     # Check if the results match
     np.testing.assert_allclose(
-        output_ctypes,
-        output_np,
+        result_ctypes,
+        result_cpu,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,

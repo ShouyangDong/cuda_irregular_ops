@@ -1,90 +1,105 @@
-
 extern "C" void
 multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
                                  float *K,     //[batch, seq_len, heads, dim]
                                  float *V,     //[batch, seq_len, heads, dim]
                                  float *output //[batch, seq_len, heads, dim]
 ) {
-  uint8_t arr_a[16];
-  uint8_t arr_b[16];
-  uint32_t arr_src[4];
-  float score[6 * 16];
-  // The dimension 1, 4096,16, 512
-  for (int i = 0; i < 1; i++) {
-    for (int j = 0; j < 4096; j++) {
-      for (int m = 0; m < 16; m++) {
-        for (int n = 0; n < 16; n++) {
-          // score[m *16 + n] = 0.0;
-          uint32_t sum = 0;
-          for (int local_s = 0; local_s < 32; local_s++) {
-            for (int local_i = 0; local_i < 16; local_i++) {
-              arr_a[local_i] = (uint8_t)Q[i * 4096 * 16 * 512 + j * 16 * 512 +
-                                          m * 512 + (local_s * 16 + local_i)];
-              arr_b[local_i] = (uint8_t)K[i * 4096 * 16 * 512 + j * 16 * 512 +
-                                          n * 512 + local_s * 16 + local_i];
-            }
-            for (int i_src = 0; i_src < 4; i_src++) {
-              arr_src[i_src] = (uint32_t)0;
+  int8_t arr_a[64];
+  int8_t arr_b[64];
+  int32_t arr_d[16]; // AVX-512 寄存器能同时处理 16 个 int32 元素
+  float score[6 * 6];
+
+  int8_t arr_a[16];
+  int8_t arr_b[16];
+  int32_t arr_d[4];
+
+  const int batch = 1;
+  const int seq_len = 4096;
+  const int heads = 16;
+  const int dim = 512;
+  const float scale = 1.0f / sqrt(dim);
+
+  for (int i = 0; i < batch; i++) {
+    for (int j = 0; j < seq_len; j++) {
+      for (int m = 0; m < heads; m++) {
+        for (int n = 0; n < heads; n++) {
+          int32_t sum = 0;
+
+          for (int local_s = 0; local_s < dim / 64; local_s++) { // 每次处理 64 个元素
+            for (int local_i = 0; local_i < 64; local_i++) {
+              arr_a[local_i] = static_cast<int8_t>(
+                  Q[i * seq_len * heads * dim + j * heads * dim + m * dim +
+                    local_s * 64 + local_i] *
+                  scale);
+              arr_b[local_i] = static_cast<int8_t>(
+                  K[i * seq_len * heads * dim + j * heads * dim + n * dim +
+                    local_s * 64 + local_i] *
+                  scale);
             }
 
-            __m128i A = _mm_loadu_si128((__m128i *)&arr_a);
-            __m128i B = _mm_loadu_si128((__m128i *)&arr_b);
-            __m128i src = _mm_loadu_si128((__m128i *)&arr_src);
-            __m128i local_result = _mm_dpbusds_epi32(src, A, B);
-            uint32_t *val = (uint32_t *)&local_result;
-            for (int i = 0; i < 4; i++) {
-              sum += val[i];
+            __m512i acc = _mm512_setzero_si512();
+
+            __m512i _a = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_a));
+            __m512i _b = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_b));
+
+            acc = _mm512_dpbusd_epi32(acc, _a, _b);
+
+            _mm512_storeu_si512(reinterpret_cast<__m512i *>(arr_d), acc);
+
+            for (int k = 0; k < 16; ++k) { // 处理 16 个累积结果
+              sum += arr_d[k];
             }
           }
-          score[m * 16 + n] = float(sum);
+
+          score[m * heads + n] = static_cast<float>(sum) * scale;
         }
       }
 
-      // score
-      for (int m_sc = 0; m_sc < 16; m_sc++) {
-        for (int n_sc = 0; n_sc < 16; n_sc++) {
-          score[m_sc * 16 + n_sc] = score[m_sc * 16 + n_sc] / sqrt(512);
+      // Softmax
+      for (int m = 0; m < heads; ++m) {
+        float max_val = -INFINITY;
+        for (int n = 0; n < heads; ++n) {
+          max_val = std::max(max_val, score[m * heads + n]);
+        }
+        float sum_exp = 0.0f;
+        for (int n = 0; n < heads; ++n) {
+          score[m * heads + n] = expf(score[m * heads + n] - max_val);
+          sum_exp += score[m * heads + n];
+        }
+        for (int n = 0; n < heads; ++n) {
+          score[m * heads + n] /= sum_exp;
         }
       }
 
-      // The Softmax code:
-      for (int j_sf = 0; j_sf < 16; ++j_sf) {
-        float sum = 0;
-
-        for (int i_ex = 0; i_ex < 16; ++i_ex) {
-          score[j_sf * 16 + i_ex] = expf(score[j_sf * 16 + i_ex]);
-        }
-        for (int i_sf = 0; i_sf < 16; ++i_sf) {
-          sum += score[j_sf * 16 + i_sf];
-        }
-        for (int k_sf = 0; k_sf < 16; ++k_sf) {
-          score[j_sf * 16 + k_sf] = score[j_sf * 16 + k_sf] / sum;
-        }
-      }
-
-      // The final Matmul
-      for (int m_fl = 0; m_fl < 16; ++m_fl) {
-        for (int n_fl = 0; n_fl < 512; ++n_fl) {
-          uint32_t sum = 0;
-          for (int local_i = 0; local_i < 16; local_i++) {
-            arr_a[local_i] = (uint8_t)score[m_fl * 16 + local_i];
-            arr_b[local_i] = (uint8_t)
-                V[i * 4096 * 16 * 512 + j * 16 * 512 + local_i * 512 + n_fl];
-          }
-          for (int i_src = 0; i_src < 4; i_src++) {
-            arr_src[i_src] = (uint32_t)0;
+      for (int j_dl = 0; j_dl < 16; j_dl++) {
+        for (int k_dl = 0; k_dl < 256; k_dl++) {
+          int32_t sum = 0;
+          // 将浮点数组A和B量化到int8类型
+          for (int local_i = 0; local_i < 16; ++local_i) {
+            arr_a[local_i] = static_cast<int8_t>(score[j_dl * 16 + local_i]);
+            arr_b[local_i] = static_cast<int8_t>(V[i * seq_len * heads * dim + j * heads * dim + local_i * 256 + k_dl]);
           }
 
-          __m128i A = _mm_loadu_si128((__m128i *)&arr_a);
-          __m128i B = _mm_loadu_si128((__m128i *)&arr_b);
-          __m128i src = _mm_loadu_si128((__m128i *)&arr_src);
-          __m128i local_result = _mm_dpbusds_epi32(src, A, B);
-          uint32_t *val = (uint32_t *)&local_result;
-          for (int i = 0; i < 4; i++) {
-            sum += val[i];
+          // 使用VNNI指令进行乘加操作
+          __m128i acc = _mm_setzero_si128(); // 初始化累加器为0
+
+          // 加载量化后的数据到SIMD寄存器中
+          __m128i _a = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_a));
+          __m128i _b = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_b));
+
+          // 使用_mm_dpbusds_epi32进行乘加操作 (VNNI)
+          acc = _mm_dpbusds_epi32(acc, _a, _b); // 执行乘加操作：acc += a * b
+
+          // 将累加结果存储到arr_d中
+          _mm_storeu_si128(reinterpret_cast<__m128i *>(arr_d), acc);
+
+          // 将arr_d中的值累加得到最终的结果
+          for (int i_dl = 0; i_dl < 4; ++i_dl) {
+            sum += arr_d[i_dl];
           }
-          output[i * 4096 * 16 * 512 + j * 16 * 512 + m_fl * 512 + n_fl] =
-              float(sum);
+
+          // 反量化并存储到输出矩阵result中
+          result[i * seq_len * heads * dim + j * heads * dim + j_dl * 256 + k_dl] = static_cast<float>(sum);
         }
       }
     }
