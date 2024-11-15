@@ -9,9 +9,9 @@ multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
   int32_t arr_d[16]; // AVX-512 寄存器能同时处理 16 个 int32 元素
   float score[6 * 6];
 
-  int8_t arr_a[16];
-  int8_t arr_b[16];
-  int32_t arr_d[4];
+  int8_t arr_a_a[16];
+  int8_t arr_b_b[16];
+  int32_t arr_d_d[4];
 
   const int batch = 1;
   const int seq_len = 2048;
@@ -87,30 +87,30 @@ multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
           int32_t sum = 0;
           // 将浮点数组A和B量化到int8类型
           for (int local_i = 0; local_i < 16; ++local_i) {
-            arr_a[local_i] = static_cast<int8_t>(score[j_dl * 16 + local_i]);
-            arr_b[local_i] = static_cast<int8_t>(V[i * seq_len * heads * dim + j * heads * dim + local_i * 256 + k_dl]);
+            arr_a_a[local_i] = static_cast<int8_t>(score[j_dl * 16 + local_i]);
+            arr_b_b[local_i] = static_cast<int8_t>(V[i * seq_len * heads * dim + j * heads * dim + local_i * 256 + k_dl]);
           }
 
           // 使用VNNI指令进行乘加操作
           __m128i acc = _mm_setzero_si128(); // 初始化累加器为0
 
           // 加载量化后的数据到SIMD寄存器中
-          __m128i _a = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_a));
-          __m128i _b = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_b));
+          __m128i _a = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_a_a));
+          __m128i _b = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_b_b));
 
           // 使用_mm_dpbusds_epi32进行乘加操作 (VNNI)
           acc = _mm_dpbusds_epi32(acc, _a, _b); // 执行乘加操作：acc += a * b
 
           // 将累加结果存储到arr_d中
-          _mm_storeu_si128(reinterpret_cast<__m128i *>(arr_d), acc);
+          _mm_storeu_si128(reinterpret_cast<__m128i *>(arr_d_d), acc);
 
           // 将arr_d中的值累加得到最终的结果
           for (int i_dl = 0; i_dl < 4; ++i_dl) {
-            sum += arr_d[i_dl];
+            sum += arr_d_d[i_dl];
           }
 
           // 反量化并存储到输出矩阵result中
-          result[i * seq_len * heads * dim + j * heads * dim + j_dl * 256 + k_dl] = static_cast<float>(sum);
+          output[i * seq_len * heads * dim + j * heads * dim + j_dl * 256 + k_dl] = static_cast<float>(sum);
         }
       }
     }
