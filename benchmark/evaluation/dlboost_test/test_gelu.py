@@ -14,7 +14,7 @@ def run_compilation(so_name, file_name):
                 "g++",
                 "-shared",
                 "-fPIC",
-                "-march=icelake-server",
+                "-mavx512vnni",
                 "-O3",
                 file_name,
                 "-o",

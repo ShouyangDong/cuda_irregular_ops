@@ -13,7 +13,7 @@ def run_compilation(so_name, file_name):
                 "g++",
                 "-shared",
                 "-fPIC",
-                "-march=icelake-server",
+                "-mavx512vnni",
                 "-O3",
                 file_name,
                 "-o",
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code

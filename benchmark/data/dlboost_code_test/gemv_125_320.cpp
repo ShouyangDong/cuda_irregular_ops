@@ -1,27 +1,33 @@
-extern "C" void gemv_kernel(float *A, float *x, float *y) {
-  uint8_t arr_a[16];
-  uint8_t arr_b[16];
-  uint32_t arr_src[4];
-  for (int i = 0; i < 125; i++) {
+extern "C" void gemv_kernel( float *A, float *x, float *y) {
+  uint8_t arr_a[64];
+  uint8_t arr_b[64];
+  uint32_t arr_d[16];
+
+  for (int i = 0; i < 125; ++i) {
     uint32_t sum = 0;
-    for (int local_s = 0; local_s < 20; local_s++) {
-      for (int local_i = 0; local_i < 16; local_i++) {
-        arr_a[local_i] = (uint8_t)A[i * 320 + (local_s * 16 + local_i)];
-        arr_b[local_i] = (uint8_t)x[local_s * 16 + local_i];
-      }
-      for (int i_src = 0; i_src < 4; i_src++) {
-        arr_src[i_src] = (uint32_t)0;
+    __m512i acc = _mm512_setzero_si512(); // 累加器初始化为0
+
+    for (int local_s = 0; local_s < 5; ++local_s) {
+      // 加载A和x到arr_a和arr_b
+      for (int j = 0; j < 64; ++j) {
+        arr_a[j] = A[i * 320 + local_s * 64 + j];
+        arr_b[j] = x[local_s * 64 + j];
       }
 
-      __m128i A = _mm_loadu_si128((__m128i *)&arr_a);
-      __m128i B = _mm_loadu_si128((__m128i *)&arr_b);
-      __m128i src = _mm_loadu_si128((__m128i *)&arr_src);
-      __m128i local_result = _mm_dpbusds_epi32(src, A, B);
-      uint32_t *val = (uint32_t *)&local_result;
-      for (int i = 0; i < 4; i++) {
-        sum += val[i];
-      }
+      // 使用VNNI指令进行乘加操作
+      __m512i _a = _mm512_loadu_si512(arr_a);
+      __m512i _b = _mm512_loadu_si512(arr_b);
+      acc = _mm512_dpbusd_epi32(acc, _a, _b);
     }
-    y[i] = float(sum);
+
+    // 将累加结果存储到arr_d中
+    _mm512_storeu_si512(arr_d, acc);
+
+    // 将arr_d中的值累加得到最终的结果
+    for (int k = 0; k < 16; ++k) {
+      sum += arr_d[k];
+    }
+
+    y[i] = static_cast<float>(sum);
   }
 }

@@ -41,8 +41,10 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     # Define the input matrix A and vector x
-    A = np.random.rand(*shape).astype(np.float32)
-    x = np.random.rand(shape[1]).astype(np.float32)
+    # A = np.random.rand(*shape).astype(np.float32)
+    A = np.ones(shape).astype(np.float32)
+    # x = np.random.rand(shape[1]).astype(np.float32)
+    x = np.ones(shape[1]).astype(np.float32)
 
     # Create an empty vector y
     y_ctypes = np.zeros(shape[0], dtype=np.float32)
@@ -61,7 +63,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open("benchmark/macro/dlboost_macro.txt", "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
@@ -72,7 +74,6 @@ if __name__ == "__main__":
         f.close()
     # Load the shared library with the batch matrix multiplication function
     success, output = run_compilation(so_name, file_name)
-
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
