@@ -1,14 +1,12 @@
-
-
 extern "C" void conv2dnchw_kernel(float *input, float *kernel, float *output) {
   int batch_size = 32;
   int input_height = 8;
   int input_width = 8;
-  int input_channels = 128;  // 输入通道增加为128
+  int input_channels = 64;
   int kernel_height = 2;
   int kernel_width = 2;
-  int output_channels = 64;  // 输出通道数为64
-  int stride = 2;
+  int output_channels = 128;
+  int stride = 3;
   int padding = 0;
   int output_height = (input_height - kernel_height) / stride + 1;
   int output_width = (input_width - kernel_width) / stride + 1;
@@ -18,9 +16,9 @@ extern "C" void conv2dnchw_kernel(float *input, float *kernel, float *output) {
     for (int oc = 0; oc < output_channels; oc++) {
       for (int oh = 0; oh < output_height; oh++) {
         for (int ow = 0; ow < output_width; ow++) {
-          int32_t sum = 0;
+          int32_t sum = 0;  // 使用int32_t来存储累加结果
 
-          // 每次遍历128个通道，以便使用AVX-512的向量化能力
+          // 每次遍历64个通道，以便使用AVX-512的向量化能力
           for (int ic = 0; ic < input_channels; ic += 64) {
             int8_t input_block[64];
             int8_t kernel_block[64];
@@ -78,3 +76,4 @@ extern "C" void conv2dnchw_kernel(float *input, float *kernel, float *output) {
     }
   }
 }
+
