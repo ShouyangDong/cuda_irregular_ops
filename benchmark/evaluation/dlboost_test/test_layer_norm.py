@@ -6,30 +6,7 @@ from ctypes import CDLL
 
 import numpy as np
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "g++",
-                "-shared",
-                "-fPIC",
-                "-march=icelake-server",
-                "-O3",
-                file_name,
-                "-o",
-                so_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            # text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+from benchmark.utils import run_compilation
 
 
 def ref_program(x, gamma, beta, eps=1e-5):
@@ -66,7 +43,6 @@ if __name__ == "__main__":
 
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
-    success, output = run_compilation(so_name, file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型

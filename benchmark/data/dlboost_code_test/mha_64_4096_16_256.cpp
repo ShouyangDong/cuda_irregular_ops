@@ -1,8 +1,8 @@
 extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
-                                 float *K,     //[batch, seq_len, heads, dim]
-                                 float *V,     //[batch, seq_len, heads, dim]
-                                 float *output //[batch, seq_len, heads, dim]
+multiHeadAttentionForward_kernel(float *Q,     
+                                 float *K,     
+                                 float *V,     
+                                 float *output 
 ) {
   int8_t arr_a[64];
   int8_t arr_b[64];

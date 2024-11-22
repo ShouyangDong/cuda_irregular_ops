@@ -4,10 +4,15 @@ from falcon.smt.loop_transformation.loop_split import ast_loop_split
 from falcon.smt.tensorization.detensorization import ast_detensorization
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
-    run_apply_split, run_loop_fusion, run_split_annotation)
+    run_apply_split,
+    run_loop_fusion,
+    run_split_annotation,
+)
 from falcon.src.post_processing.post_processing import run_thread_binding
-from falcon.src.pre_processing.preprocessing import (run_detensorization,
-                                                     run_loop_recovery)
+from falcon.src.pre_processing.preprocessing import (
+    run_detensorization,
+    run_loop_recovery,
+)
 from falcon.unit_test import unit_test
 
 

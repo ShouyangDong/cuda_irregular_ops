@@ -1,9 +1,9 @@
 
 extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
-                                 float *K,     //[batch, seq_len, heads, dim]
-                                 float *V,     //[batch, seq_len, heads, dim]
-                                 float *output //[batch, seq_len, heads, dim]
+multiHeadAttentionForward_kernel(float *Q,     
+                                 float *K,     
+                                 float *V,     
+                                 float *output 
 ) {
   float score[12 * 12];
   // The dimension 1, 4096, 12, 256

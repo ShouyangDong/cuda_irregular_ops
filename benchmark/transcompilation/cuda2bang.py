@@ -1,5 +1,6 @@
-import re
 import os
+import re
+
 import openai
 
 model_name = """gpt-4-turbo"""
@@ -33,6 +34,7 @@ def run_transcompile(code):
         return code_content
     return None
 
+
 if __name__ == "__main__":
     files = glob.glob("benchmark/data/cuda_code_test/*.cu")
     for file in tqdm(files):
@@ -40,7 +42,7 @@ if __name__ == "__main__":
         with open(file, "r") as f:
             source = f.read()
             f.close()
-        
+
         target_code = run_transcompile(source)
         file_name = os.path.join("benchmark/transcompilation/cuda/bang", base_name)
         with open(file_name, mode="w") as f:

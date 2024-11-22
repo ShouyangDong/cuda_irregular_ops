@@ -5,53 +5,7 @@ import subprocess
 
 import numpy as np
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "g++",
-                "-shared",
-                "-fPIC",
-                "-march=icelake-server",
-                "-O3",
-                file_name,
-                "-o",
-                so_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            # text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
-
-def minpool_np(data, kernel_stride):
-    """min pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of avgpool
-
-    stride : list or tuple
-        The stride of avgpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.min(mask, axis=(1, 2))
-    return ret
+from benchmark.utils import minpool_np, run_compilation
 
 
 def generate_data(shape, dtype):

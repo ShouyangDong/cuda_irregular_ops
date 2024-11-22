@@ -3,8 +3,12 @@ import json
 from falcon.smt.auto_cache import ast_auto_cache
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.post_processing.post_processing import (
-    replace_operation_with_intrinsic, run_cache_process, run_code_decoration,
-    run_tensorization, run_thread_binding)
+    replace_operation_with_intrinsic,
+    run_cache_process,
+    run_code_decoration,
+    run_tensorization,
+    run_thread_binding,
+)
 from falcon.unit_test import unit_test
 
 

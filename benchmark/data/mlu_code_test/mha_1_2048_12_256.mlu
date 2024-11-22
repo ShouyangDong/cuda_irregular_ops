@@ -1,9 +1,9 @@
 
 
-__mlu_global__ void mha(float *Q,     //[batch, seq_len, heads, dim]
-                        float *K,     //[batch, seq_len, heads, dim]
-                        float *V,     //[batch, seq_len, heads, dim]
-                        float *output //[batch, seq_len, heads, dim]
+__mlu_global__ void mha(float *Q,     
+                        float *K,     
+                        float *V,     
+                        float *output 
 ) {
   __nram__ float score[12 * 12];
   __nram__ float dinominator[12];

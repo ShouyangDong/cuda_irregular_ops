@@ -1,8 +1,11 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import (NodeTransformer, add_memory_prefix,
-                             add_parallel_variable_prefix,
-                             remove_target_prefix)
+from falcon.smt.util import (
+    NodeTransformer,
+    add_memory_prefix,
+    add_parallel_variable_prefix,
+    remove_target_prefix,
+)
 
 builtin_var = {"CUDA": ["threadIdxx", "blockIdxx"], "BANG": ["coreId", "clusterId"]}
 builtin_dim = {

@@ -5,6 +5,8 @@ import subprocess
 
 import numpy as np
 
+from benchmark.perf.utils import avgpool_np
+
 
 def run_compilation(so_name, file_name):
     try:

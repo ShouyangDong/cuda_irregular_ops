@@ -1,0 +1,385 @@
+import ctypes
+import glob
+import os
+import re
+from string import Template
+
+import numpy as np
+import torch
+
+from benchmark.utils import conv2d_nchw, maxpool_np, run_compilation
+
+
+def perf_function(file_name):
+    with open(file_name, "r") as f:
+        original_function = f.read()
+        f.close()
+
+    # 正则表达式提取参数部分
+    function_signature_pattern = r"void (\w+)\(([^()]*)\)"
+    match = re.search(function_signature_pattern, original_function, re.DOTALL)
+    if not match:
+        raise ValueError("Could not find function signature.")
+
+    # 获取函数名称和参数列表
+    kernel_name = match.group(1)
+    param_list_str = match.group(2)
+
+    # 构造参数列表
+    params = [param_str.strip() for param_str in param_list_str.split(",")]
+    param_list = ", ".join(
+        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in params]
+    )
+
+    # 构造新的计时函数模板
+    cpp_pef_template = Template(
+        """  
+    #include <stdio.h>  
+    #include <time.h>  
+    #include <math.h>
+    #include <float.h>
+    #include <stdio.h>
+    #include <immintrin.h>
+    #include <stdint.h>
+
+    // Original function  
+    ${original_function}
+
+    extern "C" void timed_${kernel_name}(${param_list}) {  
+        clock_t start, end;  
+        int msec;  
+
+        // Calling original kernel  
+        start = clock();  
+        for (int i = 0; i < 100; i++) {  
+            ${kernel_name}(${called_param_list});  
+        }  
+        end = clock();  
+        msec = (end - start) * 10000 / CLOCKS_PER_SEC;  
+        printf("Time taken for ${kernel_name}:  %d us\\n", msec);  
+    }  
+    """
+    )
+
+    pattern = r'extern\s*"C"\s*'
+    # 使用 re.sub 替换匹配部分为空字符串
+    cleaned_code = re.sub(pattern, "", original_function)
+
+    called_param_list = param_list.replace("float *", "")
+    called_param_list = called_param_list.replace("int *", "")
+
+    # 动态替换模板
+    new_code = cpp_pef_template.substitute(
+        kernel_name=kernel_name,
+        param_list=param_list,
+        called_param_list=called_param_list,
+        original_function=cleaned_code,
+    )
+
+    # 保存生成的 C++ 文件
+    output_file = file_name.replace(".cpp", "_bak.cpp")
+    with open(output_file, "w") as f:
+        f.write(new_code)
+
+
+def perf_pipeline(file_name):
+    perf_function(file_name)
+    backup_file_name = file_name.replace(".cpp", "_bak.cpp")
+    so_name = file_name.replace(".cpp", ".so")
+    run_compilation(so_name, backup_file_name)
+
+
+def perf_unary(shape, function, dtype="float32"):
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+    # 创建输入数组
+    input_array = np.random.uniform(size=shape).astype(dtype)
+
+    # 创建输出数组
+    output_array = np.zeros_like(input_array)
+
+    # 将输入数组和输出数组转换为C指针类型
+    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(input_ptr, output_ptr)
+
+
+def perf_binary(shape_A, shape_B, shape_C, function, dtype="float32"):
+    A = np.random.rand(*shape_A).astype("float32")
+    B = np.random.rand(*shape_B).astype("float32")
+
+    # Convert the matrices to contiguous memory for ctypes
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    result_ctypes = np.zeros(shape_C, dtype=np.float32)
+    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    function(A_ptr, B_ptr, output_ptr)
+
+
+def perf_deformable(shape, function):
+    N, M, D = shape[:3]
+    Lq, L, P = shape[3:]
+    shapes = torch.as_tensor(
+        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
+    )
+    level_start_index = torch.cat(
+        (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
+    )
+    S = sum([(H * W).item() for H, W in shapes])
+
+    value = torch.rand(N, S, M, D) * 0.01
+    sampling_locations = torch.rand(N, Lq, M, L, P, 2)
+    attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
+
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+
+    # 创建输出数组
+    output_array = np.zeros(
+        (
+            value.shape[0],
+            sampling_locations.shape[1],
+            value.shape[2] * value.shape[3],
+        ),
+        "float32",
+    )
+
+    # 将输入数组和输出数组转换为C指针类型
+    value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    attention_weights_ptr = attention_weights.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(
+        value_ptr, shapes_ptr, sampling_locations_ptr, attention_weights_ptr, output_ptr
+    )
+
+
+def perf_pooling(shape, kernel, stride, function, dtype="float32"):
+    input_array = np.random.rand(*shape).astype("float32")
+    # Calculate the result using numpy for comparison
+    output_np = maxpool_np(input_array, kernel + stride)
+    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
+    # Convert the arrays to contiguous memory for ctypes
+    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    function(input_ptr, output_ptr)
+
+
+def perf_scaled_dot_product_attention(shape, function):
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+    # 创建输入数组
+    input_array_1 = np.random.uniform(size=shape).astype(dtype)
+    input_array_2 = np.random.uniform(size=shape).astype(dtype)
+    input_array_3 = np.random.uniform(size=shape).astype(dtype)
+    # 创建输出数组
+    output_array = np.zeros_like(input_array_1)
+
+    # 将输入数组和输出数组转换为C指针类型
+    input_ptr_1 = input_array_1.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_2 = input_array_2.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr_3 = input_array_3.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(input_ptr, input_ptr_2, input_ptr_3, output_ptr)
+
+
+def perf_layernorm(shape, function, dtype="float32"):
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
+    # 创建输入数组
+    dtype = "float32"
+    input_array = np.random.uniform(size=shape).astype(dtype)
+    gamma_array = np.random.uniform(size=shape[-1:]).astype(dtype)
+    beta_array = np.random.uniform(size=shape[-1:]).astype(dtype)
+
+    # 创建输出数组
+    output_array = np.zeros_like(input_array)
+
+    # 将输入数组和输出数组转换为C指针类型
+    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    gamma_ptr = gamma_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
+
+
+def benchmark(file_name):
+    base_name = os.path.basename(file_name)
+    name = base_name.split("_")[0]
+    perf_pipeline(file_name)
+    lib = ctypes.CDLL(file_name.replace(".cpp", ".so"))
+    function = getattr(lib, "timed_" + name + "_kernel")
+    if name == "add":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        perf_binary(shape, shape, shape, function)
+
+    elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
+        shape = base_name.split("_")[1:5]
+        shape = [int(intg) for intg in shape]
+        kernel_stride = base_name.split(".")[0].split("_")[5:]
+        kernel_stride = [int(intg) for intg in kernel_stride]
+        perf_pooling(shape, kernel_stride[:2], kernel_stride[2:], function)
+
+    elif name == "bmm":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
+        shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
+        shape_B = [batch_size, matrix_dim_k, matrix_dim_j]
+        shape_C = [batch_size, matrix_dim_i, matrix_dim_k]
+        perf_binary(shape_A, shape_B, shape_C, function)
+
+    elif name == "gemm":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        shape_A = [1, shape[0], shape[1]]
+        shape_B = [1, shape[2], shape[1]]
+        shape_C = [1, shape[0], shape[2]]
+        perf_binary(shape_A, shape_B, shape_C, function)
+
+    elif name in ["sign", "relu", "sigmoid", "softmax", "rmsnorm", "gelu"]:
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        perf_unary(shape, function)
+
+    elif name == "conv2d":
+        data_shape = base_name.split("_")[1:5]
+        data_shape = [int(intg) for intg in data_shape]
+
+        kernel_shape = base_name.split("_")[5:9]
+        kernel_shape = [int(intg) for intg in kernel_shape]
+        stride_h = stride_w = int(base_name.split("_")[9])
+        pad_h = pad_w = int(base_name.split("_")[10].replace(".cpp", ""))
+
+        batch_size, input_height, input_width, input_channel = data_shape
+        output_channel, kernel_height, kernel_width, _ = kernel_shape
+        out_height = int((input_height + np.sum(pad_h) - kernel_height) / stride_h + 1)
+        out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
+        output_shape = [batch_size, out_height, out_width, output_channel]
+        perf_binary(data_shape, kernel_shape, output_shape, function)
+
+    elif name == "conv2dnchw":
+        data_shape = base_name.split("_")[1:5]
+        data_shape = [int(intg) for intg in data_shape]
+        kernel_shape = base_name.split("_")[5:9]
+        kernel_shape = [int(intg) for intg in kernel_shape]
+        stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
+        pad = int(base_name.split(".")[0].split("_")[10])
+        dtype = "float32"
+        wtype = "float32"
+
+        # generate data
+        data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
+        kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(
+            dtype
+        )
+        # cpu compute
+        result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
+        perf_binary(data_shape, kernel_shape, result_cpu.shape, function)
+
+    elif name == "gemv":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        kernel_shape = [shape[1]]
+        output_shape = [shape[0]]
+        perf_binary(shape, kernel_shape, output_shape, function)
+
+    elif name == "conv1d":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        shape = [shape[1]]
+        kernel_shape = [3]
+        output_shape = [shape[0]]
+        perf_binary(shape, kernel_shape, output_shape, function)
+
+    elif name == "depthwiseconv":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+        shape = [input_height, input_height, input_channels]
+        kernel_shape = [kernel_size, kernel_size, input_channels]
+        # Calculate the output tensor shape
+        output_height = input_height - kernel_size + 1
+        output_width = input_height - kernel_size + 1
+        output_shape = [output_height, output_width, input_channels]
+        perf_binary(shape, kernel_shape, output_shape, function)
+
+    elif name == "deformable":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        perf_deformable(shape, function)
+
+    elif name == "mha":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        perf_scaled_dot_product_attention(shape, function)
+
+    elif name == "layernorm":
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        perf_layernorm(shape, function)
+
+    else:
+        print("Undefined file: ", file_name)
+
+    os.remove(file_name.replace(".cpp", "_bak.cpp"))
+    os.remove(file_name.replace(".cpp", ".so"))
+
+
+if __name__ == "__main__":
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/dlboost_code_test/*.cpp")
+    )
+
+    for file in files:
+        benchmark(file)

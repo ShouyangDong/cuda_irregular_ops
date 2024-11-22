@@ -1,8 +1,8 @@
 extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     //[batch, seq_len, heads, dim]
-                                 float *K,     //[batch, seq_len, heads, dim]
-                                 float *V,     //[batch, seq_len, heads, dim]
-                                 float *output //[batch, seq_len, heads, dim]
+multiHeadAttentionForward_kernel(float *Q,     
+                                 float *K,     
+                                 float *V,     
+                                 float *output 
 ) {
   // 定义所需的数组，使用不同的变量名以避免重定义
   int8_t arr_a_64[64];

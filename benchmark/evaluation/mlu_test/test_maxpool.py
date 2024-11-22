@@ -8,30 +8,9 @@ import tvm.topi.testing
 from bangpy import tensor_op as tsop
 from toc import Environment
 
+from benchmark.utils import maxpool_np
+
 env = Environment("cambricon/mlu590-h8")
-
-
-def maxpool_np(data, kernel_stride):
-    """max pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of avgpool
-
-    stride : list or tuple
-        The stride of avgpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.max(mask, axis=(1, 2))
-    return ret
 
 
 def generate_data(shape, dtype):

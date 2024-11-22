@@ -3,8 +3,7 @@ import re
 import numpy as np
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import (NodeTransformer, add_memory_prefix,
-                             remove_target_prefix)
+from falcon.smt.util import NodeTransformer, add_memory_prefix, remove_target_prefix
 
 
 class PragmaToSIMDTransformer(NodeTransformer):

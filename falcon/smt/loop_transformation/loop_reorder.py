@@ -26,12 +26,13 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
                             init=node.init,
                             cond=node.cond,
                             next=node.next,
-                            stmt=stmt_node
+                            stmt=stmt_node,
                         )
                         node.init = inner_loop.init
                         node.cond = inner_loop.cond
                         node.next = inner_loop.next
                         node.stmt = c_ast.Compound(block_items=[new_inner_loop])
+
 
 def ast_loop_reorder(c_code):
     # 解析 C 代码
@@ -43,6 +44,7 @@ def ast_loop_reorder(c_code):
     visitor.visit(ast)
     visitor.reorder_loops()
     return generator.visit(ast)
+
 
 if __name__ == "__main__":
     c_code = """

@@ -5,6 +5,8 @@ import subprocess
 
 import numpy as np
 
+from benchmark.utils import sumpool_np
+
 
 def run_compilation(so_name, file_name):
     try:
@@ -20,29 +22,6 @@ def run_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
-
-
-def sumpool_np(data, kernel_stride):
-    """sum pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of sumpool
-
-    stride : list or tuple
-        The stride of sumpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.sum(mask, axis=(1, 2))
-    return ret
 
 
 def generate_data(shape, dtype):

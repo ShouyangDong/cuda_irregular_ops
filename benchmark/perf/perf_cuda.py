@@ -265,8 +265,6 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
 
 
 def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
-    print(file)
-
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
         code = open(file).read()
@@ -830,24 +828,24 @@ if __name__ == "__main__":
                 name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
             )
 
-        # elif name == "conv2dnchw":
-        #    data_shape = base_name.split("_")[1:5]
-        #    data_shape = [int(intg) for intg in data_shape]
-        #    kernel_shape = base_name.split("_")[5:9]
-        #    kernel_shape = [int(intg) for intg in kernel_shape]
-        #    stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
-        #    pad = int(base_name.split(".")[0].split("_")[10])
+        elif name == "conv2dnchw":
+            data_shape = base_name.split("_")[1:5]
+            data_shape = [int(intg) for intg in data_shape]
+            kernel_shape = base_name.split("_")[5:9]
+            kernel_shape = [int(intg) for intg in kernel_shape]
+            stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
+            pad = int(base_name.split(".")[0].split("_")[10])
 
-        #    perf_conv2d_nchw(
-        #        base_name,
-        #        file,
-        #        data_shape,
-        #        kernel_shape[1],
-        #        kernel_shape[0],
-        #        kernel_shape[2],
-        #        stride_h,
-        #        pad,
-        #    )
+            perf_conv2d_nchw(
+                base_name,
+                file,
+                data_shape,
+                kernel_shape[1],
+                kernel_shape[0],
+                kernel_shape[2],
+                stride_h,
+                pad,
+            )
 
         elif name == "gemv":
             shapes = base_name.split(".")[0]

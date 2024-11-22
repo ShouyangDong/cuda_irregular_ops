@@ -1,7 +1,9 @@
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.tensorization.detensorization import ast_detensorization
-from falcon.src.pre_processing.preprocessing import (run_detensorization,
-                                                     run_loop_recovery)
+from falcon.src.pre_processing.preprocessing import (
+    run_detensorization,
+    run_loop_recovery,
+)
 from falcon.unit_test import unit_test
 
 

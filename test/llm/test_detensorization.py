@@ -3,8 +3,7 @@ import re
 
 import openai
 
-from falcon.src.pre_processing.preprocessing_prompt import \
-    DETENSORIZATION_PROMPT_BANG
+from falcon.src.pre_processing.preprocessing_prompt import DETENSORIZATION_PROMPT_BANG
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""

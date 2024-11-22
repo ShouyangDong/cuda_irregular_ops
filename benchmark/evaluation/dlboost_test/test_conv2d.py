@@ -5,30 +5,7 @@ import subprocess
 
 import numpy as np
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "g++",
-                "-shared",
-                "-fPIC",
-                "-march=icelake-server",
-                "-O3",
-                file_name,
-                "-o",
-                so_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            # text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+from benchmark.utils import run_compilation
 
 
 def get_im2col_indices(images_shape, filter_shape, padding, stride):
@@ -117,7 +94,7 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    data_np= np.ones(data_shape).astype(dtype)
+    data_np = np.ones(data_shape).astype(dtype)
     kernel_np = np.ones(kernel_shape).astype(dtype)
     # cpu compute
     result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)
