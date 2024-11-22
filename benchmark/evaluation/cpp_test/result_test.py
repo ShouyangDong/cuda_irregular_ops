@@ -13,7 +13,6 @@ def run_test(file_name, test_file):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            # text=True,
             timeout=400,
         )
         return True, output

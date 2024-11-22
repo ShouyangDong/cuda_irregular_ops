@@ -141,7 +141,6 @@ def run_compilation(so_name, file_name):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
-            # text=True,
             timeout=15,
         )
         return True, output
