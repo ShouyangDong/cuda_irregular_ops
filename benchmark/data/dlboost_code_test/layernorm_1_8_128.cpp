@@ -1,9 +1,6 @@
 
-extern "C" void layernorm_kernel(float *input, 
-                                 float *gamma, 
-                                 float *beta,  
-                                 float *output)
-{
+extern "C" void layernorm_kernel(float *input, float *gamma, float *beta,
+                                 float *output) {
   for (int i_seq = 0; i_seq < 8; i_seq++) {
     float mean = 0.0;
     float variance = 0.0;

@@ -1,9 +1,4 @@
-extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     
-                                 float *K,     
-                                 float *V,     
-                                 float *output 
-) {
+extern "C" void mha_kernel(float *Q, float *K, float *V, float *output) {
   // 定义所需的数组，使用不同的变量名以避免重定义
   int8_t arr_a_64[64];
   int8_t arr_b_64[64];
@@ -26,7 +21,8 @@ multiHeadAttentionForward_kernel(float *Q,
         for (int n = 0; n < heads; n++) {
           int32_t sum = 0;
 
-          for (int local_s = 0; local_s < dim / 64; local_s++) { // 每次处理 64 个元素
+          for (int local_s = 0; local_s < dim / 64;
+               local_s++) { // 每次处理 64 个元素
             for (int local_i = 0; local_i < 64; local_i++) {
               arr_a_64[local_i] = static_cast<int8_t>(
                   Q[i * seq_len * heads * dim + j * heads * dim + m * dim +
@@ -38,8 +34,10 @@ multiHeadAttentionForward_kernel(float *Q,
 
             __m512i acc = _mm512_setzero_si512();
 
-            __m512i _a = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_a_64));
-            __m512i _b = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_b_64));
+            __m512i _a =
+                _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_a_64));
+            __m512i _b =
+                _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_b_64));
 
             acc = _mm512_dpbusd_epi32(acc, _a, _b);
 
@@ -76,17 +74,21 @@ multiHeadAttentionForward_kernel(float *Q,
           int32_t sum = 0;
           // 将浮点数组量化到int8类型
           for (int local_i = 0; local_i < heads; ++local_i) {
-            arr_a_16[local_i] = static_cast<int8_t>(heads * score[j_dl * heads + local_i]); // 假设量化到[-128,127]
-            arr_b_16[local_i] = static_cast<int8_t>(
-                V[i * seq_len * heads * dim + j * heads * dim + local_i * dim + k_dl]);
+            arr_a_16[local_i] = static_cast<int8_t>(
+                heads * score[j_dl * heads + local_i]); // 假设量化到[-128,127]
+            arr_b_16[local_i] =
+                static_cast<int8_t>(V[i * seq_len * heads * dim +
+                                      j * heads * dim + local_i * dim + k_dl]);
           }
 
           // 使用VNNI指令进行乘加操作
           __m128i acc = _mm_setzero_si128(); // 初始化累加器为0
 
           // 加载量化后的数据到SIMD寄存器中
-          __m128i _a = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_a_16));
-          __m128i _b = _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_b_16));
+          __m128i _a =
+              _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_a_16));
+          __m128i _b =
+              _mm_loadu_si128(reinterpret_cast<const __m128i *>(arr_b_16));
 
           // 使用_mm_dpbusds_epi32进行乘加操作 (VNNI)
           acc = _mm_dpbusds_epi32(acc, _a, _b); // 执行乘加操作：acc += a * b
@@ -100,11 +102,10 @@ multiHeadAttentionForward_kernel(float *Q,
           }
 
           // 反量化并存储到输出矩阵output中
-          output[i * seq_len * heads * dim + j * heads * dim + j_dl * dim + k_dl] =
-              static_cast<float>(sum) / heads; // 恢复到浮点数
+          output[i * seq_len * heads * dim + j * heads * dim + j_dl * dim +
+                 k_dl] = static_cast<float>(sum) / heads; // 恢复到浮点数
         }
       }
     }
   }
 }
-

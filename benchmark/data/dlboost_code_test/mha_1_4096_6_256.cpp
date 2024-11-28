@@ -1,9 +1,4 @@
-extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     
-                                 float *K,     
-                                 float *V,     
-                                 float *output 
-) {
+extern "C" void mha_kernel(float *Q, float *K, float *V, float *output) {
   int8_t arr_a[64];
   int8_t arr_b[64];
   int32_t arr_d[16]; // AVX-512 寄存器能同时处理 16 个 int32 元素
@@ -21,7 +16,8 @@ multiHeadAttentionForward_kernel(float *Q,
         for (int n = 0; n < heads; n++) {
           int32_t sum = 0;
 
-          for (int local_s = 0; local_s < dim / 64; local_s++) { // 每次处理 64 个元素
+          for (int local_s = 0; local_s < dim / 64;
+               local_s++) { // 每次处理 64 个元素
             for (int local_i = 0; local_i < 64; local_i++) {
               arr_a[local_i] = static_cast<int8_t>(
                   Q[i * seq_len * heads * dim + j * heads * dim + m * dim +
@@ -33,8 +29,10 @@ multiHeadAttentionForward_kernel(float *Q,
 
             __m512i acc = _mm512_setzero_si512();
 
-            __m512i _a = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_a));
-            __m512i _b = _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_b));
+            __m512i _a =
+                _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_a));
+            __m512i _b =
+                _mm512_loadu_si512(reinterpret_cast<const __m512i *>(arr_b));
 
             acc = _mm512_dpbusd_epi32(acc, _a, _b);
 
@@ -68,7 +66,8 @@ multiHeadAttentionForward_kernel(float *Q,
       // Final Matmul
       for (int m = 0; m < heads; ++m) {
         for (int n = 0; n < dim; ++n) {
-          output[i * seq_len * heads * dim + j * heads * dim + m * dim + n] = 0.0f;
+          output[i * seq_len * heads * dim + j * heads * dim + m * dim + n] =
+              0.0f;
           for (int k = 0; k < heads; ++k) {
             output[i * seq_len * heads * dim + j * heads * dim + m * dim + n] +=
                 score[m * heads + k] *

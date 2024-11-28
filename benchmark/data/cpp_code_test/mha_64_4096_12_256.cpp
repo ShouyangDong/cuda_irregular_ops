@@ -1,10 +1,5 @@
 
-extern "C" void
-multiHeadAttentionForward_kernel(float *Q,     
-                                 float *K,     
-                                 float *V,     
-                                 float *output 
-) {
+extern "C" void mha_kernel(float *Q, float *K, float *V, float *output) {
   float score[12 * 12];
   // The dimension 64, 4096, 12, 256
   for (int i = 0; i < 64; i++) {

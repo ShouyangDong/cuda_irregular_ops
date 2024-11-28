@@ -47,7 +47,7 @@ def perf_function(file_name):
 
     extern "C" int timed_${kernel_name}(${param_list}) {  
         struct timeval start, end;
-
+        ${kernel_name}(${called_param_list});
         // 获取开始时间
         gettimeofday(&start, NULL);   
         for (int i = 0; i < 1000; i++) {  
@@ -207,7 +207,7 @@ def perf_pooling(shape, kernel, stride, function, dtype="float32"):
     return elapsed_time
 
 
-def perf_scaled_dot_product_attention(shape, function):
+def perf_scaled_dot_product_attention(shape, function, dtype="float32"):
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
@@ -229,7 +229,7 @@ def perf_scaled_dot_product_attention(shape, function):
     input_ptr_3 = input_array_3.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    elapsed_time = function(input_ptr, input_ptr_2, input_ptr_3, output_ptr)
+    elapsed_time = function(input_ptr_1, input_ptr_2, input_ptr_3, output_ptr)
     return elapsed_time
 
 
@@ -264,8 +264,6 @@ def benchmark(file_name):
     execution_time = 0
     base_name = os.path.basename(file_name)
     name = base_name.split("_")[0]
-    if name in ["mha"]:
-        return execution_time
     perf_pipeline(file_name)
     lib = ctypes.CDLL(file_name.replace(".cpp", ".so"))
     function = getattr(lib, "timed_" + name + "_kernel")
