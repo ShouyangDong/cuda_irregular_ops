@@ -76,7 +76,7 @@ multiHeadAttentionForward_kernel(float *Q,
           int32_t sum = 0;
           // 将浮点数组量化到int8类型
           for (int local_i = 0; local_i < heads; ++local_i) {
-            arr_a_16[local_i] = static_cast<int8_t>(score[j_dl * heads + local_i]); // 假设量化到[-128,127]
+            arr_a_16[local_i] = static_cast<int8_t>(heads * score[j_dl * heads + local_i]); // 假设量化到[-128,127]
             arr_b_16[local_i] = static_cast<int8_t>(
                 V[i * seq_len * heads * dim + j * heads * dim + local_i * dim + k_dl]);
           }
@@ -101,7 +101,7 @@ multiHeadAttentionForward_kernel(float *Q,
 
           // 反量化并存储到输出矩阵output中
           output[i * seq_len * heads * dim + j * heads * dim + j_dl * dim + k_dl] =
-              static_cast<float>(sum); // 恢复到浮点数
+              static_cast<float>(sum) / heads; // 恢复到浮点数
         }
       }
     }

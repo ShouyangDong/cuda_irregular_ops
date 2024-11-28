@@ -25,12 +25,10 @@ multiHeadAttentionForward_kernel(float *Q,
             for (int local_i = 0; local_i < 64; local_i++) {
               arr_a[local_i] = static_cast<int8_t>(
                   Q[i * seq_len * heads * dim + j * heads * dim + m * dim +
-                    local_s * 64 + local_i] *
-                  scale);
+                    local_s * 64 + local_i]);
               arr_b[local_i] = static_cast<int8_t>(
                   K[i * seq_len * heads * dim + j * heads * dim + n * dim +
-                    local_s * 64 + local_i] *
-                  scale);
+                    local_s * 64 + local_i]);
             }
 
             __m512i acc = _mm512_setzero_si512();
