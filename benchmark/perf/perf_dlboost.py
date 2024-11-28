@@ -1,9 +1,10 @@
+import csv
 import ctypes
 import glob
 import os
 import re
 from string import Template
-import csv
+
 import numpy as np
 import torch
 
@@ -33,7 +34,7 @@ def perf_function(file_name):
 
     # 构造新的计时函数模板
     cpp_pef_template = Template(
-    """  
+        """  
     #include <sys/time.h>
     #include <math.h>
     #include <float.h>
@@ -110,6 +111,7 @@ def perf_unary(shape, function, dtype="float32"):
     elapsed_time = function(input_ptr, output_ptr)
     return elapsed_time
 
+
 def perf_binary(shape_A, shape_B, shape_C, function, dtype="float32"):
     A = np.random.rand(*shape_A).astype("float32")
     B = np.random.rand(*shape_B).astype("float32")
@@ -130,6 +132,7 @@ def perf_binary(shape_A, shape_B, shape_C, function, dtype="float32"):
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     elapsed_time = function(A_ptr, B_ptr, output_ptr)
     return elapsed_time
+
 
 def perf_deformable(shape, function):
     N, M, D = shape[:3]
@@ -183,6 +186,7 @@ def perf_deformable(shape, function):
     )
     return elapsed_time
 
+
 def perf_pooling(shape, kernel, stride, function, dtype="float32"):
     input_array = np.random.rand(*shape).astype("float32")
     # Calculate the result using numpy for comparison
@@ -201,6 +205,7 @@ def perf_pooling(shape, kernel, stride, function, dtype="float32"):
     # Call the function with the matrices and dimensions
     elapsed_time = function(input_ptr, output_ptr)
     return elapsed_time
+
 
 def perf_scaled_dot_product_attention(shape, function):
     # 定义函数参数和返回类型
@@ -226,6 +231,7 @@ def perf_scaled_dot_product_attention(shape, function):
     # 调用C函数
     elapsed_time = function(input_ptr, input_ptr_2, input_ptr_3, output_ptr)
     return elapsed_time
+
 
 def perf_layernorm(shape, function, dtype="float32"):
     function.argtypes = [
@@ -253,6 +259,7 @@ def perf_layernorm(shape, function, dtype="float32"):
     elapsed_time = function(input_ptr, gamma_ptr, beta_ptr, output_ptr)
     return elapsed_time
 
+
 def benchmark(file_name):
     execution_time = 0
     base_name = os.path.basename(file_name)
@@ -272,7 +279,9 @@ def benchmark(file_name):
         shape = [int(intg) for intg in shape]
         kernel_stride = base_name.split(".")[0].split("_")[5:]
         kernel_stride = [int(intg) for intg in kernel_stride]
-        execution_time = perf_pooling(shape, kernel_stride[:2], kernel_stride[2:], function)
+        execution_time = perf_pooling(
+            shape, kernel_stride[:2], kernel_stride[2:], function
+        )
 
     elif name == "bmm":
         shapes = base_name.split(".")[0]
@@ -329,7 +338,9 @@ def benchmark(file_name):
         )
         # cpu compute
         result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
-        execution_time = perf_binary(data_shape, kernel_shape, result_cpu.shape, function)
+        execution_time = perf_binary(
+            data_shape, kernel_shape, result_cpu.shape, function
+        )
 
     elif name == "gemv":
         shapes = base_name.split(".")[0]
@@ -380,11 +391,12 @@ def benchmark(file_name):
     os.remove(file_name.replace(".cpp", ".so"))
     return execution_time
 
+
 if __name__ == "__main__":
     files = glob.glob(
         os.path.join(os.getcwd(), "benchmark/data/dlboost_code_test/*.cpp")
     )
-    
+
     table = []
     times = []
     table.append(files)
