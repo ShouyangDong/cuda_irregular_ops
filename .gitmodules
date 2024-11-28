@@ -1,0 +1,6 @@
+[submodule "3rdparty/cadical"]
+	path = 3rdparty/cadical
+	url = https://github.com/arminbiere/cadical.git
+[submodule "3rdparty/cvc5"]
+	path = 3rdparty/cvc5
+	url = https://github.com/cvc5/cvc5.git
