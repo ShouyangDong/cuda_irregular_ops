@@ -4,3 +4,6 @@
 [submodule "3rdparty/cvc5"]
 	path = 3rdparty/cvc5
 	url = https://github.com/cvc5/cvc5.git
+[submodule "3rdparty/bitwuzla"]
+	path = 3rdparty/bitwuzla
+	url = https://github.com/bitwuzla/bitwuzla.git
