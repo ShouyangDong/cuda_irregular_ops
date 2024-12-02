@@ -13,32 +13,25 @@ __global__ void matrixMul_Ampere(half *A, half *B, float *C, int M, int N, int K
     wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
     wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
 
-    // 计算块索引
-    int blockRow = blockIdx.y;
-    int blockCol = blockIdx.x;
 
     // 确保线程块范围在矩阵尺寸内
-    if (blockRow * 16 >= M || blockCol * 16 >= N) {
-        return;
-    }
+    if (blockIdx.y * 16 < M || blockIdx.x * 16 < N) {
+        // 初始化 C 的片段为 0
+        wmma::fill_fragment(c_frag, 0.0f);
 
-    // 初始化 C 的片段为 0
-    wmma::fill_fragment(c_frag, 0.0f);
-
-    // 在 K 方向上迭代，每次处理 16 个元素
-    for (int k = 0; k < K; k += 16) {
-        if (k < K) {
+        // 在 K 方向上迭代，每次处理 16 个元素
+        for (int k = 0; k < K / 16; k ++) {
             // 加载 A 和 B 中的片段
-            wmma::load_matrix_sync(a_frag, A + blockRow * 16 * K + k, K);
-            wmma::load_matrix_sync(b_frag, B + k * N + blockCol * 16, N);
+            wmma::load_matrix_sync(a_frag, A + blockIdx.y * 16 * K + k * 16, K);
+            wmma::load_matrix_sync(b_frag, B + k * 16 * N + blockIdx.x * 16, N);
 
             // 计算片段并累加结果
             wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
         }
-    }
 
-    // 将计算结果存储到矩阵 C 中
-    wmma::store_matrix_sync(C + (blockRow * 16 * N + blockCol * 16), c_frag, N, wmma::mem_row_major);
+        // 将计算结果存储到矩阵 C 中
+        wmma::store_matrix_sync(C + (blockIdx.y * 16 * N + blockIdx.x * 16), c_frag, N, wmma::mem_row_major);
+    }
 }
 
 __global__ void convertFloatToHalf(float* in, half* out, int size) {
