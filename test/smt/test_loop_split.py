@@ -4,7 +4,7 @@ from z3 import *
 solver = Solver()
 
 # 定义变量 n 代表内层 k 的上界
-n = Int('n')
+n = Int("n")
 
 # 原始的总迭代次数
 original_iteration_count = 256 * 1024
