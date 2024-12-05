@@ -13,24 +13,26 @@ __global__ void matrixMul_Ampere(half *A, half *B, float *C, int M, int N, int K
     wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
     wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
 
+    int blockRow = blockIdx.y * 16;
+    int blockCol = blockIdx.x * 16;
 
     // 确保线程块范围在矩阵尺寸内
-    if (blockIdx.y * 16 < M || blockIdx.x * 16 < N) {
+    if (blockRow < M && blockCol < N) {
         // 初始化 C 的片段为 0
         wmma::fill_fragment(c_frag, 0.0f);
 
         // 在 K 方向上迭代，每次处理 16 个元素
-        for (int k = 0; k < K / 16; k ++) {
+        for (int k = 0; k < K; k += 16) {
             // 加载 A 和 B 中的片段
-            wmma::load_matrix_sync(a_frag, A + blockIdx.y * 16 * K + k * 16, K);
-            wmma::load_matrix_sync(b_frag, B + k * 16 * N + blockIdx.x * 16, N);
+            wmma::load_matrix_sync(a_frag, A + blockRow * K + k, K);
+            wmma::load_matrix_sync(b_frag, B + k * N + blockCol, N);
 
             // 计算片段并累加结果
             wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
         }
 
         // 将计算结果存储到矩阵 C 中
-        wmma::store_matrix_sync(C + (blockIdx.y * 16 * N + blockIdx.x * 16), c_frag, N, wmma::mem_row_major);
+        wmma::store_matrix_sync(C + blockRow * N + blockCol, c_frag, N, wmma::mem_row_major);
     }
 }
 
@@ -42,43 +44,52 @@ __global__ void convertFloatToHalf(float* in, half* out, int size) {
 }
 
 int main() {
-    int N = 1024; // 定义矩阵大小
-    size_t size_float = N * N * sizeof(float);
-    size_t size_half = N * N * sizeof(half);
+    int M = 32; // A 的行数
+    int K = 128; // A 的列数 / B 的行数
+    int N = 128; // B 的列数
+    
+    size_t size_A_float = M * K * sizeof(float);
+    size_t size_B_float = K * N * sizeof(float);
+    size_t size_C_float = M * N * sizeof(float);
+    size_t size_A_half = M * K * sizeof(half);
+    size_t size_B_half = K * N * sizeof(half);
 
     // 分配主机内存
-    float *h_A = (float*)malloc(size_float);
-    float *h_B = (float*)malloc(size_float);
-    float *h_C = (float*)malloc(size_float);
+    float *h_A = (float*)malloc(size_A_float);
+    float *h_B = (float*)malloc(size_B_float);
+    float *h_C = (float*)malloc(size_C_float);
 
     // 初始化矩阵 A 和 B
-    for (int i = 0; i < N * N; ++i) {
+    for (int i = 0; i < M * K; ++i) {
         h_A[i] = 1.0f; // 每个元素赋值为 1
+    }
+    for (int i = 0; i < K * N; ++i) {
         h_B[i] = 1.0f; // 每个元素赋值为 1
     }
 
     // 分配设备内存
     float *d_A_float, *d_B_float, *d_C;
     half *d_A_half, *d_B_half;
-    cudaMalloc(&d_A_float, size_float);
-    cudaMalloc(&d_B_float, size_float);
-    cudaMalloc(&d_C, size_float);
-    cudaMalloc(&d_A_half, size_half);
-    cudaMalloc(&d_B_half, size_half);
+    cudaMalloc(&d_A_float, size_A_float);
+    cudaMalloc(&d_B_float, size_B_float);
+    cudaMalloc(&d_C, size_C_float);
+    cudaMalloc(&d_A_half, size_A_half);
+    cudaMalloc(&d_B_half, size_B_half);
 
     // 将数据从主机复制到设备
-    cudaMemcpy(d_A_float, h_A, size_float, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B_float, h_B, size_float, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A_float, h_A, size_A_float, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B_float, h_B, size_B_float, cudaMemcpyHostToDevice);
 
     // 转换浮点数为 half 类型
     int threadsPerBlock = 256;
-    int blocksPerGrid = (N * N + threadsPerBlock - 1) / threadsPerBlock;
-    convertFloatToHalf<<<blocksPerGrid, threadsPerBlock>>>(d_A_float, d_A_half, N * N);
-    convertFloatToHalf<<<blocksPerGrid, threadsPerBlock>>>(d_B_float, d_B_half, N * N);
+    int blocksPerGrid_A = (M * K + threadsPerBlock - 1) / threadsPerBlock;
+    int blocksPerGrid_B = (K * N + threadsPerBlock - 1) / threadsPerBlock;
+    convertFloatToHalf<<<blocksPerGrid_A, threadsPerBlock>>>(d_A_float, d_A_half, M * K);
+    convertFloatToHalf<<<blocksPerGrid_B, threadsPerBlock>>>(d_B_float, d_B_half, K * N);
 
     // 定义线程块和网格大小
-    dim3 threadsPerBlock2D(16, 16);  // 每个块 32 x 8 个线程
-    dim3 numBlocks((N + 16 - 1) / 16, (N + 16 - 1) / 16);  // 确保覆盖所有 16x16 的子块
+    dim3 threadsPerBlock2D(32, 32);
+    dim3 numBlocks((N + 16 - 1) / 16, (M + 16 - 1) / 16);
 
     // 定义 CUDA 事件以计算时间
     cudaEvent_t start, stop;
@@ -87,7 +98,7 @@ int main() {
 
     // 启动内核
     cudaEventRecord(start);
-    matrixMul_Ampere<<<numBlocks, threadsPerBlock2D>>>(d_A_half, d_B_half, d_C, N, N, N);
+    matrixMul_Ampere<<<numBlocks, threadsPerBlock2D>>>(d_A_half, d_B_half, d_C, M, N, K);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
@@ -96,15 +107,15 @@ int main() {
     cudaEventElapsedTime(&milliseconds, start, stop);
 
     float seconds = milliseconds / 1000.0f;
-    long long total_flops = 2LL * N * N * N;
+    long long total_flops = 2LL * M * N * K;
     float gflops = (total_flops / seconds) / 1e9f;
 
-    printf("Matrix size: %d x %d\n", N, N);
+    printf("Matrix size: %d x %d and %d x %d\n", M, K, K, N);
     printf("Execution time: %f milliseconds\n", milliseconds);
     printf("Performance: %f GFLOPS\n", gflops);
 
     // 将结果从设备复制到主机
-    cudaMemcpy(h_C, d_C, size_float, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_C, d_C, size_C_float, cudaMemcpyDeviceToHost);
 
     // 打印结果的前 10 个元素
     printf("First few elements of the result:\n");
