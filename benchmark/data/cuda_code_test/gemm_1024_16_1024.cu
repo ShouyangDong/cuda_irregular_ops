@@ -6,22 +6,22 @@ __global__ void gemm(half *A, half *B, float *C) {
   int blockRow = blockIdx.y * 16;
   int blockCol = blockIdx.x * 16;
 
-  if (blockRow < 32 && blockCol < 128) {
+  if (blockRow < 1024 && blockCol < 1024) {
 
     wmma::fill_fragment(c_frag, 0.0f);
 
-    for (int k = 0; k < 32; k += 16) {
+    for (int k = 0; k < 16; k += 16) {
 
       wmma::load_matrix_sync(a_frag,
-                              A + blockRow * 32 + k, 32);
+                              A + blockRow * 16 + k, 16);
       wmma::load_matrix_sync(b_frag,
-                              B + k * 128 + blockCol, 128);
+                              B + k * 1024 + blockCol, 1024);
 
       wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
     }
 
-    wmma::store_matrix_sync(C + blockRow * 128 + blockCol,
-                            c_frag, 128, wmma::mem_row_major);
+    wmma::store_matrix_sync(C + blockRow * 1024 + blockCol,
+                            c_frag, 1024, wmma::mem_row_major);
   }
 }
 
