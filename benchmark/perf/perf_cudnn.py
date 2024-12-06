@@ -100,21 +100,22 @@ def perf_pooling(name, shape, kernel, stride):
 
 
 def perf_bmm(name, shape_A, shape_B):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建随机张量
+    torch.set_float32_matmul_precision('medium')
+    device = torch.device("cuda")
+    # 创建随机张量，数据类型为float16
     A = torch.randn(shape_A, device=device)
     B = torch.randn(shape_B, device=device)
+    use_amp = True
 
     def test_gemm():
-        # 执行矩阵乘法操作 (GEMM)
         C = torch.matmul(A, B)
-        # 确保 CUDA 操作完成
         torch.cuda.synchronize()
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_gemm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
-    return execution_time * 10
+    execution_time = timeit.timeit(test_gemm, number=10000)
+    print(f"{name} execution time: {execution_time / 10000 * 1000} ms")
+    return execution_time
+
 
 
 def perf_activation(name, shape):
@@ -323,7 +324,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/gemm_32_128_128.cu"))
     counter = 0
     execution_time = 0
     table = []
@@ -424,17 +425,17 @@ if __name__ == "__main__":
             execution_time = perf_scaled_dot_product_attention(base_name, shape)
         times.append(execution_time)
 
-    table.append(files)
-    table.append(times)
+    # table.append(files)
+    # table.append(times)
 
-    # 转置数据
-    transposed_data = list(zip(*table))
+    # # 转置数据
+    # transposed_data = list(zip(*table))
 
-    # 添加标题行
-    header = ["file", "time(ms)"]
-    transposed_data.insert(0, header)
+    # # 添加标题行
+    # header = ["file", "time(ms)"]
+    # transposed_data.insert(0, header)
 
-    # 保存为CSV文件
-    with open("benchmark/perf/cudnn_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    # # 保存为CSV文件
+    # with open("benchmark/perf/cudnn_output.csv", "w", newline="") as file:
+    #     writer = csv.writer(file)
+    #     writer.writerows(transposed_data)

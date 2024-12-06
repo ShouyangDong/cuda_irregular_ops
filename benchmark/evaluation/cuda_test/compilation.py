@@ -8,7 +8,7 @@ from tqdm import tqdm
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-Xcompiler", "-fPIC", "-shared", "-o", so_name, file_name],
+            ["nvcc", "-Xcompiler", "-fPIC", "-shared", "-arch=sm_80", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -21,7 +21,7 @@ def run_compilation(so_name, file_name):
         return False, e.output
 
 
-files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
+files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/bmm*.cu"))
 counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
@@ -41,7 +41,7 @@ for file_name in tqdm(files):
     with open(back_file_name, mode="w") as f:
         f.write(code)
         f.close()
-
+    print(code)
     success, output = run_compilation(so_name, back_file_name)
     os.remove(back_file_name)
     if success:

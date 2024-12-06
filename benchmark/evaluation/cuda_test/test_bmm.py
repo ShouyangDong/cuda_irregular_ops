@@ -9,7 +9,7 @@ import numpy as np
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["nvcc", "-Xcompiler", "-fPIC", "-shared", "-arch=sm_80", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -36,15 +36,15 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
-    A = np.random.rand(batch_size, matrix_dim_i, matrix_dim_j).astype("float32")
-    B = np.random.rand(batch_size, matrix_dim_j, matrix_dim_k).astype("float32")
+    A = np.ones((batch_size, matrix_dim_i, matrix_dim_j)).astype("float16")
+    B = np.ones((batch_size, matrix_dim_j, matrix_dim_k)).astype("float16")
 
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(A, B)
 
     # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_uint16))
+    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_uint16))
     name = base_name.split("_")[0]
     so_name = args.file.replace(".cu", ".so")
     with open(args.file, "r") as f:
@@ -70,8 +70,8 @@ if __name__ == "__main__":
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_uint16),
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,

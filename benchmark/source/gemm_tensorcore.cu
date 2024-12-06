@@ -16,22 +16,22 @@ __global__ void matrixMul_Ampere(half *A, half *B, float *C, int M, int N, int K
     int blockRow = blockIdx.y * 16;
     int blockCol = blockIdx.x * 16;
 
-    // 确保线程块范围在矩阵尺寸内
+    
     if (blockRow < M && blockCol < N) {
-        // 初始化 C 的片段为 0
+        
         wmma::fill_fragment(c_frag, 0.0f);
 
-        // 在 K 方向上迭代，每次处理 16 个元素
+        
         for (int k = 0; k < K; k += 16) {
-            // 加载 A 和 B 中的片段
+            
             wmma::load_matrix_sync(a_frag, A + blockRow * K + k, K);
             wmma::load_matrix_sync(b_frag, B + k * N + blockCol, N);
 
-            // 计算片段并累加结果
+            
             wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
         }
 
-        // 将计算结果存储到矩阵 C 中
+        
         wmma::store_matrix_sync(C + blockRow * N + blockCol, c_frag, N, wmma::mem_row_major);
     }
 }

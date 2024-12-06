@@ -11,7 +11,7 @@ from benchmark.utils import minpool_np
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-shared", "-Xcompiler", "-fPIC", "-o", so_name, file_name],
+            ["nvcc", "-Xcompiler", "-fPIC", "-shared", "-arch=sm_80", "-o", so_name, file_name],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",

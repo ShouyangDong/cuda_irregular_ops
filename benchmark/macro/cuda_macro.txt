@@ -4,3 +4,8 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <cmath>
+#include <mma.h>
+#include <cuda_fp16.h>
+#include <stdlib.h>
+
+using namespace nvcuda;
