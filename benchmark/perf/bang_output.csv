@@ -151,4 +151,20 @@ file,time(us)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv2d_16_8_8_128_64_2_2_128_2_0.mlu,5
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv2d_32_8_8_64_64_2_2_64_3_0.mlu,5
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv2d_32_8_8_128_64_2_2_128_2_0.mlu,6
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_128_3_128.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_192_3_3.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_256_3_128.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_256_3_3.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_6_3_128.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_6_3_3.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_128_3_3.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/depthwiseconv_192_3_128.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_126_128.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_190_192.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_222_224.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_256_258.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_25_27.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_312_314.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_44_46.cu
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cpp_code_test/conv1d_5_7.cu
 
