@@ -143,12 +143,12 @@ benchmark/data/cpp_code_test/conv2dnchw_32_128_8_8_64_128_2_2_2_0.cpp,0
 benchmark/data/cpp_code_test/conv2dnchw_32_128_8_8_64_128_2_2_3_0.cpp,0																								
 benchmark/data/cpp_code_test/conv2dnchw_32_64_8_8_128_64_2_2_2_0.cpp,0																								
 benchmark/data/cpp_code_test/conv2dnchw_32_64_8_8_128_64_2_2_3_0.cpp,0
-conv2d_16_8_8_128_64_2_2_128_3_0.mlu,5
-conv2d_32_8_8_64_64_2_2_64_2_0.mlu,5
-conv2d_32_8_8_128_64_2_2_128_3_0.mlu,6
-conv2d_16_8_8_64_64_2_2_64_2_0.mlu,3
-conv2d_16_8_8_64_64_2_2_64_3_0.mlu,3
-conv2d_16_8_8_128_64_2_2_128_2_0.mlu,5
-conv2d_32_8_8_64_64_2_2_64_3_0.mlu,5
-conv2d_32_8_8_128_64_2_2_128_2_0.mlu,6
+benchmark/data/cpp_code_test/conv2d_16_8_8_128_64_2_2_128_3_0.mlu,5
+benchmark/data/cpp_code_test/conv2d_32_8_8_64_64_2_2_64_2_0.mlu,5
+benchmark/data/cpp_code_test/conv2d_32_8_8_128_64_2_2_128_3_0.mlu,6
+benchmark/data/cpp_code_test/conv2d_16_8_8_64_64_2_2_64_2_0.mlu,3
+benchmark/data/cpp_code_test/conv2d_16_8_8_64_64_2_2_64_3_0.mlu,3
+benchmark/data/cpp_code_test/conv2d_16_8_8_128_64_2_2_128_2_0.mlu,5
+benchmark/data/cpp_code_test/conv2d_32_8_8_64_64_2_2_64_3_0.mlu,5
+benchmark/data/cpp_code_test/conv2d_32_8_8_128_64_2_2_128_2_0.mlu,6
 
