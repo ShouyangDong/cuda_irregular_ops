@@ -1,4 +1,4 @@
-
+file	time(us)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/mlu_code_test/gemm_128_128_128.mlu,2.998
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/mlu_code_test/gemm_128_256_512.mlu,4.0
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/mlu_code_test/gemm_256_256_256.mlu,3.992
