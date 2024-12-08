@@ -1,20 +1,28 @@
-file	time(us)
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_128_128.cu,2.998
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_256_512.cu,4.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_256_256.cu,3.992
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_512.cu,6.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_512_256.cu,4.985
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_512_256.cu,6.0,
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_256.cu,5.964
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_128_256.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_128_128.cu,2.001
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_256_512.cu,2.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_256_256_256.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_512_512_512.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_128_512_256.cu,2.994
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_512_256.cu,3.988
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_512_512_256.cu,6.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_128_256.cu,3.992
+file	time(ms)
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_128_128.cu,0.002998
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_256_512.cu,0.0040
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_256_256.cu,0.003992
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_512.cu,0.0060
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_512_256.cu,0.004985
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_512_256.cu,0.0060,
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_256.cu,0.005964
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_128_256.cu,0.0030
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_128_128.cu,0.002001
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_256_512.cu,0.0020
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_256_256_256.cu,0.0030
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_512_512_512.cu,0.0030
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_128_512_256.cu,0.002994
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_512_256.cu,0.003988
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_512_512_256.cu,0.0060
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_128_256.cu,0.003992
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_1_2048_12_256.cu,0.170176
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_1_2048_6_256.cu,0.142779
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_1_4096_12_256.cu,0.303314
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_1_4096_12_512.cu,0.274243
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_1_4096_6_256.cu,0.299096
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_64_2048_12_256.cu,9.435194
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_64_2048_12_512.cu,8.837913
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/mha_64_4096_12_256.cu,19.233381
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_100_2_10_1024.cu	0.008588262499999999 ms
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_18_128.cu	0.0029649884999999997 ms
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_1_15_64.cu	0.0028569554999999997 ms
