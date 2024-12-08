@@ -4,7 +4,7 @@ file,time(ms)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_256_256.cu,0.003992
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_512.cu,0.0060
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_512_256.cu,0.004985
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_512_256.cu,0.0060,
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_512_256.cu,0.0060
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_256.cu,0.005964
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_128_256.cu,0.0030
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_128_128.cu,0.002001
