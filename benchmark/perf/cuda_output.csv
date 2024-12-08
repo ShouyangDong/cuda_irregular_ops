@@ -1,4 +1,4 @@
-file	time(ms)
+file,time(ms)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_128_128.cu,0.002998
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_128_256_512.cu,0.0040
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_256_256.cu,0.003992
