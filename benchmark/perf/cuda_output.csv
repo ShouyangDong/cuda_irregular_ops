@@ -7,14 +7,14 @@ file	time(us)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_512_256.cu,6.0,
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_512_512_256.cu,5.964
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_256_128_256.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_1_128_128_128.cu,2.001
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_1_128_256_512.cu,2.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_1_256_256_256.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_1_512_512_512.cu,3.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_4_128_512_256.cu,2.994
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_4_256_512_256.cu,3.988
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_4_512_512_256.cu,6.0
-/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gemm_4_256_128_256.cu,3.992
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_128_128.cu,2.001
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_128_256_512.cu,2.0
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_256_256_256.cu,3.0
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_1_512_512_512.cu,3.0
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_128_512_256.cu,2.994
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_512_256.cu,3.988
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_512_512_256.cu,6.0
+/projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/bmm_4_256_128_256.cu,3.992
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_100_2_10_1024.cu	0.008588262499999999 ms
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_18_128.cu	0.0029649884999999997 ms
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/add_1_15_64.cu	0.0028569554999999997 ms
