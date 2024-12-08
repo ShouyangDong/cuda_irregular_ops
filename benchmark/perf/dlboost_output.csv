@@ -151,11 +151,19 @@ benchmark/data/cpp_code_test/sign_5_12_23_128.cpp,0.22294270107522607
 benchmark/data/cpp_code_test/sign_5_7_3_32.cpp,0.03472801996394992
 benchmark/data/cpp_code_test/sign_7_1_6_7.cpp,0.6912986794486642
 benchmark/data/cpp_code_test/sign_8_10_64.cpp,0.08256521075963974
-softmax_45_25.cpp execution time: 0.008340499480254948 ms
-softmax_5_128.cpp execution time: 0.005641630268655717 ms
-softmax_5_12_23_128.cpp execution time: 0.04451065033208579 ms
-softmax_5_7_3_32.cpp execution time: 0.007645490113645792 ms
-softmax_7_1_6_7.cpp execution time: 0.0070524896727874875 ms
-softmax_8_10_64.cpp execution time: 0.007780469604767859 ms
-softmax_12_3_128.cpp execution time: 0.007744189933873713 ms
-softmax_3_4_5.cpp execution time: 0.006848420016467571 ms
+benchmark/data/cpp_code_test/softmax_45_25.cpp,0.008340499480254948
+benchmark/data/cpp_code_test/softmax_5_128.cpp,0.005641630268655717
+benchmark/data/cpp_code_test/softmax_5_12_23_128.cpp,0.04451065033208579
+benchmark/data/cpp_code_test/softmax_5_7_3_32.cpp,0.007645490113645792
+benchmark/data/cpp_code_test/softmax_7_1_6_7.cpp,0.0070524896727874875
+benchmark/data/cpp_code_test/softmax_8_10_64.cpp,0.007780469604767859
+benchmark/data/cpp_code_test/softmax_12_3_128.cpp,0.007744189933873713
+benchmark/data/cpp_code_test/softmax_3_4_5.cpp,0.006848420016467571
+benchmark/data/cpp_code_test/gelu_12_3_128.cpp,0.007752130040898919
+benchmark/data/cpp_code_test/gelu_3_4_5.cpp,0.0055039802100509405
+benchmark/data/cpp_code_test/gelu_45_25.cpp,0.005537110264413059
+benchmark/data/cpp_code_test/gelu_5_128.cpp,0.0054129998898133636
+benchmark/data/cpp_code_test/gelu_5_12_23_128.cpp,0.04497203975915909
+benchmark/data/cpp_code_test/gelu_5_7_3_32.cpp,0.007837960147298872
+benchmark/data/cpp_code_test/gelu_7_1_6_7.cpp,0.007338209543377161
+benchmark/data/cpp_code_test/gelu_8_10_64.cpp,0.007951909792609513
