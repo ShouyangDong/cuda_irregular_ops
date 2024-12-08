@@ -95,3 +95,11 @@ file,time(ms)
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gelu_5_7_3_32.cu,0.005595
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gelu_7_1_6_7.cu,0.003996
 /projs/AE/dongshouyang/isca/cuda_irregular_ops/benchmark/data/cuda_code_test/gelu_8_10_64.cu,0.005729
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_1_8_256_100_4_4.cu,0.022640
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_1_8_256_200_4_4.cu,0.048637
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_1_8_512_100_4_4.cu,0.055537
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_1_8_512_200_4_4.cu,0.091563
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_256_100_4_4.cu,0.102107
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_256_200_4_4.cu,0.163614
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_512_100_4_4.cu,0.189430
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_512_200_4_4.cu,0.312932
