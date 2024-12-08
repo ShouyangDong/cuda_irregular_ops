@@ -103,3 +103,11 @@ file,time(ms)
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_256_200_4_4.cu,0.163614
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_512_100_4_4.cu,0.189430
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/deformable_4_8_512_200_4_4.cu,0.312932
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_2048_2048.cu,6.038099
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_2048_4096.cu,24.411465
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_2048_8192.cu,24.222448
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_4096_2048.cu,6.073899
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_4096_4096.cu,12.237061
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_4096_8192.cu,24.342716
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_8192_4096.cu,12.162436
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_8192_8192.cu,24.375254
