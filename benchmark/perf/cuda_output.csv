@@ -119,3 +119,12 @@ file,time(ms)
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_32_64.cu,0.004589
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_3_16.cu,0.002504
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_3_512.cu,0.012983
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_1_4_128.cu,0.017905
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_1_4_32.cu,0.006045
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_1_8_128.cu,0.019101
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_1_8_32.cu,0.006354
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_2_4_128.cu,0.019175
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_2_4_32.cu,0.006111
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_2_8_128.cu,0.023234
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/layernorm_2_8_32.cu,0.006806
+
