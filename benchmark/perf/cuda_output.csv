@@ -111,3 +111,11 @@ file,time(ms)
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_4096_8192.cu,24.342716
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_8192_4096.cu,12.162436
 /projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/rmsnorm_8192_8192.cu,24.375254
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_112_128.cu,0.014119
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_112_224.cu,0.022707
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_125_128.cu,0.015565
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_125_320.cu,0.034816
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_32_512.cu,0.023888
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_32_64.cu,0.004589
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_3_16.cu,0.002504
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/gemv_3_512.cu,0.012983
