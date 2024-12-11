@@ -1,26 +1,7 @@
 import glob
 import os
-import subprocess
 
-
-def run_test(file_name, test_file):
-    try:
-        output = subprocess.run(
-            ["python", test_file, "--file", file_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=400,
-        )
-        print(output)
-        return True, output
-    except subprocess.TimeoutExpired:
-        return False, "timeout"
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
+from benchmark.utils import run_test
 
 if __name__ == "__main__":
     files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/**.cu"))
