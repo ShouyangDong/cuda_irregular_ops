@@ -57,8 +57,9 @@ def perf_function(file_name):
         gettimeofday(&end, NULL); 
 
         int time_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
-        printf("Time taken for ${kernel_name}:  %d us\\n", time_us);
-        return time_us;
+        float us_time = time_us / 1000.0f / 1000.0f;
+        printf("Time taken for ${kernel_name}:  %d ms\\n", us_time);
+        return us_time;
     }  
     """
     )

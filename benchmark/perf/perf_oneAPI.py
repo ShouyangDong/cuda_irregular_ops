@@ -99,8 +99,8 @@ def perf_pooling(name, shape, kernel, stride):
 def perf_bmm(name, shape_A, shape_B):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # 创建随机张量
-    A = torch.randn(shape_A, device=device)
-    B = torch.randn(shape_B, device=device)
+    A = torch.randn(shape_A, dtype=torch.float16, device=device)
+    B = torch.randn(shape_B, dtype=torch.float16, device=device)
 
     def test_gemm():
         # 执行矩阵乘法操作 (GEMM)
@@ -135,23 +135,6 @@ def perf_activation(name, shape):
     return execution_time * 10
 
 
-def perf_conv2d_nchw(name, shape, kernel, stride):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    input_tensor = torch.randn(16, 3, 224, 224, device=device)
-    # 定义卷积层
-    conv_layer = torch.nn.Conv2d(
-        in_channels=3, out_channels=64, kernel_size=3, stride=1, padding=0
-    ).to(device)
-
-    def test_conv2d():
-        output = conv_layer(input_tensor)
-
-    # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
-    return execution_time * 10
-
-
 def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     input_tensor = torch.randn(shape, device=device)
@@ -166,6 +149,29 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
 
     def test_conv2d():
         output = conv_layer(input_tensor)
+
+    # 使用 timeit 进行多次测量，设置执行次数为 100
+    execution_time = timeit.timeit(test_conv2d, number=100)
+    print(f"{name} execution time: {execution_time * 10} ms")
+    return execution_time * 10
+
+
+def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, padding):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    input_nhwc = torch.randn(shape, device=device)
+    weight_hwio = torch.randn([out_channels, kernel, kernel, shape[3]], device=device)
+    def test_conv2d():
+        # 将输入从 NHWC 转换到 NCHW
+        input_nchw = input_nhwc.permute(0, 3, 1, 2)
+        
+        # 将卷积核从 HWIO (H, W, in_channels, out_channels) 转换到 PyTorch的 OIHW 格式
+        weight_oihw = weight_hwio.permute(0, 3, 1, 2)
+        
+        # 使用转换后的卷积核和输入进行卷积操作
+        output_nchw = F.conv2d(input_nchw, weight_oihw,stride=stride, padding=padding)
+        
+        # 将输出从 NCHW 转换回 NHWC
+        output_nhwc = output_nchw.permute(0, 3, 1, 2)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
@@ -207,17 +213,24 @@ def perf_conv1d(name, shape):
     return execution_time * 10
 
 
-def perf_depthwise_conv2d(name, shape):
+def perf_depthwise_conv2d(name, shape, kernel_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 创建输入张量
-    input_tensor = torch.randn(16, 3, 224, 224, device=device)
-    # 定义深度卷积层
-    depthwise_conv_layer = torch.nn.Conv2d(
-        in_channels=3, out_channels=3, kernel_size=3, stride=1, padding=1, groups=3
-    ).to(device)
+    input_hwio = torch.randn(shape, device=device)
+    weight_fdio = torch.randn([kernel_size, kernel_size, shape[2]], device=device)
 
     def test_depthwise_conv2d():
-        output = depthwise_conv_layer(input_tensor)
+        # 输入是 (height, width, in_depth)，添加一个批次维度变成 (1, height, width, in_depth)
+        input_nchw = input_hwio.unsqueeze(0).permute(0, 3, 1, 2)  # 转换为 (1, in_depth, height, width)
+        
+        # 卷积核是 (fd, fd, in_depth)，需要转换为 (in_depth, 1, fd, fd)
+        in_depth = weight_fdio.shape[2]
+        weight_iodf = weight_fdio.permute(2, 0, 1).unsqueeze(1)  # 转换为 (in_depth, 1, fd, fd)
+        
+        # 使用深度可分离卷积
+        output_nchw = F.conv2d(input_nchw, weight_iodf, groups=in_depth)
+        
+        # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height, new_width, in_depth)
+        output_hwio = output_nchw.squeeze(0).permute(1, 2, 0)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
@@ -309,7 +322,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/depthwiseconv*.cpp"))
     counter = 0
     execution_time = 0
     table = []
@@ -374,16 +387,34 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             execution_time = perf_gemv(base_name, shape)
 
+        elif name == "conv2d":
+            data_shape = base_name.split("_")[1:5]
+            data_shape = [int(intg) for intg in data_shape]
+            kernel_shape = base_name.split("_")[5:9]
+            kernel_shape = [int(intg) for intg in kernel_shape]
+            stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
+            pad = int(base_name.split(".")[0].split("_")[10])
+
+            execution_time = perf_conv2d_nhwc(
+                base_name,
+                data_shape,
+                kernel_shape[1],
+                kernel_shape[0],
+                kernel_shape[2],
+                stride_h,
+                pad,
+            )
         elif name == "conv1d":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             execution_time = perf_conv1d(base_name, shape)
 
-        elif name == "depthwiseconv_1":
+        elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
-            execution_time = perf_depthwise_conv2d(base_name, shape)
+            shape = [input_height, input_height, input_channels]
+            execution_time = perf_depthwise_conv2d(base_name, shape, kernel_size)
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
@@ -391,11 +422,11 @@ if __name__ == "__main__":
             execution_time = perf_layernorm(base_name, shape)
 
         elif name == "rmsnorm":
-            # shapes = base_name.split(".")[0]
-            # shape = [int(intg) for intg in shapes.split("_")[1:]]
-            # execution_time = perf_rmsnorm(base_name, shape)
-            continue
-            times.append(0)
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            execution_time = perf_rmsnorm(base_name, shape)
+            # continue
+            # times.append(0)
         elif name == "deformable":
             # shapes = base_name.split(".")[0]
             # shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -412,7 +443,7 @@ if __name__ == "__main__":
 
     table.append(files)
     table.append(times)
-
+    print(times)
     # 转置数据
     transposed_data = list(zip(*table))
 
@@ -420,7 +451,7 @@ if __name__ == "__main__":
     header = ["file", "time(ms)"]
     transposed_data.insert(0, header)
 
-    # 保存为CSV文件
-    with open("benchmark/perf/oneAPI_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    # # 保存为CSV文件
+    # with open("benchmark/perf/oneAPI_output.csv", "w", newline="") as file:
+    #     writer = csv.writer(file)
+    #     writer.writerows(transposed_data)

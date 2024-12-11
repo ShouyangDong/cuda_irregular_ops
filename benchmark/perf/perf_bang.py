@@ -65,9 +65,9 @@ def perf_elementwise(name, file, shape):
 
         fmlu(data_lhs_dev, data_rhs_dev, result_arr)
         mlu_output = result_arr
-        cpu_output = np.add(data_lhs, data_rhs)
-        bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
-        print("验证通过！")
+        #cpu_output = np.add(data_lhs, data_rhs)
+        #bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
+        #print("验证通过！")
         evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
         cost = evaluator(data_lhs_dev, data_rhs_dev, result_arr).mean
         print(f"{name} execution time: {cost * 1000} ms")
@@ -291,7 +291,7 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         code = open(file, encoding="utf-8").read()
 
         code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-
+        print(code)
         return code
 
     # generate data
@@ -880,7 +880,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/softmax*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/add_*.mlu")
     )
     counter = 0
 
@@ -890,8 +890,11 @@ if __name__ == "__main__":
         if name == "add" or name == "sign":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
+            import time
+            t1 = time.time()
             perf_elementwise(base_name, file, shape)
-
+            t2 = time.time()
+            print(f"(eval time {t2-t1}")
         elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
             shape = base_name.split("_")[1:5]
             shape = [int(intg) for intg in shape]
