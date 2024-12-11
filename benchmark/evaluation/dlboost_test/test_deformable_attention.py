@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 @torch.no_grad()

@@ -124,7 +124,7 @@ def conv2d_nchw(input_tensor, kernel, stride, pad=0):
     return output_tensor
 
 
-def run_compilation(so_name, file_name):
+def run_dlboost_compilation(so_name, file_name):
     try:
         output = subprocess.run(
             [
@@ -141,6 +141,46 @@ def run_compilation(so_name, file_name):
             stderr=subprocess.STDOUT,
             encoding="utf-8",
             check=True,
+            timeout=15,
+        )
+        return True, output
+    except subprocess.CalledProcessError as e:
+        return False, e.output
+
+
+def run_cpp_compilation(so_name, file_name):
+    try:
+        output = subprocess.run(
+            ["g++", "-shared", "-fPIC", "-O3", file_name, "-o", so_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
+            timeout=15,
+        )
+        return True, output
+    except subprocess.CalledProcessError as e:
+        return False, e.output
+
+
+def run_mlu_compilation(so_name, file_name):
+    try:
+        output = subprocess.run(
+            [
+                "cncc",
+                "-shared",
+                "-fPIC",
+                "--bang-mlu-arch=mtp_592",
+                "-o",
+                so_name,
+                file_name,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
             timeout=15,
         )
         return True, output

@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 def cpu_conv(input_tensor, kernel, stride, pad=0):

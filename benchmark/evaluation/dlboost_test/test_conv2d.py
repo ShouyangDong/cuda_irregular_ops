@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 def get_im2col_indices(images_shape, filter_shape, padding, stride):

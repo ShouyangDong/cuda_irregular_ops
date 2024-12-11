@@ -7,7 +7,7 @@ from ctypes import CDLL
 import numpy as np
 import torch
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 def ref_program(x):

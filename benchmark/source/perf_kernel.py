@@ -1,8 +1,10 @@
-import torch
 import glob
 import os
+
+import torch
 import torch.nn.functional as F
-torch.set_float32_matmul_precision('medium')
+
+torch.set_float32_matmul_precision("medium")
 torch.backends.cudnn.deterministic = True
 device = torch.device("cuda")
 # 创建随机张量，数据类型为float16
@@ -31,7 +33,6 @@ for file in files:
 
     def test_scaled_dot_product_attention():
         output = F.scaled_dot_product_attention(query, key, value)
-        
 
     for _ in range(100):
         test_scaled_dot_product_attention()
@@ -41,9 +42,15 @@ for file in files:
     end_event = torch.cuda.Event(enable_timing=True)
 
     start_event.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA),
-                record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
-        for _ in range(1000):         
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.CUDA,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
+        for _ in range(1000):
             test_scaled_dot_product_attention()
     end_event.record()
     torch.cuda.current_stream().synchronize()
@@ -53,62 +60,8 @@ for file in files:
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::matmul':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::matmul":  # 根据 key 找到你需要的操作
             time = avg.cuda_time
-    
+
     times.append(time)
 print(times)
-
-
-Function Overview:
-`TENSORIZATION` in the context of SIMD (Single Instruction, Multiple Data) is a technique that 
-transforms scalar operations into vectorized operations to take advantage of the parallel processing 
-capabilities of modern processors. By converting scalar computations (processing one element at a time) 
-into tensorized or vectorized computations, SIMD instructions can process multiple data points 
-simultaneously, improving throughput and reducing the overall computation time.
-
-Application Scenario:
-- Tensorization is widely used in deep learning frameworks to speed up matrix multiplications, 
-  convolutions, and other tensor operations by leveraging SIMD. For example, 
-  it can be used to vectorize the processing of large batches of input data, 
-  improving performance on CPUs, GPUs, and other accelerators.
-- SIMD-based tensorization can be applied to common linear algebra kernels such as 
-matrix-vector multiplications (GEMV), matrix-matrix multiplications (GEMM), and vector dot products. 
-    SIMD instructions accelerate these operations by processing multiple elements of vectors or 
-    matrices in parallel.
-
-
-Example1：
-void exmaple1(float* output, float* input_1, float* input_2) {
-    for (i = 0; i < 64; ++i) {
-        for (j = 0; j < 64; ++j) {
-            for (k = 0; k < 64; ++k) {
-                output[i * 64 + j] += input_1[i * 64 + k] * input_2[k * 64 + j];
-            }
-        }
-    }
-}
-
-// after: 
-void exmaple1(float* output, float* input_1, float* input_2) {
-    __bang_mlp(output, input_1, input_2, 64, 64);
-}
-
-Example2：
-void exmaple2(float* output, half* input_1, half* input_2) {
-    for (i = 0; i < 32; ++i) {
-        for (j = 0; j < 64; ++j) {
-            for (k = 0; k < 64; ++k) {
-                output[i * 64 + j] += input_1[i * 64 + k] * input_2[k * 64 + j];
-            }
-        }
-    }
-}
-
-// after: 
-void exmaple1(float* output, half* input_1, half* input_2) {
-    __bang_mlp(output, input_1, input_2, 32, 64);
-}
-
-Input code:
-

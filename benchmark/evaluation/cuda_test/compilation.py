@@ -8,7 +8,16 @@ from tqdm import tqdm
 def run_compilation(so_name, file_name):
     try:
         output = subprocess.run(
-            ["nvcc", "-Xcompiler", "-fPIC", "-shared", "-arch=sm_80", "-o", so_name, file_name],
+            [
+                "nvcc",
+                "-Xcompiler",
+                "-fPIC",
+                "-shared",
+                "-arch=sm_80",
+                "-o",
+                so_name,
+                file_name,
+            ],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             encoding="utf-8",
@@ -52,4 +61,4 @@ for file_name in tqdm(files):
 
 print(counter)
 print(len(files))
-print("[INFO]*******************Compilation rate: ", counter / len(files))
+print("[INFO]*******************Compilation successfule rate ", counter / len(files))

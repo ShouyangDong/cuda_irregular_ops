@@ -65,9 +65,9 @@ def perf_elementwise(name, file, shape):
 
         fmlu(data_lhs_dev, data_rhs_dev, result_arr)
         mlu_output = result_arr
-        #cpu_output = np.add(data_lhs, data_rhs)
-        #bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
-        #print("验证通过！")
+        # cpu_output = np.add(data_lhs, data_rhs)
+        # bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
+        # print("验证通过！")
         evaluator = fmlu.time_evaluator(number=100, repeat=1, min_repeat_ms=0)
         cost = evaluator(data_lhs_dev, data_rhs_dev, result_arr).mean
         print(f"{name} execution time: {cost * 1000} ms")
@@ -891,6 +891,7 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             import time
+
             t1 = time.time()
             perf_elementwise(base_name, file, shape)
             t2 = time.time()

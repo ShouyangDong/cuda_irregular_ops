@@ -2,8 +2,6 @@ import glob
 import os
 import subprocess
 
-from tqdm import tqdm
-
 
 def run_test(file_name, test_file):
     try:
@@ -25,10 +23,10 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/depthwiseconv*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/**.cu"))
     counter = 0
 
-    for file in (files):
+    for file in files:
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":
@@ -127,4 +125,7 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************cuda test successfule rate: ", counter / len(files))
+    print(
+        "[INFO]*******************cuda test computation successfule rate: ",
+        counter / len(files),
+    )

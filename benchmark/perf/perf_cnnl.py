@@ -1,18 +1,14 @@
-import csv
 import glob
 import os
-import timeit
 
 import torch
 import torch.nn.functional as F
-import shutil
-import torch_mlu
-
 
 # torch.set_float32_matmul_precision('medium')
 # torch.backends.cudnn.deterministic = True
 
 device = torch.device("mlu")
+
 
 def perf_elementwise(name, shape):
     x = torch.randn(shape, device=device)
@@ -20,7 +16,7 @@ def perf_elementwise(name, shape):
 
     op_name = name.split("_")[0]
     if op_name == "add":
-        for _ in range(100): # warm up
+        for _ in range(100):  # warm up
             z = torch.add(x, y)
 
         torch.mlu.synchronize()
@@ -28,8 +24,14 @@ def perf_elementwise(name, shape):
         end = torch.mlu.Event(enable_timing=True)
         nb_iters = 1000
         start.record()
-        with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-            record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+        with torch.profiler.profile(
+            activities=(
+                torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.MLU,
+            ),
+            record_shapes=True,
+            on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+        ) as p:
             for _ in range(nb_iters):
                 z = torch.add(x, y)
         end.record()
@@ -38,13 +40,13 @@ def perf_elementwise(name, shape):
         key_averages = p.key_averages()
         time = 0
         for avg in key_averages:
-            if avg.key == 'aten::add':  # 根据 key 找到你需要的操作
+            if avg.key == "aten::add":  # 根据 key 找到你需要的操作
                 time = avg.mlu_time
-        
+
         return time
 
     elif op_name == "sign":
-        for _ in range(100): # warm up
+        for _ in range(100):  # warm up
             z = torch.sign(x)
 
         torch.mlu.synchronize()
@@ -52,8 +54,14 @@ def perf_elementwise(name, shape):
         end = torch.mlu.Event(enable_timing=True)
         nb_iters = 1000
         start.record()
-        with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-            record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+        with torch.profiler.profile(
+            activities=(
+                torch.profiler.ProfilerActivity.CPU,
+                torch.profiler.ProfilerActivity.MLU,
+            ),
+            record_shapes=True,
+            on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+        ) as p:
             for _ in range(nb_iters):
                 z = torch.sign(x)
         end.record()
@@ -62,9 +70,9 @@ def perf_elementwise(name, shape):
         key_averages = p.key_averages()
         time = 0
         for avg in key_averages:
-            if avg.key == 'aten::sign':  # 根据 key 找到你需要的操作
+            if avg.key == "aten::sign":  # 根据 key 找到你需要的操作
                 time = avg.mlu_time
-        
+
         return time
 
 
@@ -81,6 +89,7 @@ def perf_pooling(name, shape, kernel, stride):
         name = "max_pool2d"
     elif op_name == "minpool":
         name = "avg_pool2d"
+
         class MinPool2d(torch.nn.Module):
             def __init__(self, kernel_size, stride=None, padding=0):
                 super(MinPool2d, self).__init__()
@@ -127,15 +136,21 @@ def perf_pooling(name, shape, kernel, stride):
     def test_pool():
         output = pool(x)
 
-    for _ in range(100): # warm up
+    for _ in range(100):  # warm up
         test_pool()
 
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
-    start.record()        
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-            record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    start.record()
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_pool()
     end.record()
@@ -145,9 +160,9 @@ def perf_pooling(name, shape, kernel, stride):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == ('aten::'+name):  # 根据 key 找到你需要的操作
+        if avg.key == ("aten::" + name):  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -160,14 +175,21 @@ def perf_bmm(name, shape_A, shape_B):
     def test_gemm():
         # 执行矩阵乘法操作 (GEMM)
         C = torch.matmul(A, B)
+
     for _ in range(100):
         test_gemm()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_gemm()
     end.record()
@@ -176,9 +198,9 @@ def perf_bmm(name, shape_A, shape_B):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::matmul':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::matmul":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -192,7 +214,7 @@ def perf_activation(name, shape):
     elif op_name == "gelu":
         activation = torch.nn.GELU()
     elif op_name == "softmax":
-        activation = torch.nn.Softmax(dim=len(shape)-1)
+        activation = torch.nn.Softmax(dim=len(shape) - 1)
 
     def test_activation():
         output = activation(x)
@@ -203,8 +225,14 @@ def perf_activation(name, shape):
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_activation()
     end.record()
@@ -214,11 +242,10 @@ def perf_activation(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == ('aten::'+ op_name):  # 根据 key 找到你需要的操作
+        if avg.key == ("aten::" + op_name):  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
-    return time
 
+    return time
 
 
 def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
@@ -238,13 +265,19 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
 
     for _ in range(100):
         test_conv2d()
-        
+
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_conv2d()
     end.record()
@@ -254,9 +287,9 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::conv2d':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::conv2d":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -264,29 +297,34 @@ def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, pad
     input_nhwc = torch.randn(shape, device=device)
     weight_hwio = torch.randn([out_channels, kernel, kernel, shape[3]], device=device)
     print(weight_hwio.shape)
+
     def test_conv2d():
         # 将输入从 NHWC 转换到 NCHW
         input_nchw = input_nhwc.permute(0, 3, 1, 2)
-        
+
         # 将卷积核从 HWIO (H, W, in_channels, out_channels) 转换到 PyTorch的 OIHW 格式
         weight_oihw = weight_hwio.permute(0, 3, 1, 2)
-        
+
         # 使用转换后的卷积核和输入进行卷积操作
-        output_nchw = F.conv2d(input_nchw, weight_oihw,stride=stride, padding=padding)
-        
+        output_nchw = F.conv2d(input_nchw, weight_oihw, stride=stride, padding=padding)
+
         # 将输出从 NCHW 转换回 NHWC
         output_nhwc = output_nchw.permute(0, 3, 1, 2)
-        
 
-        
     for _ in range(100):
         test_conv2d()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_conv2d()
     end.record()
@@ -296,10 +334,11 @@ def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, pad
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::conv2d':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::conv2d":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
+
 
 def perf_gemv(name, shape):
 
@@ -310,15 +349,21 @@ def perf_gemv(name, shape):
     def test_gemv():
         output = torch.matmul(matrix, vector)
         # 或者使用 matrix @ vector
-        
+
     for _ in range(100):
         test_gemv()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_gemv()
     end.record()
@@ -328,29 +373,35 @@ def perf_gemv(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::matmul':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::matmul":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
 def perf_conv1d(name, shape):
 
     # 创建输入张量
-    input_tensor = torch.randn([1 ,1, shape[1]], device=device)
+    input_tensor = torch.randn([1, 1, shape[1]], device=device)
     kernel_tensor = torch.randn([1, 1, 3], device=device)
 
     def test_conv1d():
         output_tensor = F.conv1d(input_tensor, kernel_tensor, padding=0)
-        
+
     for _ in range(100):
         test_conv1d()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_conv1d()
     end.record()
@@ -360,9 +411,9 @@ def perf_conv1d(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::conv1d':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::conv1d":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -372,34 +423,43 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
 
     def test_depthwise_conv2d():
         # 输入是 (height, width, in_depth)，添加一个批次维度变成 (1, height, width, in_depth)
-        input_nchw = input_hwio.unsqueeze(0).permute(0, 3, 1, 2)  # 转换为 (1, in_depth, height, width)
-        
+        input_nchw = input_hwio.unsqueeze(0).permute(
+            0, 3, 1, 2
+        )  # 转换为 (1, in_depth, height, width)
+
         # 卷积核是 (fd, fd, in_depth)，需要转换为 (in_depth, 1, fd, fd)
         in_depth = weight_fdio.shape[2]
-        weight_iodf = weight_fdio.permute(2, 0, 1).unsqueeze(1)  # 转换为 (in_depth, 1, fd, fd)
-        
+        weight_iodf = weight_fdio.permute(2, 0, 1).unsqueeze(
+            1
+        )  # 转换为 (in_depth, 1, fd, fd)
+
         # 使用深度可分离卷积
         output_nchw = F.conv2d(input_nchw, weight_iodf, groups=in_depth)
-        
+
         # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height, new_width, in_depth)
         output_hwio = output_nchw.squeeze(0).permute(1, 2, 0)
 
-        
     for _ in range(100):
         test_depthwise_conv2d()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_depthwise_conv2d()
     end.record()
     torch.mlu.current_stream().synchronize()
 
     print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    return start.elapsed_time(end) /nb_iters
+    return start.elapsed_time(end) / nb_iters
 
 
 def perf_layernorm(name, shape):
@@ -411,15 +471,21 @@ def perf_layernorm(name, shape):
 
     def test_layernorm():
         output = layer_norm(input_tensor)
-    
+
     for _ in range(100):
         test_layernorm()
     start = torch.mlu.Event(enable_timing=True)
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_layernorm()
     end.record()
@@ -429,9 +495,9 @@ def perf_layernorm(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::layer_norm':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::layer_norm":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -451,8 +517,14 @@ def perf_rmsnorm(name, shape):
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_rmsnorm()
     end.record()
@@ -462,11 +534,10 @@ def perf_rmsnorm(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::rmsnorm':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::rmsnorm":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
-    return time
 
+    return time
 
 
 def perf_deformable(name, shape):
@@ -483,9 +554,7 @@ def perf_deformable(name, shape):
     value = torch.rand(N, S, M, D, device=device) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2, device=device)
     attention_weights = torch.rand(N, Lq, M, L, P, device=device) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
-        -2, keepdim=True
-    )
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
 
     def test_deformable():
         MSDA.ms_deform_attn_forward(
@@ -497,7 +566,6 @@ def perf_deformable(name, shape):
             64,
         )
         # necessary because kernel launches are async
-        
 
     for _ in range(100):
         test_deformable()
@@ -506,8 +574,14 @@ def perf_deformable(name, shape):
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_deformable()
     end.record()
@@ -517,9 +591,9 @@ def perf_deformable(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::scaled_dot_product_attention':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::scaled_dot_product_attention":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
@@ -532,7 +606,6 @@ def perf_scaled_dot_product_attention(name, shape):
 
     def test_scaled_dot_product_attention():
         output = F.scaled_dot_product_attention(query, key, value)
-        
 
     for _ in range(100):
         test_scaled_dot_product_attention()
@@ -540,8 +613,14 @@ def perf_scaled_dot_product_attention(name, shape):
     end = torch.mlu.Event(enable_timing=True)
     nb_iters = 1000
     start.record()
-    with torch.profiler.profile(activities=(torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.MLU),
-        record_shapes=True, on_trace_ready=torch.profiler.tensorboard_trace_handler("./time")) as p:
+    with torch.profiler.profile(
+        activities=(
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.MLU,
+        ),
+        record_shapes=True,
+        on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
+    ) as p:
         for _ in range(nb_iters):
             test_scaled_dot_product_attention()
     end.record()
@@ -551,14 +630,16 @@ def perf_scaled_dot_product_attention(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == 'aten::scaled_dot_product_attention':  # 根据 key 找到你需要的操作
+        if avg.key == "aten::scaled_dot_product_attention":  # 根据 key 找到你需要的操作
             time = avg.mlu_time
-    
+
     return time
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/conv1d_*.cu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/conv1d_*.cu")
+    )
     counter = 0
     execution_time = 0
     table = []
@@ -657,7 +738,7 @@ if __name__ == "__main__":
             shape = [input_height, input_height, input_channels]
             execution_time = perf_depthwise_conv2d(base_name, shape, kernel_size)
             times.append(execution_time)
-            
+
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -665,7 +746,7 @@ if __name__ == "__main__":
             times.append(execution_time)
 
         elif name == "rmsnorm":
-            #TODO:torch >= 2.4.0
+            # TODO:torch >= 2.4.0
             # shapes = base_name.split(".")[0]
             # shape = [int(intg) for intg in shapes.split("_")[1:]]
             # execution_time = perf_rmsnorm(base_name, shape)

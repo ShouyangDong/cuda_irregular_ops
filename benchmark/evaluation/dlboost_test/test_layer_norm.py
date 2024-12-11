@@ -6,7 +6,7 @@ from ctypes import CDLL
 
 import numpy as np
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 def ref_program(x, gamma, beta, eps=1e-5):

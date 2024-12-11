@@ -4,24 +4,9 @@ import subprocess
 
 from tqdm import tqdm
 
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-O3", file_name, "-o", so_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
-
-files = glob.glob("./cpp_code_test/*.cpp")
+files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
 counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)
@@ -41,7 +26,9 @@ for file_name in tqdm(files):
         f.close()
 
     so_name = base_name.replace("cpp", "so")
-    so_name = os.path.join("./cpp_code_test/", so_name)
+    so_name = os.path.join(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/"), so_name
+    )
 
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
@@ -55,4 +42,6 @@ for file_name in tqdm(files):
 
 print(counter)
 print(len(files))
-print("[INFO]*******************CPP Compilation rate: ", counter / len(files))
+print(
+    "[INFO]*******************CPP Compilation successfule rate ", counter / len(files)
+)

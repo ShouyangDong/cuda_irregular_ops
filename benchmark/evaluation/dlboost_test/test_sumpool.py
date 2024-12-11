@@ -5,7 +5,8 @@ import subprocess
 
 import numpy as np
 
-from benchmark.utils import run_compilation, sumpool_np
+from benchmark.utils import run_dlboost_compilation as run_compilation
+from benchmark.utils import sumpool_np
 
 
 def generate_data(shape, dtype):

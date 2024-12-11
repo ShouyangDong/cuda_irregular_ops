@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

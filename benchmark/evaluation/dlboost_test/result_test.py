@@ -124,4 +124,7 @@ if __name__ == "__main__":
 
     print(counter)
     print(len(files))
-    print("[INFO]*******************CPP test successfule rate: ", counter / len(files))
+    print(
+        "[INFO]*******************CPP test computation successfule rate: ",
+        counter / len(files),
+    )

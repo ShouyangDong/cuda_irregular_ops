@@ -4,7 +4,7 @@ import subprocess
 
 from tqdm import tqdm
 
-from benchmark.utils import run_compilation
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 files = glob.glob("benchmark/data/dlboost_code_test/*.cpp")
 counter = 0
@@ -38,4 +38,6 @@ for file_name in tqdm(files):
 
 print(counter)
 print(len(files))
-print("[INFO]*******************CPP Compilation rate: ", counter / len(files))
+print(
+    "[INFO]*******************CPP Compilation successfule rate ", counter / len(files)
+)

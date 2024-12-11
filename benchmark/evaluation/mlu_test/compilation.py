@@ -4,35 +4,11 @@ import subprocess
 
 from tqdm import tqdm
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "cncc",
-                "-shared",
-                "-fPIC",
-                "--bang-mlu-arch=mtp_592",
-                "-o",
-                so_name,
-                file_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu"))
 counter = 0
 for file_name in tqdm(files):
-    print(file_name)
     base_name = os.path.basename(file_name)
     so_name = base_name.replace("mlu", "so")
     so_name = os.path.join(
@@ -62,4 +38,6 @@ for file_name in tqdm(files):
 
 print(counter)
 print(len(files))
-print("[INFO]*******************MLU Compilation rate: ", counter / len(files))
+print(
+    "[INFO]*******************MLU Compilation successfule rate ", counter / len(files)
+)

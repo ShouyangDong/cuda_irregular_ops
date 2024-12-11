@@ -5,21 +5,7 @@ import subprocess
 
 import numpy as np
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            ["g++", "-shared", "-fPIC", "-O3", file_name, "-o", so_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
