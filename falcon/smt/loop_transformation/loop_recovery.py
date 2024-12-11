@@ -152,7 +152,7 @@ if __name__ == "__main__":
     print(converted_code)
 
     cuda_code = """
-    __global__ void gemm(float *A, float *B, float *C) {
+    __global__ void gemm(half *A, half *B, float *C) {
         int row = blockIdx.x * blockDim.x + threadIdx.x;
         int col = blockIdx.y * blockDim.y + threadIdx.y;
 

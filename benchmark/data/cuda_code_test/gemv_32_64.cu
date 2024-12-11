@@ -22,7 +22,27 @@ extern "C" void gemv_kernel(float *y, float *A, float *x, int m, int n) {
   int blockSize = 32;
   int numBlocks = (m + blockSize - 1) / blockSize;
 
-  gemv<<<numBlocks, blockSize>>>(d_y, d_A, d_x);
+    for (int i = 0; i < 1000; ++i) { 
+    gemv<<<numBlocks, blockSize>>>(d_y, d_A, d_x);
+  }
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      gemv<<<numBlocks, blockSize>>>(d_y, d_A, d_x);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
 
   cudaMemcpy(y, d_y, m * sizeof(float), cudaMemcpyDeviceToHost);
 

@@ -34,7 +34,28 @@ extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   dim3 blockSize(45);
   dim3 numBlocks((size1 + 45 - 1) / 45);
 
-  softmax<<<numBlocks, blockSize>>>(d_A, d_C);
+    for (int i =0; i< 10; i++){
+    softmax<<<numBlocks, blockSize>>>(d_A, d_C);
+  }
+  
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      softmax<<<numBlocks, blockSize>>>(d_A, d_C);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
 
   cudaMemcpy(C, d_C, size1 * size2 * sizeof(float), cudaMemcpyDeviceToHost);
 

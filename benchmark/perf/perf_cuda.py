@@ -765,7 +765,7 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/mha*.cu")
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/depthwiseconv*.cu")
     )
     counter = 0
 
@@ -802,7 +802,7 @@ if __name__ == "__main__":
             shape_C = [1, shape[0], shape[2]]
             perf_bmm(name, file, shape_A, shape_B, shape_C)
 
-        elif name in ["relu", "sigmoid", "softmax"]:
+        elif name in ["relu", "sigmoid", "softmax", "gelu"]:
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             perf_activation(base_name, file, shape)

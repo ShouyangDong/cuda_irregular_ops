@@ -25,8 +25,28 @@ extern "C" void gelu_kernel(float *C, float *A, int size) {
   dim3 blockSize(1024);
   dim3 numBlocks((size + 1024 - 1) / 1024);
 
-  gelu<<<numBlocks, blockSize>>>(d_A, d_C);
+  for (int i =0; i< 10; i++){
+    gelu<<<numBlocks, blockSize>>>(d_A, d_C);
+  }
+  
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
 
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      gelu<<<numBlocks, blockSize>>>(d_A, d_C);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
   cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
 
   cudaFree(d_A);

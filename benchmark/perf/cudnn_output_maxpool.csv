@@ -1,0 +1,9 @@
+file,time(us)
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_16_128_8_8_64_128_2_2_2_0.cu,17.83488100000009
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_16_128_8_8_64_128_2_2_3_0.cu,17.970203000000105
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_16_64_8_8_128_64_2_2_2_0.cu,16.646180999999917
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_16_64_8_8_128_64_2_2_3_0.cu,16.402716000000424
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_32_128_8_8_64_128_2_2_2_0.cu,18.400881999999925
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_32_128_8_8_64_128_2_2_3_0.cu,18.186761999999153
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_32_64_8_8_128_64_2_2_2_0.cu,17.043568999999902
+/projs/AE/dongshouyang/cuda_irregular_ops/benchmark/data/cuda_code_test/conv2dnchw_32_64_8_8_128_64_2_2_3_0.cu,16.978999999999687

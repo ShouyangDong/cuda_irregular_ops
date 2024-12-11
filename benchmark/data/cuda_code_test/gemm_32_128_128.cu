@@ -40,12 +40,31 @@ extern "C" void gemm_kernel(float *C, half *A, half *B, int m, int k, int n) {
   dim3 blockSize(32);
   dim3 numBlocks((n + 16 - 1) / 16,
                  (m + 16 - 1) / 16);
+  for (int i = 0; i < 1000; ++i) { 
+    gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+  }
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
 
-  gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
 
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
   cudaMemcpy(C, d_C, m * n * sizeof(float), cudaMemcpyDeviceToHost);
 
   cudaFree(d_A);
   cudaFree(d_B);
   cudaFree(d_C);
 }
+

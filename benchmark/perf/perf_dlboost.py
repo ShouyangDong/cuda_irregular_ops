@@ -47,7 +47,9 @@ def perf_function(file_name):
 
     extern "C" int timed_${kernel_name}(${param_list}) {  
         struct timeval start, end;
-        ${kernel_name}(${called_param_list});
+        for (int i = 0; i < 10; i++) {  
+            ${kernel_name}(${called_param_list});
+        }
         // 获取开始时间
         gettimeofday(&start, NULL);   
         for (int i = 0; i < 1000; i++) {  
@@ -57,8 +59,8 @@ def perf_function(file_name):
         gettimeofday(&end, NULL); 
 
         int time_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
-        float us_time = time_us / 1000.0f / 1000.0f;
-        printf("Time taken for ${kernel_name}:  %d ms\\n", us_time);
+        float us_time = time_us / 1000.0f / 1000.0f'
+        printf("Time taken for ${kernel_name}:  %d us\\n", us_time);
         return us_time;
     }  
     """

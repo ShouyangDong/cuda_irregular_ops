@@ -16,6 +16,7 @@ def run_test(file_name, test_file):
             text=True,
             timeout=400,
         )
+        print(output)
         return True, output
     except subprocess.TimeoutExpired:
         return False, "timeout"
@@ -24,10 +25,10 @@ def run_test(file_name, test_file):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/gemm*.cu"))
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/depthwiseconv*.cu"))
     counter = 0
 
-    for file in tqdm(files):
+    for file in (files):
         base_name = os.path.basename(file)
         name = base_name.split("_")[0]
         if name == "deformable":

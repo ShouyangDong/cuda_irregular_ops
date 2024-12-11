@@ -50,7 +50,28 @@ extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output,
                  (output_height + blockSize.y - 1) / blockSize.y,
                  input_channels); // 每个通道使用一个块
 
-  depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+   for (int i =0; i< 10; i++){
+    depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+  }
+  
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
 
   cudaMemcpy(output, d_output, output_size * sizeof(float),
              cudaMemcpyDeviceToHost);

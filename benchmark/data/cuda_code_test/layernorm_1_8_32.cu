@@ -60,8 +60,27 @@ extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
   int block_size = 8;
   int num_blocks = (batch_size * seq_length + block_size - 1) / block_size;
 
-  // Launch kernel
-  layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
+    for (int i = 0; i < 1000; ++i) { 
+    layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
+  }
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
 
   // Copy the result back to host
   cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);

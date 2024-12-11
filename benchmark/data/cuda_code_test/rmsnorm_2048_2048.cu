@@ -37,8 +37,28 @@ extern "C" void rmsnorm_kernel(float *A, float *B, int size_1, int size_2) {
   int num_blocks = (size_1 + block_size - 1) / block_size;
 
   // Launch kernel
-  rmsnorm<<<num_blocks, block_size>>>(d_A, d_B);
+  for (int i =0; i< 10; i++){
+    rmsnorm<<<num_blocks, block_size>>>(d_A, d_B);
+  }
+  
+  // 定义 CUDA 事件以计算时间
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
 
+  // 启动内核
+  cudaEventRecord(start);
+  for (int i = 0; i < 1000; ++i) {
+      rmsnorm<<<num_blocks, block_size>>>(d_A, d_B);
+  }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+
+  // 计算执行时间
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  milliseconds = milliseconds / 1000.0f;
+  printf("Execution time: %f milliseconds\n", milliseconds);
   // Copy the result back to host
   cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
   // Free device memory

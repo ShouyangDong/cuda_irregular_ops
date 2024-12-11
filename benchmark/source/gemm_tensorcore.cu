@@ -1,40 +1,59 @@
-#include <cuda_runtime.h>
 #include <mma.h>
 #include <cuda_fp16.h>
+#include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 using namespace nvcuda;
 
 __global__ void matrixMul_Ampere(half *A, half *B, float *C, int M, int N, int K) {
-    // 每个线程块计算 C 中的一个 16x16 块
     // 定义 wmma fragment
     wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
     wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
     wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
 
+    // 定义共享内存，用于乒乓缓存
+    __shared__ half shared_A[2][16 * 16];
+    __shared__ half shared_B[2][16 * 16];
+
     int blockRow = blockIdx.y * 16;
     int blockCol = blockIdx.x * 16;
 
-    
-    if (blockRow < M && blockCol < N) {
-        
+    if (blockRow < 512 && blockCol < 512) {
         wmma::fill_fragment(c_frag, 0.0f);
 
-        
-        for (int k = 0; k < K; k += 16) {
-            
-            wmma::load_matrix_sync(a_frag, A + blockRow * K + k, K);
-            wmma::load_matrix_sync(b_frag, B + k * N + blockCol, N);
+        // 使用两个共享内存片区进行乒乓缓存
+        int current_buffer = 0;
 
-            
+        // 首先预加载数据到第一个共享缓存
+        for (int k = 0; k < 512; k += 16) {
+            // 加载 A 和 B 的数据到共享内存
+            if (threadIdx.x < 16 && threadIdx.y < 16) {
+                shared_A[current_buffer][threadIdx.y * 16 + threadIdx.x] = A[(blockRow + threadIdx.y) * 512 + (k + threadIdx.x)];
+                shared_B[current_buffer][threadIdx.y * 16 + threadIdx.x] = B[(k + threadIdx.y) * 512 + (blockCol + threadIdx.x)];
+            }
+
+            __syncthreads();
+
+            // 加载共享内存的数据到 fragment
+            wmma::load_matrix_sync(a_frag, shared_A[current_buffer], 16);
+            wmma::load_matrix_sync(b_frag, shared_B[current_buffer], 16);
+
+            // 进行矩阵乘法运算
             wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+
+            // 交换乒乓缓存的片区，加载下一个数据
+            current_buffer = 1 - current_buffer;
+
+            __syncthreads(); // 确保前一块共享内存计算完成后再进行加载
         }
 
-        
-        wmma::store_matrix_sync(C + blockRow * N + blockCol, c_frag, N, wmma::mem_row_major);
+        // 将结果存储到矩阵 C 中
+        wmma::store_matrix_sync(C + blockRow * 512 + blockCol, c_frag, 512, wmma::mem_row_major);
     }
+
 }
+
 
 __global__ void convertFloatToHalf(float* in, half* out, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -44,9 +63,9 @@ __global__ void convertFloatToHalf(float* in, half* out, int size) {
 }
 
 int main() {
-    int M = 32; // A 的行数
-    int K = 128; // A 的列数 / B 的行数
-    int N = 128; // B 的列数
+    int M = 512; // A 的行数
+    int K = 512; // A 的列数 / B 的行数
+    int N = 512; // B 的列数
     
     size_t size_A_float = M * K * sizeof(float);
     size_t size_B_float = K * N * sizeof(float);
@@ -88,9 +107,11 @@ int main() {
     convertFloatToHalf<<<blocksPerGrid_B, threadsPerBlock>>>(d_B_float, d_B_half, K * N);
 
     // 定义线程块和网格大小
-    dim3 threadsPerBlock2D(32, 32);
+    dim3 threadsPerBlock2D(32);
     dim3 numBlocks((N + 16 - 1) / 16, (M + 16 - 1) / 16);
-
+    for (int i = 0; i < 10; ++i) {
+        matrixMul_Ampere<<<numBlocks, threadsPerBlock2D>>>(d_A_half, d_B_half, d_C, M, N, K);
+    }
     // 定义 CUDA 事件以计算时间
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
@@ -98,14 +119,16 @@ int main() {
 
     // 启动内核
     cudaEventRecord(start);
-    matrixMul_Ampere<<<numBlocks, threadsPerBlock2D>>>(d_A_half, d_B_half, d_C, M, N, K);
+    for (int i = 0; i < 1000; ++i) {
+        matrixMul_Ampere<<<numBlocks, threadsPerBlock2D>>>(d_A_half, d_B_half, d_C, M, N, K);
+    }
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
 
     // 计算执行时间
     float milliseconds = 0;
     cudaEventElapsedTime(&milliseconds, start, stop);
-
+    milliseconds = milliseconds / 1000.0f;
     float seconds = milliseconds / 1000.0f;
     long long total_flops = 2LL * M * N * K;
     float gflops = (total_flops / seconds) / 1e9f;
@@ -129,6 +152,5 @@ int main() {
     cudaFree(d_A_float); cudaFree(d_B_float); cudaFree(d_C);
     cudaFree(d_A_half); cudaFree(d_B_half);
     cudaEventDestroy(start); cudaEventDestroy(stop);
-
     return 0;
 }
