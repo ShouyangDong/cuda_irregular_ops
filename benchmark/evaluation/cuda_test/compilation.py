@@ -4,33 +4,11 @@ import subprocess
 
 from tqdm import tqdm
 
-
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "nvcc",
-                "-Xcompiler",
-                "-fPIC",
-                "-shared",
-                "-arch=sm_80",
-                "-o",
-                so_name,
-                file_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+from benchmark.utils import run_cuda_compilation as run_compilation
 
 
-files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/bmm*.cu"))
+
+files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
 counter = 0
 for file_name in tqdm(files):
     base_name = os.path.basename(file_name)

@@ -8,29 +8,7 @@ import numpy as np
 import torch
 
 
-def run_compilation(so_name, file_name):
-    try:
-        output = subprocess.run(
-            [
-                "nvcc",
-                "-Xcompiler",
-                "-fPIC",
-                "-shared",
-                "-arch=sm_80",
-                "-o",
-                so_name,
-                file_name,
-            ],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=15,
-        )
-        return True, output
-    except subprocess.CalledProcessError as e:
-        return False, e.output
+
 
 
 def ref_program(x):
