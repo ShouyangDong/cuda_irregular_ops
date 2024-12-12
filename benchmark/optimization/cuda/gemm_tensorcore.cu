@@ -7,51 +7,30 @@
 using namespace nvcuda;
 
 __global__ void matrixMul_Ampere(half *A, half *B, float *C, int M, int N, int K) {
-    // 定义 wmma fragment
-    wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
-    wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
-    wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
+  wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
+  wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
+  wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
 
-    // 定义共享内存，用于乒乓缓存
-    __shared__ half shared_A[2][16 * 16];
-    __shared__ half shared_B[2][16 * 16];
-
-    int blockRow = blockIdx.y * 16;
-    int blockCol = blockIdx.x * 16;
+  int blockRow = blockIdx.y * 16;
+  int blockCol = blockIdx.x * 16;
 
     if (blockRow < 512 && blockCol < 512) {
-        wmma::fill_fragment(c_frag, 0.0f);
 
-        // 使用两个共享内存片区进行乒乓缓存
-        int current_buffer = 0;
+      wmma::fill_fragment(c_frag, 0.0f);
 
-        // 首先预加载数据到第一个共享缓存
-        for (int k = 0; k < 512; k += 16) {
-            // 加载 A 和 B 的数据到共享内存
-            if (threadIdx.x < 16 && threadIdx.y < 16) {
-                shared_A[current_buffer][threadIdx.y * 16 + threadIdx.x] = A[(blockRow + threadIdx.y) * 512 + (k + threadIdx.x)];
-                shared_B[current_buffer][threadIdx.y * 16 + threadIdx.x] = B[(k + threadIdx.y) * 512 + (blockCol + threadIdx.x)];
-            }
+      for (int k = 0; k < 512; k += 16) {
 
-            __syncthreads();
+        wmma::load_matrix_sync(a_frag,
+                               A + blockRow * 512 + k, 512);
+        wmma::load_matrix_sync(b_frag,
+                               B + k * 512 + blockCol, 512);
 
-            // 加载共享内存的数据到 fragment
-            wmma::load_matrix_sync(a_frag, shared_A[current_buffer], 16);
-            wmma::load_matrix_sync(b_frag, shared_B[current_buffer], 16);
+        wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+      }
 
-            // 进行矩阵乘法运算
-            wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
-
-            // 交换乒乓缓存的片区，加载下一个数据
-            current_buffer = 1 - current_buffer;
-
-            __syncthreads(); // 确保前一块共享内存计算完成后再进行加载
-        }
-
-        // 将结果存储到矩阵 C 中
-        wmma::store_matrix_sync(C + blockRow * 512 + blockCol, c_frag, 512, wmma::mem_row_major);
+      wmma::store_matrix_sync(C + blockRow * 512 + blockCol,
+                              c_frag, 512, wmma::mem_row_major);
     }
-
 }
 
 
@@ -100,7 +79,7 @@ int main() {
     cudaMemcpy(d_B_float, h_B, size_B_float, cudaMemcpyHostToDevice);
 
     // 转换浮点数为 half 类型
-    int threadsPerBlock = 256;
+    int threadsPerBlock = 512;
     int blocksPerGrid_A = (M * K + threadsPerBlock - 1) / threadsPerBlock;
     int blocksPerGrid_B = (K * N + threadsPerBlock - 1) / threadsPerBlock;
     convertFloatToHalf<<<blocksPerGrid_A, threadsPerBlock>>>(d_A_float, d_A_half, M * K);
@@ -154,3 +133,10 @@ int main() {
     cudaEventDestroy(start); cudaEventDestroy(stop);
     return 0;
 }
+
+// nvcc -arch=sm_80 benchmark/source/gemm_tensorcore.cu -o output
+// ./output
+
+// Matrix size: 512 x 512 and 512 x 512
+// Execution time: 0.020575 milliseconds
+// Performance: 13046.533203 GFLOPS
