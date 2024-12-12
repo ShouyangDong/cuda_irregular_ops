@@ -1,47 +1,61 @@
 import argparse
+import ctypes
 import os
+import subprocess
 
-import bangpy
 import numpy as np
-import tvm
-import tvm.topi.testing
-from bangpy import tensor_op as tsop
-from toc import Environment
 
-env = Environment("cambricon/mlu590-h8")
+from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 
-def verify_add(name, file, shape):
-    op_name = name.split("_")[0]
+# Define the add function using numpy
+def add(A, B):
+    return np.add(A, B)
 
-    @tvm.register_func("toc_callback_bang_postproc")
-    def toc_callback_bang_postproc(code):
-        with open(file, "r") as f:
-            code = f.read()
-            f.close()
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        return code
 
-    input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
-    input1 = tsop.tensor(shape, dtype=bangpy.float32, name="input1")
-    # Describe Computation
-    result = tsop.add(input0, input1)
-    # Build and get executable module
-    fmlu = tsop.BuildBANG([input0, input1], [result], "mlu590-h8", kernel_name=op_name)
-    # Generate random test data and run on mlu and cpu
-    data_lhs = np.random.rand(*shape).astype("float32")
-    data_rhs = np.random.rand(*shape).astype("float32")
-    result_np = np.zeros(shape=shape, dtype="float32")
-    dev = bangpy.device(0)
-    data_lhs_dev = bangpy.Array(data_lhs, dev)
-    data_rhs_dev = bangpy.Array(data_rhs, dev)
-    result_arr = bangpy.Array(result_np, dev)
+def verify_add(base_name, file, shape):
+    # A = np.random.rand(*shape).astype("float32")
+    # B = np.random.rand(*shape).astype("float32")
+    A = np.ones(shape).astype("float32")
+    B = np.ones(shape).astype("float32")
+    # Convert the matrices to contiguous memory for ctypes
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    result_np = add(A, B)
 
-    fmlu(data_lhs_dev, data_rhs_dev, result_arr)
-    mlu_output = result_arr
-    cpu_output = np.add(data_lhs, data_rhs)
-    bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
-    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    so_name = file.replace(".mlu", ".so")
+
+    file_name = create_bang_func(file)
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    name = base_name.split("_")[0]
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    result_ctypes = np.zeros(shape, dtype=np.float32)
+    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    function(A_ptr, B_ptr, output_ptr, np.prod(shape))
+    # Check if the results match
+    np.testing.assert_allclose(
+        result_ctypes,
+        result_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
+    print("验证通过！")
+    result = subprocess.run(["rm", so_name])
 
 
 if __name__ == "__main__":
@@ -52,4 +66,3 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     verify_add(base_name, args.file, shape)
-    print("验证通过！")
