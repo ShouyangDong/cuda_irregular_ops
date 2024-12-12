@@ -1,69 +1,56 @@
 import argparse
+import ctypes
 import os
+import subprocess
 
-import bangpy
 import numpy as np
-import toc
-import tvm
-import tvm.topi.testing
-from toc import Environment
-from tvm import te
-from tvm.topi.utils import get_const_tuple
 
-env = Environment("cambricon/mlu590-h8")
+from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 
-def verify_sign(name, file, shape):
-    from toc import Environment
+# Define the function using numpy
+def ref_program(A):
+    return np.sign(A)
 
-    env = Environment("cambricon/mlu590-h8")
 
-    @tvm.register_func("toc_callback_bang_postproc")
-    def toc_callback_bang_postproc(code):
-        with open(file, "r") as f:
-            code = f.read()
-            f.close()
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        return code
+def verify_sign(base_name, file, shape):
+    A = np.random.rand(*shape).astype("float32")
+    # Convert the matrices to contiguous memory for ctypes
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    result_np = ref_program(A)
 
-    op_name = name.split("_")[0]
-    A = te.placeholder(shape, dtype="float32", name="A")
+    so_name = file.replace(".mlu", ".so")
 
-    def test_activation(A, B):
-        n = A.shape[0]
-        prod = np.prod(A.shape[:-1])
-        ib = tvm.tir.ir_builder.create()
-        tx = te.thread_axis("threadIdx.x")
-        bx = te.thread_axis("blockIdx.x")
-
-        ib.scope_attr(tx, "thread_extent", 4)
-        ib.scope_attr(bx, "thread_extent", 4)
-
-        Aptr = ib.buffer_ptr(A)
-        Bptr = ib.buffer_ptr(B)
-        with ib.for_range(0, n, name="i") as i:
-            Bptr[i] = Aptr[i]
-        body = ib.get()
-        return body
-
-    B = te.extern(
-        A.shape,
-        [A],
-        lambda ins, outs: test_activation(ins[0], outs[0]),
-        name=op_name,
-        dtype="float32",
+    file_name = create_bang_func(file)
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    name = base_name.split("_")[0]
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    result_ctypes = np.zeros(shape, dtype=np.float32)
+    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    function(A_ptr, output_ptr, np.prod(shape))
+    # Check if the results match
+    np.testing.assert_allclose(
+        result_ctypes,
+        result_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
     )
-
-    s = te.create_schedule(B.op)
-    dev = tvm.device("bang", 0)
-    data = np.random.rand(*shape).astype("float32")
-    a = tvm.nd.array(data, dev)
-    b = tvm.nd.array(np.zeros(get_const_tuple(B.shape), dtype=B.dtype), dev)
-    with toc.build_config(env):
-        f = toc.build(s, [A, B], name=op_name)
-    f(a, b)
-    bangpy.assert_allclose(b.numpy(), np.sign(data))
-    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+    print("验证通过！")
+    result = subprocess.run(["rm", so_name])
 
 
 if __name__ == "__main__":
@@ -74,4 +61,3 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     verify_sign(base_name, args.file, shape)
-    print("验证通过！")

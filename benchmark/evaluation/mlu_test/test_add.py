@@ -15,10 +15,8 @@ def add(A, B):
 
 
 def verify_add(base_name, file, shape):
-    # A = np.random.rand(*shape).astype("float32")
-    # B = np.random.rand(*shape).astype("float32")
-    A = np.ones(shape).astype("float32")
-    B = np.ones(shape).astype("float32")
+    A = np.random.rand(*shape).astype("float32")
+    B = np.random.rand(*shape).astype("float32")
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
