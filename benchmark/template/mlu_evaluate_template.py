@@ -121,7 +121,6 @@ def create_evaluate_bang_func(file_name):
         memcpy_back=memcpy_back,
         memory_free=memory_free_list,
     )
-    print(new_code)
     # 保存生成的 C++ 文件
     output_file = file_name.replace(".mlu", "_bak.mlu")
     with open(output_file, "w") as f:

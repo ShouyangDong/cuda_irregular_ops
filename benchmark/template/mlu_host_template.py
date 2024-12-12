@@ -2,7 +2,7 @@ import re
 from string import Template
 
 
-def create_bang_func(file_name):
+def create_bang_func(file_name, op_type="ewise"):
     with open(file_name, "r") as f:
         original_function = f.read()
         f.close()
@@ -26,39 +26,82 @@ def create_bang_func(file_name):
     mlu_param_list = ", ".join(
         [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in mlu_params]
     )
-    dim = (
-        "cnrtDim3_t dim = {16, 1, 1};"
-        if "clusterId" in original_function
-        else "cnrtDim3_t dim = {1, 1, 1};"
-    )
-    func_type = (
-        "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;"
-        if "clusterId" in original_function
-        else "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_BLOCK;"
-    )
+
+    dim = None
+    func_type = None
+    if "clusterId" in original_function:
+        dim = "cnrtDim3_t dim = {16, 1, 1};"
+        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;"
+    elif "coreId" in original_function:
+        dim = "cnrtDim3_t dim = {4, 1, 1};"
+        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;"
+    else:
+        dim = "cnrtDim3_t dim = {1, 1, 1};"
+        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_BLOCK;"
     # 构造新的计时函数模板
     device_memory_alloc = []
-    for param in params:
-        name = param.split("*")[1]
-        device_memory_alloc.append(param + "_mlu;\n")
-        device_memory_alloc.append(
-            f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, size * sizeof(float)));\n"
-        )
-
     memcpy = []
-    for param in params[:-1]:
-        name = param.split("*")[1]
-        memcpy.append(
-            f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, size * sizeof(float), cnrtMemcpyHostToDev));\n"
-        )
+    size = None
+    if op_type == "ewise":
+        size = "size"
+        for param in params:
+            name = param.split("*")[1]
+            device_memory_alloc.append(param + "_mlu;\n")
+            device_memory_alloc.append(
+                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size} * sizeof(float)));\n"
+            )
 
-    # copy back
-    name = params[-1].split("*")[1]
-    memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size * sizeof(float), cnrtMemcpyDevToHost));\n"
+        for param in params[:-1]:
+            name = param.split("*")[1]
+            memcpy.append(
+                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size} * sizeof(float), cnrtMemcpyHostToDev));\n"
+            )
+        # copy back
+        name = params[-1].split("*")[1]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, {size} * sizeof(float), cnrtMemcpyDevToHost));\n"
+    elif op_type == "pool":
+        size = ["size1", "size2"]
+        for i, param in enumerate(params):
+            name = param.split("*")[1]
+            device_memory_alloc.append(param + "_mlu;\n")
+            device_memory_alloc.append(
+                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size[i]} * sizeof(float)));\n"
+            )
+
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            memcpy.append(
+                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size[i]} * sizeof(float), cnrtMemcpyHostToDev));\n"
+            )
+        # copy back
+        name = params[-1].split("*")[1]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, {size[-1]} * sizeof(float), cnrtMemcpyDevToHost));\n"
+    elif op_type == "matmul":
+        size = ["size1", "size2", "size3"]
+        for i, param in enumerate(params):
+            print(size[i])
+            name = param.split("*")[1]
+            device_memory_alloc.append(param + "_mlu;\n")
+            device_memory_alloc.append(
+                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size[i]} * sizeof(float)));\n"
+            )
+
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            memcpy.append(
+                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size[i]} * sizeof(float), cnrtMemcpyHostToDev));\n"
+            )
+        # copy back
+        name = params[-1].split("*")[1]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size3 * sizeof(float), cnrtMemcpyDevToHost));\n"
+
     memory_free = []
     for param in params:
         name = param.split("*")[1]
         memory_free.append(f"cnrtFree({name}_mlu);\n")
+
+    size_list = ", ".join(arg for arg in ["int " + string for string in size])
+
     cpp_pef_template = Template(
         """  
     #include <stdio.h>
@@ -68,7 +111,7 @@ def create_bang_func(file_name):
     // Original function  
     ${original_function}
 
-    extern "C" void ${kernel_name}_kernel(${param_list}, int size) { 
+    extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) { 
         cnrtQueue_t queue;
         CNRT_CHECK(cnrtSetDevice(0));
         CNRT_CHECK(cnrtQueueCreate(&queue));
@@ -106,12 +149,14 @@ def create_bang_func(file_name):
         memcpy_list=memcpy_list,
         memcpy_back=memcpy_back,
         memory_free=memory_free_list,
+        size_list=size_list,
     )
-    print(new_code)
+
     # 保存生成的 C++ 文件
     output_file = file_name.replace(".mlu", "_bak.mlu")
     with open(output_file, "w") as f:
         f.write(new_code)
+    print(new_code)
     return output_file
 
 

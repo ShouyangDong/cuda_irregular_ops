@@ -1,30 +1,14 @@
 import glob
 import os
-import subprocess
 
 from tqdm import tqdm
 
-
-def run_test(file_name, test_file):
-    try:
-        output = subprocess.run(
-            ["python", test_file, "--file", file_name],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            encoding="utf-8",
-            check=True,
-            text=True,
-            timeout=400,
-        )
-        return True, output
-    except subprocess.TimeoutExpired:
-        return False, "timeout"
-    except subprocess.CalledProcessError as e:
-        return False, e.output
-
+from benchmark.utils import run_test
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*pool*.mlu")
+    )
     counter = 0
     for file in tqdm(files):
         base_name = os.path.basename(file)

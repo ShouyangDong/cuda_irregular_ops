@@ -1,84 +1,18 @@
 import argparse
+import ctypes
 import os
+import subprocess
 
 import numpy as np
-import toc
-import tvm
-import tvm.topi.testing
-from toc import Environment
-from tvm import te
 
-env = Environment("cambricon/mlu590-h8")
+from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 
-def verify_conv1d(name, file, shape, kernel_shape, output_shape):
-    op_name = name.split("_")[0]
-    A = te.placeholder(shape, dtype="float32", name="A")
-    B = te.placeholder(kernel_shape, dtype="float32", name="B")
-
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
-
-    @tvm.register_func("toc_callback_bang_postproc")
-    def toc_callback_bang_postproc(code):
-        with open(file, "r") as f:
-            code = f.read()
-            f.close()
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        return code
-
-    def test_conv1d(A, B, C):
-        n = A.shape[0]
-        prod = np.prod(A.shape[:-1])
-        ib = tvm.tir.ir_builder.create()
-        tx = te.thread_axis("threadIdx.x")
-        bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 4)
-        ib.scope_attr(bx, "thread_extent", 4)
-
-        Aptr = ib.buffer_ptr(A)
-        Bptr = ib.buffer_ptr(B)
-        Cptr = ib.buffer_ptr(C)
-
-        with ib.for_range(0, n, name="i") as i:
-            Cptr[i] = Aptr[i] + Bptr[i]
-        body = ib.get()
-        return body
-
-    C = te.extern(
-        output_shape,
-        [A, B],
-        lambda ins, outs: test_conv1d(ins[0], ins[1], outs[0]),
-        name=op_name,
-        dtype="float32",
-    )
-
-    s = te.create_schedule(C.op)
-
-    dev = tvm.device("bang", 0)
-    input_array = np.random.rand(*shape).astype("float32")
-    kernel = np.random.rand(*kernel_shape).astype("float32")
-    a = tvm.nd.array(input_array, dev)
-    b = tvm.nd.array(kernel, dev)
-    c = tvm.nd.array(np.random.rand(*output_shape).astype("float32"), dev)
-    with toc.build_config(env):
-        f = toc.build(s, [A, B, C], name=op_name)
-    f(a, b, c)
-    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
-
+def ref_program(input_array, kernel):
     # Calculate the result using numpy for comparison
     output_np = np.convolve(input_array, kernel, mode="valid")
-    # Check if the results match
-    np.testing.assert_allclose(
-        c.numpy(),
-        output_np,
-        rtol=1e-03,
-        atol=1e-03,
-        equal_nan=True,
-        err_msg="",
-        verbose=True,
-    )
+    return output_np
 
 
 if __name__ == "__main__":
@@ -88,8 +22,49 @@ if __name__ == "__main__":
     base_name = os.path.basename(args.file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    shape = [shape[1]]
-    kernel_shape = [3]
-    output_shape = [shape[0]]
-    verify_conv1d(base_name, args.file, shape, kernel_shape, output_shape)
+    # Define the input array and kernel
+    input_array = np.random.uniform(size=[shape[1]]).astype("float32")
+    kernel = np.array([0.5, 1.0, 0.5]).astype(np.float32)
+    # Calculate the output size
+    output_size = shape[0]
+    # Create an empty output array
+    output_ctypes = np.zeros(output_size, dtype=np.float32)
+    name = base_name.split("_")[0]
+    # Convert the arrays to contiguous memory for ctypes
+    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+
+    output_np = ref_program(input_array, kernel)
+    # Load the shared library with the batch matrix multiplication function
+    so_name = args.file.replace(".mlu", ".so")
+    file_name = create_bang_func(file, op_type="matmul")
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    function(output_ptr, input_ptr, kernel_ptr, shape[1], 3, shape[0])
+    # Check if the results match
+    np.testing.assert_allclose(
+        output_ctypes,
+        output_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
     print("验证通过！")
+    result = subprocess.run(["rm", so_name])

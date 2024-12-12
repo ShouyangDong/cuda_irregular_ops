@@ -1,61 +1,51 @@
 import argparse
+import ctypes
 import os
+import subprocess
 
-import bangpy
 import numpy as np
-import tvm
-import tvm.topi.testing
-from bangpy import tensor_op as tsop
-from toc import Environment
 
+from benchmark.template.mlu_host_template import create_bang_func
 from benchmark.utils import minpool_np
-
-env = Environment("cambricon/mlu590-h8")
-
-
-def generate_data(shape, dtype):
-    return np.random.uniform(size=shape).astype(dtype)
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 
-def verify_pooling(name, file, shape, kernel, stride):
-    op_name = name.split("_")[0]
-
-    kh, kw = kernel[0], kernel[1]
-    sh, sw = stride[0], stride[1]
-    from toc import Environment
-
-    env = Environment("cambricon/mlu590-h8")
-    op_name = name.split("_")[0]
-
-    @tvm.register_func("toc_callback_bang_postproc")
-    def toc_callback_bang_postproc(code):
-
-        if not os.path.exists(file):
-            with open(file, "w", encoding="utf-8") as f:
-                f.write(code)
-        code = open(file, encoding="utf-8").read()
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
-        return code
-
-    input0 = tsop.tensor(shape, dtype=bangpy.float32, name="input0")
-    # Describ Computation
-    result = tsop.minpool(input0, kh, kw, sh, sw)
-    # Build ang get executable module
-    fmlu = tsop.BuildBANG([input0], [result], "mlu590-h8", kernel_name=op_name)
-    # Generate random test data and run on mlu and cpu
-
-    data0 = generate_data(shape, "float32")
-    cpu_output = minpool_np(data0, kernel_stride)
-    result_np = np.zeros(shape=cpu_output.shape, dtype="float32")
-
-    dev = bangpy.device(0)
-    data_dev = bangpy.Array(data0, dev)
-    result_arr = bangpy.Array(result_np, dev)
-
-    fmlu(data_dev, result_arr)
-    # Compare
-    bangpy.assert_allclose(result_arr.numpy(), cpu_output, 0.1, 0)
-    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
+def verify_pooling(base_name, file, shape, kernel_stride):
+    input_array = np.random.rand(*shape).astype("float32")
+    output_np = minpool_np(input_array, kernel_stride)
+    output_array = np.zeros(shape=output_np.shape, dtype="float32")
+    # Convert the arrays to contiguous memory for ctypes
+    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    so_name = file.replace(".mlu", ".so")
+    file_name = create_bang_func(file, op_type="pool")
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    name = base_name.split("_")[0]
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+    ]
+    function.restype = None
+    # Call the function with the matrices and dimensions
+    function(input_ptr, output_ptr, np.prod(shape), np.prod(output_np.shape))
+    # Check if the results match
+    np.testing.assert_allclose(
+        output_array,
+        output_np,
+        rtol=1e-03,
+        atol=1e-03,
+        equal_nan=True,
+        err_msg="",
+        verbose=True,
+    )
+    print("验证通过！")
+    result = subprocess.run(["rm", so_name])
 
 
 if __name__ == "__main__":
@@ -68,5 +58,4 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shape]
     kernel_stride = base_name.split(".")[0].split("_")[5:]
     kernel_stride = [int(intg) for intg in kernel_stride]
-    verify_pooling(base_name, args.file, shape, kernel_stride[:2], kernel_stride[2:])
-    print("验证通过！")
+    verify_pooling(base_name, args.file, shape, kernel_stride)
