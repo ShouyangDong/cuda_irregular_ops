@@ -6,8 +6,6 @@ from tqdm import tqdm
 
 from benchmark.utils import run_cuda_compilation as run_compilation
 
-
-
 files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
 counter = 0
 for file_name in tqdm(files):

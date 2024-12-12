@@ -8,9 +8,6 @@ import numpy as np
 import torch
 
 
-
-
-
 def ref_program(x):
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)
 

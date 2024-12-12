@@ -7,9 +7,6 @@ from ctypes import CDLL
 import numpy as np
 
 
-
-
-
 def ref_program(x):
     return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
 

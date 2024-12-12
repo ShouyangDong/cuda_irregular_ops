@@ -7,9 +7,6 @@ from ctypes import CDLL
 import numpy as np
 
 
-
-
-
 def ref_program(x, gamma, beta, eps=1e-5):
     mean = np.mean(x, axis=-1, keepdims=True)
     std = np.std(x, axis=-1, keepdims=True)

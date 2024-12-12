@@ -6,9 +6,6 @@ import subprocess
 import numpy as np
 
 
-
-
-
 def depthwise_conv2d(input, w):
     """Two-dimensional depthwise convolution.
 

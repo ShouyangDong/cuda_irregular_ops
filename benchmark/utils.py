@@ -187,6 +187,7 @@ def run_mlu_compilation(so_name, file_name):
     except subprocess.CalledProcessError as e:
         return False, e.output
 
+
 def run_cuda_compilation(so_name, file_name):
     try:
         output = subprocess.run(
@@ -210,6 +211,7 @@ def run_cuda_compilation(so_name, file_name):
         return True, output
     except subprocess.CalledProcessError as e:
         return False, e.output
+
 
 def run_test(file_name, test_file):
     try:

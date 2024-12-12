@@ -6,9 +6,6 @@ import subprocess
 import numpy as np
 
 
-
-
-
 def cpu_conv(input_tensor, kernel, stride, pad=0):
     # 获取输入张量和卷积核的维度
     N, C, H, W = input_tensor.shape

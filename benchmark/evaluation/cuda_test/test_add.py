@@ -6,9 +6,6 @@ import subprocess
 import numpy as np
 
 
-
-
-
 # Define the add function using numpy
 def add(A, B):
     return np.add(A, B)

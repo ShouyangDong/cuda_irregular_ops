@@ -6,9 +6,6 @@ import subprocess
 import numpy as np
 
 
-
-
-
 def get_im2col_indices(images_shape, filter_shape, padding, stride):
     """Get index for shape"""
     batch_size, channels, height, width = images_shape

@@ -10,9 +10,6 @@ import torch
 import torch.nn.functional as F
 
 
-
-
-
 def ref_program(q, k, v, causal=False):
     score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
     if causal:

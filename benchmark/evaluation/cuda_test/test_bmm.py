@@ -6,9 +6,6 @@ import subprocess
 import numpy as np
 
 
-
-
-
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):
     return np.matmul(A, B)

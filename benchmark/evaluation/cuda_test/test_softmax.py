@@ -7,9 +7,6 @@ from ctypes import CDLL
 import numpy as np
 
 
-
-
-
 def ref_program(x):
     # 对最后一个维度进行softmax操作
     e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))

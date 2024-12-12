@@ -7,9 +7,6 @@ from ctypes import CDLL
 import numpy as np
 
 
-
-
-
 def ref_program(x):
     return np.sign(x)
 

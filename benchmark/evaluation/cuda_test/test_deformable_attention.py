@@ -9,9 +9,6 @@ import torch
 import torch.nn.functional as F
 
 
-
-
-
 @torch.no_grad()
 def deformable_attention_pytorch(
     value, value_spatial_shapes, sampling_locations, attention_weights

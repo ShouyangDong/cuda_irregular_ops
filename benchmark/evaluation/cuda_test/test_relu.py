@@ -8,9 +8,6 @@ import numpy as np
 import torch
 
 
-
-
-
 def ref_program(x):
     relu = torch.nn.ReLU()
     return relu(x)

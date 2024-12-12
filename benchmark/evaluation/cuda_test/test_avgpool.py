@@ -8,9 +8,6 @@ import numpy as np
 from benchmark.utils import avgpool_np
 
 
-
-
-
 def generate_data(shape, dtype):
     return np.random.uniform(size=shape).astype(dtype)
 
