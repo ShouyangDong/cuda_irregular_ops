@@ -86,7 +86,7 @@ float gflops = (total_flops / diff.count()) / 1e9f;
 }
 
 
-// g++ -march=icelake-server -o test_program benchmark/source/gemm_dlboost.cpp
+// g++ -march=icelake-server -o test_program benchmark/optimization/dlboost/gemm_dlboost.cpp
 // /test_program
 // Matrix size: 128x128 and 128x128 
 // Execution time: 9.28553 milliseconds

@@ -67,7 +67,7 @@ int main() {
 
     return 0;
 }
-// g++ -fopenmp -o matmul benchmark/source/gemm_omp.cpp
+// g++ -fopenmp -o matmul benchmark/optimization/dlboost/gemm_omp.cpp
 // ./matmul 
 // Matrix size: 128x128 and 128x128 
 // Execution time: 0.20937 milliseconds

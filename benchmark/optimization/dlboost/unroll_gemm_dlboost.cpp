@@ -94,7 +94,7 @@ float gflops = (total_flops / diff.count()) / 1e9f;
 }
 
 
-// g++ -march=icelake-server -fopenmp -O3 -o test_program benchmark/source/unroll_gemm_dlboost.cpp
+// g++ -march=icelake-server -fopenmp -O3 -o test_program benchmark/optimization/dlboost/unroll_gemm_dlboost.cpp
 // ./test_program
 
 // Matrix size: 32x128 and 128x128 

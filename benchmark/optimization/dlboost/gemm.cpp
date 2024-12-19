@@ -50,7 +50,7 @@ int main() {
     return 0;
 }
 
-// g++ -o matmul benchmark/source/gemm.cpp
+// g++ -o matmul benchmark/optimization/dlboost/gemm.cpp
 // ./matmul 
 // Matrix size: 128x128 and 128x128 
 // Execution time: 7.30723 milliseconds

@@ -71,9 +71,8 @@ float gflops = (total_flops / diff.count()) / 1e9f;
 }
 
 
-// g++ -march=icelake-server -o test_program benchmark/source/gemm_dlboost.cpp
-// /test_program
+// g++ -march=icelake-server -O3 -o test_program benchmark/optimization/dlboost/gemm_dlboost_optimize.cpp
+// ./test_program
 // Matrix size: 128x128 and 128x128 
-// Execution time: 9.28553 milliseconds
-// Performance: 0.000451703 GFLOPS
-
+// Execution time: 0.0727115 milliseconds
+// Performance: 0.0576842 GFLOPS
