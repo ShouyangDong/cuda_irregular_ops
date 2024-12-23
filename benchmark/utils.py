@@ -1,6 +1,5 @@
 import subprocess
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -64,33 +63,36 @@ def minpool_np(input_tensor, kernel_stride):
     return output_tensor
 
 
-def conv2d_nchw(input_tensor, kernel, stride, pad=0):
-    # 获取输入张量和卷积核的维度
-    N, C, H, W = input_tensor.shape
-    out_channels, in_channels, kernel_height, kernel_width = kernel.shape
-    # 计算输出张量的空间维度
-    out_height = (H - kernel_height) // stride + 1
-    out_width = (W - kernel_width) // stride + 1
+def conv2d_nchw(input_tensor, in_channels, out_channels, kernel, stride, padding=0):
+    # 定义卷积层
+    conv_layer = torch.nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel,
+        stride=stride,
+        padding=padding,
+    )
+    output = conv_layer(input_tensor)
+    return output
 
-    # 初始化输出张量
-    output_tensor = np.zeros((N, out_channels, out_height, out_width))
 
-    # 执行卷积操作
-    for n in range(N):
-        for out_channel in range(out_channels):
-            for in_channel in range(in_channels):
-                for i in range(0, out_height):
-                    for j in range(0, out_width):
-                        h_start = i * stride
-                        h_end = h_start + kernel_height
-                        w_start = j * stride
-                        w_end = w_start + kernel_width
-                        output_tensor[n, out_channel, i, j] += np.sum(
-                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end]
-                            * kernel[out_channel, in_channel]
-                        )
+def conv2d_nhwc(input_nhwc, in_channels, out_channels, kernel, stride, padding):
+    weight_hwio = torch.randn(
+        [out_channels, kernel, kernel, input_nhwc.shape[3]], device="cpu"
+    )
 
-    return output_tensor
+    # 将输入从 NHWC 转换到 NCHW
+    input_nchw = input_nhwc.permute(0, 3, 1, 2)
+
+    # 将卷积核从 HWIO (H, W, in_channels, out_channels) 转换到 PyTorch的 OIHW 格式
+    weight_oihw = weight_hwio.permute(0, 3, 1, 2)
+
+    # 使用转换后的卷积核和输入进行卷积操作
+    output_nchw = F.conv2d(input_nchw, weight_oihw, stride=stride, padding=padding)
+
+    # 将输出从 NCHW 转换回 NHWC
+    output_nhwc = output_nchw.permute(0, 3, 1, 2)
+    return output_nhwc
 
 
 def run_dlboost_compilation(so_name, file_name):

@@ -1,25 +1,30 @@
-#!/bin/bash
+#!/bin/bash  
 
-# Check if a directory argument is provided
-if [ -z "$1" ]; then
-  echo "Please provide a directory to process."
-  echo "Usage: $0 <directory>"
-  exit 1
-fi
+# Check if a directory argument is provided  
+if [ -z "$1" ]; then  
+  echo "Please provide a directory to process."  
+  echo "Usage: $0 <directory>"  
+  exit 1  
+fi  
 
-# Iterate through all Python files in the specified directory
-find "$1" -type f -name "*.py" | while read -r file; do
-  echo "Processing file: $file"
+# Function to process a Python file  
+process_file() {  
+  local file="$1"  
+  echo "Processing file: $file"  
   
-  # Remove unused imports
-  autoflake --remove-all-unused-imports --in-place "$file"
+  # Remove unused imports  
+  autoflake --remove-all-unused-imports --in-place "$file"  
 
-  # Sort import modules
-  isort "$file"
+  # Sort import modules  
+  isort "$file"  
 
-  # Format the code using black
-  black "$file"
+  # Format the code using black  
+  black "$file"  
+}  
 
-done
+export -f process_file  # Export function for parallel use  
+
+# Find all Python files and process them in parallel  
+find "$1" -type f -name "*.py" | parallel process_file  
 
 echo "Unused imports removed and all Python files formatted."

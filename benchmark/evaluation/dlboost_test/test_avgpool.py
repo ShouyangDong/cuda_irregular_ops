@@ -3,14 +3,21 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
 from benchmark.utils import avgpool_np
 from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
-def generate_data(shape, dtype):
-    return np.random.uniform(size=shape).astype(dtype)
+def avgpool_np(input_tensor, kernel_stride):
+    input_tensor = input_tensor.permute(0, 3, 1, 2)
+    avgpool = torch.nn.AvgPool2d(
+        kernel_size=kernel_stride[:2], stride=kernel_stride[2:]
+    )
+    # 执行平均池化
+    output_tensor = avgpool(input_tensor)
+    output_tensor = output_tensor.permute(0, 2, 3, 1)
+    return output_tensor
 
 
 if __name__ == "__main__":
@@ -26,13 +33,12 @@ if __name__ == "__main__":
     kernel_stride = [int(intg) for intg in kernel_stride]
 
     dtype = "float32"
-    input_array = generate_data(shape, dtype)
+    input_array = torch.randn(*shape, device="cpu")
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    # Calculate the result using numpy for comparison
+    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_np = avgpool_np(input_array, kernel_stride)
-    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_array = torch.zeros(output_np.shape, dtype=torch.float32)
+    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Load the shared library with the avgpool function
     so_name = args.file.replace(".cpp", ".so")
@@ -40,7 +46,7 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
+    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
         macro = f.read()
         f.close()
     code = macro + code
@@ -63,14 +69,12 @@ if __name__ == "__main__":
     # Call the function with the matrices and dimensions
     function(input_ptr, output_ptr)
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         output_array,
         output_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

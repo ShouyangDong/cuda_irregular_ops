@@ -4,6 +4,7 @@ import os
 import subprocess
 
 import numpy as np
+import torch
 
 from benchmark.template.mlu_host_template import create_bang_func
 from benchmark.utils import run_mlu_compilation as run_compilation
@@ -11,12 +12,12 @@ from benchmark.utils import sumpool_np
 
 
 def verify_pooling(base_name, file, shape, kernel_stride):
-    input_array = np.random.rand(*shape).astype("float32")
+    input_array = torch.randn(*shape, device="cpu")
     output_np = sumpool_np(input_array, kernel_stride)
-    output_array = np.zeros(shape=output_np.shape, dtype="float32")
+    output_array = torch.zeros(output_np.shape, dtype=torch.float32)
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     so_name = file.replace(".mlu", ".so")
     file_name = create_bang_func(file, op_type="pool")
     success, output = run_compilation(so_name, file_name)
@@ -35,14 +36,12 @@ def verify_pooling(base_name, file, shape, kernel_stride):
     # Call the function with the matrices and dimensions
     function(input_ptr, output_ptr, np.prod(shape), np.prod(output_np.shape))
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         output_array,
         output_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])
