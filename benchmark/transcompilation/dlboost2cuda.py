@@ -43,7 +43,9 @@ if __name__ == "__main__":
             f.close()
 
         target_code = run_transcompile(source)
-        file_name = os.path.join("benchmark/transcompilation/dlboost/cuda", base_name)
+        file_name = os.path.join(
+            "benchmark/transcompilation/dlboost/cuda", base_name
+        )
         with open(file_name, mode="w") as f:
             f.write(target_code)
             f.close()

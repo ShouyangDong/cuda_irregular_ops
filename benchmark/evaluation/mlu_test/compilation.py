@@ -11,14 +11,18 @@ from benchmark.utils import run_mlu_compilation as run_compilation
 def compile_mlu_file(file_name):
     base_name = os.path.basename(file_name)
     so_name = base_name.replace("mlu", "so")
-    so_name = os.path.join(os.getcwd(), "benchmark/data/mlu_code_test", so_name)
+    so_name = os.path.join(
+        os.getcwd(), "benchmark/data/mlu_code_test", so_name
+    )
 
     # Read the MLU code
     with open(file_name, "r") as f:
         code = f.read()
 
     # Read the macro definitions
-    with open(os.path.join(os.getcwd(), "benchmark/macro/mlu_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/mlu_macro.txt"), "r"
+    ) as f:
         macro = f.read()
 
     # Combine macro with code
@@ -33,16 +37,24 @@ def compile_mlu_file(file_name):
     success, output = run_compilation(so_name, back_file_name)
     os.remove(back_file_name)  # Clean up the temporary backup file
 
-    return success, output, so_name  # Return result and compiled shared object name
+    return (
+        success,
+        output,
+        so_name,
+    )  # Return result and compiled shared object name
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu")
+    )
     counter = 0
 
     # Use ProcessPoolExecutor for parallel compilation
     with ProcessPoolExecutor() as executor:
-        results = list(tqdm(executor.map(compile_mlu_file, files), total=len(files)))
+        results = list(
+            tqdm(executor.map(compile_mlu_file, files), total=len(files))
+        )
 
     # Process results
     for success, output, so_name in results:
@@ -56,5 +68,6 @@ if __name__ == "__main__":
     print(counter)
     print(len(files))
     print(
-        "[INFO]*******************MLU Compilation success rate: ", counter / len(files)
+        "[INFO]*******************MLU Compilation success rate: ",
+        counter / len(files),
     )

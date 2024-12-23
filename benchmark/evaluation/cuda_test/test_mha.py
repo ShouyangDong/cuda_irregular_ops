@@ -13,7 +13,9 @@ import torch.nn.functional as F
 def ref_program(q, k, v, causal=False):
     score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
     if causal:
-        mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
+        mask = torch.triu(
+            torch.ones(score.shape[-2], score.shape[-1]), diagonal=1
+        )
         mask = mask.masked_fill(mask == 1, torch.finfo(q.dtype).min)
         mask = mask.to(q.device, q.dtype)
         score = score + mask
@@ -42,12 +44,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    file_name = args.file.replace(
+        base_name.replace(".cu", ""), base_name + "_bak.cu"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()

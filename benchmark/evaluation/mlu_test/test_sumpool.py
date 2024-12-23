@@ -16,8 +16,12 @@ def verify_pooling(base_name, file, shape, kernel_stride):
     output_np = sumpool_np(input_array, kernel_stride)
     output_array = torch.zeros(output_np.shape, dtype=torch.float32)
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     so_name = file.replace(".mlu", ".so")
     file_name = create_bang_func(file, op_type="pool")
     success, output = run_compilation(so_name, file_name)
@@ -44,7 +48,7 @@ def verify_pooling(base_name, file, shape, kernel_stride):
         equal_nan=True,
     )
     print("验证通过！")
-    result = subprocess.run(["rm", so_name])
+    subprocess.run(["rm", so_name])
 
 
 if __name__ == "__main__":

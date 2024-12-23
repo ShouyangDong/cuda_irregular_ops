@@ -27,12 +27,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -54,8 +58,12 @@ if __name__ == "__main__":
     output_array = torch.zeros(shape)
 
     # 将输入数组和输出数组转换为C指针类型
-    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     # 调用C函数
     function(input_ptr, output_ptr)
     # 验证结果

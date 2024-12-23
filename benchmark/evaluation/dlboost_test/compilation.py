@@ -33,7 +33,11 @@ def compile_cpp_file(file_name):
     success, output = run_compilation(so_name, bak_file_name)
     os.remove(bak_file_name)  # Clean up temporary file
 
-    return success, output, so_name  # Return the result and the generated .so file name
+    return (
+        success,
+        output,
+        so_name,
+    )  # Return the result and the generated .so file name
 
 
 if __name__ == "__main__":
@@ -42,7 +46,9 @@ if __name__ == "__main__":
 
     # Using ProcessPoolExecutor for parallel compilation
     with ProcessPoolExecutor() as executor:
-        results = list(tqdm(executor.map(compile_cpp_file, files), total=len(files)))
+        results = list(
+            tqdm(executor.map(compile_cpp_file, files), total=len(files))
+        )
 
     # Process the results
     for success, output, so_name in results:
@@ -55,5 +61,6 @@ if __name__ == "__main__":
     print(counter)
     print(len(files))
     print(
-        "[INFO]*******************CPP Compilation success rate: ", counter / len(files)
+        "[INFO]*******************CPP Compilation success rate: ",
+        counter / len(files),
     )

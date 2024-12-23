@@ -9,7 +9,7 @@ openai.api_base = "https://api.keya.pw/v1"
 
 
 def run_transcompile(code):
-    PROMPT = """Please rewrite the following BANG-optimized code into CUDA C code for GPU acceleration. 
+    PROMPT = """Please rewrite the following BANG-optimized code into CUDA C code for GPU acceleration.
     Ensure the converted code retains the same functionality and is optimized for CUDA's parallel processing capabilities.
 
     Requirements:
@@ -44,7 +44,9 @@ if __name__ == "__main__":
             f.close()
 
         target_code = run_transcompile(source)
-        file_name = os.path.join("benchmark/transcompilation/bang/cuda", base_name)
+        file_name = os.path.join(
+            "benchmark/transcompilation/bang/cuda", base_name
+        )
         with open(file_name, mode="w") as f:
             f.write(target_code)
             f.close()

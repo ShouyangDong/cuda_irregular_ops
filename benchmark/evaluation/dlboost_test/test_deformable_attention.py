@@ -22,16 +22,24 @@ def deformable_attention_pytorch(
     # need to use cuda version instead
     N_, S_, M_, D_ = value.shape
     _, Lq_, M_, L_, P_, _ = sampling_locations.shape
-    value_list = value.split([H_ * W_ for H_, W_ in value_spatial_shapes], dim=1)
+    value_list = value.split(
+        [H_ * W_ for H_, W_ in value_spatial_shapes], dim=1
+    )
     sampling_grids = 2 * sampling_locations - 1
     sampling_value_list = []
     for lid_, (H_, W_) in enumerate(value_spatial_shapes):
-        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_, D_, H_, W_
+        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_,
+        # D_, H_, W_
         value_l_ = (
-            value_list[lid_].flatten(2).transpose(1, 2).reshape(N_ * M_, D_, H_, W_)
+            value_list[lid_]
+            .flatten(2)
+            .transpose(1, 2)
+            .reshape(N_ * M_, D_, H_, W_)
         )
         # N_, Lq_, M_, P_, 2 -> N_, M_, Lq_, P_, 2 -> N_*M_, Lq_, P_, 2
-        sampling_grid_l_ = sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        sampling_grid_l_ = (
+            sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        )
         # N_*M_, D_, Lq_, P_
         sampling_value_l_ = F.grid_sample(
             value_l_,
@@ -46,7 +54,10 @@ def deformable_attention_pytorch(
         N_ * M_, 1, Lq_, L_ * P_
     )
     output = (
-        (torch.stack(sampling_value_list, dim=-2).flatten(-2) * attention_weights)
+        (
+            torch.stack(sampling_value_list, dim=-2).flatten(-2)
+            * attention_weights
+        )
         .sum(-1)
         .view(N_, M_ * D_, Lq_)
     )
@@ -74,7 +85,9 @@ if __name__ == "__main__":
     value = torch.rand(N, S, M, D) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2)
     attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
+    )
     # Check for correctness
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights
@@ -85,12 +98,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -121,7 +138,9 @@ if __name__ == "__main__":
 
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    shapes_ptr = (
+        shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    )
     sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
@@ -131,7 +150,11 @@ if __name__ == "__main__":
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
     function(
-        value_ptr, shapes_ptr, sampling_locations_ptr, attention_weights_ptr, output_ptr
+        value_ptr,
+        shapes_ptr,
+        sampling_locations_ptr,
+        attention_weights_ptr,
+        output_ptr,
     )
     # 验证结果
     np.testing.assert_allclose(

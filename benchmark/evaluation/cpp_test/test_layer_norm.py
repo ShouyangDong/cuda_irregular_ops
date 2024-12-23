@@ -11,7 +11,9 @@ from benchmark.utils import run_dlboost_compilation as run_compilation
 def ref_program(x, gamma, beta, eps=1e-5):
     # 使用 PyTorch 计算层归一化
     x_tensor = torch.tensor(x)
-    layer_norm = torch.nn.LayerNorm(x_tensor.size()[1:])  # 初始化 LayerNorm，保持维度
+    layer_norm = torch.nn.LayerNorm(
+        x_tensor.size()[1:]
+    )  # 初始化 LayerNorm，保持维度
     x_normalized = layer_norm(x_tensor)
 
     # 计算输出
@@ -32,11 +34,15 @@ if __name__ == "__main__":
     with open(args.file, "r") as f:
         code = f.read()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r"
+    ) as f:
         macro = f.read()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
 
@@ -68,10 +74,18 @@ if __name__ == "__main__":
     output_array = torch.zeros(shape)
 
     # 将输入数组和输出数组转换为 C 指针类型
-    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    gamma_ptr = gamma_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    beta_ptr = beta_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    gamma_ptr = gamma_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    beta_ptr = beta_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
 
     # 如果调用 C 函数可以保留：
     function(input_ptr, gamma_ptr, beta_ptr, output_ptr)

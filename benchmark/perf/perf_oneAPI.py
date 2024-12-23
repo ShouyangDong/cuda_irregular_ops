@@ -13,10 +13,10 @@ def perf_elementwise(name, shape):
     y = torch.randn(shape, device=device)
 
     def test_add():
-        z = torch.add(x, y)
+        torch.add(x, y)
 
     def test_sign():
-        z = torch.sign(x)
+        torch.sign(x)
 
     op_name = name.split("_")[0]
     if op_name == "add":
@@ -55,7 +55,10 @@ def perf_pooling(name, shape, kernel, stride):
                 x_neg = -x
                 # 执行最大池化
                 x_maxpool = F.max_pool2d(
-                    x_neg, self.kernel_size, stride=self.stride, padding=self.padding
+                    x_neg,
+                    self.kernel_size,
+                    stride=self.stride,
+                    padding=self.padding,
                 )
                 # 再取反结果
                 return -x_maxpool
@@ -87,7 +90,7 @@ def perf_pooling(name, shape, kernel, stride):
         pool = SumPool2d(kernel_size=kernel, stride=stride)
 
     def test_pool():
-        output = pool(x)
+        pool(x)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_pool, number=100)
@@ -103,7 +106,7 @@ def perf_bmm(name, shape_A, shape_B):
 
     def test_gemm():
         # 执行矩阵乘法操作 (GEMM)
-        C = torch.matmul(A, B)
+        torch.matmul(A, B)
         # 确保 CUDA 操作完成
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
@@ -115,7 +118,7 @@ def perf_bmm(name, shape_A, shape_B):
 def perf_activation(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     x = torch.randn(shape, device=device)
-    op_name = name.split("_")[0]
+    name.split("_")[0]
 
     activation = torch.nn.ReLU()
     if name == "sigmoid":
@@ -126,7 +129,7 @@ def perf_activation(name, shape):
         activation = torch.nn.Softmax(dim=len(shape))
 
     def test_activation():
-        output = activation(x)
+        activation(x)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_activation, number=100)
@@ -134,7 +137,9 @@ def perf_activation(name, shape):
     return execution_time * 10
 
 
-def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
+def perf_conv2d_nchw(
+    name, shape, in_channels, out_channels, kernel, stride, padding
+):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     input_tensor = torch.randn(shape, device=device)
     # 定义卷积层
@@ -147,7 +152,7 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     ).to(device)
 
     def test_conv2d():
-        output = conv_layer(input_tensor)
+        conv_layer(input_tensor)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
@@ -155,10 +160,14 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     return execution_time * 10
 
 
-def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, padding):
+def perf_conv2d_nhwc(
+    name, shape, in_channels, out_channels, kernel, stride, padding
+):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     input_nhwc = torch.randn(shape, device=device)
-    weight_hwio = torch.randn([out_channels, kernel, kernel, shape[3]], device=device)
+    weight_hwio = torch.randn(
+        [out_channels, kernel, kernel, shape[3]], device=device
+    )
 
     def test_conv2d():
         # 将输入从 NHWC 转换到 NCHW
@@ -168,10 +177,12 @@ def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, pad
         weight_oihw = weight_hwio.permute(0, 3, 1, 2)
 
         # 使用转换后的卷积核和输入进行卷积操作
-        output_nchw = F.conv2d(input_nchw, weight_oihw, stride=stride, padding=padding)
+        output_nchw = F.conv2d(
+            input_nchw, weight_oihw, stride=stride, padding=padding
+        )
 
         # 将输出从 NCHW 转换回 NHWC
-        output_nhwc = output_nchw.permute(0, 3, 1, 2)
+        output_nchw.permute(0, 3, 1, 2)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
@@ -186,7 +197,7 @@ def perf_gemv(name, shape):
     vector = torch.randn(shape[1], device=device)
 
     def test_gemv():
-        output = torch.matmul(matrix, vector)
+        torch.matmul(matrix, vector)
         # 或者使用 matrix @ vector
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
@@ -205,7 +216,7 @@ def perf_conv1d(name, shape):
     ).to(device)
 
     def test_conv1d():
-        output = conv_layer(input_tensor)
+        conv_layer(input_tensor)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv1d, number=100)
@@ -216,7 +227,9 @@ def perf_conv1d(name, shape):
 def perf_depthwise_conv2d(name, shape, kernel_size):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     input_hwio = torch.randn(shape, device=device)
-    weight_fdio = torch.randn([kernel_size, kernel_size, shape[2]], device=device)
+    weight_fdio = torch.randn(
+        [kernel_size, kernel_size, shape[2]], device=device
+    )
 
     def test_depthwise_conv2d():
         # 输入是 (height, width, in_depth)，添加一个批次维度变成 (1, height, width, in_depth)
@@ -233,8 +246,9 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
         # 使用深度可分离卷积
         output_nchw = F.conv2d(input_nchw, weight_iodf, groups=in_depth)
 
-        # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height, new_width, in_depth)
-        output_hwio = output_nchw.squeeze(0).permute(1, 2, 0)
+        # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height,
+        # new_width, in_depth)
+        output_nchw.squeeze(0).permute(1, 2, 0)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
@@ -250,7 +264,7 @@ def perf_layernorm(name, shape):
     layer_norm = torch.nn.LayerNorm(shape[-1]).to(device)
 
     def test_layernorm():
-        output = layer_norm(input_tensor)
+        layer_norm(input_tensor)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_layernorm, number=100)
@@ -266,7 +280,7 @@ def perf_rmsnorm(name, shape):
     rmsnorm = torch.nn.RMSNorm(shape).to(device)
 
     def test_rmsnorm():
-        output = rmsnorm(input_tensor)
+        rmsnorm(input_tensor)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_rmsnorm, number=100)
@@ -278,7 +292,9 @@ def perf_deformable(name, shape):
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
-        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long, device=device
+        [[84, 117], [42, 59], [21, 30], [11, 15]],
+        dtype=torch.long,
+        device=device,
     )
     level_start_index = torch.cat(
         (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
@@ -310,24 +326,29 @@ def perf_deformable(name, shape):
 
 
 def perf_scaled_dot_product_attention(name, shape):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # Optionally use the context manager to ensure one of the fused kernels is run
+    torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Optionally use the context manager to ensure one of the fused kernels is
+    # run
     query = torch.rand(shape)
     key = torch.rand(shape)
     value = torch.rand(shape)
 
     def test_scaled_dot_product_attention():
-        output = F.scaled_dot_product_attention(query, key, value)
+        F.scaled_dot_product_attention(query, key, value)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
-    execution_time = timeit.timeit(test_scaled_dot_product_attention, number=100)
+    execution_time = timeit.timeit(
+        test_scaled_dot_product_attention, number=100
+    )
     print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/depthwiseconv*.cpp")
+        os.path.join(
+            os.getcwd(), "benchmark/data/cpp_code_test/depthwiseconv*.cpp"
+        )
     )
     counter = 0
     execution_time = 0
@@ -418,9 +439,15 @@ if __name__ == "__main__":
         elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+            input_height, kernel_size, input_channels = (
+                shape[0],
+                shape[1],
+                shape[2],
+            )
             shape = [input_height, input_height, input_channels]
-            execution_time = perf_depthwise_conv2d(base_name, shape, kernel_size)
+            execution_time = perf_depthwise_conv2d(
+                base_name, shape, kernel_size
+            )
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
@@ -444,7 +471,9 @@ if __name__ == "__main__":
         elif name == "mha":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            execution_time = perf_scaled_dot_product_attention(base_name, shape)
+            execution_time = perf_scaled_dot_product_attention(
+                base_name, shape
+            )
         times.append(execution_time)
 
     table.append(files)

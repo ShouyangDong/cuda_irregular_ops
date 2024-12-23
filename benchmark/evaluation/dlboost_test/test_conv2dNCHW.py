@@ -32,7 +32,12 @@ if __name__ == "__main__":
     kernel_np = torch.rand(kernel_shape)
     # cpu compute
     result_cpu = conv2d_nchw(
-        data_np, kernel_shape[1], kernel_shape[0], kernel_shape[2], stride_h, pad
+        data_np,
+        kernel_shape[1],
+        kernel_shape[0],
+        kernel_shape[2],
+        stride_h,
+        pad,
     )
 
     # Load the shared library with the conv2d function
@@ -41,12 +46,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -64,9 +73,13 @@ if __name__ == "__main__":
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
     input_ptr = data_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel_np.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     result_ctypes = torch.zeros(result_cpu.shape)
-    output_ptr = result_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = result_ctypes.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     # Call the function with the matrices and dimensions
     function(input_ptr, kernel_ptr, output_ptr)
     # Check if the results match

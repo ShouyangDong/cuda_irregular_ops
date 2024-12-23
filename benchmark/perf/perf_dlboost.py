@@ -29,12 +29,15 @@ def perf_function(file_name):
     # 构造参数列表
     params = [param_str.strip() for param_str in param_list_str.split(",")]
     param_list = ", ".join(
-        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in params]
+        [
+            " ".join(param.split()[:-1]) + " " + param.split()[-1]
+            for param in params
+        ]
     )
 
     # 构造新的计时函数模板
     cpp_pef_template = Template(
-        """  
+        """
     #include <sys/time.h>
     #include <math.h>
     #include <float.h>
@@ -42,27 +45,27 @@ def perf_function(file_name):
     #include <immintrin.h>
     #include <stdint.h>
 
-    // Original function  
+    // Original function
     ${original_function}
 
-    extern "C" int timed_${kernel_name}(${param_list}) {  
+    extern "C" int timed_${kernel_name}(${param_list}) {
         struct timeval start, end;
-        for (int i = 0; i < 10; i++) {  
+        for (int i = 0; i < 10; i++) {
             ${kernel_name}(${called_param_list});
         }
         // 获取开始时间
-        gettimeofday(&start, NULL);   
-        for (int i = 0; i < 1000; i++) {  
-            ${kernel_name}(${called_param_list});  
-        }  
+        gettimeofday(&start, NULL);
+        for (int i = 0; i < 1000; i++) {
+            ${kernel_name}(${called_param_list});
+        }
         // 获取结束时间
-        gettimeofday(&end, NULL); 
+        gettimeofday(&end, NULL);
 
         int time_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
         float us_time = time_us / 1000.0f / 1000.0f'
         printf("Time taken for ${kernel_name}:  %d us\\n", us_time);
         return us_time;
-    }  
+    }
     """
     )
 
@@ -151,7 +154,9 @@ def perf_deformable(shape, function):
     value = torch.rand(N, S, M, D) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2)
     attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
+    )
 
     # 定义函数参数和返回类型
     function.argtypes = [
@@ -175,7 +180,9 @@ def perf_deformable(shape, function):
 
     # 将输入数组和输出数组转换为C指针类型
     value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    shapes_ptr = shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    shapes_ptr = (
+        shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
+    )
     sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
@@ -185,7 +192,11 @@ def perf_deformable(shape, function):
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
     elapsed_time = function(
-        value_ptr, shapes_ptr, sampling_locations_ptr, attention_weights_ptr, output_ptr
+        value_ptr,
+        shapes_ptr,
+        sampling_locations_ptr,
+        attention_weights_ptr,
+        output_ptr,
     )
     return elapsed_time
 
@@ -317,10 +328,16 @@ def benchmark(file_name):
 
         batch_size, input_height, input_width, input_channel = data_shape
         output_channel, kernel_height, kernel_width, _ = kernel_shape
-        out_height = int((input_height + np.sum(pad_h) - kernel_height) / stride_h + 1)
-        out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
+        out_height = int(
+            (input_height + np.sum(pad_h) - kernel_height) / stride_h + 1
+        )
+        out_width = int(
+            (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
+        )
         output_shape = [batch_size, out_height, out_width, output_channel]
-        execution_time = perf_binary(data_shape, kernel_shape, output_shape, function)
+        execution_time = perf_binary(
+            data_shape, kernel_shape, output_shape, function
+        )
 
     elif name == "conv2dnchw":
         data_shape = base_name.split("_")[1:5]
@@ -330,13 +347,14 @@ def benchmark(file_name):
         stride_h = stride_w = int(base_name.split(".")[0].split("_")[9])
         pad = int(base_name.split(".")[0].split("_")[10])
         dtype = "float32"
-        wtype = "float32"
 
         # generate data
-        data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-        kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(
+        data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
             dtype
         )
+        kernel_np = np.random.uniform(
+            low=1.0, high=2.0, size=kernel_shape
+        ).astype(dtype)
         # cpu compute
         result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
         execution_time = perf_binary(
@@ -348,7 +366,9 @@ def benchmark(file_name):
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         kernel_shape = [shape[1]]
         output_shape = [shape[0]]
-        execution_time = perf_binary(shape, kernel_shape, output_shape, function)
+        execution_time = perf_binary(
+            shape, kernel_shape, output_shape, function
+        )
 
     elif name == "conv1d":
         shapes = base_name.split(".")[0]
@@ -356,19 +376,27 @@ def benchmark(file_name):
         shape = [shape[1]]
         kernel_shape = [3]
         output_shape = [shape[0]]
-        execution_time = perf_binary(shape, kernel_shape, output_shape, function)
+        execution_time = perf_binary(
+            shape, kernel_shape, output_shape, function
+        )
 
     elif name == "depthwiseconv":
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
-        input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+        input_height, kernel_size, input_channels = (
+            shape[0],
+            shape[1],
+            shape[2],
+        )
         shape = [input_height, input_height, input_channels]
         kernel_shape = [kernel_size, kernel_size, input_channels]
         # Calculate the output tensor shape
         output_height = input_height - kernel_size + 1
         output_width = input_height - kernel_size + 1
         output_shape = [output_height, output_width, input_channels]
-        execution_time = perf_binary(shape, kernel_shape, output_shape, function)
+        execution_time = perf_binary(
+            shape, kernel_shape, output_shape, function
+        )
 
     elif name == "deformable":
         shapes = base_name.split(".")[0]

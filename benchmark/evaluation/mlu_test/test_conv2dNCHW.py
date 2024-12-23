@@ -32,7 +32,9 @@ def cpu_conv(input_tensor, kernel, stride, pad=0):
                         w_start = j * stride
                         w_end = w_start + kernel_width
                         output_tensor[n, out_channel, i, j] += np.sum(
-                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end]
+                            input_tensor[
+                                n, in_channel, h_start:h_end, w_start:w_end
+                            ]
                             * kernel[out_channel, in_channel]
                         )
 
@@ -59,8 +61,12 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
+    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
+        dtype
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(
+        dtype
+    )
     # cpu compute
     result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)
 

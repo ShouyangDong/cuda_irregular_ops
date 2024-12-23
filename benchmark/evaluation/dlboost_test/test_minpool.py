@@ -27,8 +27,12 @@ if __name__ == "__main__":
     output_np = minpool_np(input_array, kernel_stride)
     output_array = torch.zeros(output_np.shape, dtype=torch.float32)
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
 
     # Load the shared library with the avgpool function
     so_name = args.file.replace(".cpp", ".so")
@@ -36,12 +40,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/dlboost_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()

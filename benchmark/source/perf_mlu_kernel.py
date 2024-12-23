@@ -18,13 +18,14 @@ for file in files:
     print(base_name)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Optionally use the context manager to ensure one of the fused kernels is run
+    # Optionally use the context manager to ensure one of the fused kernels is
+    # run
     query = torch.rand(shape, dtype=torch.float16, device=device)
     key = torch.rand(shape, dtype=torch.float16, device=device)
     value = torch.rand(shape, dtype=torch.float16, device=device)
 
     def test_scaled_dot_product_attention():
-        output = F.scaled_dot_product_attention(query, key, value)
+        F.scaled_dot_product_attention(query, key, value)
 
     for _ in range(100):
         test_scaled_dot_product_attention()
@@ -48,7 +49,9 @@ for file in files:
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == "aten::scaled_dot_product_attention":  # 根据 key 找到你需要的操作
+        if (
+            avg.key == "aten::scaled_dot_product_attention"
+        ):  # 根据 key 找到你需要的操作
             time = avg.mlu_time
     print(f"eval {base_name}, {time}")
     times.append(time)

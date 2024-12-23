@@ -50,7 +50,10 @@ def minpool_np(input_tensor, kernel_stride):
             x_neg = -x
             # 执行最大池化
             x_maxpool = F.max_pool2d(
-                x_neg, self.kernel_size, stride=self.stride, padding=self.padding
+                x_neg,
+                self.kernel_size,
+                stride=self.stride,
+                padding=self.padding,
             )
             # 再取反结果
             return -x_maxpool
@@ -63,7 +66,9 @@ def minpool_np(input_tensor, kernel_stride):
     return output_tensor
 
 
-def conv2d_nchw(input_tensor, in_channels, out_channels, kernel, stride, padding=0):
+def conv2d_nchw(
+    input_tensor, in_channels, out_channels, kernel, stride, padding=0
+):
     # 定义卷积层
     conv_layer = torch.nn.Conv2d(
         in_channels=in_channels,
@@ -76,7 +81,9 @@ def conv2d_nchw(input_tensor, in_channels, out_channels, kernel, stride, padding
     return output
 
 
-def conv2d_nhwc(input_nhwc, in_channels, out_channels, kernel, stride, padding):
+def conv2d_nhwc(
+    input_nhwc, in_channels, out_channels, kernel, stride, padding
+):
     weight_hwio = torch.randn(
         [out_channels, kernel, kernel, input_nhwc.shape[3]], device="cpu"
     )
@@ -88,7 +95,9 @@ def conv2d_nhwc(input_nhwc, in_channels, out_channels, kernel, stride, padding):
     weight_oihw = weight_hwio.permute(0, 3, 1, 2)
 
     # 使用转换后的卷积核和输入进行卷积操作
-    output_nchw = F.conv2d(input_nchw, weight_oihw, stride=stride, padding=padding)
+    output_nchw = F.conv2d(
+        input_nchw, weight_oihw, stride=stride, padding=padding
+    )
 
     # 将输出从 NCHW 转换回 NHWC
     output_nhwc = output_nchw.permute(0, 3, 1, 2)

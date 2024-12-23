@@ -14,7 +14,9 @@ def compile_file(file_name):
     with open(file_name, "r") as f:
         code = f.read()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r"
+    ) as f:
         macro = f.read()
 
     code = macro + code
@@ -32,7 +34,7 @@ def compile_file(file_name):
     os.remove(bak_file_name)
 
     if success:
-        result = subprocess.run(["rm", so_name])
+        subprocess.run(["rm", so_name])
         return True
     else:
         print(output)
@@ -40,12 +42,16 @@ def compile_file(file_name):
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp")
+    )
 
     # 使用 ThreadPoolExecutor 并行执行文件编译
     counter = 0
     with ThreadPoolExecutor() as executor:
-        results = list(tqdm(executor.map(compile_file, files), total=len(files)))
+        results = list(
+            tqdm(executor.map(compile_file, files), total=len(files))
+        )
 
     # 统计编译成功的文件数
     counter = sum(results)

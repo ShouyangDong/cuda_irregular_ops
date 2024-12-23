@@ -15,7 +15,9 @@ from benchmark.utils import run_dlboost_compilation as run_compilation
 def ref_program(q, k, v, causal=False):
     score = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(q.size(-1))
     if causal:
-        mask = torch.triu(torch.ones(score.shape[-2], score.shape[-1]), diagonal=1)
+        mask = torch.triu(
+            torch.ones(score.shape[-2], score.shape[-1]), diagonal=1
+        )
         mask = mask.masked_fill(mask == 1, torch.finfo(q.dtype).min)
         mask = mask.to(q.device, q.dtype)
         score = score + mask
@@ -49,7 +51,9 @@ if __name__ == "__main__":
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()

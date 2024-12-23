@@ -50,7 +50,7 @@ def verify_gelu(base_name, file, shape):
         verbose=True,
     )
     print("验证通过！")
-    result = subprocess.run(["rm", so_name])
+    subprocess.run(["rm", so_name])
 
 
 if __name__ == "__main__":

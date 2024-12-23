@@ -20,11 +20,17 @@ def create_evaluate_bang_func(file_name):
     # 构造参数列表
     params = [param_str.strip() for param_str in param_list_str.split(",")]
     param_list = ", ".join(
-        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in params]
+        [
+            " ".join(param.split()[:-1]) + " " + param.split()[-1]
+            for param in params
+        ]
     )
     mlu_params = [param + "_mlu" for param in params]
     mlu_param_list = ", ".join(
-        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in mlu_params]
+        [
+            " ".join(param.split()[:-1]) + " " + param.split()[-1]
+            for param in mlu_params
+        ]
     )
     dim = (
         "cnrtDim3_t dim = {16, 1, 1};"
@@ -60,15 +66,15 @@ def create_evaluate_bang_func(file_name):
         name = param.split("*")[1]
         memory_free.append(f"cnrtFree({name}_mlu);\n")
     cpp_pef_template = Template(
-        """  
+        """
     #include <stdio.h>
     #include <bang.h>
     #include <stdint.h>
 
-    // Original function  
+    // Original function
     ${original_function}
 
-    extern "C" float ${kernel_name}_kernel(${param_list}, int size) { 
+    extern "C" float ${kernel_name}_kernel(${param_list}, int size) {
         cnrtQueue_t queue;
         CNRT_CHECK(cnrtSetDevice(0));
         CNRT_CHECK(cnrtQueueCreate(&queue));
@@ -79,11 +85,11 @@ def create_evaluate_bang_func(file_name):
         CNRT_CHECK(cnrtNotifierCreate(&end));
         ${memcpy_alloc_list}
         ${memcpy_list}
-        for (int i = 0; i < 10; i++) { 
+        for (int i = 0; i < 10; i++) {
             ${kernel_name}<<<dim, ktype, queue>>>(${called_param_list});
         }
         CNRT_CHECK(cnrtPlaceNotifier(start, queue));
-        for (int i = 0; i < 1000; i++) {  
+        for (int i = 0; i < 1000; i++) {
            ${kernel_name}<<<dim, ktype, queue>>>(${called_param_list});
         }
         CNRT_CHECK(cnrtPlaceNotifier(end, queue));

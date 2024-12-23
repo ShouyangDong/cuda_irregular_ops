@@ -41,7 +41,9 @@ def perf_elementwise(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -64,7 +66,6 @@ def perf_elementwise(name, file, shape):
         result_arr = bangpy.Array(result_np, dev)
 
         fmlu(data_lhs_dev, data_rhs_dev, result_arr)
-        mlu_output = result_arr
         # cpu_output = np.add(data_lhs, data_rhs)
         # bangpy.assert_allclose(mlu_output.numpy(), cpu_output)
         # print("验证通过！")
@@ -76,7 +77,9 @@ def perf_elementwise(name, file, shape):
         # Describe Computation
         result = tsop.sign(input0)
         # Build and get executable module
-        fmlu = tsop.BuildBANG([input0], [result], "mlu590-h8", kernel_name=op_name)
+        fmlu = tsop.BuildBANG(
+            [input0], [result], "mlu590-h8", kernel_name=op_name
+        )
         # Generate random test data and run on mlu and cpu
         data_npy = np.random.rand(*shape).astype("float32")
         out_npy = np.sign(data_npy)
@@ -130,7 +133,9 @@ def perf_pooling(name, file, shape, kernel, stride):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -179,7 +184,9 @@ def perf_bmm(name, file, shape_A, shape_B, shape_C):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -235,7 +242,9 @@ def perf_activation(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -290,13 +299,19 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
         print(code)
         return code
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype(
+        "float32"
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype(
+        "float32"
+    )
     # cpu compute
     A = te.placeholder(data_shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
@@ -355,8 +370,12 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         return code
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype(
+        "float32"
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype(
+        "float32"
+    )
     # cpu compute
     A = te.placeholder(data_shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
@@ -419,9 +438,9 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -431,7 +450,9 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -482,9 +503,9 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -494,7 +515,9 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -545,9 +568,9 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -557,7 +580,9 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -609,10 +634,10 @@ def perf_layernorm(name, file, shape):
     B = te.placeholder(shape[-1:], dtype="float32", name="B")
     C = te.placeholder(shape[-1:], dtype="float32", name="C")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
-    D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -622,7 +647,9 @@ def perf_layernorm(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -682,7 +709,9 @@ def perf_rmsnorm(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -743,11 +772,11 @@ def perf_deformable(name, file, shape):
     shape_pl = te.placeholder([4, 2], dtype="int32", name="shape")
     output_shape = [N, Lq, M * D]
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    shape_buffer = tvm.tir.decl_buffer(shape_pl.shape, "int32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
-    D_buff = tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(shape_pl.shape, "int32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
 
     @tvm.register_func
     def toc_callback_bang_postproc(code):
@@ -757,7 +786,9 @@ def perf_deformable(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
@@ -783,7 +814,9 @@ def perf_deformable(name, file, shape):
     out_D = te.extern(
         output_shape,
         [A, shape_pl, B, C],
-        lambda ins, outs: test_deformable(ins[0], ins[1], ins[2], ins[3], outs[0]),
+        lambda ins, outs: test_deformable(
+            ins[0], ins[1], ins[2], ins[3], outs[0]
+        ),
         name=op_name,
         dtype="float32",
     )
@@ -825,11 +858,15 @@ def perf_scaled_dot_product_attention(name, file, shape):
                 f.write(code)
         code = open(file, encoding="utf-8").read()
 
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel0(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel0("
+        )
 
         return code
 
-    def test_scaled_dot_product_attention(A, B, C, D, seq_len, num_heads, head_dim):
+    def test_scaled_dot_product_attention(
+        A, B, C, D, seq_len, num_heads, head_dim
+    ):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -901,7 +938,9 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            perf_pooling(base_name, file, shape, kernel_stride[:2], kernel_stride[2:])
+            perf_pooling(
+                base_name, file, shape, kernel_stride[:2], kernel_stride[2:]
+            )
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
@@ -939,11 +978,19 @@ if __name__ == "__main__":
             out_height = int(
                 (input_height + np.sum(pad_h) - kernel_height) / stride_h + 1
             )
-            out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
+            out_width = int(
+                (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
+            )
             output_shape = [batch_size, out_height, out_width, output_channel]
 
             perf_conv2d(
-                name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
+                name,
+                file,
+                data_shape,
+                kernel_shape,
+                output_shape,
+                stride_h,
+                pad_h,
             )
 
         elif name == "conv2dnchw_1":
@@ -982,14 +1029,20 @@ if __name__ == "__main__":
         elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+            input_height, kernel_size, input_channels = (
+                shape[0],
+                shape[1],
+                shape[2],
+            )
             shape = [input_height, input_height, input_channels]
             kernel_shape = [kernel_size, kernel_size, input_channels]
             # Calculate the output tensor shape
             output_height = input_height - kernel_size + 1
             output_width = input_height - kernel_size + 1
             output_shape = [output_height, output_width, input_channels]
-            perf_depthwise_conv2d(base_name, file, shape, kernel_shape, output_shape)
+            perf_depthwise_conv2d(
+                base_name, file, shape, kernel_shape, output_shape
+            )
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]

@@ -52,7 +52,9 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    result_ctypes = np.zeros(
+        (batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32
+    )
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     function(
         A_ptr,

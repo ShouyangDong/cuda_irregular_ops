@@ -10,7 +10,9 @@ device = torch.device("cpu")
 
 
 times = []
-files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu"))
+files = glob.glob(
+    os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu")
+)
 for file in files:
     base_name = os.path.basename(file)
     shapes = base_name.split(".")[0]
@@ -31,7 +33,7 @@ for file in files:
     use_amp = True
 
     def test_bmm():
-        C = torch.matmul(A, B)
+        torch.matmul(A, B)
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_bmm, number=100)

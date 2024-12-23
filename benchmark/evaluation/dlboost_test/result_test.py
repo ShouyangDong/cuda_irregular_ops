@@ -57,7 +57,11 @@ if __name__ == "__main__":
             base_name, success, output = future.result()
             results.append((base_name, success, output))
 
-            if success and hasattr(output, "stdout") and "验证通过" in output.stdout:
+            if (
+                success
+                and hasattr(output, "stdout")
+                and "验证通过！" in output.stdout
+            ):
                 counter += 1
             elif isinstance(output, str):
                 print(base_name)

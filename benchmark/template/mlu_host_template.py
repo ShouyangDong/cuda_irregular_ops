@@ -20,11 +20,17 @@ def create_bang_func(file_name, op_type="ewise"):
     # 构造参数列表
     params = [param_str.strip() for param_str in param_list_str.split(",")]
     param_list = ", ".join(
-        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in params]
+        [
+            " ".join(param.split()[:-1]) + " " + param.split()[-1]
+            for param in params
+        ]
     )
     mlu_params = [param + "_mlu" for param in params]
     mlu_param_list = ", ".join(
-        [" ".join(param.split()[:-1]) + " " + param.split()[-1] for param in mlu_params]
+        [
+            " ".join(param.split()[:-1]) + " " + param.split()[-1]
+            for param in mlu_params
+        ]
     )
 
     dim = None
@@ -103,15 +109,15 @@ def create_bang_func(file_name, op_type="ewise"):
     size_list = ", ".join(arg for arg in ["int " + string for string in size])
 
     cpp_pef_template = Template(
-        """  
+        """
     #include <stdio.h>
     #include <bang.h>
     #include <stdint.h>
 
-    // Original function  
+    // Original function
     ${original_function}
 
-    extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) { 
+    extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
         cnrtQueue_t queue;
         CNRT_CHECK(cnrtSetDevice(0));
         CNRT_CHECK(cnrtQueueCreate(&queue));

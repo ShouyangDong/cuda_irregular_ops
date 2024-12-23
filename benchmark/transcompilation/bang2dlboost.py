@@ -9,7 +9,7 @@ openai.api_base = "https://api.keya.pw/v1"
 
 
 def run_transcompile(code):
-    PROMPT = """Please rewrite the following BANG C code to utilize VNNI (Vector Neural Network Instructions) for optimal performance. 
+    PROMPT = """Please rewrite the following BANG C code to utilize VNNI (Vector Neural Network Instructions) for optimal performance.
     Ensure the code leverages VNNI for matrix computations and neural network operations.
 
     Requirements:
@@ -44,7 +44,9 @@ if __name__ == "__main__":
             f.close()
 
         target_code = run_transcompile(source)
-        file_name = os.path.join("benchmark/transcompilation/bang/dlboost", base_name)
+        file_name = os.path.join(
+            "benchmark/transcompilation/bang/dlboost", base_name
+        )
         with open(file_name, mode="w") as f:
             f.write(target_code)
             f.close()

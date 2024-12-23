@@ -26,13 +26,14 @@ for file in files:
     base_name = os.path.basename(file)
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Optionally use the context manager to ensure one of the fused kernels is run
+    # Optionally use the context manager to ensure one of the fused kernels is
+    # run
     query = torch.rand(shape, dtype=torch.float16, device=device)
     key = torch.rand(shape, dtype=torch.float16, device=device)
     value = torch.rand(shape, dtype=torch.float16, device=device)
 
     def test_scaled_dot_product_attention():
-        output = F.scaled_dot_product_attention(query, key, value)
+        F.scaled_dot_product_attention(query, key, value)
 
     for _ in range(100):
         test_scaled_dot_product_attention()

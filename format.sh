@@ -11,16 +11,17 @@ fi
 process_file() {  
   local file="$1"  
   echo "Processing file: $file"  
-  
+  autopep8 --in-place --aggressive --max-line-length 79 "$file"
   # Remove unused imports  
-  autoflake --remove-all-unused-imports --in-place "$file"  
+  autoflake --remove-all-unused-imports --remove-unused-variables --in-place "$file"  
 
   # Sort import modules  
   isort "$file"  
 
   # Format the code using black  
-  black "$file"  
-}  
+  black --line-length 79 "$file" 
+}
+
 
 export -f process_file  # Export function for parallel use  
 

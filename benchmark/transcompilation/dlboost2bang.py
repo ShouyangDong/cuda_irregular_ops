@@ -9,7 +9,7 @@ openai.api_base = "https://api.keya.pw/v1"
 
 
 def run_transcompile(code):
-    PROMPT = """Please rewrite the following DLBoost-optimized code into BANG C code for NPU acceleration. 
+    PROMPT = """Please rewrite the following DLBoost-optimized code into BANG C code for NPU acceleration.
     Ensure the converted code retains the same functionality and is optimized for BANG's parallel processing capabilities.
 
     Requirements:
@@ -44,7 +44,9 @@ if __name__ == "__main__":
             f.close()
 
         target_code = run_transcompile(source)
-        file_name = os.path.join("benchmark/transcompilation/dlboost/bang", base_name)
+        file_name = os.path.join(
+            "benchmark/transcompilation/dlboost/bang", base_name
+        )
         with open(file_name, mode="w") as f:
             f.write(target_code)
             f.close()

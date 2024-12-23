@@ -25,35 +25,45 @@ if __name__ == "__main__":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_layer_norm.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_layer_norm.py",
                 ),
             )
         elif name == "mha":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_mha.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_mha.py"
+                ),
             )
         elif name == "rmsnorm":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_rms_norm.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_rms_norm.py",
                 ),
             )
         elif name == "gemm":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_gemm.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gemm.py"
+                ),
             )
         elif name == "gemv":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_gemv.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gemv.py"
+                ),
             )
         elif name == "bmm":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_bmm.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_bmm.py"
+                ),
             )
         elif name == "conv1d":
             success, output = run_test(
@@ -73,79 +83,95 @@ if __name__ == "__main__":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_conv2dNCHW.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_conv2dNCHW.py",
                 ),
             )
         elif name == "depthwiseconv":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_depthwiseconv.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_depthwiseconv.py",
                 ),
             )
         elif name == "add":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_add.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_add.py"
+                ),
             )
         elif name == "sign":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_sign.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_sign.py"
+                ),
             )
         elif name == "avgpool":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_avgpool.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_avgpool.py",
                 ),
             )
         elif name == "maxpool":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_maxpool.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_maxpool.py",
                 ),
             )
         elif name == "minpool":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_minpool.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_minpool.py",
                 ),
             )
         elif name == "sumpool":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_sumpool.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_sumpool.py",
                 ),
             )
         elif name == "relu":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_relu.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_relu.py"
+                ),
             )
         elif name == "sigmoid":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_sigmoid.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_sigmoid.py",
                 ),
             )
         elif name == "gelu":
             success, output = run_test(
                 file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test/test_gelu.py"),
+                os.path.join(
+                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gelu.py"
+                ),
             )
         elif name == "softmax":
             success, output = run_test(
                 file,
                 os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_softmax.py"
+                    os.getcwd(),
+                    "benchmark/evaluation/mlu_test/test_softmax.py",
                 ),
             )
-        if hasattr(output, "stdout") and "验证通过" in output.stdout:
+        if hasattr(output, "stdout") and "验证通过！" in output.stdout:
             counter += 1
 
         elif isinstance(output, str):

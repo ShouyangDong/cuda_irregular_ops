@@ -4,7 +4,9 @@ import os
 from benchmark.utils import run_test
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/**.cu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/**.cu")
+    )
     counter = 0
 
     for file in files:
@@ -12,7 +14,8 @@ if __name__ == "__main__":
         name = base_name.split("_")[0]
         if name == "deformable":
             success, output = run_test(
-                file, "benchmark/evaluation/cuda_test/test_deformable_attention.py"
+                file,
+                "benchmark/evaluation/cuda_test/test_deformable_attention.py",
             )
         elif name == "layernorm":
             success, output = run_test(
@@ -97,7 +100,7 @@ if __name__ == "__main__":
         else:
             raise RuntimeError("The file is not tested")
 
-        if hasattr(output, "stdout") and "验证通过" in output.stdout:
+        if hasattr(output, "stdout") and "验证通过！" in output.stdout:
             counter += 1
 
         elif isinstance(output, str):

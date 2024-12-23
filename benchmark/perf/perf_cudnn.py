@@ -20,7 +20,7 @@ def perf_elementwise(name, shape):
     op_name = name.split("_")[0]
     if op_name == "add":
         for _ in range(100):  # warm up
-            z = torch.add(x, y)
+            torch.add(x, y)
 
         torch.cuda.synchronize()
         start = torch.cuda.Event(enable_timing=True)
@@ -36,7 +36,7 @@ def perf_elementwise(name, shape):
             on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
         ) as p:
             for _ in range(nb_iters):
-                z = torch.add(x, y)
+                torch.add(x, y)
         end.record()
         torch.cuda.current_stream().synchronize()
         print(p.key_averages().table(sort_by="self_cuda_time_total"))
@@ -50,7 +50,7 @@ def perf_elementwise(name, shape):
 
     elif op_name == "sign":
         for _ in range(100):  # warm up
-            z = torch.sign(x)
+            torch.sign(x)
 
         torch.cuda.synchronize()
         start = torch.cuda.Event(enable_timing=True)
@@ -66,7 +66,7 @@ def perf_elementwise(name, shape):
             on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
         ) as p:
             for _ in range(nb_iters):
-                z = torch.sign(x)
+                torch.sign(x)
         end.record()
         torch.cuda.current_stream().synchronize()
         print(p.key_averages().table(sort_by="self_cuda_time_total"))
@@ -105,7 +105,10 @@ def perf_pooling(name, shape, kernel, stride):
                 x_neg = -x
                 # 执行最大池化
                 x_maxpool = F.max_pool2d(
-                    x_neg, self.kernel_size, stride=self.stride, padding=self.padding
+                    x_neg,
+                    self.kernel_size,
+                    stride=self.stride,
+                    padding=self.padding,
                 )
                 # 再取反结果
                 return -x_maxpool
@@ -137,7 +140,7 @@ def perf_pooling(name, shape, kernel, stride):
         pool = SumPool2d(kernel_size=kernel, stride=stride)
 
     def test_pool():
-        output = pool(x)
+        pool(x)
 
     for _ in range(100):  # warm up
         test_pool()
@@ -176,7 +179,7 @@ def perf_bmm(name, shape_A, shape_B):
 
     def test_gemm():
         # 执行矩阵乘法操作 (GEMM)
-        C = torch.matmul(A, B)
+        torch.matmul(A, B)
 
     for _ in range(100):
         test_gemm()
@@ -219,7 +222,7 @@ def perf_activation(name, shape):
         activation = torch.nn.Softmax(dim=len(shape) - 1)
 
     def test_activation():
-        output = activation(x)
+        activation(x)
 
     for _ in range(100):
         test_activation()
@@ -250,7 +253,9 @@ def perf_activation(name, shape):
     return time
 
 
-def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, padding):
+def perf_conv2d_nchw(
+    name, shape, in_channels, out_channels, kernel, stride, padding
+):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     input_tensor = torch.randn(shape, device=device)
     # 定义卷积层
@@ -263,7 +268,7 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     ).to(device)
 
     def test_conv2d():
-        output = conv_layer(input_tensor)
+        conv_layer(input_tensor)
 
     for _ in range(100):
         test_conv2d()
@@ -295,9 +300,13 @@ def perf_conv2d_nchw(name, shape, in_channels, out_channels, kernel, stride, pad
     return time
 
 
-def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, padding):
+def perf_conv2d_nhwc(
+    name, shape, in_channels, out_channels, kernel, stride, padding
+):
     input_nhwc = torch.randn(shape, device=device)
-    weight_hwio = torch.randn([out_channels, kernel, kernel, shape[3]], device=device)
+    weight_hwio = torch.randn(
+        [out_channels, kernel, kernel, shape[3]], device=device
+    )
     print(weight_hwio.shape)
 
     def test_conv2d():
@@ -308,10 +317,12 @@ def perf_conv2d_nhwc(name, shape, in_channels, out_channels, kernel, stride, pad
         weight_oihw = weight_hwio.permute(0, 3, 1, 2)
 
         # 使用转换后的卷积核和输入进行卷积操作
-        output_nchw = F.conv2d(input_nchw, weight_oihw, stride=stride, padding=padding)
+        output_nchw = F.conv2d(
+            input_nchw, weight_oihw, stride=stride, padding=padding
+        )
 
         # 将输出从 NCHW 转换回 NHWC
-        output_nhwc = output_nchw.permute(0, 3, 1, 2)
+        output_nchw.permute(0, 3, 1, 2)
 
     for _ in range(100):
         test_conv2d()
@@ -349,7 +360,7 @@ def perf_gemv(name, shape):
     vector = torch.randn(shape[1], device=device)
 
     def test_gemv():
-        output = torch.matmul(matrix, vector)
+        torch.matmul(matrix, vector)
         # 或者使用 matrix @ vector
 
     for _ in range(100):
@@ -421,7 +432,9 @@ def perf_conv1d(name, shape):
 
 def perf_depthwise_conv2d(name, shape, kernel_size):
     input_hwio = torch.randn(shape, device=device)
-    weight_fdio = torch.randn([kernel_size, kernel_size, shape[2]], device=device)
+    weight_fdio = torch.randn(
+        [kernel_size, kernel_size, shape[2]], device=device
+    )
 
     def test_depthwise_conv2d():
         # 输入是 (height, width, in_depth)，添加一个批次维度变成 (1, height, width, in_depth)
@@ -438,8 +451,9 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
         # 使用深度可分离卷积
         output_nchw = F.conv2d(input_nchw, weight_iodf, groups=in_depth)
 
-        # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height, new_width, in_depth)
-        output_hwio = output_nchw.squeeze(0).permute(1, 2, 0)
+        # 转换输出格式从 (1, in_depth, new_height, new_width) 到 (new_height,
+        # new_width, in_depth)
+        output_nchw.squeeze(0).permute(1, 2, 0)
 
     for _ in range(100):
         test_depthwise_conv2d()
@@ -472,7 +486,7 @@ def perf_layernorm(name, shape):
     layer_norm = torch.nn.LayerNorm(shape[-1], device=device)
 
     def test_layernorm():
-        output = layer_norm(input_tensor)
+        layer_norm(input_tensor)
 
     for _ in range(100):
         test_layernorm()
@@ -511,7 +525,7 @@ def perf_rmsnorm(name, shape):
     rmsnorm = torch.nn.RMSNorm(shape, device=device)
 
     def test_rmsnorm():
-        output = rmsnorm(input_tensor)
+        rmsnorm(input_tensor)
 
     for _ in range(100):
         test_rmsnorm()
@@ -546,7 +560,9 @@ def perf_deformable(name, shape):
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
-        [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long, device=device
+        [[84, 117], [42, 59], [21, 30], [11, 15]],
+        dtype=torch.long,
+        device=device,
     )
     level_start_index = torch.cat(
         (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
@@ -556,7 +572,9 @@ def perf_deformable(name, shape):
     value = torch.rand(N, S, M, D, device=device) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2, device=device)
     attention_weights = torch.rand(N, Lq, M, L, P, device=device) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
+    )
 
     def test_deformable():
         MSDA.ms_deform_attn_forward(
@@ -593,7 +611,9 @@ def perf_deformable(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == "aten::scaled_dot_product_attention":  # 根据 key 找到你需要的操作
+        if (
+            avg.key == "aten::scaled_dot_product_attention"
+        ):  # 根据 key 找到你需要的操作
             time = avg.cuda_time
 
     return time
@@ -601,13 +621,14 @@ def perf_deformable(name, shape):
 
 def perf_scaled_dot_product_attention(name, shape):
 
-    # Optionally use the context manager to ensure one of the fused kernels is run
+    # Optionally use the context manager to ensure one of the fused kernels is
+    # run
     query = torch.rand(shape, dtype=torch.float16, device=device)
     key = torch.rand(shape, dtype=torch.float16, device=device)
     value = torch.rand(shape, dtype=torch.float16, device=device)
 
     def test_scaled_dot_product_attention():
-        output = F.scaled_dot_product_attention(query, key, value)
+        F.scaled_dot_product_attention(query, key, value)
 
     for _ in range(100):
         test_scaled_dot_product_attention()
@@ -632,14 +653,18 @@ def perf_scaled_dot_product_attention(name, shape):
     key_averages = p.key_averages()
     time = 0
     for avg in key_averages:
-        if avg.key == "aten::scaled_dot_product_attention":  # 根据 key 找到你需要的操作
+        if (
+            avg.key == "aten::scaled_dot_product_attention"
+        ):  # 根据 key 找到你需要的操作
             time = avg.cuda_time
 
     return time
 
 
 if __name__ == "__main__":
-    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu"))
+    files = glob.glob(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu")
+    )
     counter = 0
     execution_time = 0
     table = []
@@ -734,9 +759,15 @@ if __name__ == "__main__":
         elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+            input_height, kernel_size, input_channels = (
+                shape[0],
+                shape[1],
+                shape[2],
+            )
             shape = [input_height, input_height, input_channels]
-            execution_time = perf_depthwise_conv2d(base_name, shape, kernel_size)
+            execution_time = perf_depthwise_conv2d(
+                base_name, shape, kernel_size
+            )
             times.append(execution_time)
 
         elif name == "layernorm":
@@ -764,7 +795,9 @@ if __name__ == "__main__":
         elif name == "mha":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            execution_time = perf_scaled_dot_product_attention(base_name, shape)
+            execution_time = perf_scaled_dot_product_attention(
+                base_name, shape
+            )
             times.append(execution_time)
 
     table.append(files)
@@ -778,7 +811,9 @@ if __name__ == "__main__":
     transposed_data.insert(0, header)
 
     # 保存为CSV文件
-    with open("benchmark/perf/cudnn_output_maxpool.csv", "w", newline="") as file:
+    with open(
+        "benchmark/perf/cudnn_output_maxpool.csv", "w", newline=""
+    ) as file:
         writer = csv.writer(file)
         writer.writerows(transposed_data)
     shutil.rmtree("./time")

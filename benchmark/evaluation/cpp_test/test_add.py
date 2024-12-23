@@ -36,12 +36,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -60,7 +64,9 @@ if __name__ == "__main__":
     function.restype = None
     # Call the function with the matrices and dimensions
     result_ctypes = torch.zeros(shape)
-    output_ptr = result_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = result_ctypes.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     function(A_ptr, B_ptr, output_ptr)
     # Check if the results match
     torch.allclose(

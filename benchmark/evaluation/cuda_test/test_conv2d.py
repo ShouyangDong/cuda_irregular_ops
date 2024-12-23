@@ -23,7 +23,9 @@ def get_im2col_indices(images_shape, filter_shape, padding, stride):
     i = i0.reshape(-1, 1) + i1.reshape(1, -1)
     j = j0.reshape(-1, 1) + j1.reshape(1, -1)
 
-    k = np.repeat(np.arange(channels), filter_height * filter_width).reshape(-1, 1)
+    k = np.repeat(np.arange(channels), filter_height * filter_width).reshape(
+        -1, 1
+    )
     return (k, i, j)
 
 
@@ -31,11 +33,17 @@ def image_to_column(images, filter_shape, stride, pad):
     """Transpose the input for conv"""
     filter_height, filter_width = filter_shape
     pad_h, pad_w = cpu_pad(pad)
-    images_padded = np.pad(images, ((0, 0), (0, 0), pad_h, pad_w), mode="constant")
-    k, i, j = get_im2col_indices(images.shape, filter_shape, (pad_h, pad_w), stride)
+    images_padded = np.pad(
+        images, ((0, 0), (0, 0), pad_h, pad_w), mode="constant"
+    )
+    k, i, j = get_im2col_indices(
+        images.shape, filter_shape, (pad_h, pad_w), stride
+    )
     cols = images_padded[:, k, i, j]
     channels = images.shape[1]
-    cols = cols.transpose(1, 2, 0).reshape(filter_height * filter_width * channels, -1)
+    cols = cols.transpose(1, 2, 0).reshape(
+        filter_height * filter_width * channels, -1
+    )
     return cols
 
 
@@ -59,8 +67,12 @@ def cpu_conv(data, kernel, stride_w, stride_h, pad=None):
     batch_size, input_height, input_width, input_channel = data.shape
     output_channel, kernel_height, kernel_width, _ = kernel.shape
     pad_h, pad_w = cpu_pad(pad)
-    out_height = int((input_height + np.sum(pad_h) - kernel_height) / stride_h + 1)
-    out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
+    out_height = int(
+        (input_height + np.sum(pad_h) - kernel_height) / stride_h + 1
+    )
+    out_width = int(
+        (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
+    )
     data = data.transpose(0, 3, 1, 2)
     kernel = kernel.transpose(0, 3, 1, 2)
     X_col = image_to_column(
@@ -92,8 +104,12 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
+    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
+        dtype
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(
+        dtype
+    )
     # cpu compute
     result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)
 
@@ -103,12 +119,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    file_name = args.file.replace(
+        base_name.replace(".cu", ""), base_name + "_bak.cu"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()

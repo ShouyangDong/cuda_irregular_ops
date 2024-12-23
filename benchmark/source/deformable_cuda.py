@@ -17,16 +17,24 @@ def deformable_attention_pytorch(
     # need to use cuda version instead
     N_, S_, M_, D_ = value.shape
     _, Lq_, M_, L_, P_, _ = sampling_locations.shape
-    value_list = value.split([H_ * W_ for H_, W_ in value_spatial_shapes], dim=1)
+    value_list = value.split(
+        [H_ * W_ for H_, W_ in value_spatial_shapes], dim=1
+    )
     sampling_grids = 2 * sampling_locations - 1
     sampling_value_list = []
     for lid_, (H_, W_) in enumerate(value_spatial_shapes):
-        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_, D_, H_, W_
+        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_,
+        # D_, H_, W_
         value_l_ = (
-            value_list[lid_].flatten(2).transpose(1, 2).reshape(N_ * M_, D_, H_, W_)
+            value_list[lid_]
+            .flatten(2)
+            .transpose(1, 2)
+            .reshape(N_ * M_, D_, H_, W_)
         )
         # N_, Lq_, M_, P_, 2 -> N_, M_, Lq_, P_, 2 -> N_*M_, Lq_, P_, 2
-        sampling_grid_l_ = sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        sampling_grid_l_ = (
+            sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        )
         # N_*M_, D_, Lq_, P_
         sampling_value_l_ = F.grid_sample(
             value_l_,
@@ -41,7 +49,10 @@ def deformable_attention_pytorch(
         N_ * M_, 1, Lq_, L_ * P_
     )
     output = (
-        (torch.stack(sampling_value_list, dim=-2).flatten(-2) * attention_weights)
+        (
+            torch.stack(sampling_value_list, dim=-2).flatten(-2)
+            * attention_weights
+        )
         .sum(-1)
         .view(N_, M_ * D_, Lq_)
     )
@@ -110,7 +121,9 @@ def deformable_attention_tvmscript_reference(
     d = T.var("int32")
     p = T.var("int32")
     value_ = T.match_buffer(value, [n, s, m, d], dtype="float32")
-    value_spatial_shapes_ = T.match_buffer(value_spatial_shapes, [l, 2], dtype="int32")
+    value_spatial_shapes_ = T.match_buffer(
+        value_spatial_shapes, [l, 2], dtype="int32"
+    )
     sampling_locations_ = T.match_buffer(
         sampling_locations, [n, lq, m, l, p, 2], dtype="float32"
     )
@@ -153,12 +166,15 @@ def deformable_attention_tvmscript_reference(
                             xy[0] = sampling_locations_[batch, j, i_m, i, k, 1]
                             # Convert x,y to indices in the grid
                             xy_grid[0] = (
-                                xy[0] * T.cast(height_width[0], "float32") - 0.5
+                                xy[0] * T.cast(height_width[0], "float32")
+                                - 0.5
                             )
                             xy_grid[1] = (
-                                xy[1] * T.cast(height_width[1], "float32") - 0.5
+                                xy[1] * T.cast(height_width[1], "float32")
+                                - 0.5
                             )
-                            # Get 4 integer locations surrounding x_grid, y_grid. Dims: x,y then floor, ceil
+                            # Get 4 integer locations surrounding x_grid,
+                            # y_grid. Dims: x,y then floor, ceil
                             xy_rounded[0, 0] = T.cast(
                                 T.floor(xy_grid[0], dtype="float32"), "int32"
                             )
@@ -238,17 +254,41 @@ def deformable_attention_tvmscript_reference(
                             # bilinear interpolation
                             attention_sum[0] += (
                                 corner_values[0, 0]
-                                * (T.cast(xy_rounded[0, 1], "float32") - xy_grid[0])
-                                * (T.cast(xy_rounded[1, 1], "float32") - xy_grid[1])
+                                * (
+                                    T.cast(xy_rounded[0, 1], "float32")
+                                    - xy_grid[0]
+                                )
+                                * (
+                                    T.cast(xy_rounded[1, 1], "float32")
+                                    - xy_grid[1]
+                                )
                                 + corner_values[1, 0]
-                                * (xy_grid[0] - T.cast(xy_rounded[0, 0], "float32"))
-                                * (T.cast(xy_rounded[1, 1], "float32") - xy_grid[1])
+                                * (
+                                    xy_grid[0]
+                                    - T.cast(xy_rounded[0, 0], "float32")
+                                )
+                                * (
+                                    T.cast(xy_rounded[1, 1], "float32")
+                                    - xy_grid[1]
+                                )
                                 + corner_values[0, 1]
-                                * (T.cast(xy_rounded[0, 1], "float32") - xy_grid[0])
-                                * (xy_grid[1] - T.cast(xy_rounded[1, 0], "float32"))
+                                * (
+                                    T.cast(xy_rounded[0, 1], "float32")
+                                    - xy_grid[0]
+                                )
+                                * (
+                                    xy_grid[1]
+                                    - T.cast(xy_rounded[1, 0], "float32")
+                                )
                                 + corner_values[1, 1]
-                                * (xy_grid[0] - T.cast(xy_rounded[0, 0], "float32"))
-                                * (xy_grid[1] - T.cast(xy_rounded[1, 0], "float32"))
+                                * (
+                                    xy_grid[0]
+                                    - T.cast(xy_rounded[0, 0], "float32")
+                                )
+                                * (
+                                    xy_grid[1]
+                                    - T.cast(xy_rounded[1, 0], "float32")
+                                )
                             ) * attention_weights_[batch, j, i_m, i, k]
                     output_[batch, j, i_m * d + i_d] = attention_sum[0]
 
@@ -270,9 +310,12 @@ def deformable_attention_tvmscript(
     d = T.var("int32")  # depth
     p = T.var("int32")  # number of points to sample
 
-    # We need to bind handles to buffers so that we can access elements from them.
+    # We need to bind handles to buffers so that we can access elements from
+    # them.
     value_ = T.match_buffer(value, [n, s, m, d], dtype="float32")
-    value_spatial_shapes_ = T.match_buffer(value_spatial_shapes, [l, 2], dtype="int32")
+    value_spatial_shapes_ = T.match_buffer(
+        value_spatial_shapes, [l, 2], dtype="int32"
+    )
     sampling_locations_ = T.match_buffer(
         sampling_locations, [n, lq, m, l, p, 2], dtype="float32"
     )
@@ -291,7 +334,9 @@ def deformable_attention_tvmscript(
     xy_rounded = T.alloc_buffer(
         [2, 2, m], dtype="int32", scope="local"
     )  # first dim is x,y second is floor, ceil
-    corner_values = T.alloc_buffer([2, 2, m, d], dtype="float32", scope="local")
+    corner_values = T.alloc_buffer(
+        [2, 2, m, d], dtype="float32", scope="local"
+    )
 
     for j in T.parallel(0, lq):
         for batch in range(n):
@@ -302,7 +347,8 @@ def deformable_attention_tvmscript(
                 value_offset[0] = 0
                 for ii in range(i):
                     value_offset[0] += (
-                        value_spatial_shapes_[ii, 0] * value_spatial_shapes_[ii, 1]
+                        value_spatial_shapes_[ii, 0]
+                        * value_spatial_shapes_[ii, 1]
                     )
                 for k in range(p):
                     for i_m in range(m):
@@ -319,7 +365,8 @@ def deformable_attention_tvmscript(
                         xy_grid[1, i_m] = (
                             xy[1] * T.cast(height_width[1], "float32") - 0.5
                         )
-                        # Get 4 integer locations surrounding x_grid, y_grid. Dims: x,y then floor, ceil
+                        # Get 4 integer locations surrounding x_grid, y_grid.
+                        # Dims: x,y then floor, ceil
                         xy_rounded[0, 0, i_m] = T.cast(
                             T.floor(xy_grid[0, i_m], dtype="float32"), "int32"
                         )
@@ -452,7 +499,9 @@ def deformable_attention_tvmscript(
                             ) * attention_weights_[batch, j, i_m, i, k]
                     for i_m in range(m):
                         for i_d in range(d):
-                            output_[batch, j, i_m * d + i_d] = attention_sum[i_m, i_d]
+                            output_[batch, j, i_m * d + i_d] = attention_sum[
+                                i_m, i_d
+                            ]
 
 
 # optimized implementation for GPU
@@ -480,7 +529,9 @@ def deformable_attention_tvmscript_gpu(
     d = T.var("int32")
     p = T.var("int32")
     value_ = T.match_buffer(value, [n, s, m, d], dtype="float32")
-    value_spatial_shapes_ = T.match_buffer(value_spatial_shapes, [l, 2], dtype="int32")
+    value_spatial_shapes_ = T.match_buffer(
+        value_spatial_shapes, [l, 2], dtype="int32"
+    )
     value_level_start_index_ = T.match_buffer(
         value_level_start_index, [l], dtype="int32"
     )
@@ -500,7 +551,9 @@ def deformable_attention_tvmscript_gpu(
         xy_rounded = T.alloc_buffer(
             [2, 2], dtype="int32", scope="local"
         )  # first dim is x,y second is floor, ceil
-        corner_values = T.alloc_buffer([2, 2, 4], dtype="float32", scope="local")
+        corner_values = T.alloc_buffer(
+            [2, 2, 4], dtype="float32", scope="local"
+        )
 
         for io_d in T.thread_binding(0, d // 4, thread="threadIdx.x"):
             for j in T.thread_binding(0, lq, thread="blockIdx.x"):
@@ -514,22 +567,31 @@ def deformable_attention_tvmscript_gpu(
                             for k in range(p):
                                 # the sampling grid is in the range 0, 1. We convert it to
                                 # [-0.5, (height|width) - 0.5].
-                                xy[1] = sampling_locations_[batch, j, i_m, i, k, 0]
-                                xy[0] = sampling_locations_[batch, j, i_m, i, k, 1]
+                                xy[1] = sampling_locations_[
+                                    batch, j, i_m, i, k, 0
+                                ]
+                                xy[0] = sampling_locations_[
+                                    batch, j, i_m, i, k, 1
+                                ]
                                 # convert x,y to indices in the grid
                                 xy_grid[0] = (
-                                    xy[0] * T.cast(height_width[0], "float32") - 0.5
+                                    xy[0] * T.cast(height_width[0], "float32")
+                                    - 0.5
                                 )
                                 xy_grid[1] = (
-                                    xy[1] * T.cast(height_width[1], "float32") - 0.5
+                                    xy[1] * T.cast(height_width[1], "float32")
+                                    - 0.5
                                 )
-                                # get 4 integer locations surrounding x_grid, y_grid. Dims: x,y then floor, ceil
+                                # get 4 integer locations surrounding x_grid,
+                                # y_grid. Dims: x,y then floor, ceil
                                 xy_rounded[0, 0] = T.cast(
-                                    T.floor(xy_grid[0], dtype="float32"), "int32"
+                                    T.floor(xy_grid[0], dtype="float32"),
+                                    "int32",
                                 )
                                 xy_rounded[0, 1] = xy_rounded[0, 0] + 1
                                 xy_rounded[1, 0] = T.cast(
-                                    T.floor(xy_grid[1], dtype="float32"), "int32"
+                                    T.floor(xy_grid[1], dtype="float32"),
+                                    "int32",
                                 )
                                 xy_rounded[1, 1] = xy_rounded[1, 0] + 1
 
@@ -549,7 +611,8 @@ def deformable_attention_tvmscript_gpu(
                                         corner_values[0, 0, ii_d] = value_[
                                             batch,
                                             value_level_start_index_[i]
-                                            + xy_rounded[0, 0] * height_width[1]
+                                            + xy_rounded[0, 0]
+                                            * height_width[1]
                                             + xy_rounded[1, 0],
                                             i_m,
                                             io_d * 4 + ii_d,
@@ -567,7 +630,8 @@ def deformable_attention_tvmscript_gpu(
                                         corner_values[0, 1, ii_d] = value_[
                                             batch,
                                             value_level_start_index_[i]
-                                            + xy_rounded[0, 0] * height_width[1]
+                                            + xy_rounded[0, 0]
+                                            * height_width[1]
                                             + xy_rounded[1, 1],
                                             i_m,
                                             io_d * 4 + ii_d,
@@ -585,7 +649,8 @@ def deformable_attention_tvmscript_gpu(
                                         corner_values[1, 0, ii_d] = value_[
                                             batch,
                                             value_level_start_index_[i]
-                                            + xy_rounded[0, 1] * height_width[1]
+                                            + xy_rounded[0, 1]
+                                            * height_width[1]
                                             + xy_rounded[1, 0],
                                             i_m,
                                             io_d * 4 + ii_d,
@@ -603,7 +668,8 @@ def deformable_attention_tvmscript_gpu(
                                         corner_values[1, 1, ii_d] = value_[
                                             batch,
                                             value_level_start_index_[i]
-                                            + xy_rounded[0, 1] * height_width[1]
+                                            + xy_rounded[0, 1]
+                                            * height_width[1]
                                             + xy_rounded[1, 1],
                                             i_m,
                                             io_d * 4 + ii_d,
@@ -624,7 +690,9 @@ def deformable_attention_tvmscript_gpu(
                                         + corner_values[1, 0, ii_d]
                                         * (
                                             xy_grid[0]
-                                            - T.cast(xy_rounded[0, 0], "float32")
+                                            - T.cast(
+                                                xy_rounded[0, 0], "float32"
+                                            )
                                         )
                                         * (
                                             T.cast(xy_rounded[1, 1], "float32")
@@ -637,16 +705,22 @@ def deformable_attention_tvmscript_gpu(
                                         )
                                         * (
                                             xy_grid[1]
-                                            - T.cast(xy_rounded[1, 0], "float32")
+                                            - T.cast(
+                                                xy_rounded[1, 0], "float32"
+                                            )
                                         )
                                         + corner_values[1, 1, ii_d]
                                         * (
                                             xy_grid[0]
-                                            - T.cast(xy_rounded[0, 0], "float32")
+                                            - T.cast(
+                                                xy_rounded[0, 0], "float32"
+                                            )
                                         )
                                         * (
                                             xy_grid[1]
-                                            - T.cast(xy_rounded[1, 0], "float32")
+                                            - T.cast(
+                                                xy_rounded[1, 0], "float32"
+                                            )
                                         )
                                     ) * attention_weights_[batch, j, i_m, i, k]
                         for ii_d in range(4):
@@ -681,7 +755,9 @@ def benchmark_gpu(
             )
         )
     )
-    f = tvm.build(specialized, target=target, name="deformable_attention_tvmscript_gpu")
+    f = tvm.build(
+        specialized, target=target, name="deformable_attention_tvmscript_gpu"
+    )
     dev = tvm.cuda()
     output = tvm.nd.array(
         np.zeros(
@@ -711,24 +787,29 @@ def benchmark_gpu(
     torch_da = deformable_attention_pytorch(
         value, shapes, sampling_locations, attention_weights
     )
-    np.testing.assert_allclose(output.numpy(), torch_da.numpy(), atol=1e-6, rtol=1e-6)
+    np.testing.assert_allclose(
+        output.numpy(), torch_da.numpy(), atol=1e-6, rtol=1e-6
+    )
 
 
 if __name__ == "__main__":
     target = tvm.target.Target("nvidia/nvidia-a100", host="llvm")
     for batch_size in [1, 4, 8]:
         print(f"BATCH SIZE {batch_size}")
-        # These values are taken from https://github.com/fundamentalvision/Deformable-DETR
+        # These values are taken from
+        # https://github.com/fundamentalvision/Deformable-DETR
         N, M, D = (
             batch_size,
             8,
             256,
         )  # batch size, number of heads, depth
+        # query length, levels, points to sample. models/deformable_detr.py
+        # says 100 length query for COCO.
         Lq, L, P = (
             100,
             4,
             4,
-        )  # query length, levels, points to sample. models/deformable_detr.py says 100 length query for COCO.
+        )
         shapes = torch.as_tensor(
             [[84, 117], [42, 59], [21, 30], [11, 15]], dtype=torch.long
         )

@@ -43,10 +43,12 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
     # Define the input tensor, kernel, and parameters
-    input_tensor = np.random.rand(input_height, input_height, input_channels).astype(
+    input_tensor = np.random.rand(
+        input_height, input_height, input_channels
+    ).astype(np.float32)
+    kernel = np.random.rand(kernel_size, kernel_size, input_channels).astype(
         np.float32
     )
-    kernel = np.random.rand(kernel_size, kernel_size, input_channels).astype(np.float32)
     # Calculate the output tensor shape
     output_height = input_height - kernel_size + 1
     output_width = input_height - kernel_size + 1
@@ -69,12 +71,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    file_name = args.file.replace(
+        base_name.replace(".cu", ""), base_name + "_bak.cu"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -95,7 +101,12 @@ if __name__ == "__main__":
     function.restype = None
     # Call the function with the matrices and dimensions
     function(
-        input_ptr, kernel_ptr, output_ptr, input_height, kernel_size, input_channels
+        input_ptr,
+        kernel_ptr,
+        output_ptr,
+        input_height,
+        kernel_size,
+        input_channels,
     )
     # Check if the results match
     np.testing.assert_allclose(

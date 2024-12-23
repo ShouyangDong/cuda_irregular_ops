@@ -35,12 +35,16 @@ if __name__ == "__main__":
         code = f.read()
         f.close()
 
-    with open(os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r") as f:
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
+    ) as f:
         macro = f.read()
         f.close()
     code = macro + code
 
-    file_name = args.file.replace(base_name.replace(".cu", ""), base_name + "_bak.cu")
+    file_name = args.file.replace(
+        base_name.replace(".cu", ""), base_name + "_bak.cu"
+    )
     with open(file_name, mode="w") as f:
         f.write(code)
         f.close()
@@ -63,7 +67,9 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
+    result_ctypes = np.zeros(
+        (batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32
+    )
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     function(output_ptr, A_ptr, B_ptr, *shape)
     # Check if the results match

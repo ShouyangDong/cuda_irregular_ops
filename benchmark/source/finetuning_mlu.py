@@ -27,9 +27,15 @@ TARGET = "mlu590-h8"
 @autotuning.template("tutorial/matmul")
 def matmul(N, L, M):
     tcps = tcp.TCP(TARGET)
-    data = tcps.Buffer(shape=(N, L), name="data", dtype=bp.int16, scope="global")
-    filters = tcps.Buffer(shape=(L, M), name="filter", dtype=bp.int16, scope="global")
-    output = tcps.Buffer(shape=(N, M), name="output", dtype=bp.float32, scope="global")
+    data = tcps.Buffer(
+        shape=(N, L), name="data", dtype=bp.int16, scope="global"
+    )
+    filters = tcps.Buffer(
+        shape=(L, M), name="filter", dtype=bp.int16, scope="global"
+    )
+    output = tcps.Buffer(
+        shape=(N, M), name="output", dtype=bp.float32, scope="global"
+    )
 
     ##### define space begin ######
     cfg = autotuning.get_config()
@@ -67,7 +73,9 @@ def matmul(N, L, M):
                     dtype=bp.float32,
                     scope="nram",
                 )
-                tcps.memcpy(filter_block, filters[:, m * 64 * M_i : (m + 1) * 64 * M_i])
+                tcps.memcpy(
+                    filter_block, filters[:, m * 64 * M_i : (m + 1) * 64 * M_i]
+                )
                 tcps.dense(output_block, data_block, filter_block, 0)
                 tcps.memcpy(
                     output[no * N_i + ni, m * 64 * M_i : (m + 1) * 64 * M_i],
@@ -145,5 +153,8 @@ bp.assert_allclose(
 )
 
 evaluator = f_matmul.time_evaluator(number=10, repeat=1, min_repeat_ms=0)
-print("Time cost of this operator : %f ms" % (evaluator(a_bp, w_bp, c_bp).mean * 1e3))
+print(
+    "Time cost of this operator : %f ms"
+    % (evaluator(a_bp, w_bp, c_bp).mean * 1e3)
+)
 os.remove("matmul.log")

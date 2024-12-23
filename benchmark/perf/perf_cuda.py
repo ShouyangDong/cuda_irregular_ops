@@ -205,8 +205,12 @@ def perf_conv2d(name, file, shape, kernel, output_shape, stride, pad):
         return code
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype(
+        "float32"
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype(
+        "float32"
+    )
     # cpu compute
     A = te.placeholder(data_shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
@@ -274,8 +278,12 @@ def perf_conv2d_nchw(name, file, shape, kernel, output_shape, stride, pad):
         return code
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype("float32")
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype("float32")
+    data_np = np.random.uniform(low=1.0, high=2.0, size=shape).astype(
+        "float32"
+    )
+    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel).astype(
+        "float32"
+    )
     # cpu compute
     A = te.placeholder(data_shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
@@ -338,9 +346,9 @@ def perf_gemv(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
@@ -396,9 +404,9 @@ def perf_conv1d(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
@@ -454,9 +462,9 @@ def perf_depthwise_conv2d(name, file, shape, kernel_shape, output_shape):
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(kernel_shape, dtype="float32", name="B")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(output_shape, "float32", "C_buf")
 
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
@@ -513,10 +521,10 @@ def perf_layernorm(name, file, shape):
     B = te.placeholder(shape[-1:], dtype="float32", name="B")
     C = te.placeholder(shape[-1:], dtype="float32", name="C")
 
-    A_buff = tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    B_buff = tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    C_buff = tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
-    D_buff = tvm.tir.decl_buffer(shape, "float32", "D_buf")
+    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
+    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
+    tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
+    tvm.tir.decl_buffer(shape, "float32", "D_buf")
 
     @tvm.register_func
     def tvm_callback_cuda_postproc(code, target):
@@ -643,7 +651,9 @@ def perf_deformable(name, file, shape):
     value = torch.rand(N, S, M, D) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2)
     attention_weights = torch.rand(N, Lq, M, L, P) + 1e-5
-    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True)
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
+    )
 
     specialized = deformable_attention_tvmscript_gpu.specialize(
         dict(
@@ -690,7 +700,7 @@ def perf_deformable(name, file, shape):
 
 
 def perf_scaled_dot_product_attention(name, file, shape):
-    op_name = name.split("_")[0]
+    name.split("_")[0]
     A = te.placeholder(shape, dtype="float32", name="A")
     B = te.placeholder(shape, dtype="float32", name="B")
     C = te.placeholder(shape, dtype="float32", name="C")
@@ -712,7 +722,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
         print(code)
         return code
 
-    def test_scaled_dot_product_attention(A, B, C, D, seq_len, num_heads, head_dim):
+    def test_scaled_dot_product_attention(
+        A, B, C, D, seq_len, num_heads, head_dim
+    ):
         n = A.shape[0]
         prod = np.prod(A.shape[:-1])
         ib = tvm.tir.ir_builder.create()
@@ -765,7 +777,9 @@ def perf_scaled_dot_product_attention(name, file, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/depthwiseconv*.cu")
+        os.path.join(
+            os.getcwd(), "benchmark/data/cuda_code_test/depthwiseconv*.cu"
+        )
     )
     counter = 0
 
@@ -783,7 +797,9 @@ if __name__ == "__main__":
             shape = [int(intg) for intg in shape]
             kernel_stride = base_name.split(".")[0].split("_")[5:]
             kernel_stride = [int(intg) for intg in kernel_stride]
-            perf_pooling(base_name, file, shape, kernel_stride[:2], kernel_stride[2:])
+            perf_pooling(
+                base_name, file, shape, kernel_stride[:2], kernel_stride[2:]
+            )
 
         elif name == "bmm":
             shapes = base_name.split(".")[0]
@@ -821,11 +837,19 @@ if __name__ == "__main__":
             out_height = int(
                 (input_height + np.sum(pad_h) - kernel_height) / stride_h + 1
             )
-            out_width = int((input_width + np.sum(pad_w) - kernel_width) / stride_w + 1)
+            out_width = int(
+                (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
+            )
             output_shape = [batch_size, out_height, out_width, output_channel]
 
             perf_conv2d(
-                name, file, data_shape, kernel_shape, output_shape, stride_h, pad_h
+                name,
+                file,
+                data_shape,
+                kernel_shape,
+                output_shape,
+                stride_h,
+                pad_h,
             )
 
         elif name == "conv2dnchw":
@@ -865,14 +889,20 @@ if __name__ == "__main__":
         elif name == "depthwiseconv":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
-            input_height, kernel_size, input_channels = shape[0], shape[1], shape[2]
+            input_height, kernel_size, input_channels = (
+                shape[0],
+                shape[1],
+                shape[2],
+            )
             shape = [input_height, input_height, input_channels]
             kernel_shape = [kernel_size, kernel_size, input_channels]
             # Calculate the output tensor shape
             output_height = input_height - kernel_size + 1
             output_width = input_height - kernel_size + 1
             output_shape = [output_height, output_width, input_channels]
-            perf_depthwise_conv2d(base_name, file, shape, kernel_shape, output_shape)
+            perf_depthwise_conv2d(
+                base_name, file, shape, kernel_shape, output_shape
+            )
 
         elif name == "layernorm":
             shapes = base_name.split(".")[0]
