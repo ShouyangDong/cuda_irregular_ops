@@ -162,7 +162,6 @@ def create_bang_func(file_name, op_type="ewise"):
     output_file = file_name.replace(".mlu", "_bak.mlu")
     with open(output_file, "w") as f:
         f.write(new_code)
-    print(new_code)
     return output_file
 
 

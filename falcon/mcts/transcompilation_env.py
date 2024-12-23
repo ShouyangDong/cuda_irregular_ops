@@ -4,7 +4,6 @@ from functools import partial
 import jax as jx
 import jax.numpy as jnp
 import numpy as np
-import tvm
 from jax import jit, lax
 
 from benchmark.perf import perf_bang, perf_cuda
@@ -22,7 +21,8 @@ def objective(file_name, target):
         time_ms = perf_bang(file_name)
     elif target == "BANG":
         time_ms = perf_bang(file_name)
-
+    elif target == "DL Boost":
+        time_ms = peft_dlboost(file_name)
     if time_ms is None:
         return 0.0
     return GFLOPS / (time_ms / 1e3)
@@ -41,7 +41,7 @@ def dynamic_action_selection(cur_action_ids):
 class TvmGo:
     def __init__(
         self,
-        file_name
+        file_name,
         target,
         action_len=A_Length,
         optimizer_len=11,
@@ -164,8 +164,8 @@ def build_env():
 
 
 def _test():
-    file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
-    source = "CUDA"
+    file_name = "benchmark/data/mlu_code_test/add_18_128.mlu"
+    source = "BANG"
     target = "BANG"
     action_len = len(ActionSpace)
     optimizer_len = 8
