@@ -1,98 +1,67 @@
 import subprocess
 
 import numpy as np
+import torch
+import torch.nn.functional as F
 
 
-def avgpool_np(data, kernel_stride):
-    """avg pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of avgpool
-
-    stride : list or tuple
-        The stride of avgpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.average(mask, axis=(1, 2))
-    return ret
+def avgpool_np(input_tensor, kernel_stride):
+    input_tensor = input_tensor.permute(0, 3, 1, 2)
+    avgpool = torch.nn.AvgPool2d(
+        kernel_size=kernel_stride[:2], stride=kernel_stride[2:]
+    )
+    # 执行平均池化
+    output_tensor = avgpool(input_tensor)
+    output_tensor = output_tensor.permute(0, 2, 3, 1)
+    return output_tensor
 
 
-def sumpool_np(data, kernel_stride):
-    """sum pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of sumpool
-
-    stride : list or tuple
-        The stride of sumpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.sum(mask, axis=(1, 2))
-    return ret
+def sumpool_np(input_tensor, kernel_stride):
+    input_tensor = input_tensor.permute(0, 3, 1, 2)
+    avgpool = torch.nn.AvgPool2d(
+        kernel_size=kernel_stride[:2], stride=kernel_stride[2:]
+    )
+    # 执行平均池化
+    output_tensor = avgpool(input_tensor)
+    output_tensor = output_tensor.permute(0, 2, 3, 1)
+    return output_tensor * kernel_stride[0] * kernel_stride[1]
 
 
-def maxpool_np(data, kernel_stride):
-    """max pooling with numpy
-    data : numpy.array
-        input array
-
-    kernel : list or tuple
-        The kernel of avgpool
-
-    stride : list or tuple
-        The stride of avgpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.max(mask, axis=(1, 2))
-    return ret
+def maxpool_np(input_tensor, kernel_stride):
+    input_tensor = input_tensor.permute(0, 3, 1, 2)
+    avgpool = torch.nn.AvgPool2d(
+        kernel_size=kernel_stride[:2], stride=kernel_stride[2:]
+    )
+    # 执行平均池化
+    output_tensor = avgpool(input_tensor)
+    output_tensor = output_tensor.permute(0, 2, 3, 1)
+    return output_tensor
 
 
-def minpool_np(data, kernel_stride):
-    """min pooling with numpy
-    data : numpy.array
-        input array
+def minpool_np(input_tensor, kernel_stride):
+    class MinPool2d(torch.nn.Module):
+        def __init__(self, kernel_size, stride=None, padding=0):
+            super(MinPool2d, self).__init__()
+            self.kernel_size = kernel_size
+            self.stride = stride
+            self.padding = padding
 
-    kernel : list or tuple
-        The kernel of avgpool
+        def forward(self, x):
+            # 取反输入
+            x_neg = -x
+            # 执行最大池化
+            x_maxpool = F.max_pool2d(
+                x_neg, self.kernel_size, stride=self.stride, padding=self.padding
+            )
+            # 再取反结果
+            return -x_maxpool
 
-    stride : list or tuple
-        The stride of avgpool
-    """
-    batch, dh, dw, dc = data.shape
-    kh, kw, sh, sw = kernel_stride
-    ch = (dh - kh) // sh + 1
-    cw = (dw - kw) // sw + 1
-    ret = np.zeros((batch, ch, cw, dc))
-    for i in range(ch):
-        for j in range(cw):
-            mask = data[:, i * sh : i * sh + kh, j * sw : j * sw + kw, :]
-            ret[:, i, j, :] = np.min(mask, axis=(1, 2))
-    return ret
+    # 使用自定义的 MinPool2d
+    pool = MinPool2d(kernel_size=kernel_stride[:2], stride=kernel_stride[2:])
+    input_tensor = input_tensor.permute(0, 3, 1, 2)
+    output_tensor = pool(input_tensor)
+    output_tensor = output_tensor.permute(0, 2, 3, 1)
+    return output_tensor
 
 
 def conv2d_nchw(input_tensor, kernel, stride, pad=0):
@@ -228,4 +197,5 @@ def run_test(file_name, test_file):
     except subprocess.TimeoutExpired:
         return False, "timeout"
     except subprocess.CalledProcessError as e:
+        print(e.output)
         return False, e.output

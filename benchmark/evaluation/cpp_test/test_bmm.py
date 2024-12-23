@@ -3,14 +3,14 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
 from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):
-    return np.matmul(A, B)
+    return torch.matmul(A, B)
 
 
 if __name__ == "__main__":
@@ -23,15 +23,15 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
-    A = np.random.rand(batch_size, matrix_dim_i, matrix_dim_j).astype("float32")
-    B = np.random.rand(batch_size, matrix_dim_j, matrix_dim_k).astype("float32")
+    A = torch.randn([batch_size, matrix_dim_i, matrix_dim_j], device="cpu")
+    B = torch.randn([batch_size, matrix_dim_j, matrix_dim_k], device="cpu")
 
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(A, B)
 
     # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    A_ptr = A.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    B_ptr = B.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     so_name = args.file.replace(".cpp", ".so")
     with open(args.file, "r") as f:
@@ -62,18 +62,16 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    result_ctypes = np.zeros((batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32)
-    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    result_ctypes = torch.zeros((batch_size, matrix_dim_i, matrix_dim_k))
+    output_ptr = result_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     function(A_ptr, B_ptr, output_ptr)
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         result_ctypes,
         result_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

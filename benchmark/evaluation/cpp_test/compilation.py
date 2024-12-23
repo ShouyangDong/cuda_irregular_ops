@@ -1,47 +1,58 @@
 import glob
 import os
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
 
 from benchmark.utils import run_dlboost_compilation as run_compilation
 
-files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
-counter = 0
-for file_name in tqdm(files):
+
+def compile_file(file_name):
     base_name = os.path.basename(file_name)
 
     with open(file_name, "r") as f:
         code = f.read()
-        f.close()
 
     with open(os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r") as f:
         macro = f.read()
 
     code = macro + code
-    file_name = file_name.replace(".cpp", "_bak.cpp")
+    bak_file_name = file_name.replace(".cpp", "_bak.cpp")
 
-    with open(file_name, mode="w") as f:
+    with open(bak_file_name, mode="w") as f:
         f.write(code)
-        f.close()
 
-    so_name = base_name.replace("cpp", "so")
+    so_name = base_name.replace(".cpp", ".so")
     so_name = os.path.join(
         os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/"), so_name
     )
 
-    success, output = run_compilation(so_name, file_name)
-    os.remove(file_name)
+    success, output = run_compilation(so_name, bak_file_name)
+    os.remove(bak_file_name)
 
     if success:
-        counter += 1
         result = subprocess.run(["rm", so_name])
+        return True
     else:
         print(output)
+        return False
 
 
-print(counter)
-print(len(files))
-print(
-    "[INFO]*******************CPP Compilation successfule rate ", counter / len(files)
-)
+if __name__ == "__main__":
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
+
+    # 使用 ThreadPoolExecutor 并行执行文件编译
+    counter = 0
+    with ThreadPoolExecutor() as executor:
+        results = list(tqdm(executor.map(compile_file, files), total=len(files)))
+
+    # 统计编译成功的文件数
+    counter = sum(results)
+
+    print(counter)
+    print(len(files))
+    print(
+        "[INFO]*******************CPP Compilation successful rate ",
+        counter / len(files),
+    )

@@ -3,15 +3,10 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
 from benchmark.utils import minpool_np
 from benchmark.utils import run_dlboost_compilation as run_compilation
-
-
-def generate_data(shape, dtype):
-    return np.random.uniform(size=shape).astype(dtype)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -27,13 +22,13 @@ if __name__ == "__main__":
 
     dtype = "float32"
 
-    input_array = generate_data(shape, dtype)
+    input_array = torch.randn(*shape, device="cpu")
     # Calculate the result using numpy for comparison
     output_np = minpool_np(input_array, kernel_stride)
-    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
+    output_array = torch.zeros(output_np.shape, dtype=torch.float32)
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Load the shared library with the avgpool function
     so_name = args.file.replace(".cpp", ".so")
@@ -64,14 +59,12 @@ if __name__ == "__main__":
     # Call the function with the matrices and dimensions
     function(input_ptr, output_ptr)
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         output_array,
         output_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

@@ -1,154 +1,61 @@
 import glob
 import os
+from concurrent.futures import ProcessPoolExecutor
 
 from tqdm import tqdm
 
 from benchmark.utils import run_test
 
+
+def run_test_for_file(file):
+    base_name = os.path.basename(file)
+    name = base_name.split("_")[0]
+
+    test_script_map = {
+        "deformable": "test_deformable_attention.py",
+        "layernorm": "test_layer_norm.py",
+        "mha": "test_mha.py",
+        "rmsnorm": "test_rms_norm.py",
+        "gemm": "test_gemm.py",
+        "gemv": "test_gemv.py",
+        "bmm": "test_bmm.py",
+        "conv1d": "test_conv1d.py",
+        "conv2d": "test_conv2d.py",
+        "conv2dnchw": "test_conv2dNCHW.py",
+        "depthwiseconv": "test_depthwise_conv.py",
+        "add": "test_add.py",
+        "sign": "test_sign.py",
+        "avgpool": "test_avgpool.py",
+        "maxpool": "test_maxpool.py",
+        "minpool": "test_minpool.py",
+        "sumpool": "test_sumpool.py",
+        "relu": "test_relu.py",
+        "sigmoid": "test_sigmoid.py",
+        "gelu": "test_gelu.py",
+        "softmax": "test_softmax.py",
+    }
+
+    if name not in test_script_map:
+        raise RuntimeError("This file is not tested.")
+
+    test_script = os.path.join(
+        os.getcwd(), "benchmark/evaluation/cpp_test", test_script_map[name]
+    )
+    success, output = run_test(file, test_script)
+
+    return base_name, output
+
+
 if __name__ == "__main__":
     files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp"))
     counter = 0
 
-    for file in tqdm(files):
-        base_name = os.path.basename(file)
-        name = base_name.split("_")[0]
-        if name == "deformable":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/cpp_test/test_deformable_attention.py",
-                ),
-            )
-        elif name == "layernorm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_layer_norm.py"
-                ),
-            )
-        elif name == "mha":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_mha.py"),
-            )
-        elif name == "rmsnorm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_rms_norm.py"
-                ),
-            )
-        elif name == "gemm":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_gemm.py"),
-            )
-        elif name == "gemv":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_gemv.py"),
-            )
-        elif name == "bmm":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_bmm.py"),
-            )
-        elif name == "conv1d":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_conv1d.py"
-                ),
-            )
-        elif name == "conv2d":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_conv2d.py"
-                ),
-            )
-        elif name == "conv2dnchw":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_conv2dNCHW.py"
-                ),
-            )
-        elif name == "depthwiseconv":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_depthwise_conv.py"
-                ),
-            )
-        elif name == "add":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_add.py"),
-            )
-        elif name == "sign":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_sign.py"),
-            )
-        elif name == "avgpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_avgpool.py"
-                ),
-            )
-        elif name == "maxpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_maxpool.py"
-                ),
-            )
-        elif name == "minpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_minpool.py"
-                ),
-            )
-        elif name == "sumpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_sumpool.py"
-                ),
-            )
-        elif name == "relu":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_relu.py"),
-            )
-        elif name == "sigmoid":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_sigmoid.py"
-                ),
-            )
-        elif name == "gelu":
-            success, output = run_test(
-                file,
-                os.path.join(os.getcwd(), "benchmark/evaluation/cpp_test/test_gelu.py"),
-            )
-        elif name == "softmax":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/cpp_test/test_softmax.py"
-                ),
-            )
-        else:
-            raise RuntimeError("This file is not tested.")
+    with ProcessPoolExecutor() as executor:
+        results = list(tqdm(executor.map(run_test_for_file, files), total=len(files)))
+
+    for base_name, output in results:
         if hasattr(output, "stdout") and "验证通过" in output.stdout:
             counter += 1
-
         elif isinstance(output, str):
             print(base_name)
             print(output)
@@ -156,6 +63,6 @@ if __name__ == "__main__":
     print(counter)
     print(len(files))
     print(
-        "[INFO]*******************CPP test computation successfule rate: ",
+        "[INFO]*******************CPP test computation successful rate: ",
         counter / len(files),
     )

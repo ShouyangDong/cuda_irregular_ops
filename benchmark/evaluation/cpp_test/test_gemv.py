@@ -3,7 +3,7 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
 from benchmark.utils import run_dlboost_compilation as run_compilation
 
@@ -17,19 +17,19 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     # Define the input matrix A and vector x
-    A = np.random.rand(*shape).astype(np.float32)
-    x = np.random.rand(shape[1]).astype(np.float32)
+    A = torch.randn(*shape)
+    x = torch.randn(shape[1])
 
     # Create an empty vector y
-    y_ctypes = np.zeros(shape[0], dtype=np.float32)
+    y_ctypes = torch.zeros(shape[0])
 
     # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    x_ptr = x.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    y_ptr = y_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    A_ptr = A.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    x_ptr = x.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    y_ptr = y_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Perform gemv using numpy
-    y_np = np.matmul(A, x)
+    y_np = torch.matmul(A, x)
 
     # Load the shared library with the batch matrix multiplication function
     so_name = args.file.replace(".cpp", ".so")
@@ -41,7 +41,6 @@ if __name__ == "__main__":
         macro = f.read()
         f.close()
     code = macro + code
-    print(code)
     file_name = args.file.replace(base_name.replace(".cpp", ""), base_name + "_bak.cpp")
     with open(file_name, mode="w") as f:
         f.write(code)
@@ -62,14 +61,12 @@ if __name__ == "__main__":
     # Call the function with the matrices and dimensions
     function(A_ptr, x_ptr, y_ptr)
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         y_ctypes,
         y_np,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

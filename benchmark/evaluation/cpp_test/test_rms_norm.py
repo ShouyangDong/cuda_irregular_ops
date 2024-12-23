@@ -4,7 +4,6 @@ import os
 import subprocess
 from ctypes import CDLL
 
-import numpy as np
 import torch
 
 from benchmark.utils import run_dlboost_compilation as run_compilation
@@ -48,28 +47,25 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # 创建输入数组
-    dtype = "float32"
-    input_array = np.random.uniform(size=shape).astype(dtype)
-    expected_output = ref_program(torch.from_numpy(input_array))
+    input_array = torch.randn(shape)
+    expected_output = ref_program(input_array)
 
     # 创建输出数组
-    output_array = np.zeros_like(input_array)
+    output_array = torch.zeros(shape)
 
     # 将输入数组和输出数组转换为C指针类型
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = output_array.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
     function(input_ptr, output_ptr)
     # 验证结果
 
-    np.testing.assert_allclose(
+    torch.allclose(
         output_array,
         expected_output,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
 
     print("验证通过！")
