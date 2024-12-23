@@ -18,11 +18,11 @@ def objective(file_name, target):
     then the score is quiet large.
     """
     if target == "CUDA":
-        time_ms = perf_bang(file_name)
+        time_ms = perf_bang.benchmark(file_name)
     elif target == "BANG":
-        time_ms = perf_bang(file_name)
+        time_ms = perf_bang.benchmark(file_name)
     elif target == "DL Boost":
-        time_ms = peft_dlboost(file_name)
+        time_ms = peft_dlboost.benchmark(file_name)
     if time_ms is None:
         return 0.0
     return GFLOPS / (time_ms / 1e3)

@@ -7,7 +7,9 @@ import numpy as np
 import torch
 
 from benchmark.template.mlu_evaluate_template import create_bang_perf_func
+from benchmark.utils import avgpool_np, maxpool_np, minpool_np
 from benchmark.utils import run_mlu_compilation as run_compilation
+from benchmark.utils import sumpool_np
 
 
 def perf_unary(shape, function, dtype="float32"):
@@ -57,8 +59,23 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(A_ptr, B_ptr, output_ptr, np.prod(shape_A))
-    else:
-        elapsed_time = 0
+    elif name in ["gemm", "gemv", "bmm", "conv2d"]:
+        function.argtypes = [
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.POINTER(ctypes.c_float),
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+        ]
+        elapsed_time = function(
+            A_ptr,
+            B_ptr,
+            output_ptr,
+            np.prod(shape_A),
+            np.prod(shape_B),
+            np.prod(shape_C),
+        )
     return elapsed_time
 
 
@@ -123,23 +140,38 @@ def perf_deformable(shape, function):
     return elapsed_time
 
 
-def perf_pooling(shape, kernel, stride, function, dtype="float32"):
-    input_array = np.random.rand(*shape).astype("float32")
+def perf_pooling(name, shape, kernel, stride, function, dtype="float32"):
+    input_array = torch.rand(*shape)
     # Calculate the result using numpy for comparison
-    output_np = maxpool_np(input_array, kernel + stride)
-    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
-    # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    if name == "maxpool":
+        output_np = maxpool_np(input_array, kernel + stride)
+    elif name == "minpool":
+        output_np = minpool_np(input_array, kernel + stride)
+    elif name == "avgpool":
+        output_np = avgpool_np(input_array, kernel + stride)
+    elif name == "sumpool":
+        output_np = sumpool_np(input_array, kernel + stride)
 
+    output_array = torch.zeros(output_np.shape)
+    # Convert the arrays to contiguous memory for ctypes
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    size1 = np.prod(shape)
+    size2 = np.prod(output_np.shape)
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = ctypes.c_int
     # Call the function with the matrices and dimensions
-    elapsed_time = function(input_ptr, output_ptr)
+    elapsed_time = function(input_ptr, output_ptr, size1, size2)
     return elapsed_time
 
 
@@ -218,30 +250,39 @@ def benchmark(file_name):
         execution_time = perf_binary(name, shape, shape, shape, function)
 
     elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
+        perf_pipeline(file_name, "pool")
+        lib = ctypes.CDLL(file_name.replace(".mlu", ".so"))
+        function = getattr(lib, "timed_" + name + "_kernel")
         shape = base_name.split("_")[1:5]
         shape = [int(intg) for intg in shape]
         kernel_stride = base_name.split(".")[0].split("_")[5:]
         kernel_stride = [int(intg) for intg in kernel_stride]
         execution_time = perf_pooling(
-            shape, kernel_stride[:2], kernel_stride[2:], function
+            name, shape, kernel_stride[:2], kernel_stride[2:], function
         )
 
     elif name == "bmm":
+        perf_pipeline(file_name, "matmul")
+        lib = ctypes.CDLL(file_name.replace(".mlu", ".so"))
+        function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
         shape_A = [batch_size, matrix_dim_i, matrix_dim_j]
         shape_B = [batch_size, matrix_dim_k, matrix_dim_j]
         shape_C = [batch_size, matrix_dim_i, matrix_dim_k]
-        execution_time = perf_binary(shape_A, shape_B, shape_C, function)
+        execution_time = perf_binary(name, shape_A, shape_B, shape_C, function)
 
     elif name == "gemm":
+        perf_pipeline(file_name, "matmul")
+        lib = ctypes.CDLL(file_name.replace(".mlu", ".so"))
+        function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         shape_A = [1, shape[0], shape[1]]
         shape_B = [1, shape[2], shape[1]]
         shape_C = [1, shape[0], shape[2]]
-        execution_time = perf_binary(shape_A, shape_B, shape_C, function)
+        execution_time = perf_binary(name, shape_A, shape_B, shape_C, function)
 
     elif name in ["sign", "relu", "sigmoid", "softmax", "rmsnorm", "gelu"]:
         shapes = base_name.split(".")[0]
@@ -267,7 +308,7 @@ def benchmark(file_name):
         )
         output_shape = [batch_size, out_height, out_width, output_channel]
         execution_time = perf_binary(
-            data_shape, kernel_shape, output_shape, function
+            name, data_shape, kernel_shape, output_shape, function
         )
 
     elif name == "conv2dnchw":
@@ -289,7 +330,7 @@ def benchmark(file_name):
         # cpu compute
         result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
         execution_time = perf_binary(
-            data_shape, kernel_shape, result_cpu.shape, function
+            name, data_shape, kernel_shape, result_cpu.shape, function
         )
 
     elif name == "gemv":
@@ -298,7 +339,7 @@ def benchmark(file_name):
         kernel_shape = [shape[1]]
         output_shape = [shape[0]]
         execution_time = perf_binary(
-            shape, kernel_shape, output_shape, function
+            name, shape, kernel_shape, output_shape, function
         )
 
     elif name == "conv1d":
@@ -308,7 +349,7 @@ def benchmark(file_name):
         kernel_shape = [3]
         output_shape = [shape[0]]
         execution_time = perf_binary(
-            shape, kernel_shape, output_shape, function
+            name, shape, kernel_shape, output_shape, function
         )
 
     elif name == "depthwiseconv":
@@ -326,7 +367,7 @@ def benchmark(file_name):
         output_width = input_height - kernel_size + 1
         output_shape = [output_height, output_width, input_channels]
         execution_time = perf_binary(
-            shape, kernel_shape, output_shape, function
+            name, shape, kernel_shape, output_shape, function
         )
 
     elif name == "deformable":

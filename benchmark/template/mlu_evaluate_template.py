@@ -85,7 +85,6 @@ def create_bang_perf_func(file_name, op_type="ewise"):
     elif op_type == "matmul":
         size = ["size1", "size2", "size3"]
         for i, param in enumerate(params):
-            print(size[i])
             name = param.split("*")[1]
             device_memory_alloc.append(param + "_mlu;\n")
             device_memory_alloc.append(
