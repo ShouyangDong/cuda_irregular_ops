@@ -3,39 +3,10 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
+from benchmark.utils import conv2d_nchw
 from benchmark.utils import run_dlboost_compilation as run_compilation
-
-
-def cpu_conv(input_tensor, kernel, stride, pad=0):
-    # 获取输入张量和卷积核的维度
-    N, C, H, W = input_tensor.shape
-    out_channels, in_channels, kernel_height, kernel_width = kernel.shape
-    # 计算输出张量的空间维度
-    out_height = (H - kernel_height) // stride + 1
-    out_width = (W - kernel_width) // stride + 1
-
-    # 初始化输出张量
-    output_tensor = np.zeros((N, out_channels, out_height, out_width))
-
-    # 执行卷积操作
-    for n in range(N):
-        for out_channel in range(out_channels):
-            for in_channel in range(in_channels):
-                for i in range(0, out_height):
-                    for j in range(0, out_width):
-                        h_start = i * stride
-                        h_end = h_start + kernel_height
-                        w_start = j * stride
-                        w_end = w_start + kernel_width
-                        output_tensor[n, out_channel, i, j] += np.sum(
-                            input_tensor[n, in_channel, h_start:h_end, w_start:w_end]
-                            * kernel[out_channel, in_channel]
-                        )
-
-    return output_tensor
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -57,12 +28,12 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    # data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(dtype)
-    # kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(dtype)
-    data_np = np.ones(data_shape).astype(dtype)
-    kernel_np = np.ones(kernel_shape).astype(dtype)
+    data_np = torch.rand(data_shape)
+    kernel_np = torch.rand(kernel_shape)
     # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, pad)
+    result_cpu = conv2d_nchw(
+        data_np, kernel_shape[1], kernel_shape[0], kernel_shape[2], stride_h, pad
+    )
 
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".cpp", ".so")
@@ -92,21 +63,19 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
-    input_ptr = data_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
-    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = data_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    result_ctypes = torch.zeros(result_cpu.shape)
+    output_ptr = result_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # Call the function with the matrices and dimensions
     function(input_ptr, kernel_ptr, output_ptr)
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         result_ctypes,
         result_cpu,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])
