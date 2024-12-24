@@ -28,7 +28,7 @@ __global__ void conv2d(float *input, float *kernel, float *output) {
   }
 }
 
-extern "C" void conv2d_kernel(float *output, float *input, float *filter,
+extern "C" void conv2d_kernel(float *input, float *output, float *filter,
                               int batch_size, int input_height,
                               int input_channels, int output_channels,
                               int kernel_height, int stride) {
@@ -59,10 +59,10 @@ extern "C" void conv2d_kernel(float *output, float *input, float *filter,
                  batch_size); // 输出的宽、高以及批次
 
   // 启动 CUDA 内核
-    for (int i =0; i< 10; i++){
+  for (int i = 0; i < 10; i++) {
     conv2d<<<numBlocks, blockSize>>>(d_input, d_filter, d_output);
   }
-  
+
   // 定义 CUDA 事件以计算时间
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
@@ -71,7 +71,7 @@ extern "C" void conv2d_kernel(float *output, float *input, float *filter,
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      conv2d<<<numBlocks, blockSize>>>(d_input, d_filter, d_output);
+    conv2d<<<numBlocks, blockSize>>>(d_input, d_filter, d_output);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

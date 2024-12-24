@@ -24,8 +24,8 @@ extern "C" void gelu_kernel(float *C, float *A, int size) {
 
   dim3 blockSize(1024);
   dim3 numBlocks((size + 1024 - 1) / 1024);
-  for (int i =0; i< 10; i++){
-  gelu<<<numBlocks, blockSize>>>(d_A, d_C);
+  for (int i = 0; i < 10; i++) {
+    gelu<<<numBlocks, blockSize>>>(d_A, d_C);
   }
 
   // 定义 CUDA 事件以计算时间
@@ -36,7 +36,7 @@ extern "C" void gelu_kernel(float *C, float *A, int size) {
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      gelu<<<numBlocks, blockSize>>>(d_A, d_C);
+    gelu<<<numBlocks, blockSize>>>(d_A, d_C);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

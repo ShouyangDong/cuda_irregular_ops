@@ -172,7 +172,6 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
         d_value_level_start_index, d_value_spatial_shapes);
   }
 
-
   // 定义 CUDA 事件以计算时间
   cudaEvent_t start, stop;
   cudaEventCreate(&start);

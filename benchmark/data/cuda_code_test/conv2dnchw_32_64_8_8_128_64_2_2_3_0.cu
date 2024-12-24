@@ -31,7 +31,7 @@ __global__ void conv2d_nchw(float *input, float *kernel, float *output) {
   }
 }
 
-extern "C" void conv2dnchw_kernel(float *output, float *input, float *kernel,
+extern "C" void conv2dnchw_kernel(float *input, float *output, float *kernel,
                                   int batch_size, int input_height,
                                   int input_channels, int output_channels,
                                   int kernel_height, int stride) {
@@ -62,10 +62,10 @@ extern "C" void conv2dnchw_kernel(float *output, float *input, float *kernel,
   dim3 numBlocks(output_channels, 1, batch_size); // 每个输出通道对应一个块
 
   // 启动 CUDA 内核
-      for (int i =0; i< 10; i++){
+  for (int i = 0; i < 10; i++) {
     conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
   }
-  
+
   // 定义 CUDA 事件以计算时间
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
@@ -74,7 +74,7 @@ extern "C" void conv2dnchw_kernel(float *output, float *input, float *kernel,
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+    conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

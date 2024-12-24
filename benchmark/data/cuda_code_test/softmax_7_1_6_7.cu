@@ -34,10 +34,10 @@ extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   dim3 blockSize(42);
   dim3 numBlocks((size1 + 42 - 1) / 42);
 
-    for (int i =0; i< 10; i++){
+  for (int i = 0; i < 10; i++) {
     softmax<<<numBlocks, blockSize>>>(d_A, d_C);
   }
-  
+
   // 定义 CUDA 事件以计算时间
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
@@ -46,7 +46,7 @@ extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      softmax<<<numBlocks, blockSize>>>(d_A, d_C);
+    softmax<<<numBlocks, blockSize>>>(d_A, d_C);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

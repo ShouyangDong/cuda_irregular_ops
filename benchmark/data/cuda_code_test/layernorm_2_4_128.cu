@@ -60,7 +60,7 @@ extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
   int block_size = 8;
   int num_blocks = (batch_size * seq_length + block_size - 1) / block_size;
 
-    for (int i = 0; i < 1000; ++i) { 
+  for (int i = 0; i < 1000; ++i) {
     layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
   }
   // 定义 CUDA 事件以计算时间
@@ -71,7 +71,7 @@ extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
+    layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

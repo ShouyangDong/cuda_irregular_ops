@@ -44,7 +44,7 @@ def run_test_for_file(file):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/**.cu")
+        os.path.join(os.getcwd(), "benchmark/data/cuda_nohost/*.cu")
     )
     counter = 0
 

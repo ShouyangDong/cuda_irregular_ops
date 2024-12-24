@@ -12,16 +12,14 @@ __global__ void gemm(half *A, half *B, float *C) {
 
     for (int k = 0; k < 16; k += 16) {
 
-      wmma::load_matrix_sync(a_frag,
-                              A + blockRow * 16 + k, 16);
-      wmma::load_matrix_sync(b_frag,
-                              B + k * 128 + blockCol, 128);
+      wmma::load_matrix_sync(a_frag, A + blockRow * 16 + k, 16);
+      wmma::load_matrix_sync(b_frag, B + k * 128 + blockCol, 128);
 
       wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
     }
 
-    wmma::store_matrix_sync(C + blockRow * 128 + blockCol,
-                            c_frag, 128, wmma::mem_row_major);
+    wmma::store_matrix_sync(C + blockRow * 128 + blockCol, c_frag, 128,
+                            wmma::mem_row_major);
   }
 }
 
@@ -38,9 +36,8 @@ extern "C" void gemm_kernel(float *C, half *A, half *B, int m, int k, int n) {
   cudaMemcpy(d_B, B, k * n * sizeof(half), cudaMemcpyHostToDevice);
 
   dim3 blockSize(32);
-  dim3 numBlocks((n + 16 - 1) / 16,
-                 (m + 16 - 1) / 16);
-  for (int i = 0; i < 1000; ++i) { 
+  dim3 numBlocks((n + 16 - 1) / 16, (m + 16 - 1) / 16);
+  for (int i = 0; i < 1000; ++i) {
     gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
   }
   // 定义 CUDA 事件以计算时间
@@ -51,7 +48,7 @@ extern "C" void gemm_kernel(float *C, half *A, half *B, int m, int k, int n) {
   // 启动内核
   cudaEventRecord(start);
   for (int i = 0; i < 1000; ++i) {
-      gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+    gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
   }
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);

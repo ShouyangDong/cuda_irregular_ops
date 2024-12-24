@@ -17,7 +17,7 @@ __global__ void __launch_bounds__(1024)
   pool_max[((int)threadIdx.x)] = pool_max_local[0];
 }
 
-extern "C" void maxpool_kernel(float *output, float *input, int batch_size,
+extern "C" void maxpool_kernel(float *input, float *output, int batch_size,
                                int channels, int input_H, int kernel_size,
                                int stride) {
   float *d_input;
