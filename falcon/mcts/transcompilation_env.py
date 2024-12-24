@@ -4,13 +4,13 @@ from functools import partial
 
 import jax as jx
 import jax.numpy as jnp
-import numpy as np
 from jax import jit, lax
 
 from benchmark.perf import perf_bang, perf_dlboost
 from falcon.mcts.actions import actions as ActionSpace
 from falcon.util import get_target
 
+# TODO(michale): replace with shape calculation
 GFLOPS = 64 * 1280 * 2 / 1e9
 A_Length = len(ActionSpace)
 
@@ -166,13 +166,9 @@ class FalconGo:
 
         return optimize_grid
 
+    @property
     def num_actions(self):
         return self.action_len
-
-
-def ref_program(x):
-    e_x = np.exp(x - np.max(x, axis=-1, keepdims=True))
-    return e_x / np.sum(e_x, axis=-1, keepdims=True)
 
 
 def build_env(file_name, source_platform="BANG", target_platform="DL Boost"):

@@ -2,7 +2,7 @@ from string import Template
 
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, remove_target_prefix
 
 BANG_binary_template = Template(
     """void binary_double_buffering(float* OUTPUT， float* INPUT0, float* INPUT1, int BUF_SIZE, int loop_ext) {
@@ -139,7 +139,7 @@ class PragmaVisitor(NodeTransformer):
 
 
 def smt_double_buffer(code):
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
     parser = c_parser.CParser()
     ast = parser.parse(code)
     visitor = PragmaVisitor()

@@ -3,7 +3,7 @@ import re
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.util import NodeTransformer
-
+from falcon.util import NodeTransformer, remove_target_prefix
 # TODO(dongshouyang): Add more varaibles
 ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 
@@ -76,29 +76,12 @@ def ast_loop_recovery(code, target="CUDA"):
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
-
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__global__\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"__launch_bounds__\(\d+\)\s+", "", code)
-
-        # 移除 `__launch_bounds__(\d+)`
-        code = re.sub(r"\b__restrict__\b", "", code)
-
     elif target == "BANG":
         for builtin_var in mlu_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
 
-        # 移除 `extern "C"`
-        code = re.sub(r'extern "C"\s+', "", code)
-
-        # 移除 `__global__` 修饰符
-        code = re.sub(r"__mlu_global__\s+", "", code)
-
+    code = remove_target_prefix(code)
     # insert the parallel loop
     parser = c_parser.CParser()
     ast = parser.parse(code)

@@ -102,7 +102,7 @@ class LoopVisitor(c_ast.NodeVisitor):
 
 
 def ast_thread_binding(code, target="BANG"):
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
     # 解析代码
     parser = c_parser.CParser()
     ast = parser.parse(code)

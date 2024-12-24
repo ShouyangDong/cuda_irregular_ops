@@ -202,7 +202,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
 
 
 def ast_tensorization(code, target="BANG"):
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
 
     # 解析代码
     parser = c_parser.CParser()

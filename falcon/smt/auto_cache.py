@@ -237,7 +237,7 @@ class CacheTransformationVisitor(NodeTransformer):
 
 
 def ast_auto_cache(code, space_map, target="BANG"):
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
 
     # 解析代码
     parser = c_parser.CParser()

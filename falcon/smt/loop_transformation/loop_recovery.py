@@ -94,7 +94,7 @@ class LoopRecoveryVisitor(NodeTransformer):
 
 def ast_loop_recovery(code, target="CUDA"):
     ParaVar = update_dim(code)
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
     builtin_map = {}
     if target == "CUDA":
         for builtin_var in cuda_paravar:

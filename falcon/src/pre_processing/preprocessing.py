@@ -14,7 +14,6 @@ from falcon.src.pre_processing.preprocessing_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import remove_target_prefix
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "sk-JmlwEmWiNtFqSD7IDaF981Dd8a7447FfBcE768755cB38010"
@@ -122,7 +121,6 @@ def run_detensorization(code, target):
         for inst in instructions:
             code = detensorization(inst, code, op_dict[inst])
 
-    code = remove_target_prefix(code, target)
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)

@@ -2,7 +2,7 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, remove_target_prefix
 
 
 class MergeLoopsAndIfsVisitor(NodeTransformer):
@@ -217,6 +217,7 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
 
 def ast_stmt_simplification(code):
     code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
+    code = remove_target_prefix(code)
     # 解析代码并应用合并
     parser = c_parser.CParser()
     ast = parser.parse(code)

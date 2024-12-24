@@ -61,7 +61,7 @@ def ast_detensorization(code, target):
     - Implement additional error checking for the input parameters.
     - Extend the visitor to handle more complex loop structures.
     """
-    code = remove_target_prefix(code, target)
+    code = remove_target_prefix(code)
     if target == "BANG":
         parser = c_parser.CParser()
         ast = parser.parse(code)

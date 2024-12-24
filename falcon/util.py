@@ -87,31 +87,23 @@ def add_parallel_variable_prefix(code):
     return "__global__ " + code if "__global__ " not in code else code
 
 
-def remove_target_prefix(code, target):
-    patterns = {
-        "BANG": [
-            (r'extern "C"\s+', ""),  # 移除 `extern "C"`
-            (r"__mlu_global__\s+", ""),  # 移除 `__mlu_global__`
-            (r"\b__nram__\s+", ""),  # 移除 `__nram__`
-            (r"\b__wram__\s+", ""),  # 移除 `__wram__`
-            (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
-        ],
-        "CUDA": [
-            (r'extern "C"\s+', ""),  # 移除 `extern "C"`
-            (r"__global__\s+", ""),  # 移除 `__global__`
-            (r"__launch_bounds__\(\d+\)\s+", ""),  # 移除 `__launch_bounds__`
-            (r"\b__restrict__\b", ""),  # 移除 `__restrict__`
-            (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
-        ],
-    }
+def remove_target_prefix(code):
+    patterns = [
+        (r'extern "C"\s+', ""),  # 移除 `extern "C"`
+        (r"__mlu_global__\s+", ""),  # 移除 `__mlu_global__`
+        (r"\b__nram__\s+", ""),  # 移除 `__nram__`
+        (r"\b__wram__\s+", ""),  # 移除 `__wram__`
+        (r"__global__\s+", ""),  # 移除 `__global__`
+        (r"__launch_bounds__\(\d+\)\s+", ""),  # 移除 `__launch_bounds__`
+        (r"\b__restrict__\b", ""),  # 移除 `__restrict__`
+        (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
+    ]
 
-    # 获取对应 `target` 的模式列表，若无则返回原始代码
-    if target in patterns:
-        for pattern, replacement, *flags in patterns[target]:
-            # 处理可选的标志 `flags`
-            code = re.sub(
-                pattern, replacement, code, flags=flags[0] if flags else 0
-            )
+    # 遍历模式列表，应用替换
+    for pattern, replacement, *flags in patterns:
+        code = re.sub(
+            pattern, replacement, code, flags=flags[0] if flags else 0
+        )
 
     return code
 

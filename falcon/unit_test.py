@@ -1,9 +1,16 @@
+import logging
 import os
 import re
 import shutil
 import subprocess
 
 from falcon.util import get_target
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,  # 设置日志级别
+    format="%(asctime)s - %(levelname)s - %(message)s",  # 设置日志格式
+)
 
 test_file_map = {
     "deformable": "benchmark/evaluation/{target}_test/test_deformable_attention.py",
@@ -91,6 +98,6 @@ def unit_test(file_name, code):
     test_file = test_file_map.get(op_name, "").format(target=target)
     # 运行测试
     success, output = run_test(tmp_file_name, test_file)
-    print("[INFO] unittest: ", output)
+    logging.info(output)
     shutil.rmtree(tmp_dir)
     return success

@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, remove_target_prefix
 
 
 class LoopMerger(NodeTransformer):
@@ -48,6 +48,7 @@ class LoopMerger(NodeTransformer):
 
 def ast_loop_inline(code):
     # Parse the code and apply loop merging
+    code = remove_target_prefix(code)
     parser = c_parser.CParser()
     ast = parser.parse(code)
 

@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, remove_target_prefix
 
 
 class InlineTransformer(NodeTransformer):
@@ -134,6 +134,7 @@ class UnusedMemoryRemover(NodeTransformer):
 
 
 def ast_buffer_inline(code):
+    code = remove_target_prefix(code)
     # 解析代码
     parser = c_parser.CParser()
     ast = parser.parse(code)

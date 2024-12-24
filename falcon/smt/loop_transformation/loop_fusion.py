@@ -1,7 +1,7 @@
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.simplification import simplify_code
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, remove_target_prefix
 
 
 class LoopNestFusionVisitor(NodeTransformer):
@@ -107,6 +107,7 @@ class LoopNestFusionVisitor(NodeTransformer):
 
 
 def ast_loop_fusion(c_code):
+    c_code = remove_target_prefix(c_code)
     # 解析 C 代码
     parser = c_parser.CParser()
     ast = parser.parse(c_code)

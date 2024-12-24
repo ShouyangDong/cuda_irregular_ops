@@ -2,6 +2,8 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
+from falcon.util import remove_target_prefix
+
 
 class SplitForLoopVisitor(c_ast.NodeVisitor):
     def __init__(self):
@@ -153,6 +155,7 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
 
 
 def ast_loop_split(code):
+    code = remove_target_prefix(code)
     # Parse the C code
     parser = c_parser.CParser()
     ast = parser.parse(code)
