@@ -45,7 +45,7 @@ if __name__ == "__main__":
         int dim2 = 4;
         int dim3 = 4;
         int dim4 = 64;
-        
+
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
                 for (int k = 0; k < dim3; k++) {

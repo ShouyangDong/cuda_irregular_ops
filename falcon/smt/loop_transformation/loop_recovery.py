@@ -4,8 +4,8 @@ from pycparser import c_ast, c_generator, c_parser
 
 from falcon.simplification import simplify_code
 from falcon.smt.const_inline import constant_inline
-from falcon.smt.util import NodeTransformer, remove_target_prefix
 from falcon.stmt_simplification import ast_stmt_simplification
+from falcon.util import NodeTransformer, remove_target_prefix
 
 ParaVar = {
     "threadIdx.x": 1024,

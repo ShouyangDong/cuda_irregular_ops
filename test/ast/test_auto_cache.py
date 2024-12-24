@@ -15,7 +15,10 @@ if __name__ == "__main__":
     }
     """
     space_map = [
-        {"input": {"input1": "Nram", "input2": "Nram"}, "output": {"output": "Nram"}}
+        {
+            "input": {"input1": "Nram", "input2": "Nram"},
+            "output": {"output": "Nram"},
+        }
     ]
     code = ast_auto_cache(code, space_map)
     print(code)

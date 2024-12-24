@@ -3,21 +3,25 @@ import re
 
 def convert_pointer_to_vector(code):
     # Step 1: Replace pointer declarations with vector declarations
-    code = re.sub(r"float\s*\*([A-Za-z_]\w*)", r"vector<vector<float>> \1", code)
+    code = re.sub(
+        r"float\s*\*([A-Za-z_]\w*)", r"vector<vector<float>> \1", code
+    )
 
     # Step 2: Replace output pointer initialization with vector initialization
     # Identify the result variable and initialize a vector of vectors for it.
     match = re.search(r"vector<vector<float>>\s+(\w+);", code)
     if match:
         result_var = match.group(1)
-        init_statement = (
-            f"vector<vector<float>> {result_var}(rows, vector<float>(cols, 0));\n"
+        init_statement = f"vector<vector<float>> {result_var}(rows, vector<float>(cols, 0));\n"
+        code = re.sub(
+            rf"vector<vector<float>>\s+{result_var};", init_statement, code
         )
-        code = re.sub(rf"vector<vector<float>>\s+{result_var};", init_statement, code)
 
     # Step 3: Convert matrix access
     # Replace accesses like A[i * N + j] with A[i][j]
-    code = re.sub(r"(\w+)\[(\w+)\s*\*\s*(\w+)\s*\+\s*(\w+)\]", r"\1[\2][\4]", code)
+    code = re.sub(
+        r"(\w+)\[(\w+)\s*\*\s*(\w+)\s*\+\s*(\w+)\]", r"\1[\2][\4]", code
+    )
 
     # Step 4: Replace for loop initializations to automatically use vector size
     code = re.sub(

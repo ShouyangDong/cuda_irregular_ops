@@ -1,7 +1,7 @@
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.smt.simplification import simplify_code
-from falcon.smt.util import NodeTransformer
+from falcon.util import NodeTransformer
 
 
 class FuncCallsRemover(NodeTransformer):
@@ -17,7 +17,8 @@ class FuncCallsRemover(NodeTransformer):
             if not isinstance(seq_def, c_ast.FileAST):
                 raise ValueError("Sequential code must be a function")
 
-            # Construct a map between the function call's  arguments and callee's arguments
+            # Construct a map between the function call's  arguments and
+            # callee's arguments
             seq_def_args = seq_def.ext[0].decl.type.args.params
             seq_def_name = [arg_id.name for arg_id in seq_def_args]
             self.parameter_mappings = {

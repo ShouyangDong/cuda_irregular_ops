@@ -79,6 +79,8 @@ def get_output_operand(pragma):
 
 
 def replace_operation_with_intrinsic(code, op_pragma):
+    if not op_pragma:
+        return code, None
     # Get the list of operations from the code
     op_list = get_operation_content(code)
     space_maps = []

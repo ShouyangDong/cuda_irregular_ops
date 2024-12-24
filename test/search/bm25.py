@@ -63,7 +63,9 @@ class BM25(object):
 
     def _load_stop_words(self):
         if not os.path.exists(self._stop_words_path):
-            raise Exception(f"system stop words: {self._stop_words_path} not found")
+            raise Exception(
+                f"system stop words: {self._stop_words_path} not found"
+            )
         stop_words = []
         with open(self._stop_words_path, "r", encoding="utf8") as reader:
             for line in reader:
@@ -73,7 +75,9 @@ class BM25(object):
 
     def _build_param(self):
         def _cal_param(reader_obj):
-            f = []  # 列表的每一个元素是一个dict，dict存储着一个文档中每个词的出现次数
+            f = (
+                []
+            )  # 列表的每一个元素是一个dict，dict存储着一个文档中每个词的出现次数
             df = {}  # 存储每个词及出现了该词的文档数量
             idf = {}  # 存储每个词的idf值
             # lines = reader_obj.readlines()
@@ -154,7 +158,9 @@ class BM25(object):
             if word not in self.param.f[index]:
                 continue
             molecular = (
-                self.param.idf[word] * self.param.f[index][word] * (self.param.k1 + 1)
+                self.param.idf[word]
+                * self.param.f[index][word]
+                * (self.param.k1 + 1)
             )
             denominator = self.param.f[index][word] + self.param.k1 * (
                 1
@@ -173,7 +179,9 @@ class BM25(object):
         :return: [(doc, score), ..]
         """
         words = [
-            word for word in jieba.lcut(query) if word and word not in self._stop_words
+            word
+            for word in jieba.lcut(query)
+            if word and word not in self._stop_words
         ]
         score_list = []
         for index in range(self.param.length):

@@ -23,13 +23,15 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
         # check the loop index
         if node.init.decls[0].name == self.axis_name_1:
             compound_nested_node = node.stmt
-            generator = c_generator.CGenerator()
+            c_generator.CGenerator()
             if isinstance(compound_nested_node, c_ast.Compound) and isinstance(
                 compound_nested_node.block_items[0], c_ast.For
             ):
                 nested_node = compound_nested_node.block_items[0]
                 if nested_node.init.decls[0].name == self.axis_name_2:
-                    self.extend[self.axis_name_2] = nested_node.cond.right.value
+                    self.extend[self.axis_name_2] = (
+                        nested_node.cond.right.value
+                    )
                     extend = int(node.cond.right.value) * int(
                         nested_node.cond.right.value
                     )
@@ -72,6 +74,7 @@ print(generator.visit(ast))
 # Custom visitor instance
 visitor = LoopReorderVisitor("i", "j")
 
-# Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+# Visit the AST to split 'for' loops with loop count 10 into 2 loops with
+# counts 2 and 5
 visitor.visit(ast)
 print(generator.visit(ast))

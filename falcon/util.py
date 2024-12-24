@@ -114,3 +114,14 @@ def remove_target_prefix(code, target):
             )
 
     return code
+
+
+def get_target(code):
+    # 判断文件类型并设置目标
+    if "__mlu_global" in code:
+        target, file_type = "mlu", ".mlu"
+    elif "__global__" in code:
+        target, file_type = "cuda", ".cu"
+    else:
+        target, file_type = "cpp", ".cpp"
+    return target, file_type

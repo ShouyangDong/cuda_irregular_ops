@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import (
+from falcon.util import (
     NodeTransformer,
     add_memory_prefix,
     add_parallel_variable_prefix,

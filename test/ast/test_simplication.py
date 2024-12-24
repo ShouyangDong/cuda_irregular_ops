@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import NodeTransformer
+from falcon.util import NodeTransformer
 
 
 class SimplifyConstants(NodeTransformer):
@@ -58,7 +58,7 @@ def simplify_code(source_code):
 
 
 # 使用示例
-source = """ 
+source = """
 void add(int* a, int* b) {
     for (int i_j_fuse = 0; i_j_fuse < 300 * 300; i_j_fuse++) {
         a[i_j_fuse] = b[i_j_fuse] + 4;

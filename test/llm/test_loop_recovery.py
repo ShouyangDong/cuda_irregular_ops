@@ -18,15 +18,15 @@ openai.api_base = "https://api.keya.pw/v1"
 def run_loop_recovery(code, target):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     {TENSORIZATION_PROMPT}
-    
-    Example: 
+
+    Example:
     {LOOP_RECOVERY_DEMO}
 
     Input CUDA Code:
     {code}
-    Output C++ Code: 
+    Output C++ Code:
 
     Please return the output kernel function without any additional information.
     """

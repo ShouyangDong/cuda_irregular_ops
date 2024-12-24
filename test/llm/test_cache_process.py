@@ -16,7 +16,8 @@ openai.api_base = "https://api.keya.pw/v1"
 
 
 def get_intrinsic_content(code):
-    # Define the regex pattern to match the content inside parentheses following #pragma intrinsic
+    # Define the regex pattern to match the content inside parentheses
+    # following #pragma intrinsic
     pattern = r"#pragma\s+intrinsic\(([^)]+)\)"
     # Find all matches in the given code (there might be multiple pragmas)
     matches = re.findall(pattern, code)
@@ -38,7 +39,7 @@ def get_output_memory_spaces(pragma):
 def generate_cache_read_prompt(buffer, space, code):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     {CACHE_READ_PROMPT}
 
     {CACHE_READ_DEMO}

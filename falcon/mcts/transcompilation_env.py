@@ -9,6 +9,7 @@ from jax import jit, lax
 
 from benchmark.perf import perf_bang, perf_dlboost
 from falcon.mcts.actions import actions as ActionSpace
+from falcon.util import get_target
 
 GFLOPS = 64 * 1280 * 2 / 1e9
 A_Length = len(ActionSpace)
@@ -16,17 +17,18 @@ A_Length = len(ActionSpace)
 
 def objective(file_name, target):
     """We design an objective function. If compile and runtime error happens,
-    then the score is quiet large.
+    then the score is zero.
     """
-    if target == "CUDA":
-        time_ms = perf_bang.benchmark(file_name)
-    elif target == "BANG":
-        time_ms = perf_bang.benchmark(file_name)
-    elif target == "DL Boost":
-        time_ms = perf_dlboost.benchmark(file_name)
-    if time_ms is None:
+    try:
+        if target == "CUDA":
+            time_ms = perf_bang.benchmark(file_name)
+        elif target == "BANG":
+            time_ms = perf_bang.benchmark(file_name)
+        elif target == "DL Boost":
+            time_ms = perf_dlboost.benchmark(file_name)
+        return GFLOPS / (time_ms / 1e3)
+    except BaseException:
         return 0.0
-    return GFLOPS / (time_ms / 1e3)
 
 
 # 使用一个辅助函数选择对应的 Action
@@ -87,10 +89,21 @@ class FalconGo:
             code = f.read()
             f.close()
         for action in actions:
-            code = action(code)
-        with open(self.file_name, "w", encoding="utf-8") as f:
+            code = action(
+                self.file_name,
+                code,
+                self.source_platform,
+                self.target_platform,
+            )
+
+        target, file_type = get_target(code)
+
+        with open(
+            self.file_name.split(".")[0] + file_type, "w", encoding="utf-8"
+        ) as f:
             f.write(code)
-        score = objective(self.file_name, self.target)
+
+        score = objective(self.file_name, target)
         return code, score
 
     @jit

@@ -3,6 +3,8 @@ import re
 import shutil
 import subprocess
 
+from falcon.util import get_target
+
 test_file_map = {
     "deformable": "benchmark/evaluation/{target}_test/test_deformable_attention.py",
     "layernorm": "benchmark/evaluation/{target}_test/test_layer_norm_cuda.py",
@@ -51,19 +53,13 @@ def unit_test(file_name, code):
         return False
 
     # 创建临时目录
-    tmp_dir = "./tmp"
+    tmp_dir = "tmp"
     os.makedirs(tmp_dir, exist_ok=True)
 
     # 去掉扩展名
     filename_no_ext, _ = os.path.splitext(file_name)
     # 判断文件类型并设置目标
-    if "__mlu_global" in code:
-        target, file_type = "mlu", ".mlu"
-    elif "__global__" in code:
-        target, file_type = "cuda", ".cu"
-    else:
-        target, file_type = "cpp", ".cpp"
-
+    target, file_type = get_target(code)
     # 生成目标文件名
     filename = filename_no_ext + file_type
     # 提取操作名称，并生成测试文件路径

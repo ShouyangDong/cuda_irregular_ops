@@ -2,7 +2,8 @@ import re
 
 
 def get_operation_content(code):
-    # Define the regex pattern to match the content inside parentheses following #pragma intrinsic
+    # Define the regex pattern to match the content inside parentheses
+    # following #pragma intrinsic
     pattern = r"#pragma\s+operation\(([^)]+)\)"
     # Find all matches in the given code (there might be multiple pragmas)
     matches = re.findall(pattern, code)
@@ -28,7 +29,8 @@ def replace_operation_with_intrinsic(code, op_pragma):
     # Iterate over each operation found in the code
     for op in op_list:
         op_name = op.split("(input")[0]
-        # Build the pragma search pattern to match the specific operation pragma
+        # Build the pragma search pattern to match the specific operation
+        # pragma
         pragma_pattern = re.escape(f"#pragma operation({op})")
         # Ensure the operation exists in the op_pragma dictionary
         if op_name not in op_pragma:
@@ -39,7 +41,8 @@ def replace_operation_with_intrinsic(code, op_pragma):
         # Get corresponding memory spaces from the op_pragma dictionary
         input_spaces = get_input_operand(op_pragma[op_name])
         output_spaces = get_output_operand(op_pragma[op_name])
-        # Ensure the input/output operand lists and spaces have matching lengths
+        # Ensure the input/output operand lists and spaces have matching
+        # lengths
         if len(input_operands) != len(input_spaces):
             raise ValueError(
                 f"Input operands and memory spaces length mismatch for operation '{op_name}' "
@@ -53,13 +56,16 @@ def replace_operation_with_intrinsic(code, op_pragma):
             )
         # Create the space map by zipping operands and spaces
         input_map = {
-            operand: space for operand, space in zip(input_operands, input_spaces)
+            operand: space
+            for operand, space in zip(input_operands, input_spaces)
         }
         output_map = {
-            operand: space for operand, space in zip(output_operands, output_spaces)
+            operand: space
+            for operand, space in zip(output_operands, output_spaces)
         }
         space_map = {"input": input_map, "output": output_map}
-        # Replace the matching pragma with the corresponding value from op_pragma
+        # Replace the matching pragma with the corresponding value from
+        # op_pragma
         code = re.sub(pragma_pattern, op_pragma[op_name], code)
         # Append the space map for this operation
         space_maps.append(space_map)

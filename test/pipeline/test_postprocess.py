@@ -24,7 +24,10 @@ def falcon_postprocess_pipeline(code, file_name, target):
         op_pragma = {}
         if target == "BANG":
             op_pragma = json.load(
-                open("./falcon/documents/operation_bang_C_instruction_map.json", "r")
+                open(
+                    "./falcon/documents/operation_bang_C_instruction_map.json",
+                    "r",
+                )
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
         cache_code = run_cache_process(code, space_maps)
@@ -55,7 +58,9 @@ if __name__ == "__main__":
     }
     """
     cuda_file_name = "./add_4_4_128_128."
-    code = falcon_postprocess_pipeline(code, cuda_file_name + "mlu", target="BANG")
+    code = falcon_postprocess_pipeline(
+        code, cuda_file_name + "mlu", target="BANG"
+    )
     print(code)
 
     # code = falcon_postprocess_pipeline(code, cuda_file_name + "cu", target="CUDA")

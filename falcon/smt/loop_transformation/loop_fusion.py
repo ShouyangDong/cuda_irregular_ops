@@ -1,7 +1,7 @@
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.simplification import simplify_code
-from falcon.smt.util import NodeTransformer
+from falcon.util import NodeTransformer
 
 
 class LoopNestFusionVisitor(NodeTransformer):

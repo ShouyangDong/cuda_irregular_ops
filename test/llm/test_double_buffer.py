@@ -16,13 +16,13 @@ openai.api_base = "https://api.keya.pw/v1"
 def double_buffer(code):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     Here is the introduction of double buffer: {DOUBLE_BUFFER_PROMPT}
     Please optimize the code snippet below #pragma with double buffer pipeline.
 
-    {code} 
-    
-    
+    {code}
+
+
     accordingt to the introduction of double buffer.
 
     {DOUBLE_BUFFER_DEMO}

@@ -4,8 +4,8 @@ from pycparser import c_ast, c_generator, c_parser
 
 from falcon.buffer_inline import ast_buffer_inline
 from falcon.simplification import simplify_code
-from falcon.smt.util import NodeTransformer, remove_target_prefix
 from falcon.stmt_simplification import ast_stmt_simplification
+from falcon.util import NodeTransformer, remove_target_prefix
 
 file_name = "falcon/documents/op_tensorization.json"
 

@@ -3,7 +3,9 @@ import re
 
 import openai
 
-from falcon.src.pre_processing.preprocessing_prompt import DETENSORIZATION_PROMPT_BANG
+from falcon.src.pre_processing.preprocessing_prompt import (
+    DETENSORIZATION_PROMPT_BANG,
+)
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
@@ -14,10 +16,10 @@ openai.api_base = "https://api.keya.pw/v1"
 def detensorization(op, code, document):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     Here is the introduction of Detensorization: {DETENSORIZATION_PROMPT_BANG}
     Please transform the instruction {op} in following code into sequential for loop.
-    
+
     {code}
 
     accordingt to the description of tinstruction.

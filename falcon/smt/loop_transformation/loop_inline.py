@@ -1,6 +1,6 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import NodeTransformer
+from falcon.util import NodeTransformer
 
 
 class LoopMerger(NodeTransformer):

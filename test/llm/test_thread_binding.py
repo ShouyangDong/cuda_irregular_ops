@@ -18,15 +18,14 @@ openai.api_base = "https://api.keya.pw/v1"
 def run_thread_binding(code, target):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     {THREAD_BINDING_PROMPT}
-    
+
     Please return the output kernel function without any additional information.
     """
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_demo = None
-    vairables = None
     THREAD_BINDING_PROMPT = None
     if target == "CUDA":
         prompt_demo = THREAD_BINDING_DEMO_CUDA
@@ -58,7 +57,7 @@ if __name__ == "__main__":
         int dim2 = 4;
         int dim3 = 4;
         int dim4 = 64;
-        
+
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim2; j++) {
                 for (int k = 0; k < dim3; k++) {

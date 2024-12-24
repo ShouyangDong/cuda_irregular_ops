@@ -30,7 +30,7 @@ def run_transcompile_code(file_name, source, target):
     if source in ["BANG"]:
         try:
             modi_code = run_detensorization(code, source)
-        except:
+        except BaseException:
             modi_code = None
 
         if not unit_test(file_name, modi_code):

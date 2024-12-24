@@ -11,7 +11,8 @@ int factorial(int result) {
 """
 
 
-# Custom visitor class to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+# Custom visitor class to split 'for' loops with loop count 10 into 2
+# loops with counts 2 and 5
 class SplitForLoopVisitor(c_ast.NodeVisitor):
     def __init__(self, axis_name, factor):
         self.axis_name = axis_name
@@ -43,7 +44,9 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 c_ast.ID(self.axis_name + "_in"),
                 c_ast.Constant("int", node.cond.right.value),
             )
-            next_node = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
+            next_node = c_ast.UnaryOp(
+                node.next.op, c_ast.ID(self.axis_name + "_in")
+            )
 
             inner_loop = c_ast.For(
                 init=init_node, cond=cond_node, next=next_node, stmt=node.stmt
@@ -69,7 +72,9 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 c_ast.ID(self.axis_name + "_out"),
                 c_ast.Constant("int", str(org_extent // self.factor)),
             )
-            node.next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_out"))
+            node.next = c_ast.UnaryOp(
+                node.next.op, c_ast.ID(self.axis_name + "_out")
+            )
             node.stmt = inner_loop
 
     def visit_ID(self, node):
@@ -94,6 +99,7 @@ print(generator.visit(ast))
 # Custom visitor instance
 visitor = SplitForLoopVisitor("i", factor=2)
 
-# Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+# Visit the AST to split 'for' loops with loop count 10 into 2 loops with
+# counts 2 and 5
 visitor.visit(ast)
 print(generator.visit(ast))
