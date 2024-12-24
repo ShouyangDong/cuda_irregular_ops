@@ -59,7 +59,8 @@ def add_memory_prefix(code):
     # Regex pattern to match the variable declarations
     pattern = r"\bfloat\s+(\w+_(Nram|Wram|nram|wram|Gdram))\b"
 
-    # Function to replace matched float declarations with the appropriate prefix
+    # Function to replace matched float declarations with the appropriate
+    # prefix
     def replacer(match):
         var_name = match.group(1)
         suffix = match.group(2)
@@ -108,6 +109,8 @@ def remove_target_prefix(code, target):
     if target in patterns:
         for pattern, replacement, *flags in patterns[target]:
             # 处理可选的标志 `flags`
-            code = re.sub(pattern, replacement, code, flags=flags[0] if flags else 0)
+            code = re.sub(
+                pattern, replacement, code, flags=flags[0] if flags else 0
+            )
 
     return code

@@ -1,6 +1,10 @@
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import NodeTransformer, add_memory_prefix, remove_target_prefix
+from falcon.smt.util import (
+    NodeTransformer,
+    add_memory_prefix,
+    remove_target_prefix,
+)
 
 
 class LoopVisitor(c_ast.NodeVisitor):
@@ -121,14 +125,16 @@ class CacheTransformationVisitor(NodeTransformer):
         for var_name, location in self.space_map[0]["input"].items():
             inputs.append(
                 c_ast.ArrayRef(
-                    name=c_ast.ID(name=f"{var_name}_{location}"), subscript=index
+                    name=c_ast.ID(name=f"{var_name}_{location}"),
+                    subscript=index,
                 )
             )
         ouptuts = []
         for var_name, location in self.space_map[0]["output"].items():
             ouptuts.append(
                 c_ast.ArrayRef(
-                    name=c_ast.ID(name=f"{var_name}_{location}"), subscript=index
+                    name=c_ast.ID(name=f"{var_name}_{location}"),
+                    subscript=index,
                 )
             )
 
@@ -138,7 +144,9 @@ class CacheTransformationVisitor(NodeTransformer):
         left_value = ouptuts[0]
         right_value = None
         if isinstance(right, c_ast.BinaryOp):
-            right_value = c_ast.BinaryOp(op=right.op, left=inputs[0], right=inputs[1])
+            right_value = c_ast.BinaryOp(
+                op=right.op, left=inputs[0], right=inputs[1]
+            )
 
         final_node = c_ast.For(
             init=for_node.init,
@@ -146,7 +154,9 @@ class CacheTransformationVisitor(NodeTransformer):
             next=for_node.next,
             stmt=c_ast.Compound(
                 block_items=[
-                    c_ast.Assignment(op="=", lvalue=left_value, rvalue=right_value)
+                    c_ast.Assignment(
+                        op="=", lvalue=left_value, rvalue=right_value
+                    )
                 ]
             ),
         )
@@ -217,7 +227,9 @@ class CacheTransformationVisitor(NodeTransformer):
                     c_ast.Assignment(
                         op="=",
                         lvalue=index_expr,
-                        rvalue=c_ast.ArrayRef(name=c_ast.ID(name=src), subscript=index),
+                        rvalue=c_ast.ArrayRef(
+                            name=c_ast.ID(name=src), subscript=index
+                        ),
                     )
                 ]
             ),
@@ -233,7 +245,9 @@ def ast_auto_cache(code, space_map, target="BANG"):
     # 进行缓存加载和写回插入
     cache_visitor = LoopVisitor()
     cache_visitor.visit(ast)
-    transformer = CacheTransformationVisitor(space_map, cache_visitor.cache_size)
+    transformer = CacheTransformationVisitor(
+        space_map, cache_visitor.cache_size
+    )
     ast = transformer.visit(ast)
 
     # 输出最终代码
@@ -256,7 +270,9 @@ if __name__ == "__main__":
     }
     """
 
-    space_map = [{"input": {"A": "Nram", "B": "Nram"}, "output": {"C": "Nram"}}]
+    space_map = [
+        {"input": {"A": "Nram", "B": "Nram"}, "output": {"C": "Nram"}}
+    ]
     output_code = ast_auto_cache(code, space_map)
 
     print(output_code)

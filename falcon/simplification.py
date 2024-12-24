@@ -17,14 +17,17 @@ class SimplifyConstants(NodeTransformer):
         if isinstance(node.cond, c_ast.BinaryOp) and node.cond.op == "<":
             if isinstance(node.cond.right, c_ast.BinaryOp):
                 # 尝试折叠常量表达式，例如 256 * 1024
-                if isinstance(node.cond.right.left, c_ast.Constant) and isinstance(
-                    node.cond.right.right, c_ast.Constant
-                ):
+                if isinstance(
+                    node.cond.right.left, c_ast.Constant
+                ) and isinstance(node.cond.right.right, c_ast.Constant):
                     result = self.visit_BinaryOp(node.cond.right)
                     node.cond.right = result
 
         # 处理for循环中的if语句，尝试将其合并到for循环的条件中
-        if isinstance(node.stmt, c_ast.Compound) and len(node.stmt.block_items) == 1:
+        if (
+            isinstance(node.stmt, c_ast.Compound)
+            and len(node.stmt.block_items) == 1
+        ):
             if isinstance(node.stmt.block_items[0], c_ast.If):
                 if_node = node.stmt.block_items[0]
                 if (
@@ -34,7 +37,8 @@ class SimplifyConstants(NodeTransformer):
                     and if_node.cond.left.name == node.init.decls[0].name
                     and isinstance(if_node.cond.right, c_ast.Constant)
                     and isinstance(node.cond.right, c_ast.Constant)
-                    and int(if_node.cond.right.value) <= int(node.cond.right.value)
+                    and int(if_node.cond.right.value)
+                    <= int(node.cond.right.value)
                 ):
                     # 合并if条件到for循环中
                     node.cond.right = if_node.cond.right
@@ -63,7 +67,9 @@ class SimplifyConstants(NodeTransformer):
                 elif node.op == "-":
                     result = left_val - right_val
                 elif node.op == "/":
-                    result = left_val // right_val if right_val != 0 else 0  # 避免除零
+                    result = (
+                        left_val // right_val if right_val != 0 else 0
+                    )  # 避免除零
                 return c_ast.Constant("int", value=str(result))
 
         return self.generic_visit(node)

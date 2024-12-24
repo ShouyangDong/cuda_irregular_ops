@@ -23,15 +23,15 @@ openai.api_base = "https://api.keya.pw/v1"
 def run_loop_recovery(code, target):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     {TENSORIZATION_PROMPT}
-    
-    Example: 
+
+    Example:
     {LOOP_RECOVERY_DEMO}
 
     Input CUDA Code:
     {code}
-    Output C++ Code: 
+    Output C++ Code:
 
     Please return the output kernel function without any additional information.
     """
@@ -67,10 +67,10 @@ def run_loop_recovery(code, target):
 def detensorization(op, code, document):
     PROMPT = """
     {SYSTEM_PROMPT}
-    
+
     Here is the introduction of Detensorization: {DETENSORIZATION_PROMPT_BANG}
     Please transform the instruction {op} in following code into sequential for loop.
-    
+
     {code}
 
     accordingt to the description of tinstruction.

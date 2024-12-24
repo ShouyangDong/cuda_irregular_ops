@@ -24,7 +24,9 @@ flags.DEFINE_integer(
 )
 flags.DEFINE_integer("max_depth", 5, "The maximum search depth.")
 flags.DEFINE_string(
-    "output_file", "./tvm_search_tree.png", "The output file for the visualization."
+    "output_file",
+    "./tvm_search_tree.png",
+    "The output file for the visualization.",
 )
 
 jax.config.update("jax_disable_jit", True)
@@ -39,7 +41,9 @@ def get_recurrent_fn(env):
 
     def recurrent_fn(params, key, actions, env_states):
         key, subkey = jax.random.split(key)
-        env_states, obs, rewards, terminals, _ = batch_step(actions, env_states)
+        env_states, obs, rewards, terminals, _ = batch_step(
+            actions, env_states
+        )
 
         discount = jnp.ones_like(rewards)
         prior_logits = jax.random.uniform(subkey, shape=[BS, env.action_len])
@@ -55,9 +59,12 @@ def get_recurrent_fn(env):
     return recurrent_fn
 
 
-def _run_demo(rng_key: chex.PRNGKey):
+def _run_demo(
+    rng_key: chex.PRNGKey,
+    file_name: str = "benchmark/data/mlu_code_test/add_18_128.mlu",
+):
     """Runs a search algorithm on a toy environment."""
-    env = build_env()
+    env = build_env(file_name)
     batch_reset = vmap(env.reset)
 
     key, subkey = jax.random.split(rng_key)
@@ -69,14 +76,14 @@ def _run_demo(rng_key: chex.PRNGKey):
     recurrent_fn = get_recurrent_fn(env)
 
     # Using optimistic initial values to encourage exploration.
-    values = jnp.full([env.optimizer_len], 0.1)
+    jnp.full([env.optimizer_len], 0.1)
     # The prior policies for each state.
-    root_state = 0
 
     key, logits_rng = jax.random.split(key)
     rng_key, logits_rng, q_rng, search_rng = jax.random.split(key, 4)
     prior_logits = (
-        jax.random.normal(logits_rng, shape=[batch_size, num_actions]) * 0.01 + 0.5
+        jax.random.normal(logits_rng, shape=[batch_size, num_actions]) * 0.01
+        + 0.5
     )
 
     qvalues = jax.random.uniform(q_rng, shape=prior_logits.shape)
@@ -108,7 +115,9 @@ def main(_):
     policy_output = _run_demo(rng_key)
     batch_index = 0
     selected_action = policy_output.action[batch_index]
-    q_value = policy_output.search_tree.summary().qvalues[batch_index, selected_action]
+    q_value = policy_output.search_tree.summary().qvalues[
+        batch_index, selected_action
+    ]
     print("Selected action:", selected_action)
     # To estimate the value of the root state, use the Q-value of the selected
     # action. The Q-value is not affected by the exploration at the root node.

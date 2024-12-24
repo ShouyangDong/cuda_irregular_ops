@@ -43,18 +43,18 @@ for (int i = 0; i < 300; i++) {
 ```cpp
 for (int i_j_fuse = 0; i_j_fuse < 300 * 300; i_j_fuse++) {
     a[i_j_fuse] = b[i_j_fuse] + 4;
-} 
+}
 """
 
 LOOP_REORDER_PROMPT = """
 Loop reorder
 
-Function Overview: 
-`LOOP_REORDER` is an optimization technique that reorders the sequence of loops in nested loops structures. 
-The primary goal of reordering loops is to enhance data locality and improve cache utilization, 
-leading to better performance on hardware such as CPUs, GPUs, or other accelerators. 
-By modifying the loop order, this technique can reduce cache misses and take advantage of memory hierarchies, 
-resulting in faster execution for data-intensive applications. 
+Function Overview:
+`LOOP_REORDER` is an optimization technique that reorders the sequence of loops in nested loops structures.
+The primary goal of reordering loops is to enhance data locality and improve cache utilization,
+leading to better performance on hardware such as CPUs, GPUs, or other accelerators.
+By modifying the loop order, this technique can reduce cache misses and take advantage of memory hierarchies,
+resulting in faster execution for data-intensive applications.
 
 Application Scenario:
 - In memory-bound applications, splitting a loop can improve data locality, reducing cache misses by working on smaller chunks of data.
@@ -103,7 +103,7 @@ for (int j = 0; j < M; j++) {
 """
 
 LOOP_SPLIT_PROMPT = """
-Please split the following loop based on the parameter specified in the `#pragma loop_split` directive. 
+Please split the following loop based on the parameter specified in the `#pragma loop_split` directive.
 
 ### Original Code:
 ```cpp
@@ -117,7 +117,7 @@ for (int i = 0; i < 60; i++) {
 1. **Identify the Split Factor**: The split factor is specified as `4`, indicating that the loop variable `i` should be split into 4 outer iterations.
 2. **Calculate the Iteration Range**: Given that the original loop iterates from `0` to `59`, the outer loop should iterate 4 times, and the inner loop should cover the corresponding range of iterations. Each outer iteration will cover `60 / 4 = 15` iterations of the inner loop.
 
-3. **Create the New Loop Structure**: The outer loop will iterate over `k` from `0` to `3`, and the inner loop will iterate over `j` from `0` to `14`. 
+3. **Create the New Loop Structure**: The outer loop will iterate over `k` from `0` to `3`, and the inner loop will iterate over `j` from `0` to `14`.
 
 ### After Transformation:
 ```cpp
@@ -154,7 +154,7 @@ for (int k = 0; k < 4; k++) {
     for (int j = 0; j < 15; j++) {
         if ((k * 15 + j) < 60) {
             A[k * 15 + j] = B[k * 15 + j] * C[k * 15 + j];
-        } 
+        }
     }
 }
 
@@ -162,15 +162,15 @@ for (int k = 0; k < 4; k++) {
 """
 
 
-TENSOR_CONTRACTION = """ 
+TENSOR_CONTRACTION = """
 Tensor Contraction
 
-Function Overview:  
-Tensor contraction is a technique used to merge two loops that share the same size and stride into a single loop. 
-By combining these loops, the overall computational workload can be reduced, 
-and memory access patterns can be optimized, leading to improved performance in tensor computations. 
+Function Overview:
+Tensor contraction is a technique used to merge two loops that share the same size and stride into a single loop.
+By combining these loops, the overall computational workload can be reduced,
+and memory access patterns can be optimized, leading to improved performance in tensor computations.
 
-Application Scenario:  
+Application Scenario:
 Tensor contraction is commonly applied in scenarios where two or more loops operate over dimensions with identical sizes and memory strides. This is particularly useful in optimizing tensor operations in deep learning models, such as matrix multiplications, convolutions, and backpropagation. By reducing the number of loops, tensor contraction helps minimize the overhead of loop management and improves the efficiency of data accesses, which is critical in handling large-scale tensor computations in fields like scientific computing, machine learning, and quantum physics.
 """
 

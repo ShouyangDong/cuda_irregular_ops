@@ -71,7 +71,9 @@ def unit_test(file_name, code):
 
     if target == "cuda":
         with open(
-            os.path.join("benchmark/data/cuda_code_test", os.path.basename(filename)),
+            os.path.join(
+                "benchmark/data/cuda_code_test", os.path.basename(filename)
+            ),
             "r",
         ) as f:
             host_code = f.read()
@@ -81,7 +83,9 @@ def unit_test(file_name, code):
         code = device_code + host_code
 
     elif target == "cpp":
-        code = code.replace("void " + op_name + "(", "void " + op_name + "_kernel(")
+        code = code.replace(
+            "void " + op_name + "(", "void " + op_name + "_kernel("
+        )
         code = 'extern "C" ' + code if "extern" not in code else code
 
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))

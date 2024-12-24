@@ -24,12 +24,14 @@ class InlineTransformer(NodeTransformer):
                 prev_stmt = new_block_items[-1]
 
                 # 检查是否可以内联
-                if isinstance(prev_stmt, c_ast.Assignment) and self.is_dependency(
-                    prev_stmt, stmt
-                ):
+                if isinstance(
+                    prev_stmt, c_ast.Assignment
+                ) and self.is_dependency(prev_stmt, stmt):
                     # 内联当前语句到前一个语句
                     inlined_stmt = self.create_inlined_stmt(prev_stmt, stmt)
-                    new_block_items[-1] = inlined_stmt  # 更新最后一个语句为内联后的语句
+                    new_block_items[-1] = (
+                        inlined_stmt  # 更新最后一个语句为内联后的语句
+                    )
 
                     # 继续递归内联
                     new_block_items = self.inline_statements(new_block_items)
@@ -47,9 +49,9 @@ class InlineTransformer(NodeTransformer):
     def is_dependency(self, stmt1, stmt2):
         """检查 stmt1 的输出是否是 stmt2 的输入"""
         # 确认 stmt1 的左值是否被 stmt2 右值引用
-        return self.nodes_equal(stmt1.lvalue, stmt2.rvalue) or self.contains_reference(
-            stmt2.rvalue, stmt1.lvalue
-        )
+        return self.nodes_equal(
+            stmt1.lvalue, stmt2.rvalue
+        ) or self.contains_reference(stmt2.rvalue, stmt1.lvalue)
 
     def create_inlined_stmt(self, stmt1, stmt2):
         """创建一个新的内联语句，将 stmt2 的右值更新为 stmt1 的左值"""
@@ -69,7 +71,9 @@ class InlineTransformer(NodeTransformer):
         if self.nodes_equal(node, target):
             return replacement
         for child_name, child in node.children():
-            setattr(node, child_name, self.replace_node(child, target, replacement))
+            setattr(
+                node, child_name, self.replace_node(child, target, replacement)
+            )
         return node
 
     def contains_reference(self, node, target):
@@ -99,13 +103,17 @@ class UnusedMemoryRemover(NodeTransformer):
         for i in range(len(block_items)):
             stmt = block_items[i]
             # 如果是内存分配语句，并且其变量未被后续语句引用，则删除该语句
-            if isinstance(stmt, c_ast.Decl) and isinstance(stmt.type, c_ast.ArrayDecl):
+            if isinstance(stmt, c_ast.Decl) and isinstance(
+                stmt.type, c_ast.ArrayDecl
+            ):
                 if not any(
                     self.contains_reference(later_stmt, stmt.name)
                     for later_stmt in block_items[i + 1 :]
                 ):
                     continue  # 跳过未使用的内存分配语句
-            if isinstance(stmt, c_ast.Decl) and isinstance(stmt.type, c_ast.TypeDecl):
+            if isinstance(stmt, c_ast.Decl) and isinstance(
+                stmt.type, c_ast.TypeDecl
+            ):
                 if isinstance(stmt.type.type, c_ast.ArrayDecl):
                     if not any(
                         self.contains_reference(later_stmt, stmt.name)

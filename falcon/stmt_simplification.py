@@ -19,7 +19,9 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
                     int(node.cond.right.value) - 1
                 )
             elif node.cond.op == "<=":
-                self.loop_bounds[node.init.decls[0].name] = int(node.cond.right.value)
+                self.loop_bounds[node.init.decls[0].name] = int(
+                    node.cond.right.value
+                )
         return self.generic_visit(node)
 
     def visit_Compound(self, node):
@@ -85,7 +87,9 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
                 ):
                     # 合并 if 语句的主体内容
                     if node.block_items[i].iftrue:
-                        combined_body.extend(node.block_items[i].iftrue.block_items)
+                        combined_body.extend(
+                            node.block_items[i].iftrue.block_items
+                        )
                     i += 1  # 继续检查下一个节点
 
                 # 创建合并后的 if 语句
@@ -114,7 +118,8 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
             and loop1.init.__class__ == loop2.init.__class__
             and loop1.cond.__class__ == loop2.cond.__class__
             and loop1.next.__class__ == loop2.next.__class__
-            and loop1.cond.right.value == loop2.cond.right.value  # 确保范围一致
+            and loop1.cond.right.value
+            == loop2.cond.right.value  # 确保范围一致
             and loop1.cond.op == loop2.cond.op  # 确保操作符一致
         )
 
@@ -154,12 +159,17 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
 
     def is_condition_always_true(self, condition):
         # 只处理简单的 `<` 和 `<=` 情况
-        if isinstance(condition, c_ast.BinaryOp) and condition.op in ("<", "<="):
+        if isinstance(condition, c_ast.BinaryOp) and condition.op in (
+            "<",
+            "<=",
+        ):
             left, right = condition.left, condition.right
             # 判断右侧是否为一个常量
             if isinstance(right, c_ast.Constant):
                 # 检查左侧是否包含循环变量及范围，并确定条件恒真
-                return self.is_left_expression_in_bounds(left, int(right.value))
+                return self.is_left_expression_in_bounds(
+                    left, int(right.value)
+                )
         return False
 
     def is_left_expression_in_bounds(self, expr, bound):

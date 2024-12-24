@@ -31,7 +31,9 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
                         node.init = inner_loop.init
                         node.cond = inner_loop.cond
                         node.next = inner_loop.next
-                        node.stmt = c_ast.Compound(block_items=[new_inner_loop])
+                        node.stmt = c_ast.Compound(
+                            block_items=[new_inner_loop]
+                        )
 
 
 def ast_loop_reorder(c_code):

@@ -14,12 +14,16 @@ class LoopMerger(NodeTransformer):
             # Check if the statement is a `For` loop and can be merged
             if isinstance(stmt, c_ast.For) and i + 1 < len(node.block_items):
                 next_stmt = node.block_items[i + 1]
-                if isinstance(next_stmt, c_ast.For) and self.can_merge(stmt, next_stmt):
+                if isinstance(next_stmt, c_ast.For) and self.can_merge(
+                    stmt, next_stmt
+                ):
                     # Create merged loop body
                     new_body = c_ast.Compound(
                         stmt.stmt.block_items + next_stmt.stmt.block_items
                     )
-                    merged_loop = c_ast.For(stmt.init, stmt.cond, stmt.next, new_body)
+                    merged_loop = c_ast.For(
+                        stmt.init, stmt.cond, stmt.next, new_body
+                    )
                     merged_body.append(merged_loop)
                     i += 2  # Skip next loop, as it's merged
                     continue

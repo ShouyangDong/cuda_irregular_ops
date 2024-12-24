@@ -12,7 +12,10 @@ class LoopNestFusionVisitor(NodeTransformer):
 
     def visit_For(self, node):
         # 检查当前 for 循环是否包含嵌套的 for 循环
-        if isinstance(node.stmt, c_ast.Compound) and len(node.stmt.block_items) == 1:
+        if (
+            isinstance(node.stmt, c_ast.Compound)
+            and len(node.stmt.block_items) == 1
+        ):
             nested_loop = node.stmt.block_items[0]
             if isinstance(nested_loop, c_ast.For) and isinstance(
                 node.next, c_ast.UnaryOp
@@ -29,9 +32,7 @@ class LoopNestFusionVisitor(NodeTransformer):
                 self.inner_bound = nested_loop.cond.right.value
 
                 # 更新初始化部分，将变量名改为 i_j_fused
-                fused_name = (
-                    f"{node.init.decls[0].name}_{nested_loop.init.decls[0].name}_fused"
-                )
+                fused_name = f"{node.init.decls[0].name}_{nested_loop.init.decls[0].name}_fused"
                 node.init.decls[0].name = fused_name
                 node.init.decls[0].type.declname = fused_name
                 node.cond.left.name = fused_name
@@ -55,7 +56,9 @@ class LoopNestFusionVisitor(NodeTransformer):
                 and left.left.name == self.outer_var
             ):
                 # 替换为融合变量
-                fused_index = c_ast.ID(name=f"{self.outer_var}_{self.inner_var}_fused")
+                fused_index = c_ast.ID(
+                    name=f"{self.outer_var}_{self.inner_var}_fused"
+                )
                 return fused_index
         return self.generic_visit(node)
 
@@ -72,7 +75,9 @@ class LoopNestFusionVisitor(NodeTransformer):
                 and isinstance(right.right, c_ast.Constant)
                 and right.right.value == self.inner_bound
             ):
-                fused_index = c_ast.ID(name=f"{self.outer_var}_{self.inner_var}_fused")
+                fused_index = c_ast.ID(
+                    name=f"{self.outer_var}_{self.inner_var}_fused"
+                )
                 node.subscript = fused_index
                 node.name = node.name.left
             return node
@@ -87,7 +92,8 @@ class LoopNestFusionVisitor(NodeTransformer):
             right=c_ast.Constant(
                 type="int",
                 value=str(
-                    int(outer_loop.cond.right.value) * int(inner_loop.cond.right.value)
+                    int(outer_loop.cond.right.value)
+                    * int(inner_loop.cond.right.value)
                 ),
             ),
         )

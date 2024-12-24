@@ -1,3 +1,4 @@
+import os
 import tempfile
 from functools import partial
 
@@ -6,7 +7,7 @@ import jax.numpy as jnp
 import numpy as np
 from jax import jit, lax
 
-from benchmark.perf import perf_bang, perf_cuda
+from benchmark.perf import perf_bang, perf_dlboost
 from falcon.mcts.actions import actions as ActionSpace
 
 GFLOPS = 64 * 1280 * 2 / 1e9
@@ -22,7 +23,7 @@ def objective(file_name, target):
     elif target == "BANG":
         time_ms = perf_bang.benchmark(file_name)
     elif target == "DL Boost":
-        time_ms = peft_dlboost.benchmark(file_name)
+        time_ms = perf_dlboost.benchmark(file_name)
     if time_ms is None:
         return 0.0
     return GFLOPS / (time_ms / 1e3)
@@ -38,11 +39,13 @@ def dynamic_action_selection(cur_action_ids):
     return jx.vmap(get_action_from_space)(cur_action_ids)
 
 
-class TvmGo:
+class FalconGo:
     def __init__(
         self,
         file_name,
-        target,
+        op_name,
+        source_platform,
+        target_platform,
         action_len=A_Length,
         optimizer_len=11,
         goal_reward=False,
@@ -50,11 +53,13 @@ class TvmGo:
     ):
         self.timeout = timeout
         self.file_name = file_name
+        self.op_name = op_name
+        self.source_platform = source_platform
+        self.target_platform = target_platform
         self.action_len = action_len
         self.optimizer_len = optimizer_len
         self.best_reward = 0.01
         self.best_optimizer_ids = None
-        self.target = target
 
     def pick_best_annotation(self, actions):
         with tempfile.TemporaryDirectory() as work_dir:
@@ -78,10 +83,13 @@ class TvmGo:
         with specific parameters to apply the given scheduling rule (`action`) to the module.
         The function returns a new `ProgramState` object, which represents the new program
         state after applying the action."""
-        code = self.pick_best_annotation(actions)
+        with open(self.file_name, "r") as f:
+            code = f.read()
+            f.close()
+        for action in actions:
+            code = action(code)
         with open(self.file_name, "w", encoding="utf-8") as f:
-                f.write(code)
-
+            f.write(code)
         score = objective(self.file_name, self.target)
         return code, score
 
@@ -93,24 +101,27 @@ class TvmGo:
         # -- depth: 访问深度
         optimize_grid, trajectory, depth = env_state
         trajectory = trajectory.at[depth].set(action_id)
-        cur_action_ids = lax.dynamic_slice(trajectory, (0,), (depth.val[0] + 1,))
+        cur_action_ids = lax.dynamic_slice(
+            trajectory, (0,), (depth.val[0] + 1,)
+        )
         cur_actions = [
-            ActionSpace[_i] for _i in jx.device_get(cur_action_ids.val[0]).tolist()
+            ActionSpace[_i]
+            for _i in jx.device_get(cur_action_ids.val[0]).tolist()
         ]
 
-        try:
-            _tvm_space, reward = self.perform_action(cur_actions)
+        # try:
+        _tvm_space, reward = self.perform_action(cur_actions)
 
-            if reward > self.best_reward:
-                self.best_reward = reward
-                self.best_optimizer_ids = cur_action_ids.val[0].tolist()
+        if reward > self.best_reward:
+            self.best_reward = reward
+            self.best_optimizer_ids = cur_action_ids.val[0].tolist()
 
-            print(
-                f""" Action: {cur_action_ids.val[0].tolist()} Reward: {reward} Best Reward: {self.best_reward} Best Reward IDs: {self.best_optimizer_ids}"""
-            )
+        print(
+            f""" Action: {cur_action_ids.val[0].tolist()} Reward: {reward} Best Reward: {self.best_reward} Best Reward IDs: {self.best_optimizer_ids}"""
+        )
 
-        except:
-            reward = 0.0
+        # except:
+        #     reward = 0.0
 
         optimize_grid.at[depth, action_id].set(True)
         # Treminated if we reach the goal
@@ -127,7 +138,9 @@ class TvmGo:
 
     @partial(jit, static_argnums=(0,))
     def reset(self, key):
-        optimize_grid = jnp.zeros([self.action_len, self.optimizer_len], dtype=bool)
+        optimize_grid = jnp.zeros(
+            [self.action_len, self.optimizer_len], dtype=bool
+        )
         trajectory = jnp.zeros(self.optimizer_len, dtype=int)
 
         depth = 0
@@ -149,14 +162,16 @@ def ref_program(x):
     return e_x / np.sum(e_x, axis=-1, keepdims=True)
 
 
-def build_env():
+def build_env(file_name, source_platform="BANG", target_platform="DL Boost"):
     action_len = len(ActionSpace)
+    base_name = os.path.basename(file_name)
+    op_name = base_name.split("_")[0]
     optimizer_len = 8
-    tvm_env = TvmGo(
+    tvm_env = FalconGo(
         file_name,
-        name,
-        target,
-        inputs,
+        op_name,
+        source_platform,
+        target_platform,
         action_len=action_len,
         optimizer_len=optimizer_len,
     )
@@ -164,12 +179,11 @@ def build_env():
 
 
 def _test():
-    file_name = "benchmark/data/mlu_code_test/add_18_128.mlu"
     source = "BANG"
-    target = "BANG"
+    target = "DL Boost"
     action_len = len(ActionSpace)
     optimizer_len = 8
-    tvm_env = TvmGo(
+    tvm_env = FalconGo(
         name,
         source,
         target,

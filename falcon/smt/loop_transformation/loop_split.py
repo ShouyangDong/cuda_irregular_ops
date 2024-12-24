@@ -25,15 +25,22 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
                 continue
 
             # 检查是否是 `#pragma loop_split(<factor>)`
-            if isinstance(subnode, c_ast.Pragma) and "loop_split" in subnode.string:
+            if (
+                isinstance(subnode, c_ast.Pragma)
+                and "loop_split" in subnode.string
+            ):
                 # 提取因子值
                 pragma_content = subnode.string.strip()
                 self.factor = int(
-                    re.search(r"\((?:factor=)?(\d+)\)", pragma_content).group(1)
+                    re.search(r"\((?:factor=)?(\d+)\)", pragma_content).group(
+                        1
+                    )
                 )
 
                 # 检查下一节点是否为 `for` 循环
-                if index + 1 < len(blocks) and isinstance(blocks[index + 1], c_ast.For):
+                if index + 1 < len(blocks) and isinstance(
+                    blocks[index + 1], c_ast.For
+                ):
                     self.axis_name = blocks[index + 1].init.decls[0].name
                     # 应用循环拆分
                     split_for_loop = self.split_for_loop(blocks[index + 1])
@@ -79,7 +86,9 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
             c_ast.ID(self.axis_name + "_in"),
             c_ast.Constant("int", str(self.org_extent // self.factor)),
         )
-        inner_next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_in"))
+        inner_next = c_ast.UnaryOp(
+            node.next.op, c_ast.ID(self.axis_name + "_in")
+        )
 
         # 内层循环的 `for` 结构
         inner_for = c_ast.For(
@@ -113,7 +122,9 @@ class SplitForLoopVisitor(c_ast.NodeVisitor):
             c_ast.ID(self.axis_name + "_out"),
             c_ast.Constant("int", str(outer_extent)),
         )
-        outer_next = c_ast.UnaryOp(node.next.op, c_ast.ID(self.axis_name + "_out"))
+        outer_next = c_ast.UnaryOp(
+            node.next.op, c_ast.ID(self.axis_name + "_out")
+        )
 
         # 外层循环的 `for` 结构
         outer_for = c_ast.For(
@@ -148,7 +159,8 @@ def ast_loop_split(code):
     generator = c_generator.CGenerator()
     # Custom visitor instance
     visitor = SplitForLoopVisitor()
-    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with counts 2 and 5
+    # Visit the AST to split 'for' loops with loop count 10 into 2 loops with
+    # counts 2 and 5
     visitor.visit(ast)
     return generator.visit(ast)
 
@@ -185,7 +197,7 @@ if __name__ == "__main__":
     for (int threadIdxx = 0; threadIdxx < 5; ++threadIdxx)
     {
         float maxVal = A[threadIdxx * 128];
-        
+
         #pragma loop_split(factor=4)
         for (int i = 1; i < 128; ++i)
         {

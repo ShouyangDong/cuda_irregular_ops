@@ -2,9 +2,9 @@ DETENSORIZATION_PROMPT_BANG = """
 Detensorize
 
 Function Overview:
-`DETENSORIZE` refers to the process of transforming operations that are expressed using SIMD (Single Instruction, Multiple Data) 
-or vectorized instructions into scalar operations, typically implemented as sequential `for` loops. 
-This conversion allows code to be more portable across different hardware architectures, 
+`DETENSORIZE` refers to the process of transforming operations that are expressed using SIMD (Single Instruction, Multiple Data)
+or vectorized instructions into scalar operations, typically implemented as sequential `for` loops.
+This conversion allows code to be more portable across different hardware architectures,
 
 Application Scenario:
 - When targeting multiple hardware platforms with varying SIMD support, such as CPUs, GPUs, or FPGAs, `DETENSORIZE` enables developers to write a single version of the code that runs efficiently across all platforms by removing reliance on SIMD.
@@ -34,7 +34,7 @@ LOOP_RECOVERY_PROMPT_CUDA = """
 Loop recovery
 
 Function Overview:
-Loop recovery is designed to convert CUDA C code that utilizes GPU thread indexing (using `threadIdx`, `blockIdx`, `blockDim`, and `gridDim`) 
+Loop recovery is designed to convert CUDA C code that utilizes GPU thread indexing (using `threadIdx`, `blockIdx`, `blockDim`, and `gridDim`)
 into standard C++ code with `for` loop structures. The goal is to remove CUDA-specific parallelism while preserving the logical flow and structure of the code.
 
 Application Scenario:
@@ -92,7 +92,7 @@ LOOP_RECOVERY_PROMPT_BANG = """
 Loop recovery
 
 Function Overview:
-This prompt is designed to convert MLU multi-core indexing logic (with `clusterId` and `coreId`) into standard C++ `for` loop structures. 
+This prompt is designed to convert MLU multi-core indexing logic (with `clusterId` and `coreId`) into standard C++ `for` loop structures.
 The goal is to simulate the multi-core execution on a CPU using nested `for` loops, while preserving the logic for executing across different clusters and cores.
 
 Application Scenario:

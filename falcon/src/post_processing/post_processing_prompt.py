@@ -1,18 +1,18 @@
 CACHE_READ_PROMPT = """
-You are tasked with performing an optimization on C code that mimics the effect of `cache_read` from TVM in C for loops. 
-The goal is to buffer {buffer} into faster {CACHE_NAME} memory and adjust the loop accesses accordingly. 
+You are tasked with performing an optimization on C code that mimics the effect of `cache_read` from TVM in C for loops.
+The goal is to buffer {buffer} into faster {CACHE_NAME} memory and adjust the loop accesses accordingly.
 
 
 ### Steps for conversion:
 1. Identify repeated memory reads of {buffer} within the C code's for loops.
 2. **Cache these reads** {buffer} into a {CACHE_NAME} buffer.
 3. **Adjust the loop** to read from the cached buffer instead of the original memory location.
-4. **Preserve any existing cache reads** from other buffers (e.g., if `A` is already cached, do not overwrite it). 
+4. **Preserve any existing cache reads** from other buffers (e.g., if `A` is already cached, do not overwrite it).
 If both buffers (e.g., `A` and `B`) need to be cached, **perform cache reads for both** buffers into separate buffers.
 5. Output the transformed C code.
 
 ### Input:
-The input will be C for loop code that accesses buffer {buffer} repeatedly. The loop bounds should be retained as per the input code. 
+The input will be C for loop code that accesses buffer {buffer} repeatedly. The loop bounds should be retained as per the input code.
 The transformation must not assume a fixed loop boundary, but instead, retain the original boundary in the output.
 Additionally, existing cache reads should not be removed.
 
@@ -78,21 +78,21 @@ for (int j = 0; j < 64; j++) {
 """
 
 CACHE_WRITE_PROMPT = """
-Cache Write： 
-You are tasked with performing an optimization on C code that mimics the effect of `cache_write` from TVM in C for loops. 
-The goal is to buffer intermediate results in {CACHE_NAME} memory (e.g., a temporary buffer) 
+Cache Write：
+You are tasked with performing an optimization on C code that mimics the effect of `cache_write` from TVM in C for loops.
+The goal is to buffer intermediate results in {CACHE_NAME} memory (e.g., a temporary buffer)
 during computation and write them back to the main memory once the computation is complete.
 
 ### Task:
 1. **Identify the memory writes** in the innermost loop.
 2. **Cache the write operations** into a {CACHE_NAME} buffer instead of writing directly to the original buffer.
 3. **Write back the cached results** to the original buffer after the computation.
-4. **Preserve any existing cache writes or reads** from other buffers (e.g., if `A` is already cached, do not overwrite it). 
+4. **Preserve any existing cache writes or reads** from other buffers (e.g., if `A` is already cached, do not overwrite it).
 If both buffers (e.g., `A` and `B`) need to be cached, **perform cache reads for both** buffers into separate buffers.
 5. Output the transformed C code.
 
 ### Input:
-The input will be C for loop code that accesses buffers repeatedly. The loop bounds should be retained as per the input code. 
+The input will be C for loop code that accesses buffers repeatedly. The loop bounds should be retained as per the input code.
 The transformation must not assume a fixed loop boundary, but instead, retain the original boundary in the output.
 Additionally, existing cache reads should not be removed.
 
@@ -164,7 +164,7 @@ Function Overview:
 
 Application Scenario:
 - Tensorization is widely used in deep learning frameworks to speed up matrix multiplications, convolutions, and other tensor operations by leveraging SIMD. For example, it can be used to vectorize the processing of large batches of input data, improving performance on CPUs, GPUs, and other accelerators.
-  
+
 - SIMD-based tensorization can be applied to common linear algebra kernels such as matrix-vector multiplications (GEMV), matrix-matrix multiplications (GEMM), and vector dot products. SIMD instructions accelerate these operations by processing multiple elements of vectors or matrices in parallel.
 """
 
@@ -178,7 +178,7 @@ for (int i = 0; i < 512; ++i) {
     }
 }
 
-// after: 
+// after:
 __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
 """
 
@@ -186,11 +186,11 @@ DOUBLE_BUFFER_PROMPT = """
 double buffering
 
 Function Overview:
-`DOUBLE_BUFFER` is a memory management and parallel processing technique designed to hide memory access latency by overlapping computation with data transfers. It utilizes two buffers, where one buffer is being read from or written to by the compute unit, while the other buffer is being populated with the next data to process. This ensures that the compute unit is never idle, leading to higher throughput and more efficient usage of hardware resources. 
+`DOUBLE_BUFFER` is a memory management and parallel processing technique designed to hide memory access latency by overlapping computation with data transfers. It utilizes two buffers, where one buffer is being read from or written to by the compute unit, while the other buffer is being populated with the next data to process. This ensures that the compute unit is never idle, leading to higher throughput and more efficient usage of hardware resources.
 
 Application Scenario:
-- In deep learning processors and GPUs, where large datasets need to be streamed to and from the compute units, 
-`DOUBLE_BUFFER` ensures that data movement does not stall computation. 
+- In deep learning processors and GPUs, where large datasets need to be streamed to and from the compute units,
+`DOUBLE_BUFFER` ensures that data movement does not stall computation.
 For example, while one batch of input data is being processed, the next batch can be loaded into memory.
 """
 
@@ -238,7 +238,7 @@ __mlu_entry__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*
         __memcpy_async(OUTPUT + ((i_outer * 128) + 64), OUTPUT_N + 64, 256,NRAM2GDRAM);
         __asm__ volatile("sync;");
     }
-        
+
     __bang_add(OUTPUT_N + 64, INPUT0_N + 64, INPUT1_N + 64,64);
     __memcpy_async(OUTPUT + 130944, OUTPUT_N, 256, NRAM2GDRAM);
     __asm__ volatile("sync;");
@@ -251,33 +251,33 @@ THREAD_BINDING_PROMPT_CUDA = """
 Thread Binding
 
 Function Overview:
-You are tasked with identifying parallelizable loops in C++ code and binding them to the available block and thread on an GPU. 
-Maximum number of threads per block is 1024, and the maximum number of blocks per grid is 256. 
-Your goal is to transform the input code by mapping the loops onto specific hardware resources (block and thread) for parallel execution. 
+You are tasked with identifying parallelizable loops in C++ code and binding them to the available block and thread on an GPU.
+Maximum number of threads per block is 1024, and the maximum number of blocks per grid is 256.
+Your goal is to transform the input code by mapping the loops onto specific hardware resources (block and thread) for parallel execution.
 
 Application Scenario:
-Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.) 
+Use this prompt when you want to parallelize a computational task by binding one or more axes of a loop (e.g., batch size, spatial dimensions, etc.)
 to the available threads in a GPU. This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
 
 Input:
-The input is a C++/CUDA code snippet containing loops that can be parallelized, with the goal of binding these loops to threads on a GPU. 
+The input is a C++/CUDA code snippet containing loops that can be parallelized, with the goal of binding these loops to threads on a GPU.
 The target hardware may have specific threads, and the prompt will help map the loop dimensions accordingly.
 
 Output:
-The transformed code with appropriate thread binding directives inserted into the loops, 
+The transformed code with appropriate thread binding directives inserted into the loops,
 ensuring that each iteration of the loop is handled by different threads for parallel execution.
 
 
 ### Steps for Insertion:
 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is smaller than the number of blocks (256) or threads (1024).
 2. Bind these loops to available hardware threads directly using CUDA constructs like `threadIdx.x` and `blockIdx.x`.
-    For loops where the iteration count is larger than the number of block (256) or threads (1024), 
-    replace the loop variables with `blockIdx.x` and `threadIdx` respectively. 
-    - If the loop’s iteration count is smaller than 1024, add condition checks to ensure proper core binding. 
-    For example, `if (threadIdx.x < dim)`. 
-3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `threadIdx.x` and `blockIdx.x`, and directly map iterations to hardware blocks and threads. 
+    For loops where the iteration count is larger than the number of block (256) or threads (1024),
+    replace the loop variables with `blockIdx.x` and `threadIdx` respectively.
+    - If the loop’s iteration count is smaller than 1024, add condition checks to ensure proper core binding.
+    For example, `if (threadIdx.x < dim)`.
+3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `threadIdx.x` and `blockIdx.x`, and directly map iterations to hardware blocks and threads.
 
-### Example 
+### Example
 {THREAD_BINDING_DEMO}
 
 ### GPT Task:
@@ -290,7 +290,7 @@ Please transform the following C++ by binding the parallel loops to GPU threads 
 ```
 
 ### Notes:
-- Replace the loop dimensions with `blockIdx.x` and `threadIdx` where possible. 
+- Replace the loop dimensions with `blockIdx.x` and `threadIdx` where possible.
 - Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
 - The variables `blockIdx.x` and `threadIdx` are built-in parallel variables and do not require initialization.
 """
@@ -299,9 +299,9 @@ THREAD_BINDING_PROMPT_BANG = """
 Thread Binding
 
 Function Overview:
-You are tasked with identifying parallelizable loops in C++ code and binding them to the available clusters and cores on an NPU. 
+You are tasked with identifying parallelizable loops in C++ code and binding them to the available clusters and cores on an NPU.
 The target NPU has 4 clusters and 4 cores per cluster. Your goal is to transform the input code by mapping the loops onto specific
-hardware resources (clusters and cores) for parallel execution. 
+hardware resources (clusters and cores) for parallel execution.
 
 
 Application Scenario:
@@ -309,22 +309,22 @@ Use this prompt when you want to parallelize a computational task by binding one
 This process accelerates the computation by exploiting the parallel nature of hardware accelerators.
 
 Input:
-The input is a C++/CUDA code snippet containing loops that can be parallelized. The goal is to bind these loops to cores and clusters on an NPU for parallel execution. 
+The input is a C++/CUDA code snippet containing loops that can be parallelized. The goal is to bind these loops to cores and clusters on an NPU for parallel execution.
 The target hardware has 4 clusters and 4 cores per cluster, and the prompt will help map the loop dimensions accordingly.
 
 Output:
 The transformed code should include appropriate thread binding directives, ensuring that iterations of the loop are distributed across the clusters and cores of the NPU for parallel execution.
 
 
- ### Steps for the transformation: 
- 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is larger than the number of clusters (4) or cores (4). 
- 
- 2. **Replace loop variables with `clusterId` and `coreId`:** - For loops where the iteration count is larger than the number of clusters (4) or cores (4), replace the loop variables with `clusterId` and `coreId` respectively. - If the loop’s iteration count is smaller than 4, add condition checks to ensure proper core binding. For example, `if (clusterId < dim)`. 
- 
- 3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `clusterId` and `coreId`, and directly map iterations to hardware cores and clusters. 
+ ### Steps for the transformation:
+ 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is larger than the number of clusters (4) or cores (4).
+
+ 2. **Replace loop variables with `clusterId` and `coreId`:** - For loops where the iteration count is larger than the number of clusters (4) or cores (4), replace the loop variables with `clusterId` and `coreId` respectively. - If the loop’s iteration count is smaller than 4, add condition checks to ensure proper core binding. For example, `if (clusterId < dim)`.
+
+ 3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `clusterId` and `coreId`, and directly map iterations to hardware cores and clusters.
 
 
-### Example 
+### Example
 {THREAD_BINDING_DEMO}
 
 ### GPT Task:
@@ -337,7 +337,7 @@ Please transform the following C++ by binding the parallel loops to NPU clusters
 ```
 
 ### Notes:
-- Replace the loop dimensions with `clusterId` and `coreId` where possible. 
+- Replace the loop dimensions with `clusterId` and `coreId` where possible.
 - Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
 - The variables `clusterId` and `coreId` are built-in parallel variables and do not require initialization.
 """
@@ -397,10 +397,10 @@ DECORATION_PROMPT = """
 Operation Recognition
 
 Function Overview:
-Operation Recognition is designed to identify element-wise or matrix multiplication arithmetic 
-operations inside for loops in C++ code and insert the corresponding `#pragma operation( )` directives. 
-The inserted pragmas are intended to mark operations for future SIMD (Single Instruction, Multiple Data) vectorization. 
-This ensures that element-wise or matrix multiplication calculations can be efficiently transformed into SIMD instructions 
+Operation Recognition is designed to identify element-wise or matrix multiplication arithmetic
+operations inside for loops in C++ code and insert the corresponding `#pragma operation( )` directives.
+The inserted pragmas are intended to mark operations for future SIMD (Single Instruction, Multiple Data) vectorization.
+This ensures that element-wise or matrix multiplication calculations can be efficiently transformed into SIMD instructions
 during a later code transformation stage.
 
 ### Application Scenario:
@@ -440,7 +440,7 @@ for (int col = 0; col < 64; col++) {
 ```
 
 #### Desired Output C++ Code with Pragmas for SIMD Preparation:
-```cpp 
+```cpp
 #pragma operation(add(input[A, B], output[C]))
 for (int i = 0; i < 64; i++) {
     C[i] = A[i] + B[i];

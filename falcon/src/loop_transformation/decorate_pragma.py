@@ -1,13 +1,13 @@
 SPLIT_PRAGMA_PROMPT = """
-Please analyze the following loop and determine which axes can be split using loop splitting. 
+Please analyze the following loop and determine which axes can be split using loop splitting.
 Additionally, provide the appropriate pragma directive for loop splitting above the for loop.
 
 
 ### Transformation:
 1. **Identify Axes for Loop Split**: Assess the loop to determine if the iteration variable `i` can be split.
 
-2. **Specify the Split Factor**: Choose an appropriate factor for splitting the loop. 
-This factor should be a divisor of the loop's range. 
+2. **Specify the Split Factor**: Choose an appropriate factor for splitting the loop.
+This factor should be a divisor of the loop's range.
 For example, if the factor is 4, the loop will be split into 4 segments.
 
 3. **Add the Pragma Directive**: Insert the `#pragma` directive for loop splitting above the loop.

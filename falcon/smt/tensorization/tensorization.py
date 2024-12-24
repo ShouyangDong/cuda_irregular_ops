@@ -3,7 +3,11 @@ import re
 import numpy as np
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.smt.util import NodeTransformer, add_memory_prefix, remove_target_prefix
+from falcon.smt.util import (
+    NodeTransformer,
+    add_memory_prefix,
+    remove_target_prefix,
+)
 
 
 class PragmaToSIMDTransformer(NodeTransformer):
@@ -28,7 +32,9 @@ class PragmaToSIMDTransformer(NodeTransformer):
                     transformed_stmt = self.transform_pragma_loop(
                         node.block_items[i + 1], pragma_text
                     )
-                    new_block_items.append(transformed_stmt)  # 替换 for 循环为目标指令
+                    new_block_items.append(
+                        transformed_stmt
+                    )  # 替换 for 循环为目标指令
                     i += 2  # 跳过下一个 for 循环，因为已经处理
                     continue
                 else:
@@ -45,7 +51,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
 
     def extract_argments(self, for_node):
         self.vectorize_var = for_node.init.decls[0].name
-        new_node = self.generic_visit(for_node)
+        self.generic_visit(for_node)
         self.vectorize_var = None
 
         def get_body(node):
@@ -72,14 +78,20 @@ class PragmaToSIMDTransformer(NodeTransformer):
         assert isinstance(stmt, c_ast.Assignment)
         assert isinstance(stmt.lvalue, c_ast.ArrayRef)
         args = [
-            c_ast.BinaryOp(op="+", left=stmt.lvalue.name, right=stmt.lvalue.subscript)
+            c_ast.BinaryOp(
+                op="+", left=stmt.lvalue.name, right=stmt.lvalue.subscript
+            )
         ]
         right = stmt.rvalue
         if isinstance(right, c_ast.ArrayRef):
-            args.append(c_ast.BinaryOp(op="+", left=right.name, right=right.subscript))
+            args.append(
+                c_ast.BinaryOp(op="+", left=right.name, right=right.subscript)
+            )
         elif isinstance(right, c_ast.BinaryOp):
             args.append(
-                c_ast.BinaryOp(op="+", left=right.left.name, right=right.left.subscript)
+                c_ast.BinaryOp(
+                    op="+", left=right.left.name, right=right.left.subscript
+                )
             )
             args.append(
                 c_ast.BinaryOp(
@@ -135,7 +147,10 @@ class PragmaToSIMDTransformer(NodeTransformer):
                         *(args),
                         c_ast.Constant(
                             "int",
-                            str(4 * np.prod([int(ext) for ext in self.loop_exts])),
+                            str(
+                                4
+                                * np.prod([int(ext) for ext in self.loop_exts])
+                            ),
                         ),
                         c_ast.ID(direction),
                     ]
@@ -145,7 +160,11 @@ class PragmaToSIMDTransformer(NodeTransformer):
             transformed_code = c_ast.FuncCall(
                 name=c_ast.ID("__matmul"),
                 args=c_ast.ExprList(
-                    [c_ast.ID("C_nram"), c_ast.ID("A_nram"), c_ast.ID("B_wram")]
+                    [
+                        c_ast.ID("C_nram"),
+                        c_ast.ID("A_nram"),
+                        c_ast.ID("B_wram"),
+                    ]
                 ),
             )
         elif "add" in pragma_text:
@@ -209,7 +228,7 @@ if __name__ == "__main__":
     __wram__ float B_wram[32768];
     __nram__ float A_nram[512];
     __nram__ float C_nram[64];
-    
+
     #pragma operation(memory(input[B], output[B_wram]))
     for (int col = 0; col < 64; col++) {
         for (int i = 0; i < 512; i++) {

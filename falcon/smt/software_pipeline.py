@@ -1,5 +1,9 @@
 from string import Template
 
+from pycparser import c_ast, c_generator, c_parser
+
+from falcon.smt.util import NodeTransformer
+
 BANG_binary_template = Template(
     """void binary_double_buffering(float* OUTPUT， float* INPUT0, float* INPUT1, int BUF_SIZE, int loop_ext) {
     __nram__ float INPUT0_N[BUF_SIZE * 2];
@@ -18,7 +22,7 @@ BANG_binary_template = Template(
         __memcpy_async(INPUT0_N, INPUT0 + ((i_outer + 1) * BUF_SIZE * 2), BUF_SIZE * sizeof(float), GDRAM2NRAM);
         __memcpy_async(INPUT1_N, INPUT1 + ((i_outer + 1) * BUF_SIZE * 2), BUF_SIZE * sizeof(float), GDRAM2NRAM);
         $inst(OUTPUT_N + BUF_SIZE, INPUT0_N + BUF_SIZE, INPUT1_N + BUF_SIZE, BUF_SIZE);
-        __memcpy_async(OUTPUT + (i_outer * BUF_SIZE * 2) , OUTPUT_N, BUF_SIZE * sizeof(float), NRAM2GDRAM);   
+        __memcpy_async(OUTPUT + (i_outer * BUF_SIZE * 2) , OUTPUT_N, BUF_SIZE * sizeof(float), NRAM2GDRAM);
         __asm__ volatile("sync;");
         __memcpy_async(INPUT0_N + BUF_SIZE, INPUT0 + ((i_outer + 1) * BUF_SIZE * 2) + BUF_SIZE, BUF_SIZE * sizeof(float), GDRAM2NRAM);
         __memcpy_async(INPUT1_N + BUF_SIZE, INPUT1 + ((i_outer + 1) * BUF_SIZE * 2) + BUF_SIZE, BUF_SIZE * sizeof(float), GDRAM2NRAM);
@@ -48,13 +52,13 @@ BANG_unary_template = Template(
     for (int i_outer = 0; i_outer < (loop_ext / 2 - 1); ++i_outer) {
         __memcpy_async(INPUT0_N, INPUT0 + ((i_outer + 1) * BUF_SIZE * 2), BUF_SIZE * sizeof(float), GDRAM2NRAM);
         $inst(OUTPUT_N + BUF_SIZE, INPUT0_N + BUF_SIZE, BUF_SIZE);
-        __memcpy_async(OUTPUT + (i_outer * BUF_SIZE * 2) , OUTPUT_N, BUF_SIZE * sizeof(float), NRAM2GDRAM);   
+        __memcpy_async(OUTPUT + (i_outer * BUF_SIZE * 2) , OUTPUT_N, BUF_SIZE * sizeof(float), NRAM2GDRAM);
         __asm__ volatile("sync;");
         __memcpy_async(INPUT0_N + BUF_SIZE, INPUT0 + ((i_outer + 1) * BUF_SIZE * 2) + BUF_SIZE, BUF_SIZE * sizeof(float), GDRAM2NRAM);
         __memcpy_async(OUTPUT + ((i_outer * BUF_SIZE * 2) + BUF_SIZE), OUTPUT_N + BUF_SIZE, BUF_SIZE * sizeof(float), NRAM2GDRAM);
         __asm__ volatile("sync;");
     }
-    
+
     $inst(OUTPUT_N + BUF_SIZE, INPUT0_N + BUF_SIZE, BUF_SIZE);
     __memcpy_async(OUTPUT + (BUF_SIZE * loop_ext - BUF_SIZE * 2), OUTPUT_N, BUF_SIZE * sizeof(float), NRAM2GDRAM);
     __asm__ volatile("sync;");
@@ -72,9 +76,6 @@ op_template = {
     "__bang_add": BANG_binary_template,
     "__bang_active_tanh": BANG_unary_template,
 }
-from pycparser import c_ast, c_generator, c_parser
-
-from falcon.smt.util import NodeTransformer
 
 
 class PragmaVisitor(NodeTransformer):
@@ -102,7 +103,9 @@ class PragmaVisitor(NodeTransformer):
                 isinstance(subnode, c_ast.Pragma)
                 and subnode.string == "software_pipeline"
             ):
-                if index + 1 < len(blocks) and isinstance(blocks[index + 1], c_ast.For):
+                if index + 1 < len(blocks) and isinstance(
+                    blocks[index + 1], c_ast.For
+                ):
                     pipeline_for = blocks[index + 1]
 
                     ext = pipeline_for.cond.right.value

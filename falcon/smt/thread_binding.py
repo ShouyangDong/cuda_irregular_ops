@@ -7,7 +7,10 @@ from falcon.smt.util import (
     remove_target_prefix,
 )
 
-builtin_var = {"CUDA": ["threadIdxx", "blockIdxx"], "BANG": ["coreId", "clusterId"]}
+builtin_var = {
+    "CUDA": ["threadIdxx", "blockIdxx"],
+    "BANG": ["coreId", "clusterId"],
+}
 builtin_dim = {
     "threadIdxx": 256,
     "blockIdxx": 1024,
@@ -27,7 +30,9 @@ class ThreadBindingTransformer(NodeTransformer):
     def visit_For(self, node):
         self.current_depth += 1
         loop_var = (
-            node.init.decls[0].name if isinstance(node.init, c_ast.DeclList) else None
+            node.init.decls[0].name
+            if isinstance(node.init, c_ast.DeclList)
+            else None
         )
         extend = int(node.cond.right.value)
 
@@ -66,7 +71,9 @@ class ThreadBindingTransformer(NodeTransformer):
 
     def _generate_new_node(self, thread_var, node):
         return c_ast.If(
-            cond=c_ast.BinaryOp(op="<", left=thread_var, right=node.cond.right),
+            cond=c_ast.BinaryOp(
+                op="<", left=thread_var, right=node.cond.right
+            ),
             iftrue=node.stmt,
             iffalse=None,
         )

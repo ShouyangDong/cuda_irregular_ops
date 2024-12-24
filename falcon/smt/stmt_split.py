@@ -17,7 +17,8 @@ class LoopSplitter(NodeTransformer):
                 ):
                     # 判断循环体是否包含声明语句
                     contains_decl = any(
-                        isinstance(item, c_ast.Decl) for item in stmt.stmt.block_items
+                        isinstance(item, c_ast.Decl)
+                        for item in stmt.stmt.block_items
                     )
 
                     if contains_decl:
@@ -30,7 +31,9 @@ class LoopSplitter(NodeTransformer):
                                 init=stmt.init,
                                 cond=stmt.cond,
                                 next=stmt.next,
-                                stmt=c_ast.Compound([single_stmt]),  # 单语句循环体
+                                stmt=c_ast.Compound(
+                                    [single_stmt]
+                                ),  # 单语句循环体
                             )
                             new_block_items.append(new_for)
                 else:

@@ -28,7 +28,9 @@ def parse_markdown(file_path):
             current_title = element.get_text()  # 更新当前标题
             paragraphs = []  # 重置段落列表
         elif element.name == "p" and current_title is not None:
-            paragraphs.append(element.get_text())  # 添加段落到当前标题的段落列表
+            paragraphs.append(
+                element.get_text()
+            )  # 添加段落到当前标题的段落列表
 
     # 添加最后一个标题和段落
     if current_title is not None:
@@ -39,9 +41,7 @@ def parse_markdown(file_path):
 
 if __name__ == "__main__":
     # 输入 Markdown 文件路径
-    markdown_file = (
-        "cntoolkit_3.5.2_cambricon_bang_c_4.5.1.md"  # 替换为您的 Markdown 文件路径
-    )
+    markdown_file = "cntoolkit_3.5.2_cambricon_bang_c_4.5.1.md"  # 替换为您的 Markdown 文件路径
 
     # 解析 Markdown 文件
     titles_and_paragraphs = parse_markdown(markdown_file)

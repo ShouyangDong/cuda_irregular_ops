@@ -45,7 +45,10 @@ class ConstInlineTransformer(NodeTransformer):
     def visit_Assignment(self, node):
         """替换 'index' 的赋值表达式"""
         # 如果左值是 'index'，将整个赋值替换为右值
-        if isinstance(node.lvalue, c_ast.ID) and node.lvalue.name in self.constants:
+        if (
+            isinstance(node.lvalue, c_ast.ID)
+            and node.lvalue.name in self.constants
+        ):
             return self.generic_visit(node.rvalue)
         return self.generic_visit(node)
 

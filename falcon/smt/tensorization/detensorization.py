@@ -23,7 +23,8 @@ class Detensorizer(NodeTransformer):
             if not isinstance(seq_def, c_ast.FileAST):
                 raise ValueError("Sequential code must be a function")
 
-            # Construct a map between the function call's  arguments and callee's arguments
+            # Construct a map between the function call's  arguments and
+            # callee's arguments
             seq_def_args = seq_def.ext[0].decl.type.args.params
             seq_def_name = [arg_id.name for arg_id in seq_def_args]
             self.parameter_mappings = {

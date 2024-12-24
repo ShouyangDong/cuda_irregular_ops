@@ -8,7 +8,9 @@ import pygraphviz
 
 
 def convert_tree_to_graph(
-    tree: mctx.Tree, action_labels: Optional[Sequence[str]] = None, batch_index: int = 0
+    tree: mctx.Tree,
+    action_labels: Optional[Sequence[str]] = None,
+    batch_index: int = 0,
 ) -> pygraphviz.AGraph:
     """Converts a search tree into a Graphviz graph.
 
@@ -45,7 +47,9 @@ def convert_tree_to_graph(
         probs = jax.nn.softmax(tree.children_prior_logits[batch_index, node_i])
         return (
             f"{action_labels[a_i]}\n"
-            f"Q: {tree.qvalues(node_index)[batch_index, a_i]:.2f}\n"  # pytype: disable=unsupported-operands  # always-use-return-annotations
+            # pytype: disable=unsupported-operands  #
+            # always-use-return-annotations
+            f"Q: {tree.qvalues(node_index)[batch_index, a_i]:.2f}\n"
             f"p: {probs[a_i]:.2f}\n"
         )
 
@@ -64,10 +68,14 @@ def convert_tree_to_graph(
                     label=node_to_str(
                         node_i=children_i,
                         reward=tree.children_rewards[batch_index, node_i, a_i],
-                        discount=tree.children_discounts[batch_index, node_i, a_i],
+                        discount=tree.children_discounts[
+                            batch_index, node_i, a_i
+                        ],
                     ),
                     color="red",
                 )
-                graph.add_edge(node_i, children_i, label=edge_to_str(node_i, a_i))
+                graph.add_edge(
+                    node_i, children_i, label=edge_to_str(node_i, a_i)
+                )
 
     return graph
