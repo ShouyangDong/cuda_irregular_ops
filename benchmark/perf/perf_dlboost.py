@@ -8,7 +8,8 @@ from string import Template
 import numpy as np
 import torch
 
-from benchmark.utils import conv2d_nchw, maxpool_np, run_compilation
+from benchmark.utils import conv2d_nchw, maxpool_np
+from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
 def perf_function(file_name):
@@ -48,7 +49,7 @@ def perf_function(file_name):
     // Original function
     ${original_function}
 
-    extern "C" int timed_${kernel_name}(${param_list}) {
+    extern "C" float timed_${kernel_name}(${param_list}) {
         struct timeval start, end;
         for (int i = 0; i < 10; i++) {
             ${kernel_name}(${called_param_list});
@@ -62,8 +63,8 @@ def perf_function(file_name):
         gettimeofday(&end, NULL);
 
         int time_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
-        float us_time = time_us / 1000.0f / 1000.0f'
-        printf("Time taken for ${kernel_name}:  %d us\\n", us_time);
+        float us_time = time_us / 1000.0f / 1000.0f;
+        printf("Time taken for ${kernel_name}:  %f ms\\n", us_time);
         return us_time;
     }
     """
@@ -94,7 +95,8 @@ def perf_pipeline(file_name):
     perf_function(file_name)
     backup_file_name = file_name.replace(".cpp", "_bak.cpp")
     so_name = file_name.replace(".cpp", ".so")
-    run_compilation(so_name, backup_file_name)
+    success, output = run_compilation(so_name, backup_file_name)
+    print(output)
 
 
 def perf_unary(shape, function, dtype="float32"):
@@ -103,7 +105,7 @@ def perf_unary(shape, function, dtype="float32"):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
     # 创建输入数组
     input_array = np.random.uniform(size=shape).astype(dtype)
 
@@ -132,7 +134,7 @@ def perf_binary(shape_A, shape_B, shape_C, function, dtype="float32"):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
     # Call the function with the matrices and dimensions
     result_ctypes = np.zeros(shape_C, dtype=np.float32)
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
@@ -166,7 +168,7 @@ def perf_deformable(shape, function):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
 
     # 创建输出数组
     output_array = np.zeros(
@@ -202,20 +204,24 @@ def perf_deformable(shape, function):
 
 
 def perf_pooling(shape, kernel, stride, function, dtype="float32"):
-    input_array = np.random.rand(*shape).astype("float32")
+    input_array = torch.rand(*shape)
     # Calculate the result using numpy for comparison
     output_np = maxpool_np(input_array, kernel + stride)
-    output_array = np.zeros(shape=output_np.shape, dtype=dtype)
+    output_array = torch.zeros(output_np.shape)
     # Convert the arrays to contiguous memory for ctypes
-    input_ptr = input_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = input_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
 
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
     # Call the function with the matrices and dimensions
     elapsed_time = function(input_ptr, output_ptr)
     return elapsed_time
@@ -229,7 +235,7 @@ def perf_scaled_dot_product_attention(shape, function, dtype="float32"):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
     # 创建输入数组
     input_array_1 = np.random.uniform(size=shape).astype(dtype)
     input_array_2 = np.random.uniform(size=shape).astype(dtype)
@@ -254,7 +260,7 @@ def perf_layernorm(shape, function, dtype="float32"):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
     ]
-    function.restype = ctypes.c_int
+    function.restype = ctypes.c_float
     # 创建输入数组
     dtype = "float32"
     input_array = np.random.uniform(size=shape).astype(dtype)

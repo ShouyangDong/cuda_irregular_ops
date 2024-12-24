@@ -152,6 +152,7 @@ def run_mlu_compilation(so_name, file_name):
                 "-shared",
                 "-fPIC",
                 "--bang-mlu-arch=mtp_592",
+                "-O3",
                 "-o",
                 so_name,
                 file_name,
@@ -208,5 +209,4 @@ def run_test(file_name, test_file):
     except subprocess.TimeoutExpired:
         return False, "timeout"
     except subprocess.CalledProcessError as e:
-        print(e.output)
         return False, e.output
