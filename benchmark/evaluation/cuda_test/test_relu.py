@@ -7,6 +7,8 @@ from ctypes import CDLL
 import numpy as np
 import torch
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 def ref_program(x):
     relu = torch.nn.ReLU()

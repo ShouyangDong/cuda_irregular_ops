@@ -3,86 +3,10 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
+import torch
 
-
-def get_im2col_indices(images_shape, filter_shape, padding, stride):
-    """Get index for shape"""
-    batch_size, channels, height, width = images_shape
-    filter_height, filter_width = filter_shape
-    pad_h, pad_w = padding
-    stride_h, stride_w = stride
-    out_height = int((height + np.sum(pad_h) - filter_height) / stride_h + 1)
-    out_width = int((width + np.sum(pad_w) - filter_width) / stride_w + 1)
-
-    i0 = np.repeat(np.arange(filter_height), filter_width)
-    i0 = np.tile(i0, channels)
-    i1 = stride_h * np.repeat(np.arange(out_height), out_width)
-    j0 = np.tile(np.arange(filter_width), filter_height * channels)
-    j1 = stride_w * np.tile(np.arange(out_width), out_height)
-    i = i0.reshape(-1, 1) + i1.reshape(1, -1)
-    j = j0.reshape(-1, 1) + j1.reshape(1, -1)
-
-    k = np.repeat(np.arange(channels), filter_height * filter_width).reshape(
-        -1, 1
-    )
-    return (k, i, j)
-
-
-def image_to_column(images, filter_shape, stride, pad):
-    """Transpose the input for conv"""
-    filter_height, filter_width = filter_shape
-    pad_h, pad_w = cpu_pad(pad)
-    images_padded = np.pad(
-        images, ((0, 0), (0, 0), pad_h, pad_w), mode="constant"
-    )
-    k, i, j = get_im2col_indices(
-        images.shape, filter_shape, (pad_h, pad_w), stride
-    )
-    cols = images_padded[:, k, i, j]
-    channels = images.shape[1]
-    cols = cols.transpose(1, 2, 0).reshape(
-        filter_height * filter_width * channels, -1
-    )
-    return cols
-
-
-def cpu_pad(padding=None):
-    """Get the pad param"""
-    pad_h = 0
-    pad_w = 0
-    if isinstance(padding, (list, tuple)):
-        if len(padding) == 2:
-            pad_h = padding[0]
-            pad_w = padding[1]
-        elif len(padding) == 1:
-            pad_h = pad_w = padding[0]
-    elif isinstance(padding, int):
-        pad_h = pad_w = padding
-    return (pad_h, pad_h), (pad_w, pad_w)
-
-
-def cpu_conv(data, kernel, stride_w, stride_h, pad=None):
-    """Conv op in cpu"""
-    batch_size, input_height, input_width, input_channel = data.shape
-    output_channel, kernel_height, kernel_width, _ = kernel.shape
-    pad_h, pad_w = cpu_pad(pad)
-    out_height = int(
-        (input_height + np.sum(pad_h) - kernel_height) / stride_h + 1
-    )
-    out_width = int(
-        (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
-    )
-    data = data.transpose(0, 3, 1, 2)
-    kernel = kernel.transpose(0, 3, 1, 2)
-    X_col = image_to_column(
-        data, (kernel_height, kernel_width), (stride_h, stride_w), pad
-    )
-    W_col = kernel.reshape((output_channel, -1))
-    output = W_col.dot(X_col)
-    output = output.reshape(output_channel, out_height, out_width, batch_size)
-    return output.transpose(3, 1, 2, 0)
-
+from benchmark.utils import conv2d_nhwc
+from benchmark.utils import run_cuda_compilation as run_compilation
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -104,14 +28,17 @@ if __name__ == "__main__":
     wtype = "float32"
 
     # generate data
-    data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
-        dtype
-    )
-    kernel_np = np.random.uniform(low=1.0, high=2.0, size=kernel_shape).astype(
-        dtype
-    )
+    data_np = torch.rand(data_shape)
+    kernel_np = torch.rand(kernel_shape)
     # cpu compute
-    result_cpu = cpu_conv(data_np, kernel_np, stride_h, stride_w, pad)
+    result_cpu = conv2d_nhwc(
+        data_np,
+        kernel_shape[1],
+        kernel_shape[0],
+        kernel_shape[2],
+        stride_h,
+        pad,
+    )
 
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".cu", ".so")
@@ -151,10 +78,14 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
-    input_ptr = data_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel_np.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    result_ctypes = np.zeros(result_cpu.shape, dtype=np.float32)
-    output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    input_ptr = data_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel_np.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    result_ctypes = torch.zeros(result_cpu.shape)
+    output_ptr = result_ctypes.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     # Call the function with the matrices and dimensions
     function(
         output_ptr,
@@ -168,14 +99,12 @@ if __name__ == "__main__":
         stride_h,
     )
     # Check if the results match
-    np.testing.assert_allclose(
+    torch.allclose(
         result_ctypes,
         result_cpu,
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
     print("验证通过！")
     result = subprocess.run(["rm", so_name])

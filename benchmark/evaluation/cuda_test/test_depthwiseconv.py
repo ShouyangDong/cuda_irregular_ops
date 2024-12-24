@@ -5,6 +5,8 @@ import subprocess
 
 import numpy as np
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 def depthwise_conv2d(input, w):
     """Two-dimensional depthwise convolution.

@@ -8,6 +8,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 @torch.no_grad()
 def deformable_attention_pytorch(

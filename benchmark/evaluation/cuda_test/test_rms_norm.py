@@ -7,6 +7,8 @@ from ctypes import CDLL
 import numpy as np
 import torch
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 def ref_program(x):
     return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + 1e-5)

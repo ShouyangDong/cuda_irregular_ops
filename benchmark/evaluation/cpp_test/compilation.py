@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
 
-from benchmark.utils import run_dlboost_compilation as run_compilation
+from benchmark.utils import run_cpp_compilation as run_compilation
 
 
 def compile_file(file_name):

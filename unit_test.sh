@@ -22,9 +22,9 @@ if cnmon > /dev/null 2>&1; then
 fi
 # Check for NVIDIA GPU presence
 if nvidia-smi > /dev/null 2>&1; then
-    echo "NVIDIA GPU detected. Running CUDA tests..."
+    # echo "NVIDIA GPU detected. Running CUDA tests..."
 
-    echo "==============GPU Compilation Test==============="
+    # echo "==============GPU Compilation Test==============="
     python benchmark/evaluation/cuda_test/compilation.py
     echo "==============GPU Computation Test==============="
     python benchmark/evaluation/cuda_test/result_test.py

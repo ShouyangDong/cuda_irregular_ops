@@ -1,19 +1,15 @@
 import glob
 import os
 import subprocess
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
 
 from benchmark.utils import run_cuda_compilation as run_compilation
 
 
-def compile_cuda_file(file_name):
+def compile_file(file_name):
     base_name = os.path.basename(file_name)
-    so_name = base_name.replace("cu", "so")
-    so_name = os.path.join(
-        os.getcwd(), "benchmark/data/cuda_code_test/", so_name
-    )
 
     with open(file_name, "r") as f:
         code = f.read()
@@ -23,48 +19,46 @@ def compile_cuda_file(file_name):
     ) as f:
         macro = f.read()
 
-    # Combine macro with code
     code = macro + code
-    back_file_name = file_name.replace(".cu", "_bak.cu")
+    bak_file_name = file_name.replace(".cu", "_bak.cu")
 
-    # Write the combined code to a temporary file
-    with open(back_file_name, mode="w") as f:
+    with open(bak_file_name, mode="w") as f:
         f.write(code)
 
-    success, output = run_compilation(so_name, back_file_name)
-    os.remove(back_file_name)  # Clean up the temporary file
+    so_name = base_name.replace(".cu", ".so")
+    so_name = os.path.join(
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/"), so_name
+    )
 
-    return success, output
+    success, output = run_compilation(so_name, bak_file_name)
+    os.remove(bak_file_name)
+
+    if success:
+        subprocess.run(["rm", so_name])
+        return True
+    else:
+        print(output)
+        return False
 
 
 if __name__ == "__main__":
     files = glob.glob(
         os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu")
     )
-    counter = 0
 
-    # Use ProcessPoolExecutor for parallel compilation
-    with ProcessPoolExecutor() as executor:
-        # Track the results of the compilation
+    # 使用 ThreadPoolExecutor 并行执行文件编译
+    counter = 0
+    with ThreadPoolExecutor() as executor:
         results = list(
-            tqdm(executor.map(compile_cuda_file, files), total=len(files))
+            tqdm(executor.map(compile_file, files), total=len(files))
         )
 
-    # Process results
-    for success, output in results:
-        if success:
-            counter += 1
-            so_name = (
-                # Obtain the shared object name if needed (modify if necessary)
-                output
-            )
-            subprocess.run(["rm", so_name])  # Remove the compiled .so file
-        else:
-            print(output)
+    # 统计编译成功的文件数
+    counter = sum(results)
 
     print(counter)
     print(len(files))
     print(
-        "[INFO]*******************Compilation success rate: ",
+        "[INFO]*******************CUDA Compilation successful rate ",
         counter / len(files),
     )

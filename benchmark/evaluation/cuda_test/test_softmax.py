@@ -6,6 +6,8 @@ from ctypes import CDLL
 
 import numpy as np
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 def ref_program(x):
     # 对最后一个维度进行softmax操作

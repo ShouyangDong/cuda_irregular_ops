@@ -6,6 +6,8 @@ from ctypes import CDLL
 
 import numpy as np
 
+from benchmark.utils import run_cuda_compilation as run_compilation
+
 
 def ref_program(x, gamma, beta, eps=1e-5):
     mean = np.mean(x, axis=-1, keepdims=True)
