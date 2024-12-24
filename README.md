@@ -1,4 +1,4 @@
-# cuda_irregular_ops
+# Tensor Programs Transcompilation
 
 The **cuda_irregular_ops** repository focuses on cross-conversion between programming languages for different deep learning processors. It includes implementations of irregular tensor operators in **CUDA C**, **AVX VNNI**, and **BANG C**. 
 The overall workflow involves: 
@@ -11,13 +11,7 @@ The overall workflow involves:
 This repository streamlines the translation process across different processor architectures, ensuring efficient computation on deep learning processors through both architecture-specific and generic optimizations.
 
 # Install
-Install is similar to tvm. First, fill in USE_CUDA and USE_LLVM in cmake/config.cmake, like this:
-```
-set(USE_LLVM "/path/to/llvm-config --link-static")
-set(HIDE_PRIVATE_SYMBOLS ON)
-set(USE_CUDA /usr/local/cuda)
-```
-Furthermore, to optimize the MCTS algorithm, the following Python packages are necessary:
+To optimize the MCTS algorithm, the following Python packages are necessary:
 ```
 pip install chex jax mctx
 ```
