@@ -1,12 +1,13 @@
 import argparse
+import ctypes
 import os
 
 import numpy as np
-import ctypes
 import torch
 import torch.nn.functional as F
-from benchmark.template.mlu_host_template import create_bang_func
+
 from benchmark.utils import run_mlu_compilation as run_compilation
+
 
 @torch.no_grad()
 def deformable_attention_pytorch(
@@ -62,7 +63,6 @@ def deformable_attention_pytorch(
 
 
 def verify_deformable(name, file, shape):
-    op_name = "deformable"
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(

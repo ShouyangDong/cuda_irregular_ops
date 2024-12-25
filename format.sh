@@ -20,6 +20,7 @@ process_file() {
 
   # Format the code using black  
   black --line-length 79 "$file" 
+  flake8 "$file" 
 }
 
 

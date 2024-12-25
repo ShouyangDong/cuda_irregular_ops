@@ -3,16 +3,10 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
 import torch
 
 from benchmark.utils import run_dlboost_compilation as run_compilation
 from benchmark.utils import sumpool_np
-
-
-def generate_data(shape, dtype):
-    return np.random.uniform(size=shape).astype(dtype)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

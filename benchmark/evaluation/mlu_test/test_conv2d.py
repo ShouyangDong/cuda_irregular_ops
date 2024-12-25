@@ -2,13 +2,13 @@ import argparse
 import ctypes
 import os
 import subprocess
-import torch
+
 import numpy as np
-from benchmark.utils import conv2d_nhwc
+import torch
+
 from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.utils import conv2d_nhwc
 from benchmark.utils import run_mlu_compilation as run_compilation
-
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -62,9 +62,13 @@ if __name__ == "__main__":
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
     input_ptr = data_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    kernel_ptr = kernel_np.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    kernel_ptr = kernel_np.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     result_ctypes = torch.zeros(result_cpu.shape)
-    output_ptr = result_ctypes.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    output_ptr = result_ctypes.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
     # Call the function with the matrices and dimensions
     function(
         input_ptr,

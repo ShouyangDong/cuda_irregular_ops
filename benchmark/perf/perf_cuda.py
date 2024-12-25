@@ -3,6 +3,7 @@ import ctypes
 import glob
 import os
 import re
+
 import numpy as np
 import torch
 
@@ -11,69 +12,73 @@ from benchmark.utils import run_cuda_compilation as run_compilation
 from benchmark.utils import sumpool_np
 
 
-def create_cuda_perf_func(cuda_file):   
-    """读取CUDA文件，插入事件以获取内核执行时间，并写回文件"""  
-    with open(cuda_file, 'r') as f:  
-        content = f.read()  
+def create_cuda_perf_func(cuda_file):
+    """读取CUDA文件，插入事件以获取内核执行时间，并写回文件"""
+    with open(cuda_file, "r") as f:
+        content = f.read()
 
-    # 正则表达式匹配内核调用的行，比如 add<<<numBlocks, blockSize>>>(d_A, d_B, d_C); 
-    #TODO(michael): solve the case if the kernel change into another line
-    kernel_call_pattern = r'(\w+<<<.*?>>>\(.*?\);)'  # 匹配具有<<<...>>>的行  
+    # 正则表达式匹配内核调用的行，比如 add<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
+    # TODO(michael): solve the case if the kernel change into another line
+    kernel_call_pattern = r"(\w+<<<.*?>>>\(.*?\);)"  # 匹配具有<<<...>>>的行
 
-    # 查找所有匹配的行  
-    matches = re.findall(kernel_call_pattern, content)  
-    for match in matches:  
-        # 插入热身和事件相关代码  
-        event_code = f"""  
-// Warm-up the kernel by running it 10 times  
-for (int i = 0; i < 10; i++) {{  
-    {match}  
-}}  
+    # 查找所有匹配的行
+    matches = re.findall(kernel_call_pattern, content)
+    for match in matches:
+        # 插入热身和事件相关代码
+        event_code = f"""
+// Warm-up the kernel by running it 10 times
+for (int i = 0; i < 10; i++) {{
+    {match}
+}}
 
-// Timing the kernel execution  
-cudaEvent_t start, stop;  
-cudaEventCreate(&start);  
-cudaEventCreate(&stop);  
-cudaEventRecord(start, 0);   
+// Timing the kernel execution
+cudaEvent_t start, stop;
+cudaEventCreate(&start);
+cudaEventCreate(&stop);
+cudaEventRecord(start, 0);
 
-for (int i = 0; i < 1000; i++) {{  
-    {match}  
-}}  
-cudaEventRecord(stop, 0);  
-cudaEventSynchronize(stop);  
-float milliseconds = 0;  
-cudaEventElapsedTime(&milliseconds, start, stop); 
+for (int i = 0; i < 1000; i++) {{
+    {match}
+}}
+cudaEventRecord(stop, 0);
+cudaEventSynchronize(stop);
+float milliseconds = 0;
+cudaEventElapsedTime(&milliseconds, start, stop);
 milliseconds = milliseconds / 1000.0f;
-printf("Kernel execution time: %f ms\\n", milliseconds);  
-cudaEventDestroy(start);  
-cudaEventDestroy(stop);  
-        """  
+printf("Kernel execution time: %f ms\\n", milliseconds);
+cudaEventDestroy(start);
+cudaEventDestroy(stop);
+        """
 
-        # 在内核调用之后插入时间计算代码  
+        # 在内核调用之后插入时间计算代码
         with open(
             os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
         ) as f:
             macro = f.read()
-        content = content.replace('extern "C" void', 'extern "C" float')  
-        modified_kernel = macro + content.replace(match, event_code)  
+        content = content.replace('extern "C" void', 'extern "C" float')
+        modified_kernel = macro + content.replace(match, event_code)
 
-        # 在主函数的末尾插入 return milliseconds;  
-        main_pattern = r'extern "C" float \w+\s*\(.*?\)\s*\{'  # 允许函数参数  
-        main_match = re.search(main_pattern, modified_kernel, re.DOTALL)  # 使用re.DOTALL  
+        # 在主函数的末尾插入 return milliseconds;
+        main_pattern = r'extern "C" float \w+\s*\(.*?\)\s*\{'  # 允许函数参数
+        main_match = re.search(
+            main_pattern, modified_kernel, re.DOTALL
+        )  # 使用re.DOTALL
 
-        if main_match:  
-            # 找到主函数的结束位置，以替换最后一个 `}`  
-            last_brace_index = modified_kernel.rfind('}')  
-            if last_brace_index != -1:  
-                modified_kernel = (modified_kernel[:last_brace_index] +   
-                                   'return milliseconds;\n}' +   
-                                   modified_kernel[last_brace_index + 1:])  
-        else:  
-            print("未找到主函数定义。请检查函数名和签名。")  
-            return  
+        if main_match:
+            # 找到主函数的结束位置，以替换最后一个 `}`
+            last_brace_index = modified_kernel.rfind("}")
+            if last_brace_index != -1:
+                modified_kernel = (
+                    modified_kernel[:last_brace_index]
+                    + "return milliseconds;\n}"
+                    + modified_kernel[last_brace_index + 1 :]
+                )
+        else:
+            print("未找到主函数定义。请检查函数名和签名。")
+            return
 
-        # 将修改后的内容写回原文件  
-        with open(cuda_file.replace(".cu", "_bak.cu"), 'w') as f:  
+        # 将修改后的内容写回原文件
+        with open(cuda_file.replace(".cu", "_bak.cu"), "w") as f:
             f.write(modified_kernel)
 
 
@@ -105,7 +110,9 @@ def perf_unary(name, shape, function, dtype="float32"):
             ctypes.c_int,
             ctypes.c_int,
         ]
-        elapsed_time = function(input_ptr, output_ptr, np.prod(shape[:-1]), shape[-1])
+        elapsed_time = function(
+            input_ptr, output_ptr, np.prod(shape[:-1]), shape[-1]
+        )
     else:
         function.argtypes = [
             ctypes.POINTER(ctypes.c_float),
@@ -143,11 +150,7 @@ def perf_layernorm(shape1, shape2, function, dtype="float32"):
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
     elapsed_time = function(
-        input_ptr,
-        gamma_ptr,
-        beta_ptr,
-        output_ptr,
-        *shape1
+        input_ptr, gamma_ptr, beta_ptr, output_ptr, *shape1
     )
     return elapsed_time
 
@@ -187,7 +190,7 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
             ctypes.c_int,
             ctypes.c_int,
-            ctypes.c_int
+            ctypes.c_int,
         ]
         elapsed_time = function(
             output_ptr,
@@ -210,10 +213,7 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr,
-            A_ptr,
-            B_ptr,
-            shape_A[0], shape_A[0] - shape_B[0] + 1
+            output_ptr, A_ptr, B_ptr, shape_A[0], shape_A[0] - shape_B[0] + 1
         )
     elif name in ["gemv"]:
         # Convert the matrices to contiguous memory for ctypes
@@ -230,12 +230,8 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr,
-            A_ptr,
-            B_ptr,
-            shape_A[0], 
-            shape_A[1]
-        )   
+            output_ptr, A_ptr, B_ptr, shape_A[0], shape_A[1]
+        )
     return elapsed_time
 
 
@@ -307,7 +303,7 @@ def perf_conv2d(name, shape_A, shape_B, shape_C, stride, function):
             ctypes.c_int,
             ctypes.c_int,
             ctypes.c_int,
-        ] 
+        ]
         elapsed_time = function(
             input_ptr,
             kernel_ptr,
@@ -315,6 +311,7 @@ def perf_conv2d(name, shape_A, shape_B, shape_C, stride, function):
             *stride,
         )
     return elapsed_time
+
 
 def perf_deformable(shape, function):
     N, M, D = shape[:3]
@@ -403,8 +400,8 @@ def perf_pooling(name, shape, kernel, stride, function, dtype="float32"):
     output_ptr = output_array.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
-    size1 = np.prod(shape)
-    size2 = np.prod(output_np.shape)
+    np.prod(shape)
+    np.prod(output_np.shape)
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
@@ -417,7 +414,15 @@ def perf_pooling(name, shape, kernel, stride, function, dtype="float32"):
     ]
     function.restype = ctypes.c_float
     # Call the function with the matrices and dimensions
-    elapsed_time = function(input_ptr, output_ptr, shape[0],shape[3], shape[1],kernel[0], stride[0],)
+    elapsed_time = function(
+        input_ptr,
+        output_ptr,
+        shape[0],
+        shape[3],
+        shape[1],
+        kernel[0],
+        stride[0],
+    )
     return elapsed_time
 
 
@@ -459,6 +464,7 @@ def perf_pipeline(cuda_file):
     so_name = cuda_file.replace(".cu", ".so")
     success, output = run_compilation(so_name, backup_cuda_file)
     print(output)
+
 
 def benchmark(cuda_file):
     execution_time = 0
@@ -521,7 +527,9 @@ def benchmark(cuda_file):
             (input_width + np.sum(pad_w) - kernel_width) / stride_w + 1
         )
         output_shape = [batch_size, out_height, out_width, output_channel]
-        execution_time = perf_conv2d(name, data_shape, kernel_shape, output_shape, stride_h, function)
+        execution_time = perf_conv2d(
+            name, data_shape, kernel_shape, output_shape, stride_h, function
+        )
 
     elif name == "conv2dnchw":
         data_shape = base_name.split("_")[1:5]
@@ -539,8 +547,9 @@ def benchmark(cuda_file):
             (input_width + np.sum(pad) - kernel_width) / stride_w + 1
         )
         output_shape = [batch_size, output_channel, out_height, out_width]
-        execution_time = perf_conv2d(name, data_shape, kernel_shape, output_shape, stride_h, function)
-
+        execution_time = perf_conv2d(
+            name, data_shape, kernel_shape, output_shape, stride_h, function
+        )
 
     elif name == "gemv":
         shapes = base_name.split(".")[0]

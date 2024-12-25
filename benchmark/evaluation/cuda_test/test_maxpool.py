@@ -3,16 +3,10 @@ import ctypes
 import os
 import subprocess
 
-import numpy as np
 import torch
 
 from benchmark.utils import maxpool_np
 from benchmark.utils import run_cuda_compilation as run_compilation
-
-
-def generate_data(shape, dtype):
-    return np.random.uniform(size=shape).astype(dtype)
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
