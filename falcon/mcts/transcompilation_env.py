@@ -6,7 +6,7 @@ import jax as jx
 import jax.numpy as jnp
 from jax import jit, lax
 
-from benchmark.perf import perf_bang, perf_dlboost
+from benchmark.perf import perf_bang, perf_dlboost, perf_cuda
 from falcon.mcts.actions import actions as ActionSpace
 from falcon.util import get_target
 
@@ -21,7 +21,7 @@ def objective(file_name, target):
     """
     try:
         if target == "CUDA":
-            time_ms = perf_bang.benchmark(file_name)
+            time_ms = perf_cuda.benchmark(file_name)
         elif target == "BANG":
             time_ms = perf_bang.benchmark(file_name)
         elif target == "DL Boost":

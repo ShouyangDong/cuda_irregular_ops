@@ -61,29 +61,9 @@ extern "C" void conv2dnchw_kernel(float *input, float *output, float *kernel,
                  output_height); // 每个块处理一个输出特征图的空间位置
   dim3 numBlocks(output_channels, 1, batch_size); // 每个输出通道对应一个块
 
-  // 启动 CUDA 内核
-  for (int i = 0; i < 10; i++) {
-    conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
-  }
+conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
-  // 定义 CUDA 事件以计算时间
-  cudaEvent_t start, stop;
-  cudaEventCreate(&start);
-  cudaEventCreate(&stop);
 
-  // 启动内核
-  cudaEventRecord(start);
-  for (int i = 0; i < 1000; ++i) {
-    conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
-  }
-  cudaEventRecord(stop);
-  cudaEventSynchronize(stop);
-
-  // 计算执行时间
-  float milliseconds = 0;
-  cudaEventElapsedTime(&milliseconds, start, stop);
-  milliseconds = milliseconds / 1000.0f;
-  printf("Execution time: %f milliseconds\n", milliseconds);
 
   // 将输出数据复制回主机
   cudaMemcpy(output, d_output, output_size * sizeof(float),

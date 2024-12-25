@@ -166,33 +166,7 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
   dim3 blockSize(d / 4);
   dim3 numBlocks(lq, n, m);
   // Launch kernel
-  for (int i = 0; i < 10; i++) {
-    deformable<<<numBlocks, blockSize>>>(
-        d_attention_weights, d_output, d_sampling_locations, d_value,
-        d_value_level_start_index, d_value_spatial_shapes);
-  }
-
-  // 定义 CUDA 事件以计算时间
-  cudaEvent_t start, stop;
-  cudaEventCreate(&start);
-  cudaEventCreate(&stop);
-
-  // 启动内核
-  cudaEventRecord(start);
-  for (int i = 0; i < 1000; ++i) {
-    deformable<<<numBlocks, blockSize>>>(
-        d_attention_weights, d_output, d_sampling_locations, d_value,
-        d_value_level_start_index, d_value_spatial_shapes);
-  }
-  cudaEventRecord(stop);
-  cudaEventSynchronize(stop);
-
-  // 计算执行时间
-  float milliseconds = 0;
-  cudaEventElapsedTime(&milliseconds, start, stop);
-  milliseconds = milliseconds / 1000.0f;
-  printf("Execution time: %f milliseconds\n", milliseconds);
-
+deformable<<<numBlocks, blockSize>>>(d_attention_weights, d_output, d_sampling_locations, d_value,d_value_level_start_index, d_value_spatial_shapes);
   // Copy the result back to host
   cudaMemcpy(output, d_output, n * lq * m * d * sizeof(float),
              cudaMemcpyDeviceToHost);
