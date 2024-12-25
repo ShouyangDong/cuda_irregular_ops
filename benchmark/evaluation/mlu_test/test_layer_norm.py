@@ -26,10 +26,10 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     so_name = args.file.replace(".mlu", ".so")
-    file_name = create_bang_func(args.file, op_type="layernorm")
+    file_name = create_bang_func(args.file, op_type="layer_norm")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
-    lib = CDLL(os.path.join(os.getcwd(), so_name))
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [

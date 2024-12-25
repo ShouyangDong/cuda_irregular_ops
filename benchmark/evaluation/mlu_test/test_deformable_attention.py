@@ -2,16 +2,11 @@ import argparse
 import os
 
 import numpy as np
-import toc
+import ctypes
 import torch
 import torch.nn.functional as F
-import tvm
-import tvm.topi.testing
-from toc import Environment
-from tvm import te
-
-env = Environment("cambricon/mlu590-h8")
-
+from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.utils import run_mlu_compilation as run_compilation
 
 @torch.no_grad()
 def deformable_attention_pytorch(
@@ -81,80 +76,75 @@ def verify_deformable(name, file, shape):
         -2, keepdim=True
     )
 
-    A = te.placeholder([N, S, M, D], dtype="float32", name="A")
-    B = te.placeholder([N, Lq, M, L, P, 2], dtype="float32", name="B")
-    C = te.placeholder([N, Lq, M, L, P], dtype="float32", name="C")
-    shape_pl = te.placeholder([4, 2], dtype="int32", name="shape")
-    output_shape = [N, Lq, M * D]
+    so_name = args.file.replace(".cpp", ".so")
+    with open(args.file, "r") as f:
+        code = f.read()
+        f.close()
 
-    tvm.tir.decl_buffer(A.shape, "float32", "A_buf")
-    tvm.tir.decl_buffer(shape_pl.shape, "int32", "A_buf")
-    tvm.tir.decl_buffer(B.shape, "float32", "B_buf")
-    tvm.tir.decl_buffer(C.shape, "float32", "C_buf")
-    tvm.tir.decl_buffer(output_shape, "float32", "D_buf")
+    with open(
+        os.path.join(os.getcwd(), "benchmark/macro/cpp_macro.txt"), "r"
+    ) as f:
+        macro = f.read()
+        f.close()
+    code = macro + code
 
-    @tvm.register_func("toc_callback_bang_postproc")
-    def toc_callback_bang_postproc(code):
-        with open(file, "r") as f:
-            code = f.read()
-            f.close()
-        code = code.replace(
-            "void " + op_name + "(", "void " + op_name + "_kernel0("
-        )
-        return code
+    file_name = args.file.replace(
+        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
+    )
+    with open(file_name, mode="w") as f:
+        f.write(code)
+        f.close()
 
-    def test_deformable(A, B, C, D, E):
-        n = A.shape[0]
-        prod = np.prod(A.shape[:-1])
-        ib = tvm.tir.ir_builder.create()
-        tx = te.thread_axis("threadIdx.x")
-        bx = te.thread_axis("blockIdx.x")
-        ib.scope_attr(tx, "thread_extent", 4)
-        ib.scope_attr(bx, "thread_extent", N)
+    success, output = run_compilation(so_name, file_name)
+    os.remove(file_name)
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    function = getattr(lib, name + "_kernel")
+    # 定义函数参数和返回类型
+    function.argtypes = [
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+    ]
+    function.restype = None
 
-        Aptr = ib.buffer_ptr(A)
-        Bptr = ib.buffer_ptr(B)
-        Cptr = ib.buffer_ptr(C)
-        Dptr = ib.buffer_ptr(D)
-        Eptr = ib.buffer_ptr(E)
-        with ib.for_range(0, n, name="i") as i:
-            Eptr[i] = Aptr[i] + Bptr[i] + Cptr[i] + Dptr[i]
-        body = ib.get()
-        return body
-
-    out_D = te.extern(
-        output_shape,
-        [A, shape_pl, B, C],
-        lambda ins, outs: test_deformable(
-            ins[0], ins[1], ins[2], ins[3], outs[0]
+    # 创建输出数组
+    output_array = np.zeros(
+        (
+            value.shape[0],
+            sampling_locations.shape[1],
+            value.shape[2] * value.shape[3],
         ),
-        name=op_name,
-        dtype="float32",
+        "float32",
     )
 
-    s = te.create_schedule(out_D.op)
-
-    dev = tvm.device("bang", 0)
-    a = tvm.nd.array(value, dev)
-    b = tvm.nd.array(shapes.int(), dev)
-    d = tvm.nd.array(sampling_locations, dev)
-    e = tvm.nd.array(attention_weights, dev)
-    output = tvm.nd.array(np.zeros(output_shape, "float32"), dev)
-    with toc.build_config(env):
-        f = toc.build(s, [A, shape_pl, B, C, out_D], name=op_name)
-    f(a, b, d, e, output)
-    tvm._ffi.registry.remove_global_func("toc_callback_bang_postproc")
-    torch_da = deformable_attention_pytorch(
-        value, shapes, sampling_locations, attention_weights
+    # 将输入数组和输出数组转换为C指针类型
+    value_ptr = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    shapes_ptr = (
+        shapes.int().numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_int))
     )
-    np.testing.assert_allclose(
-        output.numpy(),
+    sampling_locations_ptr = sampling_locations.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    attention_weights_ptr = attention_weights.numpy().ctypes.data_as(
+        ctypes.POINTER(ctypes.c_float)
+    )
+    output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    # 调用C函数
+    function(
+        value_ptr,
+        shapes_ptr,
+        sampling_locations_ptr,
+        attention_weights_ptr,
+        output_ptr,
+    )
+    torch.allclose(
+        output_array.numpy(),
         torch_da.numpy(),
         rtol=1e-03,
         atol=1e-03,
         equal_nan=True,
-        err_msg="",
-        verbose=True,
     )
 
 

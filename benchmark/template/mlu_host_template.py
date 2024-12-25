@@ -85,7 +85,6 @@ def create_bang_func(file_name, op_type="ewise"):
     elif op_type == "matmul":
         size = ["size1", "size2", "size3"]
         for i, param in enumerate(params):
-            print(size[i])
             name = param.split("*")[1]
             device_memory_alloc.append(param + "_mlu;\n")
             device_memory_alloc.append(
@@ -101,12 +100,43 @@ def create_bang_func(file_name, op_type="ewise"):
         name = params[-1].split("*")[1]
         memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size3 * sizeof(float), cnrtMemcpyDevToHost));\n"
 
+    elif op_type == "layer_norm":
+        size = ["size1", "size2"]
+        for i, param in enumerate(params):
+            name = param.split("*")[1]
+            device_memory_alloc.append(param + "_mlu;\n")
+            if i == 1 or i == 2:
+                device_memory_alloc.append(
+                    f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, size2 * sizeof(float)));\n"
+                )
+            else:
+                device_memory_alloc.append(
+                    f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, size1 * sizeof(float)));\n"
+                )
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            if i == 1 or i == 2:
+                memcpy.append(
+                    f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, size2 * sizeof(float), cnrtMemcpyHostToDev));\n"
+                )
+            else:
+                memcpy.append(
+                    f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, size1 * sizeof(float), cnrtMemcpyHostToDev));\n"
+                )
+        # copy back
+        name = params[-1].split("*")[1]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size1 * sizeof(float), cnrtMemcpyDevToHost));\n"
     memory_free = []
     for param in params:
         name = param.split("*")[1]
         memory_free.append(f"cnrtFree({name}_mlu);\n")
 
-    size_list = ", ".join(arg for arg in ["int " + string for string in size])
+    if isinstance(size, list):
+        size_list = ", ".join(
+            arg for arg in ["int " + string for string in size]
+        )
+    else:
+        size_list = "int size"
 
     cpp_pef_template = Template(
         """
@@ -119,7 +149,7 @@ def create_bang_func(file_name, op_type="ewise"):
 
     extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
         cnrtQueue_t queue;
-        CNRT_CHECK(cnrtSetDevice(0));
+        CNRT_CHECK(cnrtSetDevice(1));
         CNRT_CHECK(cnrtQueueCreate(&queue));
         ${dim}
         ${func_type}

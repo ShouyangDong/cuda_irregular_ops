@@ -39,19 +39,16 @@ if __name__ == "__main__":
 
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, name + "_kernel")
+    function = getattr(lib, "gemv_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_uint16),
         ctypes.POINTER(ctypes.c_uint16),
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(y_ptr, A_ptr, x_ptr, *shape)
+    function(y_ptr, A_ptr, x_ptr)
     # Check if the results match
     np.testing.assert_allclose(
         y_ctypes,

@@ -1,186 +1,59 @@
-import glob
-import os
+import glob  
+import os  
+from tqdm import tqdm  
+from benchmark.utils import run_test  
+from concurrent.futures import ProcessPoolExecutor, as_completed  
 
-from tqdm import tqdm
+def process_file(file):  
+    base_name = os.path.basename(file)  
+    name = base_name.split("_")[0]  
+    test_file_mapping = {  
+        "deformable": "test_deformable_attention.py",  
+        "layernorm": "test_layer_norm.py",  
+        "mha": "test_mha.py",  
+        "rmsnorm": "test_rms_norm.py",  
+        "gemm": "test_gemm.py",  
+        "gemv": "test_gemv.py",  
+        "bmm": "test_bmm.py",  
+        "conv1d": "test_conv1d.py",  
+        "conv2d": "test_conv2d.py",  
+        "conv2dnchw": "test_conv2dNCHW.py",  
+        "depthwiseconv": "test_depthwiseconv.py",  
+        "add": "test_add.py",  
+        "sign": "test_sign.py",  
+        "avgpool": "test_avgpool.py",  
+        "maxpool": "test_maxpool.py",  
+        "minpool": "test_minpool.py",  
+        "sumpool": "test_sumpool.py",  
+        "relu": "test_relu.py",  
+        "sigmoid": "test_sigmoid.py",  
+        "gelu": "test_gelu.py",  
+        "softmax": "test_softmax.py",  
+    }  
 
-from benchmark.utils import run_test
+    if name in test_file_mapping:  
+        test_file = os.path.join(os.getcwd(), "benchmark/evaluation/mlu_test", test_file_mapping[name])  
+        success, output = run_test(file, test_file)  
+        return file, output  
+    return file, None  
 
-if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*pool*.mlu")
-    )
-    counter = 0
-    for file in tqdm(files):
-        base_name = os.path.basename(file)
-        name = base_name.split("_")[0]
-        if name == "deformable":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_deformable_attention.py",
-                ),
-            )
-        elif name == "layernorm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_layer_norm.py",
-                ),
-            )
-        elif name == "mha":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_mha.py"
-                ),
-            )
-        elif name == "rmsnorm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_rms_norm.py",
-                ),
-            )
-        elif name == "gemm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gemm.py"
-                ),
-            )
-        elif name == "gemv":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gemv.py"
-                ),
-            )
-        elif name == "bmm":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_bmm.py"
-                ),
-            )
-        elif name == "conv1d":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_conv1d.py"
-                ),
-            )
-        elif name == "conv2d":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_conv2d.py"
-                ),
-            )
-        elif name == "conv2dnchw":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_conv2dNCHW.py",
-                ),
-            )
-        elif name == "depthwiseconv":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_depthwiseconv.py",
-                ),
-            )
-        elif name == "add":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_add.py"
-                ),
-            )
-        elif name == "sign":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_sign.py"
-                ),
-            )
-        elif name == "avgpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_avgpool.py",
-                ),
-            )
-        elif name == "maxpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_maxpool.py",
-                ),
-            )
-        elif name == "minpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_minpool.py",
-                ),
-            )
-        elif name == "sumpool":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_sumpool.py",
-                ),
-            )
-        elif name == "relu":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_relu.py"
-                ),
-            )
-        elif name == "sigmoid":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_sigmoid.py",
-                ),
-            )
-        elif name == "gelu":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(), "benchmark/evaluation/mlu_test/test_gelu.py"
-                ),
-            )
-        elif name == "softmax":
-            success, output = run_test(
-                file,
-                os.path.join(
-                    os.getcwd(),
-                    "benchmark/evaluation/mlu_test/test_softmax.py",
-                ),
-            )
-        if hasattr(output, "stdout") and "验证通过！" in output.stdout:
-            counter += 1
+if __name__ == "__main__":  
+    files = glob.glob(os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu"))  
+    counter = 0  
 
-        elif isinstance(output, str):
-            print(base_name)
-            print(output)
+    with ProcessPoolExecutor() as executor:  
+        future_to_file = {executor.submit(process_file, file): file for file in files}  
+        
+        for future in tqdm(as_completed(future_to_file), total=len(files)):  
+            file, output = future.result()  
+            base_name = os.path.basename(file)  
 
-    print(counter)
-    print(len(files))
-    print(
-        "[INFO]*******************MLU test computation successfule rate: ",
-        counter / len(files),
-    )
+            if hasattr(output, 'stdout') and "验证通过！" in output.stdout:  
+                counter += 1  
+            elif isinstance(output, str):  
+                print(base_name)  
+                print(output)  
+
+    print(f"Successful tests: {counter}")  
+    print(f"Total files: {len(files)}")  
+    print(f"[INFO]*******************MLU test computation successful rate: {counter / len(files):.2f}")
