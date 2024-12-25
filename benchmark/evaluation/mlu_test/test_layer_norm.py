@@ -39,7 +39,6 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int,
     ]
     function.restype = None
     # 创建输入数组
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(input_ptr, gamma_ptr, beta_ptr, output_ptr, *shape)
+    function(input_ptr, gamma_ptr, beta_ptr, output_ptr, np.prod(shape), np.prod(shape[-1:]))
     # 验证结果
 
     np.testing.assert_allclose(
