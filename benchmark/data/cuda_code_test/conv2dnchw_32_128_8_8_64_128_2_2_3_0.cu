@@ -31,7 +31,7 @@ __global__ void conv2d_nchw(float *input, float *kernel, float *output) {
   }
 }
 
-extern "C" void conv2dnchw_kernel(float *input, float *output, float *kernel,
+extern "C" void conv2dnchw_kernel(float *input, float *kernel, float *output, 
                                   int batch_size, int input_height,
                                   int input_channels, int output_channels,
                                   int kernel_height, int stride) {

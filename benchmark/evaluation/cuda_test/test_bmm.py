@@ -60,9 +60,9 @@ if __name__ == "__main__":
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
+        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_uint16),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_uint16),
-        ctypes.POINTER(ctypes.c_uint16),
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
