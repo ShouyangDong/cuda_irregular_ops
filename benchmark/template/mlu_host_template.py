@@ -86,19 +86,22 @@ def create_bang_func(file_name, op_type="ewise"):
         size = ["size1", "size2", "size3"]
         for i, param in enumerate(params):
             name = param.split("*")[1]
+            dtype = param.split("*")[0]
             device_memory_alloc.append(param + "_mlu;\n")
             device_memory_alloc.append(
-                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size[i]} * sizeof(float)));\n"
+                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size[i]} * sizeof({dtype})));\n"
             )
 
         for i, param in enumerate(params[:-1]):
             name = param.split("*")[1]
+            dtype = param.split("*")[0]
             memcpy.append(
-                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size[i]} * sizeof(float), cnrtMemcpyHostToDev));\n"
+                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size[i]} * sizeof({dtype}), cnrtMemcpyHostToDev));\n"
             )
         # copy back
         name = params[-1].split("*")[1]
-        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size3 * sizeof(float), cnrtMemcpyDevToHost));\n"
+        dtype = params[-1].split("*")[0]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size3 * sizeof({dtype}), cnrtMemcpyDevToHost));\n"
 
     elif op_type == "layer_norm":
         size = ["size1", "size2"]
@@ -169,6 +172,7 @@ def create_bang_func(file_name, op_type="ewise"):
     cleaned_code = re.sub(pattern, "", original_function)
 
     called_param_list = mlu_param_list.replace("float *", "")
+    called_param_list = called_param_list.replace("int8 *", "")
     called_param_list = called_param_list.replace("int *", "")
     memcpy_alloc_list = "        ".join(alloc for alloc in device_memory_alloc)
     memcpy_list = "        ".join(cpy for cpy in memcpy)

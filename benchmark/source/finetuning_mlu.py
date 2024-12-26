@@ -28,10 +28,10 @@ TARGET = "mlu590-h8"
 def matmul(N, L, M):
     tcps = tcp.TCP(TARGET)
     data = tcps.Buffer(
-        shape=(N, L), name="data", dtype=bp.int16, scope="global"
+        shape=(N, L), name="data", dtype=bp.int8, scope="global"
     )
     filters = tcps.Buffer(
-        shape=(L, M), name="filter", dtype=bp.int16, scope="global"
+        shape=(L, M), name="filter", dtype=bp.int8, scope="global"
     )
     output = tcps.Buffer(
         shape=(N, M), name="output", dtype=bp.float32, scope="global"
@@ -47,7 +47,7 @@ def matmul(N, L, M):
     N_o, N_i = cfg["tile_N"].apply(N)
     M_o, M_i = cfg["tile_M"].apply(M // 64)
     data_block = tcps.Buffer(
-        shape=(1, L), name="date_block", dtype=bp.int16, scope="nram"
+        shape=(1, L), name="date_block", dtype=bp.int8, scope="nram"
     )
     with tcps.for_range(0, N_o) as no:
         with tcps.for_range(0, N_i) as ni:
@@ -64,7 +64,7 @@ def matmul(N, L, M):
                 filter_block = tcps.Buffer(
                     shape=(L, 64 * M_i),
                     name="filter_block",
-                    dtype=bp.int16,
+                    dtype=bp.int8,
                     scope="wram",
                 )
                 output_block = tcps.Buffer(
@@ -141,13 +141,13 @@ a_np = np.random.uniform(low=0, high=1, size=(N, L))
 w_np = np.random.uniform(low=0, high=1, size=(L, M))
 c_np = np.random.uniform(low=0, high=1, size=(N, M))
 dev = bp.device(0)
-a_bp = bp.Array(a_np.astype(np.int16), dev)
-w_bp = bp.Array(w_np.astype(np.int16), dev)
+a_bp = bp.Array(a_np.astype(np.int8), dev)
+w_bp = bp.Array(w_np.astype(np.int8), dev)
 c_bp = bp.Array(c_np.astype(np.float32), dev)
 f_matmul(a_bp, w_bp, c_bp)
 bp.assert_allclose(
     c_bp.numpy(),
-    np.matmul(a_np.astype("int16"), w_np.astype("int16")).astype("float32"),
+    np.matmul(a_np.astype("int8"), w_np.astype("int8")).astype("float32"),
     rtol=1e-2,
     atol=1e-2,
 )

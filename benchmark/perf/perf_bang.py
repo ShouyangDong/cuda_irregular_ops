@@ -290,7 +290,7 @@ def benchmark(file_name):
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         shape_A = [1, shape[0], shape[1]]
-        shape_B = [1, shape[2], shape[1]]
+        shape_B = [1, shape[1], shape[2]]
         shape_C = [1, shape[0], shape[2]]
         execution_time = perf_binary(name, shape_A, shape_B, shape_C, function)
 
