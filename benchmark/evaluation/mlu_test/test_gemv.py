@@ -24,8 +24,8 @@ if __name__ == "__main__":
     y_ctypes = np.zeros(shape[0], dtype=np.float32)
 
     # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_uint16))
-    x_ptr = x.ctypes.data_as(ctypes.POINTER(ctypes.c_uint16))
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    x_ptr = x.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     y_ptr = y_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
     # Perform gemm using numpy
@@ -43,12 +43,15 @@ if __name__ == "__main__":
     # 定义函数参数和返回类型
     function.argtypes = [
         ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_uint16),
-        ctypes.POINTER(ctypes.c_uint16),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(y_ptr, A_ptr, x_ptr)
+    function(A_ptr, x_ptr, y_ptr, np.prod(shape), shape[1], shape[0])
     # Check if the results match
     np.testing.assert_allclose(
         y_ctypes,

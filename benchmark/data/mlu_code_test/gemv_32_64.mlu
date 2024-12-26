@@ -1,4 +1,4 @@
-extern "C" __mlu_global__ void gemv(float *y, float *A, float *B) {
+extern "C" __mlu_global__ void gemv(float *A, float *B, float *y) {
   __nram__ float local_A[64];
   __nram__ float local_B[64];
   for (int i = 0; i < 32; i++) {

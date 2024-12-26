@@ -47,7 +47,7 @@ def process_file(file):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/bmm*.mlu")
+        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/gemv*.mlu")
     )
     counter = 0
 

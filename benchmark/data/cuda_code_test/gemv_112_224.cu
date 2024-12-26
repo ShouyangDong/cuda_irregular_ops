@@ -1,4 +1,4 @@
-__global__ void gemv(float *y, float *A, float *x) {
+__global__ void gemv(float *A, float *x, float *y) {
   int row = blockIdx.x * blockDim.x + threadIdx.x;
   if (row < 112) {
     float sum = 0.0f;
@@ -9,7 +9,7 @@ __global__ void gemv(float *y, float *A, float *x) {
   }
 }
 
-extern "C" void gemv_kernel(float *y, float *A, float *x, int m, int n) {
+extern "C" void gemv_kernel(float *A, float *x, float *y, int m, int n) {
   float *d_A, *d_x, *d_y;
 
   cudaMalloc(&d_A, m * n * sizeof(float));
