@@ -3,7 +3,7 @@ __global__ void __launch_bounds__(60)
   compute[((int)threadIdx.x)] = max(A[((int)threadIdx.x)], 0.000000e+00f);
 }
 
-extern "C" void relu_kernel(float *C, float *A, int size) {
+extern "C" void relu_kernel(float *A, float *C, int size) {
   float *d_A;
   float *d_C;
 

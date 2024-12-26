@@ -4,7 +4,7 @@ __global__ void __launch_bounds__(320)
   T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
 }
 
-extern "C" void add_kernel(float *C, float *A, float *B, int size) {
+extern "C" void add_kernel(float *A, float *B, float *C, int size) {
   float *d_A;
   float *d_B;
   float *d_C;

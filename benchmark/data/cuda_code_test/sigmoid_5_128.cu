@@ -5,7 +5,7 @@ __global__ void __launch_bounds__(640)
        (1.000000e+00f + __expf((0.000000e+00f - A[((int)threadIdx.x)]))));
 }
 
-extern "C" void sigmoid_kernel(float *C, float *A, int size) {
+extern "C" void sigmoid_kernel(float *A, float *C, int size) {
   float *d_A;
   float *d_C;
 

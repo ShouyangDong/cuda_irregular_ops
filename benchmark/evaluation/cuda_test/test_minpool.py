@@ -70,8 +70,8 @@ if __name__ == "__main__":
     function.restype = None
     # Call the function with the matrices and dimensions
     function(
-        output_ptr,
         input_ptr,
+        output_ptr,
         shape[0],
         shape[3],
         shape[1],

@@ -74,7 +74,7 @@ if __name__ == "__main__":
         (batch_size, matrix_dim_i, matrix_dim_k), dtype=np.float32
     )
     output_ptr = result_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    function(output_ptr, A_ptr, B_ptr, *shape)
+    function(A_ptr, B_ptr, output_ptr, *shape)
     # Check if the results match
     np.testing.assert_allclose(
         result_ctypes,

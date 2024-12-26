@@ -11,7 +11,7 @@ __global__ void __launch_bounds__(640)
   compute[((int)threadIdx.x)] = geluf(A[((int)threadIdx.x)]);
 }
 
-extern "C" void gelu_kernel(float *C, float *A, int size) {
+extern "C" void gelu_kernel(float *A, float *C, int size) {
   float *d_A;
   float *d_C;
 

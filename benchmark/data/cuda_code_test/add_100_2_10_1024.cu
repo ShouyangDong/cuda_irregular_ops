@@ -19,7 +19,7 @@ __global__ void __launch_bounds__(1024)
   }
 }
 
-extern "C" void add_kernel(float *C, float *A, float *B, int size) {
+extern "C" void add_kernel(float *A, float *B, float *C, int size) {
   float *d_A;
   float *d_B;
   float *d_C;

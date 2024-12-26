@@ -193,9 +193,9 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr,
             A_ptr,
             B_ptr,
+            output_ptr,
             *shape,
         )
     elif name in ["conv1d"]:
@@ -213,7 +213,7 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr, A_ptr, B_ptr, shape_A[0], shape_A[0] - shape_B[0] + 1
+            A_ptr, B_ptr, output_ptr, shape_A[0], shape_A[0] - shape_B[0] + 1
         )
     elif name in ["gemv"]:
         # Convert the matrices to contiguous memory for ctypes
@@ -230,7 +230,7 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr, A_ptr, B_ptr, shape_A[0], shape_A[1]
+            A_ptr, B_ptr, output_ptr, shape_A[0], shape_A[1]
         )
     return elapsed_time
 
@@ -262,9 +262,9 @@ def perf_conv2d(name, shape_A, shape_B, shape_C, stride, function):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr,
             input_ptr,
             kernel_ptr,
+            output_ptr,
             shape_A[0],
             shape_A[1],
             shape_A[3],
@@ -285,9 +285,9 @@ def perf_conv2d(name, shape_A, shape_B, shape_C, stride, function):
             ctypes.c_int,
         ]
         elapsed_time = function(
-            output_ptr,
             input_ptr,
             kernel_ptr,
+            output_ptr,
             shape_A[0],
             shape_A[2],
             shape_A[1],

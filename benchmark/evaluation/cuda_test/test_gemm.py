@@ -66,7 +66,7 @@ if __name__ == "__main__":
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(y_ptr, A_ptr, x_ptr, *shape)
+    function(A_ptr, x_ptr, y_ptr, *shape)
     # Check if the results match
     np.testing.assert_allclose(
         y_ctypes,

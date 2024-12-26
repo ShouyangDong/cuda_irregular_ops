@@ -23,7 +23,7 @@ __global__ void __launch_bounds__(1024)
   }
 }
 
-extern "C" void softmax_kernel(float *C, float *A, int size1, int size2) {
+extern "C" void softmax_kernel(float *A, float *C, int size1, int size2) {
   float *d_A;
   float *d_C;
 

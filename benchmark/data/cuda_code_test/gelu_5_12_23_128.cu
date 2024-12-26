@@ -13,7 +13,7 @@ __global__ void __launch_bounds__(1024)
   }
 }
 
-extern "C" void gelu_kernel(float *C, float *A, int size) {
+extern "C" void gelu_kernel(float *A, float *C, int size) {
   float *d_A;
   float *d_C;
 

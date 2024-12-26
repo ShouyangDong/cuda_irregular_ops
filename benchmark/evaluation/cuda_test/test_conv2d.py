@@ -88,9 +88,9 @@ if __name__ == "__main__":
     )
     # Call the function with the matrices and dimensions
     function(
-        output_ptr,
         input_ptr,
         kernel_ptr,
+        output_ptr,
         data_shape[0],
         data_shape[1],
         data_shape[3],

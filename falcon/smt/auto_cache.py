@@ -262,7 +262,7 @@ def ast_auto_cache(code, space_map, target="BANG"):
 if __name__ == "__main__":
     # 示例代码和 space_map
     code = """
-    void __bang_add(float *C, float *A, float *B) {
+    void __bang_add(float *A, float *C, float *B) {
         #pragma __bang_add(input[Nram, Nram], output[Nram])
         for (int i_add = 0; i_add < 128; i_add++) {
             C[i_add] = A[i_add] + B[i_add];
