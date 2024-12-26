@@ -11,7 +11,7 @@ from benchmark.utils import run_mlu_compilation as run_compilation
 
 # Define the batch matrix multiplication function using numpy
 def batch_matmul(A, B):
-    return np.matmul(A, B)
+    return np.matmul(A.astype(np.int16), B.astype(np.int16)).astype(np.float32)
 
 
 if __name__ == "__main__":
@@ -23,15 +23,15 @@ if __name__ == "__main__":
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     # Generate random matrices for testing
     batch_size, matrix_dim_i, matrix_dim_j, matrix_dim_k = shape
-    A = np.ones((batch_size, matrix_dim_i, matrix_dim_j)).astype("float32")
-    B = np.ones((batch_size, matrix_dim_j, matrix_dim_k)).astype("float32")
+    A = np.ones((batch_size, matrix_dim_i, matrix_dim_j), dtype=np.int8)
+    B = np.ones((batch_size, matrix_dim_j, matrix_dim_k), dtype=np.int8)
 
     # Perform batch matrix multiplication using numpy
     result_np = batch_matmul(A, B)
 
     # Convert the matrices to contiguous memory for ctypes
-    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+    A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_int8))
+    B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_int8))
     name = base_name.split("_")[0]
     so_name = args.file.replace(".mlu", ".so")
     file_name = create_bang_func(args.file, op_type="matmul")
@@ -43,8 +43,8 @@ if __name__ == "__main__":
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
+        ctypes.POINTER(ctypes.c_int8),
+        ctypes.POINTER(ctypes.c_int8),
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
         ctypes.c_int,

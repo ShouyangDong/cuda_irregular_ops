@@ -1,14 +1,12 @@
  extern "C" __mlu_global__ void bmm(int8 *data, int8 *filter, float *output) {
-  __nram__ int8 date_block[1536];
-  __wram__ int8 filter_block[131072];
-  for (int i = 0; i < 64; ++i) {
-    for (int j = 0; j < 8; ++j) {
-      __memcpy(((int8 *)date_block + (0)), ((int8 *)data + (((i * 4096) + (j * 512)))), 512, GDRAM2NRAM);
-      for (int k = 0; k < 2; ++k) {
-        __memcpy(((int8 *)filter_block + (0)), ((int8 *)filter + ((k * 256))), 256, GDRAM2WRAM, 256, 512, 511);
-        __bang_mlp(((float *)date_block + (128)), ((int8 *)date_block + (0)), ((int8 *)filter_block + (0)), 512, 256, 0);
-        __memcpy(((float *)output + ((((i * 4096) + (j * 512)) + (k * 256)))), ((float *)date_block + (128)), 1024, NRAM2GDRAM);
-      }
+  __nram__ int8 date_block[2560];
+  __wram__ int8 filter_block[262144];
+  for (int i = 0; i < 128; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      __memcpy(((int8 *)date_block + (0)), ((int8 *)data + (((i * 2048) + (j * 512)))), 512, GDRAM2NRAM);
+      __memcpy(((int8 *)filter_block + (0)), ((int8 *)filter + (0)), 262144, GDRAM2WRAM);
+      __bang_mlp(((float *)date_block + (512)), ((int8 *)date_block + (0)), ((int8 *)filter_block + (0)), 512, 512, 0);
+      __memcpy(((float *)output + (((i * 2048) + (j * 512)))), ((float *)date_block + (512)), 2048, NRAM2GDRAM);
     }
   }
 }

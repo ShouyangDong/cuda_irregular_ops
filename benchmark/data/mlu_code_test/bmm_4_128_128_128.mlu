@@ -1,16 +1,12 @@
-extern "C" __mlu_global__ void bmm(float *A, float *B, float *C) {
-  __nram__ float A_nram[32 * 128];
-  __wram__ float B_wram[128 * 128];
-  __nram__ float C_nram[32 * 128];
-  if (clusterId < 4) {
-    if (coreId < 4) {
-      __memcpy(A_nram, A + (clusterId * 4 + coreId) * 32 * 128, 32 * 128 * 4,
-               GDRAM2NRAM);
-      __memcpy(B_wram, B + (clusterId * 4 + coreId) * 128 * 128, 128 * 128 * 4,
-               GDRAM2WRAM);
-      __bang_matmul(C_nram, A_nram, B_wram, 32, 128, 128);
-      __memcpy(C + (clusterId * 4 + coreId) * 32 * 128, C_nram, 32 * 128 * 4,
-               NRAM2GDRAM);
+extern "C" __mlu_global__ void bmm(int8 *data, int8 *filter, float *output) {
+  __nram__ int8 date_block[384];
+  __wram__ int8 filter_block[16384];
+  for (int i = 0; i < 8; ++i) {
+    for (int j = 0; j < 16; ++j) {
+      __memcpy(((int8 *)date_block + (0)), ((int8 *)data + coreId * 16384 + (((i * 2048) + (j * 128)))), 128, GDRAM2NRAM);
+      __memcpy(((int8 *)filter_block + (0)), ((int8 *)filter + coreId * 16384), 16384, GDRAM2WRAM);
+      __bang_mlp(((float *)date_block + (128)), ((int8 *)date_block + (0)), ((int8 *)filter_block + (0)), 128, 128, 0);
+      __memcpy(((float *)output + ((((coreId * 16384) + (i * 2048) + (j * 128))))), ((float *)date_block + (128)), 512, NRAM2GDRAM);
     }
   }
 }
