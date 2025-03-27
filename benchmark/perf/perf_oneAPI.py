@@ -111,7 +111,6 @@ def perf_bmm(name, shape_A, shape_B):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -133,7 +132,6 @@ def perf_activation(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_activation, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -156,7 +154,6 @@ def perf_conv2d_nchw(
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -186,7 +183,6 @@ def perf_conv2d_nhwc(
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -202,7 +198,6 @@ def perf_gemv(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_gemv, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -220,7 +215,6 @@ def perf_conv1d(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_conv1d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -252,7 +246,6 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_depthwise_conv2d, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -268,7 +261,6 @@ def perf_layernorm(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_layernorm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -284,7 +276,6 @@ def perf_rmsnorm(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_rmsnorm, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -321,7 +312,6 @@ def perf_deformable(name, shape):
 
     # 使用 timeit 进行多次测量，设置执行次数为 100
     execution_time = timeit.timeit(test_deformable, number=100)
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 
@@ -340,7 +330,6 @@ def perf_scaled_dot_product_attention(name, shape):
     execution_time = timeit.timeit(
         test_scaled_dot_product_attention, number=100
     )
-    print(f"{name} execution time: {execution_time * 10} ms")
     return execution_time * 10
 
 

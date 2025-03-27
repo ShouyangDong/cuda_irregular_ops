@@ -66,13 +66,7 @@ def perf_elementwise(name, shape):
                 torch.sign(x)
         end.record()
         torch.mlu.current_stream().synchronize()
-        print(p.key_averages().table(sort_by="self_mlu_time_total"))
-        key_averages = p.key_averages()
-        time = 0
-        for avg in key_averages:
-            if avg.key == "aten::sign":  # 根据 key 找到你需要的操作
-                time = avg.mlu_time
-
+        time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
         return time
 
 
@@ -159,13 +153,7 @@ def perf_pooling(name, shape, kernel, stride):
     end.record()
     torch.mlu.current_stream().synchronize()
 
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == ("aten::" + name):  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -197,13 +185,7 @@ def perf_bmm(name, shape_A, shape_B):
             test_gemm()
     end.record()
     torch.mlu.current_stream().synchronize()
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::matmul":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -240,14 +222,7 @@ def perf_activation(name, shape):
             test_activation()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == ("aten::" + op_name):  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -287,14 +262,7 @@ def perf_conv2d_nchw(
             test_conv2d()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::conv2d":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -305,7 +273,6 @@ def perf_conv2d_nhwc(
     weight_hwio = torch.randn(
         [out_channels, kernel, kernel, shape[3]], device=device
     )
-    print(weight_hwio.shape)
 
     def test_conv2d():
         # 将输入从 NHWC 转换到 NCHW
@@ -340,14 +307,7 @@ def perf_conv2d_nhwc(
             test_conv2d()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::conv2d":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -379,14 +339,7 @@ def perf_gemv(name, shape):
             test_gemv()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::matmul":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -417,14 +370,7 @@ def perf_conv1d(name, shape):
             test_conv1d()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::conv1d":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -472,7 +418,6 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
     end.record()
     torch.mlu.current_stream().synchronize()
 
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
     return start.elapsed_time(end) / nb_iters
 
 
@@ -505,13 +450,7 @@ def perf_layernorm(name, shape):
     end.record()
     torch.mlu.current_stream().synchronize()
 
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::layer_norm":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -543,14 +482,7 @@ def perf_rmsnorm(name, shape):
             test_rmsnorm()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if avg.key == "aten::rmsnorm":  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -604,16 +536,7 @@ def perf_deformable(name, shape):
             test_deformable()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if (
-            avg.key == "aten::scaled_dot_product_attention"
-        ):  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
@@ -646,16 +569,7 @@ def perf_scaled_dot_product_attention(name, shape):
             test_scaled_dot_product_attention()
     end.record()
     torch.mlu.current_stream().synchronize()
-
-    print(p.key_averages().table(sort_by="self_mlu_time_total"))
-    key_averages = p.key_averages()
-    time = 0
-    for avg in key_averages:
-        if (
-            avg.key == "aten::scaled_dot_product_attention"
-        ):  # 根据 key 找到你需要的操作
-            time = avg.mlu_time
-
+    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
     return time
 
 
