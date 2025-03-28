@@ -7,6 +7,13 @@ import mctx
 import pygraphviz
 
 
+def open_file(file_name):
+    with open(file_name, "r") as f:
+        code = f.read()
+        f.close()
+    return code
+
+
 def convert_tree_to_graph(
     tree: mctx.Tree,
     action_labels: Optional[Sequence[str]] = None,

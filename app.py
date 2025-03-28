@@ -39,19 +39,36 @@ with gr.Blocks() as demo:
     with gr.Row():
 
         source_platform = gr.Dropdown(
-            choices=["Intel DL Boost", "NVIDIA GPU", "AMD MI", "Cambricon MLU"],
+            choices=[
+                "Intel DL Boost",
+                "NVIDIA GPU",
+                "AMD MI",
+                "Cambricon MLU",
+            ],
             label="Select source platform",
         )
-        inp = gr.Textbox(placeholder="Enter the source code", label="Source code")
+        inp = gr.Textbox(
+            placeholder="Enter the source code", label="Source code"
+        )
         target_platform = gr.Dropdown(
-            choices=["Intel DL Boost", "NVIDIA GPU", "AMD MI", "Cambricon MLU"],
+            choices=[
+                "Intel DL Boost",
+                "NVIDIA GPU",
+                "AMD MI",
+                "Cambricon MLU",
+            ],
             label="Select target platform",
         )
 
     gr.HTML("""<h1> Sequentialization/Parallelization </h1>""")
     with gr.Row():
         dropdown = gr.Dropdown(
-            choices=["Loop Reorder", "Loop Split", "Loop Fusion", "Loop Recovery"],
+            choices=[
+                "Loop Reorder",
+                "Loop Split",
+                "Loop Fusion",
+                "Loop Recovery",
+            ],
             label="Select a loop transformation option",
         )
         btn = gr.Button("Run")
@@ -68,7 +85,9 @@ with gr.Blocks() as demo:
         mem_btn = gr.Button("Run")
         mem_out = gr.Textbox(label="Target code")
 
-    mem_btn.click(fn=memory_conversion, inputs=[out, dropdown], outputs=mem_out)
+    mem_btn.click(
+        fn=memory_conversion, inputs=[out, dropdown], outputs=mem_out
+    )
 
     gr.HTML("""<h1> (De)tensorization </h1>""")
     with gr.Row():

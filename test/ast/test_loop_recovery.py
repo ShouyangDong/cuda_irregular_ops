@@ -2,8 +2,8 @@ import re
 
 from pycparser import c_ast, c_generator, c_parser
 
-from falcon.util import NodeTransformer
 from falcon.util import NodeTransformer, remove_target_prefix
+
 # TODO(dongshouyang): Add more varaibles
 ParaVar = {"threadIdx.x": 1024, "blockIdx.x": 256, "coreId": 4, "clusterId": 4}
 

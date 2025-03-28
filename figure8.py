@@ -25,7 +25,10 @@ index = np.arange(len(targets))
 
 for i, operator in enumerate(operators):
     rects = ax[0].bar(
-        index + i * bar_width, matmul_performance[operator], bar_width, label=operator
+        index + i * bar_width,
+        matmul_performance[operator],
+        bar_width,
+        label=operator,
     )
     for rect in rects:
         height = rect.get_height()
@@ -49,7 +52,10 @@ ax[0].set_ylim(0, 20)  # Adjust the y-axis limits for better visibility
 
 for i, operator in enumerate(operators):
     rects = ax[1].bar(
-        index + i * bar_width, conv2d_performance[operator], bar_width, label=operator
+        index + i * bar_width,
+        conv2d_performance[operator],
+        bar_width,
+        label=operator,
     )
     for rect in rects:
         height = rect.get_height()

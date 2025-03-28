@@ -66,7 +66,11 @@ def perf_elementwise(name, shape):
                 torch.sign(x)
         end.record()
         torch.mlu.current_stream().synchronize()
-        time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+        time = (
+            prof.key_averages().total_average().self_mlu_time_total
+            / 1e3
+            / 1000
+        )
         return time
 
 

@@ -64,7 +64,9 @@ def perf_elementwise(name, shape):
                 torch.sign(x)
         end.record()
         torch.cuda.current_stream().synchronize()
-        time = p.key_averages().total_average().self_cuda_time_total / 1e3 / 1000
+        time = (
+            p.key_averages().total_average().self_cuda_time_total / 1e3 / 1000
+        )
         return time
 
 
