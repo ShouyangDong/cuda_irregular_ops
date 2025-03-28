@@ -1,3 +1,4 @@
+import csv
 import glob
 import os
 import timeit
@@ -335,9 +336,7 @@ def perf_scaled_dot_product_attention(name, shape):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(
-            os.getcwd(), "benchmark/data/cpp_code_test/depthwiseconv*.cpp"
-        )
+        os.path.join(os.getcwd(), "benchmark/data/cpp_code_test/*.cpp")
     )
     counter = 0
     execution_time = 0
@@ -467,7 +466,7 @@ if __name__ == "__main__":
 
     table.append(files)
     table.append(times)
-    print(times)
+
     # 转置数据
     transposed_data = list(zip(*table))
 
@@ -475,7 +474,7 @@ if __name__ == "__main__":
     header = ["file", "time(ms)"]
     transposed_data.insert(0, header)
 
-    # # 保存为CSV文件
-    # with open("benchmark/perf/oneAPI_output.csv", "w", newline="") as file:
-    #     writer = csv.writer(file)
-    #     writer.writerows(transposed_data)
+    # 保存为CSV文件
+    with open("benchmark/perf/oneAPI_output.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(transposed_data)

@@ -4,9 +4,6 @@ import os
 import torch
 import torch.nn.functional as F
 
-# torch.set_float32_matmul_precision('medium')
-# torch.backends.cudnn.deterministic = True
-
 device = torch.device("mlu")
 
 
@@ -36,13 +33,11 @@ def perf_elementwise(name, shape):
                 torch.add(x, y)
         end.record()
         torch.mlu.current_stream().synchronize()
-        print(p.key_averages().table(sort_by="self_mlu_time_total"))
-        key_averages = p.key_averages()
-        time = 0
-        for avg in key_averages:
-            if avg.key == "aten::add":  # 根据 key 找到你需要的操作
-                time = avg.mlu_time
-
+        time = (
+            p.key_averages().total_average().self_device_time_total
+            / 1e3
+            / 1000
+        )
         return time
 
     elif op_name == "sign":
@@ -67,7 +62,7 @@ def perf_elementwise(name, shape):
         end.record()
         torch.mlu.current_stream().synchronize()
         time = (
-            prof.key_averages().total_average().self_mlu_time_total
+            p.key_averages().total_average().self_device_time_total
             / 1e3
             / 1000
         )
@@ -157,7 +152,7 @@ def perf_pooling(name, shape, kernel, stride):
     end.record()
     torch.mlu.current_stream().synchronize()
 
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -189,7 +184,7 @@ def perf_bmm(name, shape_A, shape_B):
             test_gemm()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -226,7 +221,7 @@ def perf_activation(name, shape):
             test_activation()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -266,7 +261,7 @@ def perf_conv2d_nchw(
             test_conv2d()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -311,7 +306,7 @@ def perf_conv2d_nhwc(
             test_conv2d()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -343,7 +338,7 @@ def perf_gemv(name, shape):
             test_gemv()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -374,7 +369,7 @@ def perf_conv1d(name, shape):
             test_conv1d()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -454,7 +449,7 @@ def perf_layernorm(name, shape):
     end.record()
     torch.mlu.current_stream().synchronize()
 
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -486,7 +481,7 @@ def perf_rmsnorm(name, shape):
             test_rmsnorm()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -540,7 +535,7 @@ def perf_deformable(name, shape):
             test_deformable()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
@@ -573,13 +568,13 @@ def perf_scaled_dot_product_attention(name, shape):
             test_scaled_dot_product_attention()
     end.record()
     torch.mlu.current_stream().synchronize()
-    time = prof.key_averages().total_average().self_mlu_time_total / 1e3 / 1000
+    time = p.key_averages().total_average().self_device_time_total / 1e3 / 1000
     return time
 
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/conv1d_*.cu")
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu")
     )
     counter = 0
     execution_time = 0
@@ -694,11 +689,11 @@ if __name__ == "__main__":
 
         elif name == "rmsnorm":
             # TODO:torch >= 2.4.0
-            # shapes = base_name.split(".")[0]
-            # shape = [int(intg) for intg in shapes.split("_")[1:]]
-            # execution_time = perf_rmsnorm(base_name, shape)
-            continue
-            times.append(0)
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            execution_time = perf_rmsnorm(base_name, shape)
+            times.append(execution_time)
+
         elif name == "deformable":
             # shapes = base_name.split(".")[0]
             # shape = [int(intg) for intg in shapes.split("_")[1:]]
