@@ -174,7 +174,7 @@ Application Scenario:
 Tensor contraction is commonly applied in scenarios where two or more loops operate over dimensions with identical sizes and memory strides. This is particularly useful in optimizing tensor operations in deep learning models, such as matrix multiplications, convolutions, and backpropagation. By reducing the number of loops, tensor contraction helps minimize the overhead of loop management and improves the efficiency of data accesses, which is critical in handling large-scale tensor computations in fields like scientific computing, machine learning, and quantum physics.
 """
 
-TENSOR_COMTRACTION_DEMO = """
+TENSOR_CONTRACTION_DEMO = """
 Usage Examples:
 before:
 ```cpp

@@ -77,6 +77,21 @@ class LoopNestFusionVisitor(NodeTransformer):
         return c_generator.CGenerator().visit(node)
 
 
+def ast_loop_contraction(c_code):
+    """Start to run loop contraction."""
+    # 1. 解析
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+
+    # 2. 转换（融合循环）
+    visitor = LoopNestFusionVisitor()
+    new_ast = visitor.visit(ast)
+
+    # 3. 生成 C 代码
+    generator = c_generator.CGenerator()
+    return generator.visit(new_ast)
+
+
 if __name__ == "__main__":
     code = r"""
     void kernel(float A[N][M], float B[N][M], float C[N][M], float D[N][M]) {

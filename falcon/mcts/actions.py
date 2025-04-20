@@ -2,8 +2,10 @@ import json
 import random
 
 from falcon.smt.auto_cache import ast_auto_cache
+from falcon.smt.loop_transformation.loop_contraction import (
+    ast_loop_contraction,
+)
 from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
-from falcon.smt.loop_transformation.loop_inline import ast_loop_inline
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.loop_transformation.loop_reorder import ast_loop_reorder
 from falcon.smt.loop_transformation.loop_split import ast_loop_split
@@ -13,6 +15,7 @@ from falcon.smt.tensorization.tensorization import ast_tensorization
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
+    run_loop_contraction,
     run_loop_fusion,
     run_loop_reorder,
     run_split_annotation,
@@ -75,7 +78,7 @@ def loop_split(file_name, code, source_platform, target_platform):
 def loop_contraction(file_name, code, source_platform, target_platform):
     final_code = run_loop_contraction(code)
     if not unit_test(file_name, final_code):
-        final_code = ast_loop_inline(code)
+        final_code = ast_loop_contraction(code)
     return final_code
 
 
@@ -148,8 +151,8 @@ if __name__ == "__main__":
         }
     }
     """
-    source = "CUDA"
-    target = "BANG"
+    source_platform = "CUDA"
+    target_platform = "BANG"
     file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
     selected_function = random.choice(actions)
     # 调用随机选择的函数

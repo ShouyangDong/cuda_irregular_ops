@@ -15,6 +15,8 @@ from falcon.src.loop_transformation.pass_prompt import (
     LOOP_REORDER_PROMPT,
     LOOP_SPLIT_DEMO,
     LOOP_SPLIT_PROMPT,
+    TENSOR_CONTRACTION,
+    TENSOR_CONTRACTION_DEMO,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
@@ -108,6 +110,35 @@ def run_apply_split(code):
 
     PROMPT = PROMPT.replace("{LOOP_SPLIT_PROMPT}", LOOP_SPLIT_PROMPT)
     PROMPT = PROMPT.replace("{LOOP_SPLIT_DEMO}", LOOP_SPLIT_DEMO)
+    PROMPT = PROMPT.replace("{code}", code)
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": PROMPT}],
+    )
+
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
+    if match:
+        code_content = match.group(1).strip()
+        code_content = constant_inline(code_content)
+        code_content = ast_stmt_simplification(code_content)
+        return code_content
+    return None
+
+
+def run_loop_contraction(code):
+    PROMPT = """
+    {SYSTEM_PROMPT}
+    {TENSOR_CONTRACTION}
+    {TENSOR_CONTRACTION_DEMO}
+    Please return the output kernel function without any additional information.
+    """
+    PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
+
+    PROMPT = PROMPT.replace("{TENSOR_CONTRACTION}", TENSOR_CONTRACTION)
+    PROMPT = PROMPT.replace(
+        "{TENSOR_CONTRACTION_DEMO}", TENSOR_CONTRACTION_DEMO
+    )
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
