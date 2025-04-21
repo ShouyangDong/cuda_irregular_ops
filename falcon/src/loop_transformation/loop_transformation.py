@@ -139,6 +139,7 @@ def run_loop_contraction(code):
     PROMPT = PROMPT.replace(
         "{TENSOR_CONTRACTION_DEMO}", TENSOR_CONTRACTION_DEMO
     )
+    print('[INOF]*******org: ', code)
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
@@ -149,6 +150,7 @@ def run_loop_contraction(code):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
+        print("[INFO]**************code_conte: ", code_content)
         code_content = constant_inline(code_content)
         code_content = ast_stmt_simplification(code_content)
         return code_content

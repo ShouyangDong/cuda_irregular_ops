@@ -81,7 +81,7 @@ def ast_loop_contraction(c_code):
     """Start to run loop contraction."""
     # 1. 解析
     parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parser.parse(c_code)
 
     # 2. 转换（融合循环）
     visitor = LoopNestFusionVisitor()

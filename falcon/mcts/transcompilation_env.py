@@ -94,22 +94,6 @@ class FalconGo:
         self.iteration = 0
         self.best_actions = None
 
-    def pick_best_annotation(self, actions):
-        with tempfile.TemporaryDirectory() as work_dir:
-            spaces = ms.space_generator.PostOrderApply(sch_rules=actions)
-            database = ms.tir_integration.tune_tir(
-                mod=self.mod,
-                target=self.tvm_tgt,
-                work_dir=work_dir,
-                max_trials_global=32,
-                num_trials_per_iter=16,
-                space=spaces,
-            )
-        sch = ms.tir_integration.compile_tir(database, self.mod, self.tvm_tgt)
-        if sch is None:
-            return None
-        else:
-            return sch.mod
 
     def perform_action(self, actions):
         """Generates a design space for a given `action`. It calls `generate_design_space()`

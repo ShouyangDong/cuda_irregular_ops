@@ -172,26 +172,31 @@ and memory access patterns can be optimized, leading to improved performance in 
 
 Application Scenario:
 Tensor contraction is commonly applied in scenarios where two or more loops operate over dimensions with identical sizes and memory strides. This is particularly useful in optimizing tensor operations in deep learning models, such as matrix multiplications, convolutions, and backpropagation. By reducing the number of loops, tensor contraction helps minimize the overhead of loop management and improves the efficiency of data accesses, which is critical in handling large-scale tensor computations in fields like scientific computing, machine learning, and quantum physics.
+
+Note:
+Please apply tensor contraction to the following complete C/C++ kernel function (it may be annotated with `__mlu_global__`, `__global__`, or similar).  
+Return the **entire** transformed function—signature, qualifiers, all braces, and any comments—wrapped in a ```cpp code block. Do **not** output only a fragment.
 """
 
 TENSOR_CONTRACTION_DEMO = """
 Usage Examples:
 before:
 ```cpp
-#pragma tensor_contraction
-if (((clusterId * 4) + coreId) < 5) {
-    for (int i = 0; i < 672; i++) {
-        if (input0_local_nram[i] >= 0.0f) {
-            input0_local_nram[i] = 1.0f;
-        } else {
-            input0_local_nram[i] = -1.0f;
+extern "C" void test(float* active_sign_268) {
+    if (((clusterId * 4) + coreId) < 5) {
+        for (int i = 0; i < 672; i++) {
+            if (input0_local_nram[i] >= 0.0f) {
+                input0_local_nram[i] = 1.0f;
+            } else {
+                input0_local_nram[i] = -1.0f;
+            }
         }
     }
-}
-if (((clusterId * 4) + coreId) < 5) {
-    for (int i = 0; i < 2688/sizeof(float); i++) {
-        active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
-    }
+    if (((clusterId * 4) + coreId) < 5) {
+        for (int i = 0; i < 2688/sizeof(float); i++) {
+            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
+        }
+    }  
 }
 ```
 after
@@ -204,6 +209,22 @@ if (((clusterId * 4) + coreId) < 5) {
             active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = -1.0f;
         }
     }
+}
+
+
+extern "C" void test(float* active_sign_268) {
+    if (((clusterId * 4) + coreId) < 5) {
+        for (int i = 0; i < 672; i++) {
+            if (input0_local_nram[i] >= 0.0f) {
+                input0_local_nram[i] = 1.0f;
+            } else {
+                input0_local_nram[i] = -1.0f;
+            }
+        }
+        for (int i = 0; i < 2688/sizeof(float); i++) {
+            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
+        }
+    }  
 }
 ```
 """

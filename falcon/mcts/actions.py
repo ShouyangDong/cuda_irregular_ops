@@ -2,23 +2,22 @@ import json
 import random
 
 from falcon.smt.auto_cache import ast_auto_cache
-from falcon.smt.loop_transformation.loop_contraction import (
-    ast_loop_contraction,
-)
 from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
+from falcon.smt.loop_transformation.loop_inline import ast_loop_inline
 from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
 from falcon.smt.loop_transformation.loop_reorder import ast_loop_reorder
 from falcon.smt.loop_transformation.loop_split import ast_loop_split
+from falcon.smt.loop_transformation.loop_contraction import ast_loop_contraction
 from falcon.smt.stmt_split import ast_stmt_split
 from falcon.smt.tensorization.detensorization import ast_detensorization
 from falcon.smt.tensorization.tensorization import ast_tensorization
 from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
     run_apply_split,
-    run_loop_contraction,
     run_loop_fusion,
     run_loop_reorder,
     run_split_annotation,
+    run_loop_contraction,
 )
 from falcon.src.post_processing.post_processing import (
     replace_operation_with_intrinsic,
