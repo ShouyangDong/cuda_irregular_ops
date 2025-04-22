@@ -142,14 +142,66 @@ class PragmaVisitor(NodeTransformer):
         return node
 
 
-def smt_double_buffer(code):
-    print("[INFO]**************code: ", code)
-    code = remove_target_prefix(code)
+class SoftwarePipelineInserter(NodeTransformer):
+    """
+    A pycparser AST transformer that inserts a `#pragma software_pipeline`
+    immediately before every `for` loop in a C function body.
+    """
+
+    def visit_Compound(self, node):
+        # If there are no statements, return as is
+        if not node.block_items:
+            return node
+
+        new_items = []
+        for stmt in node.block_items:
+            # If the statement is a for-loop, insert a pragma first
+            if isinstance(stmt, c_ast.For):
+                # Inspect loop body
+                body = stmt.stmt
+                if isinstance(body, c_ast.Compound):
+                    generator = c_generator.CGenerator()
+                    body_code = generator.visit(body)
+                    # Detect memcpy + any 'bang_' compute instruction
+                    if "memcpy" in body_code and "bang_" in body_code:
+                        new_items.append(c_ast.Pragma("software_pipeline"))
+                # Append (and further transform) the for-loop
+                new_items.append(self.visit(stmt))
+            else:
+                # Recursively visit other statements
+                new_items.append(self.visit(stmt))
+
+        node.block_items = new_items
+        return node
+
+
+def apply_software_pipeline(source_code: str) -> str:
+    """
+    Parse the given C source code, apply the SoftwarePipelineInserter pass,
+    and return the transformed code as a string.
+    """
+    # Parse into AST
+    parser = c_parser.CParser()
+    ast = parser.parse(source_code)
+
+    # Transform
+    transformer = SoftwarePipelineInserter()
+    transformed = transformer.visit(ast)
+
+    # Generate C code
+    generator = c_generator.CGenerator()
+    return generator.visit(transformed)
+
+
+def smt_double_buffer(source_code):
+    code = remove_target_prefix(source_code)
+    code = apply_software_pipeline(code)
     parser = c_parser.CParser()
     ast = parser.parse(code)
     visitor = PragmaVisitor()
     visitor.visit(ast)
-    print("[INFO]**********inst: ", visitor.inst)
+    if not visitor.inst:
+        return source_code
     output_code = op_template[visitor.inst].substitute(inst=visitor.inst)
     generator = c_generator.CGenerator()
     modify_code = generator.visit(ast)
@@ -157,11 +209,25 @@ def smt_double_buffer(code):
 
 
 if __name__ == "__main__":
+    sample_code = """
+    void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
+        float INPUT0_N[64];
+        float INPUT1_N[64];
+        float OUTPUT_N[64];
+        for (int i = 0; i < 2048; ++i) {
+            __memcpy(INPUT0_N, INPUT0 + (i * 64), 256, GDRAM2NRAM);
+            __memcpy(INPUT1_N, INPUT1 + (i * 64), 256, GDRAM2NRAM);
+            __bang_add(OUTPUT_N, INPUT0_N , INPUT1_N, 64);
+            __memcpy(OUTPUT + (i * 64), OUTPUT_N, 256, NRAM2GDRAM);
+        }
+    }
+    """
+    print(apply_software_pipeline(sample_code))
+
     code = """void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
         float INPUT0_N[64];
         float INPUT1_N[64];
         float OUTPUT_N[64];
-        #pragma software_pipeline
         for (int i = 0; i < 2048; ++i) {
             __memcpy(INPUT0_N, INPUT0 + (i * 64), 256, GDRAM2NRAM);
             __memcpy(INPUT1_N, INPUT1 + (i * 64), 256, GDRAM2NRAM);

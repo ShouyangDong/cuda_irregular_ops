@@ -284,7 +284,6 @@ def main(argv):
     source = "BANG"
     target = "DL Boost"
     name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
-    len(ActionSpace)
     rng_key = jax.random.PRNGKey(FLAGS.seed)
     falcon_env = build_env(name, source, target)
 

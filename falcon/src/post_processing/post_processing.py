@@ -35,6 +35,7 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_demo = None
     THREAD_BINDING_PROMPT = None
+    print("[INFO]***********target: ", target)
     if target == "CUDA":
         prompt_demo = THREAD_BINDING_DEMO_CUDA
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_CUDA

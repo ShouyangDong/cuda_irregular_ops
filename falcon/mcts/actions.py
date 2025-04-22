@@ -37,9 +37,9 @@ from falcon.unit_test import unit_test
 
 
 def loop_recovery(file_name, code, source_platform, target_platform):
-    final_code = run_loop_recovery(code, source_platform, target_platform)
+    final_code = run_loop_recovery(code, source_platform)
     if not unit_test(file_name, final_code):
-        final_code = ast_loop_recovery(code, source)
+        final_code = ast_loop_recovery(code, source_platform)
     return final_code
 
 
@@ -70,7 +70,7 @@ def loop_reorder(file_name, code, source_platform, target_platform):
 
 
 def loop_split(file_name, code, source_platform, target_platform):
-    code = run_split_annotation(fusion_code)
+    code = run_split_annotation(code)
     final_code = run_apply_split(code)
     if not unit_test(file_name, final_code):
         final_code = ast_loop_split(code)
@@ -85,7 +85,8 @@ def loop_contraction(file_name, code, source_platform, target_platform):
 
 
 def auto_bind(file_name, code, source_platform, target_platform):
-    # postprocessing
+    if target_platform not in ["BANG", "CUDA", "HIP"]:
+        return code
     final_code = run_thread_binding(code, target_platform)
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(code, target_platform)
@@ -113,10 +114,10 @@ def auto_cache(file_name, code, source_platform, target_platform):
 
 
 def auto_tensorization(file_name, code, source_platform, target_platform):
-    code = run_code_decoration(cache_code)
-    final_code = run_tensorization(code, source_platform, target_platform)
+    code = run_code_decoration(code)
+    final_code = run_tensorization(code, target_platform)
     if not unit_test(file_name, final_code):
-        final_code = ast_tensorization(code, space_maps)
+        final_code = ast_tensorization(code, target_platform)
     return final_code
 
 
