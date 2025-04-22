@@ -1,5 +1,4 @@
 import os
-import tempfile
 import time
 from functools import partial
 
@@ -93,7 +92,6 @@ class FalconGo:
         self.best_optimizer_ids = None
         self.iteration = 0
         self.best_actions = None
-
 
     def perform_action(self, actions):
         """Generates a design space for a given `action`. It calls `generate_design_space()`

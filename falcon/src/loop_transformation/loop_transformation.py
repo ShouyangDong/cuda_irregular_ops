@@ -139,7 +139,7 @@ def run_loop_contraction(code):
     PROMPT = PROMPT.replace(
         "{TENSOR_CONTRACTION_DEMO}", TENSOR_CONTRACTION_DEMO
     )
-    print('[INOF]*******org: ', code)
+    print("[INOF]*******org: ", code)
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,

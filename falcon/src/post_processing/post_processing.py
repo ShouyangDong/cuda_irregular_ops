@@ -9,6 +9,8 @@ from falcon.src.post_processing.post_processing_prompt import (
     CACHE_WRITE_DEMO,
     CACHE_WRITE_PROMPT,
     DECORATION_PROMPT,
+    DOUBLE_BUFFER_DEMO,
+    DOUBLE_BUFFER_PROMPT,
     TENSORIZATION_PROMPT,
     THREAD_BINDING_DEMO_BANG,
     THREAD_BINDING_DEMO_CUDA,
@@ -287,6 +289,44 @@ def run_code_decoration(code):
         code_content = match.group(1).strip()
         return code_content
     return None
+
+
+def double_buffer(code):
+    PROMPT = """
+    {SYSTEM_PROMPT}
+
+    Here is the introduction of double buffer: {DOUBLE_BUFFER_PROMPT}
+    Please optimize the code snippet below #pragma with double buffer pipeline.
+
+    {code}
+
+
+    accordingt to the introduction of double buffer.
+
+    {DOUBLE_BUFFER_DEMO}
+    Please return the output kernel function without any additional information.
+    """
+
+    PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
+    PROMPT = PROMPT.replace("{DOUBLE_BUFFER_PROMPT}", DOUBLE_BUFFER_PROMPT)
+    PROMPT = PROMPT.replace("{DOUBLE_BUFFER_DEMO}", DOUBLE_BUFFER_DEMO)
+    PROMPT = PROMPT.replace("{code}", code)
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": PROMPT}],
+    )
+
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
+    if match:
+        code_content = match.group(1).strip()
+        return code_content
+    return None
+
+
+def run_double_buffer(code, target):
+    code = double_buffer(code)
+    return code
 
 
 def post_processing_pipeline(code, target):
