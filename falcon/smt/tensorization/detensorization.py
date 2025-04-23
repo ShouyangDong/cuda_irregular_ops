@@ -149,3 +149,32 @@ if __name__ == "__main__":
     """
     converted_code = ast_detensorization(bang_code, "BANG")
     print(converted_code)
+
+    bang_code = """
+    extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_1605) {
+    __nram__ float lhs_local_nram[512];
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+        __memcpy(
+            ((float *)lhs_local_nram + (0)),
+            ((float *)lhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+            1024, GDRAM2NRAM);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+        __memcpy(
+            ((float *)lhs_local_nram + (256)),
+            ((float *)rhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+            1024, GDRAM2NRAM);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+        __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)),
+                ((float *)lhs_local_nram + (256)), 256);
+    }
+    if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+        __memcpy(((float *)add_1605 +
+                (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+                ((float *)lhs_local_nram + (0)), 1024, NRAM2GDRAM);
+    }
+    }
+    """
+    converted_code = ast_detensorization(bang_code, "BANG")
+    print(converted_code)

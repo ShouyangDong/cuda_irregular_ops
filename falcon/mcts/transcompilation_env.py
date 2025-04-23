@@ -46,16 +46,17 @@ def objective(file_name, target):
     then the score is zero.
     """
     try:
-        if target == "CUDA":
+        time_ms = 1000000
+        if target == "cuda":
             time_ms = perf_cuda.benchmark(file_name)
-        elif target == "BANG":
+        elif target == "mlu":
             time_ms = perf_bang.benchmark(file_name)
-        elif target == "DL Boost":
+        elif target == "cpp":
             time_ms = perf_dlboost.benchmark(file_name)
-        # elif target == "HIP":
+        # elif target == "hip":
         #     continue
         return GFLOPS / (time_ms / 1e3)
-    except BaseException:
+    except Exception:
         return 0.0
 
 
@@ -77,7 +78,7 @@ class FalconGo:
         source_platform,
         target_platform,
         action_len=A_Length,
-        optimizer_len=11,
+        optimizer_len=A_Length,
         goal_reward=False,
         timeout=None,
     ):
@@ -108,13 +109,15 @@ class FalconGo:
             )
 
         target, file_type = get_target(code)
-
-        with open(
-            self.file_name.split(".")[0] + file_type, "w", encoding="utf-8"
-        ) as f:
+        os.makedirs("tmp", exist_ok=True)
+        # Extract base name and replace extension
+        base_name = os.path.basename(self.file_name)
+        name_no_ext, _ = os.path.splitext(base_name)
+        new_file = os.path.join("tmp", name_no_ext + file_type)
+        with open(new_file, "w", encoding="utf-8") as f:
             f.write(code)
-
-        score = objective(self.file_name, target)
+        score = objective(new_file, target)
+        print("[IFNO]*************score: ", score)
         return code, score
 
     @jit
@@ -232,7 +235,7 @@ def get_recurrent_fn(env):
         reward = rewards[0, 0, depth - 1, actions]
         state_concrete = [int(arr[0]) for arr in obs]
         encoder.decode(state_concrete)
-        prior_logits = jax.random.uniform(subkey, shape=(1, 11))
+        prior_logits = jax.random.uniform(subkey, shape=(1, A_Length))
 
         return (
             mctx.RecurrentFnOutput(
@@ -257,7 +260,7 @@ def _run_demo(env, rng_key):
     states_init = batch_reset(subkeys)
     key, logits_rng = jax.random.split(key)
     rng_key, logits_rng, q_rng, search_rng = jax.random.split(key, 4)
-    prior_logits = jnp.ones((1, 11)) / 7
+    prior_logits = jnp.ones((1, A_Length)) / A_Length
     root = mctx.RootFnOutput(
         prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
         value=jnp.zeros([BS]),

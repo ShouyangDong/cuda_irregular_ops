@@ -127,6 +127,7 @@ def run_apply_split(code):
 
 
 def run_loop_contraction(code):
+    code = simplify_code(code)
     PROMPT = """
     {SYSTEM_PROMPT}
     {TENSOR_CONTRACTION}

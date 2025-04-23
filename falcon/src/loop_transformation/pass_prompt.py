@@ -179,50 +179,66 @@ Return the **entire** transformed function—signature, qualifiers, all braces, 
 """
 
 TENSOR_CONTRACTION_DEMO = """
-Usage Examples:
+
+Example 1: Fuse two simple element-wise loops
+
 before:
 ```cpp
-extern "C" void test(float* active_sign_268) {
-    if (((clusterId * 4) + coreId) < 5) {
-        for (int i = 0; i < 672; i++) {
-            if (input0_local_nram[i] >= 0.0f) {
-                input0_local_nram[i] = 1.0f;
-            } else {
-                input0_local_nram[i] = -1.0f;
-            }
-        }
+extern \"C\" void clamp_and_copy(float* data, float* out, int N) {
+    for (int i = 0; i < N; ++i) {
+        // clamp to [0,1]
+        if (data[i] < 0.0f) data[i] = 0.0f;
+        else if (data[i] > 1.0f) data[i] = 1.0f;
     }
-    if (((clusterId * 4) + coreId) < 5) {
-        for (int i = 0; i < 2688/sizeof(float); i++) {
-            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
-        }
+    for (int i = 0; i < N; ++i) {
+        // copy to output
+        out[i] = data[i];
     }
 }
 ```
-after
+
+after:
 ```cpp
-if (((clusterId * 4) + coreId) < 5) {
-    for (int i = 0; i < 672; i++) {
-        if (input0_local_nram[i] >= 0.0f) {
-            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = 1.0f;
-        } else {
-            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = -1.0f;
-        }
+extern \"C\" void clamp_and_copy(float* data, float* out, int N) {
+    for (int i = 0; i < N; ++i) {
+        // clamp to [0,1]
+        if (data[i] < 0.0f) data[i] = 0.0f;
+        else if (data[i] > 1.0f) data[i] = 1.0f;
+        out[i] = data[i];
     }
 }
+```
+---
+Example 2: Merge two memcpy loops and a compute in host code
 
-
-extern "C" void test(float* active_sign_268) {
-    if (((clusterId * 4) + coreId) < 5) {
-        for (int i = 0; i < 672; i++) {
-            if (input0_local_nram[i] >= 0.0f) {
-                input0_local_nram[i] = 1.0f;
-            } else {
-                input0_local_nram[i] = -1.0f;
-            }
+before:
+```cpp
+void transform_and_write(float* src, float* dst, int M) {
+    float buf[128];
+    for (int i = 0; i < M; ++i) {
+        memcpy(buf, src + i*128, 128*sizeof(float));
+    }
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < 128; ++j) {
+            buf[j] = buf[j] * 2.0f;
         }
-        for (int i = 0; i < 2688/sizeof(float); i++) {
-            active_sign_268[(((clusterId * 2688) + (coreId * 672))) + i] = input0_local_nram[i];
+    }
+    for (int i = 0; i < M; ++i) {
+        memcpy(dst + i*128, buf, 128*sizeof(float));
+    }
+}
+```
+
+after:
+```cpp
+void transform_and_write(float* src, float* dst, int M) {
+    float buf[128];
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < 128; ++j) {
+            // load, scale, and store in one pass
+            float v = src[i*128 + j];
+            buf[j] = v * 2.0f;
+            dst[i*128 + j] = buf[j];
         }
     }
 }

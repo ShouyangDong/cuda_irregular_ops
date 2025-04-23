@@ -37,8 +37,12 @@ from falcon.unit_test import unit_test
 
 
 def loop_recovery(file_name, code, source_platform, target_platform):
-    final_code = run_loop_recovery(code, source_platform)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_loop_recovery(code, source_platform)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("loop recovery error")
+    except RuntimeError as e:
+        print("[INFO]loop recovery error: ", e)
         final_code = ast_loop_recovery(code, source_platform)
     return final_code
 
@@ -49,37 +53,57 @@ def stmt_split(file_name, code, source_platform, target_platform):
 
 
 def detensorization(file_name, code, source_platform, target_platform):
-    final_code = run_detensorization(code, source_platform)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_detensorization(code, source_platform)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("detensorization error")
+    except RuntimeError:
         final_code = ast_detensorization(code, source_platform)
+    print("[INFO]*************final code: ", final_code)
     return final_code
 
 
 def loop_fusion(file_name, code, source_platform, target_platform):
-    final_code = run_loop_fusion(code)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_loop_fusion(code)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("loop fusion error")
+    except RuntimeError as e:
+        print("[INFO]loop fusion error: ", e)
         final_code = ast_loop_fusion(code)
     return final_code
 
 
 def loop_reorder(file_name, code, source_platform, target_platform):
-    final_code = run_loop_reorder(code)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_loop_reorder(code)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("loop_reorder error")
+    except RuntimeError as e:
+        print("[INFO]loop reorder error: ", e)
         final_code = ast_loop_reorder(code)
     return final_code
 
 
 def loop_split(file_name, code, source_platform, target_platform):
-    code = run_split_annotation(code)
-    final_code = run_apply_split(code)
-    if not unit_test(file_name, final_code):
+    try:
+        code = run_split_annotation(code)
+        final_code = run_apply_split(code)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("loop_split error")
+    except RuntimeError as e:
+        print("[INFO]loop split error: ", e)
         final_code = ast_loop_split(code)
     return final_code
 
 
 def loop_contraction(file_name, code, source_platform, target_platform):
-    final_code = run_loop_contraction(code)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_loop_contraction(code)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("loop_contraction error")
+    except RuntimeError as e:
+        print("[INFO]loop contraction error: ", e)
         final_code = ast_loop_contraction(code)
     return final_code
 
@@ -87,8 +111,12 @@ def loop_contraction(file_name, code, source_platform, target_platform):
 def auto_bind(file_name, code, source_platform, target_platform):
     if target_platform not in ["BANG", "CUDA", "HIP"]:
         return code
-    final_code = run_thread_binding(code, target_platform)
-    if not unit_test(file_name, final_code):
+    try:
+        final_code = run_thread_binding(code, target_platform)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("auto_bind error")
+    except RuntimeError as e:
+        print("[INFO]auto bind error: ", e)
         final_code = ast_thread_binding(code, target_platform)
     return final_code
 
@@ -106,40 +134,54 @@ def auto_cache(file_name, code, source_platform, target_platform):
     # If no need to cache, just return origin code
     if space_maps is None:
         return code
-    cache_code = run_cache_process(code, space_maps)
+    try:
+        cache_code = run_cache_process(code, space_maps)
 
-    if not unit_test(file_name, cache_code):
+        if not unit_test(file_name, cache_code):
+            raise RuntimeError("auto_cache error")
+    except RuntimeError as e:
+        print("[INFO]auto cache error: ", e)
         cache_code = ast_auto_cache(code, space_maps)
     return cache_code
 
 
 def auto_tensorization(file_name, code, source_platform, target_platform):
-    code = run_code_decoration(code)
-    final_code = run_tensorization(code, target_platform)
-    if not unit_test(file_name, final_code):
+    try:
+        code = run_code_decoration(code)
+        final_code = run_tensorization(code, target_platform)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("auto_tensorization error")
+    except RuntimeError:
         final_code = ast_tensorization(code, target_platform)
+    print("[INFO]***********final code of tensorization: ", final_code)
     return final_code
 
 
 def auto_pipeline(file_name, code, source_platform, target_platform):
-    final_code = run_double_buffer(code, target_platform)
-    if not unit_test(file_name, final_code):
+    if target_platform not in ["BANG"]:
+        return code
+    try:
+        final_code = run_double_buffer(code, target_platform)
+        if not unit_test(file_name, final_code):
+            raise RuntimeError("auto_pipeline error")
+    except RuntimeError as e:
+        print("[INFO]auto pipeline error: ", e)
         final_code = smt_double_buffer(code)
     return final_code
 
 
 actions = [
     loop_recovery,
-    stmt_split,
-    detensorization,
-    loop_fusion,
-    loop_reorder,
-    loop_split,
-    loop_contraction,
-    auto_bind,
-    auto_cache,
+    # stmt_split,
+    # detensorization,
+    # loop_fusion,
+    # loop_reorder,
+    # loop_split,
+    # loop_contraction,
+    # auto_bind,
+    # auto_cache,
     auto_tensorization,
-    auto_pipeline,
+    # auto_pipeline,
 ]
 
 if __name__ == "__main__":

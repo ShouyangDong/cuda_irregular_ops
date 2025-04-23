@@ -64,7 +64,6 @@ def run_loop_recovery(code, target):
 
 
 def detensorization(op, code, document):
-    print("[INFO]***********code:", code)
     PROMPT = """
     {SYSTEM_PROMPT}
 
