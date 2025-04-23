@@ -37,12 +37,13 @@ from falcon.unit_test import unit_test
 
 
 def loop_recovery(file_name, code, source_platform, target_platform):
+    print("[INFO]*****org code: ", code)
     try:
         final_code = run_loop_recovery(code, source_platform)
+        print("[INFO]************final_code: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop recovery error")
     except RuntimeError as e:
-        print("[INFO]loop recovery error: ", e)
         final_code = ast_loop_recovery(code, source_platform)
     return final_code
 
@@ -153,7 +154,6 @@ def auto_tensorization(file_name, code, source_platform, target_platform):
             raise RuntimeError("auto_tensorization error")
     except RuntimeError:
         final_code = ast_tensorization(code, target_platform)
-    print("[INFO]***********final code of tensorization: ", final_code)
     return final_code
 
 
@@ -180,7 +180,7 @@ actions = [
     # loop_contraction,
     # auto_bind,
     # auto_cache,
-    auto_tensorization,
+    # auto_tensorization,
     # auto_pipeline,
 ]
 

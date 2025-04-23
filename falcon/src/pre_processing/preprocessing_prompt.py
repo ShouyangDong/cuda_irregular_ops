@@ -116,6 +116,7 @@ Transform the following NPU code into equivalent C++ for-loop code that sequenti
 
 
 LOOP_RECOVERY_DEMO_BANG = """
+Example 1:
 // before:
 ```
 for (int i = 0; i < 64; i++) {

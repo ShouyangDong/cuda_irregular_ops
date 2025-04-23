@@ -60,7 +60,7 @@ def unit_test(file_name, code):
         return False
 
     # 创建临时目录
-    tmp_dir = "tmp"
+    tmp_dir = "tmps"
     os.makedirs(tmp_dir, exist_ok=True)
 
     # 去掉扩展名
