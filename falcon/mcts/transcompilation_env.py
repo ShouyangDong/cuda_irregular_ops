@@ -11,6 +11,7 @@ from jax import jit, lax, vmap
 
 from benchmark.perf import perf_bang, perf_cuda, perf_dlboost
 from falcon.mcts.actions import actions as ActionSpace
+from falcon.mcts.invalid_actions import get_invalid_actions
 from falcon.mcts.utils import open_file
 from falcon.util import get_target
 
@@ -107,7 +108,7 @@ class FalconGo:
                 self.source_platform,
                 self.target_platform,
             )
-
+        print("[INFO]*******actions: ", actions)
         target, file_type = get_target(code)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
@@ -228,12 +229,13 @@ def get_recurrent_fn(env):
         depth_val = int(jax.device_get(depth)[0])
         cur_action_ids = lax.dynamic_slice(trajectory, (0, 0), (1, depth_val))
         jax.device_get(cur_action_ids)[0].tolist()
-        # invalid_mask = jnp.array(
-        #     get_invalid_actions(params, cur_action_list)
-        # ).reshape(1, -1)
+        
+        code_embedding = [int(arr) for arr in embedding_state[0]]
+        code = encoder.decode(code_embedding)
+        invalid_mask = jnp.array(
+            get_invalid_actions(code, env.source_platform, env.target_platform)
+        ).reshape(1, -1)
         reward = rewards[0, 0, depth - 1, actions]
-        state_concrete = [int(arr[0]) for arr in obs]
-        encoder.decode(state_concrete)
         prior_logits = jax.random.uniform(subkey, shape=(1, A_Length))
 
         return (
@@ -259,6 +261,10 @@ def _run_demo(env, rng_key):
     states_init = batch_reset(subkeys)
     key, logits_rng = jax.random.split(key)
     rng_key, logits_rng, q_rng, search_rng = jax.random.split(key, 4)
+    code = open_file(env.file_name)
+    invalid_actions = jnp.array(
+        get_invalid_actions(code, env.source_platform, env.target_platform)
+    ).reshape(1, -1)
     prior_logits = jnp.ones((1, A_Length)) / A_Length
     root = mctx.RootFnOutput(
         prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
@@ -275,7 +281,7 @@ def _run_demo(env, rng_key):
         root=root,
         recurrent_fn=recurrent_fn,
         num_simulations=FLAGS.num_simulations,
-        # invalid_actions=invalid_actions,
+        invalid_actions=invalid_actions,
         max_depth=env.optimizer_len,
         max_num_considered_actions=FLAGS.max_num_considered_actions,
     )
@@ -296,14 +302,9 @@ def main(argv):
     q_value = policy_output.search_tree.summary().qvalues[
         batch_index, selected_action
     ]
-    print("Selected action:", selected_action)
     # To estimate the value of the root state, use the Q-value of the selected
     # action. The Q-value is not affected by the exploration at the root
     # node.
-    print("Selected action Q-value:", q_value)
-    graph = convert_tree_to_graph(policy_output.search_tree)
-    print("Saving tree diagram to:", FLAGS.output_file)
-    graph.draw(FLAGS.output_file, prog="dot")
     end_time = time.time()
     print(f"[INFO]searching time: {end_time - start_time} s")
 
