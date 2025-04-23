@@ -243,4 +243,34 @@ void transform_and_write(float* src, float* dst, int M) {
     }
 }
 ```
+---
+**Example 3: Merge only for-loops, not if conditions**
+
+**before:**
+```cpp
+extern "C" void relu_and_store(float* input, float* output, int N) {
+    if (N > 0) {
+        for (int i = 0; i < N; ++i) {
+            input[i] = input[i] > 0 ? input[i] : 0;
+        }
+    }
+    if (N > 0) {
+        for (int i = 0; i < N; ++i) {
+            output[i] = input[i];
+        }
+    }
+}
+```
+
+**after (loops merged, ifs preserved):**
+```cpp
+extern "C" void relu_and_store(float* input, float* output, int N) {
+    if (N > 0) {
+        for (int i = 0; i < N; ++i) {
+            input[i] = input[i] > 0 ? input[i] : 0;
+            output[i] = input[i];
+        }
+    }
+}
+```
 """

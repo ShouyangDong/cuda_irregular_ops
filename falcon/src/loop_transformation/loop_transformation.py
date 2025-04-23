@@ -20,6 +20,7 @@ from falcon.src.loop_transformation.pass_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
+from falcon.util import make_full_func
 
 model_name = """gpt-4-turbo"""
 openai.api_key = "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"
@@ -133,6 +134,7 @@ def run_loop_contraction(code):
     {TENSOR_CONTRACTION}
     {TENSOR_CONTRACTION_DEMO}
     Please return the output kernel function without any additional information.
+    Input code: {code}
     """
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
 
@@ -140,7 +142,6 @@ def run_loop_contraction(code):
     PROMPT = PROMPT.replace(
         "{TENSOR_CONTRACTION_DEMO}", TENSOR_CONTRACTION_DEMO
     )
-    print("[INOF]*******org: ", code)
     PROMPT = PROMPT.replace("{code}", code)
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
@@ -151,8 +152,8 @@ def run_loop_contraction(code):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
-        print("[INFO]**************code_conte: ", code_content)
         code_content = constant_inline(code_content)
         code_content = ast_stmt_simplification(code_content)
+        code_content = make_full_func(code_content)
         return code_content
     return None

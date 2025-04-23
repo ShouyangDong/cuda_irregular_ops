@@ -5,8 +5,7 @@ from pycparser import c_ast, c_generator, c_parser
 from falcon.simplification import simplify_code
 from falcon.smt.const_inline import constant_inline
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import NodeTransformer, remove_target_prefix, add_memory_prefix
-from falcon.util import get_target
+from falcon.util import NodeTransformer, make_full_func, remove_target_prefix
 
 ParaVar = {
     "threadIdx.x": 1024,
@@ -117,12 +116,10 @@ def ast_loop_recovery(code, target="CUDA"):
     code = simplify_code(code)
     code = constant_inline(code)
     code = ast_stmt_simplification(code)
-    #TODO: change the code
+    # TODO: change the code
     code = code.replace("coreId", "core_id")
     code = code.replace("clusterId", "cluster_id")
-    target, _ = get_target(code)
-    if target == "mlu":
-        code = add_memory_prefix(code)
+    code = make_full_func(code)
     return code
 
 

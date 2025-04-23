@@ -71,7 +71,7 @@ def add_memory_prefix(code):
     # Substitute in the code using regex
     modified_code = re.sub(pattern, replacer, code)
     if "memcpy" in modified_code and "__memcpy" not in modified_code:
-        modified_code = modified_code .replace("memcpy", "__memcpy")
+        modified_code = modified_code.replace("memcpy", "__memcpy")
     return (
         "__mlu_global__ " + modified_code
         if "__mlu_global__ " not in modified_code
@@ -119,3 +119,10 @@ def get_target(code):
     else:
         target, file_type = "cpp", ".cpp"
     return target, file_type
+
+
+def make_full_func(code):
+    target, file_type = get_target(code)
+    if target == "mlu":
+        code = add_memory_prefix(code)
+    return code

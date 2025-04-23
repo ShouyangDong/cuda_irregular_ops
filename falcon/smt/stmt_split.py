@@ -1,7 +1,7 @@
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.smt.const_inline import constant_inline
-from falcon.util import NodeTransformer
+from falcon.util import NodeTransformer, make_full_func
 
 
 class LoopSplitter(NodeTransformer):
@@ -60,7 +60,9 @@ def ast_stmt_split(code):
 
     # Generate and print transformed code
     generator = c_generator.CGenerator()
-    return generator.visit(split_ast)
+    code = generator.visit(split_ast)
+    code = make_full_func(code)
+    return code
 
 
 if __name__ == "__main__":
@@ -106,6 +108,35 @@ if __name__ == "__main__":
 
         }
 
+    }
+    """
+    code = ast_stmt_split(code)
+    print(code)
+
+    code = """
+    extern "C" __mlu_global__ void add(float *lhs, float *rhs, float *add_1605) {
+        __nram__ float lhs_local_nram[512];
+        if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+            __memcpy(
+                ((float *)lhs_local_nram + (0)),
+                ((float *)lhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+                1024, GDRAM2NRAM);
+        }
+        if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+            __memcpy(
+                ((float *)lhs_local_nram + (256)),
+                ((float *)rhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+                1024, GDRAM2NRAM);
+        }
+        if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+            __bang_add(((float *)lhs_local_nram + (0)), ((float *)lhs_local_nram + (0)),
+                    ((float *)lhs_local_nram + (256)), 256);
+        }
+        if (((((int)clusterId) * 4) + ((int)coreId)) < 9) {
+            __memcpy(((float *)add_1605 +
+                    (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+                    ((float *)lhs_local_nram + (0)), 1024, NRAM2GDRAM);
+        }
     }
     """
     code = ast_stmt_split(code)

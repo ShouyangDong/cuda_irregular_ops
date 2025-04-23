@@ -37,13 +37,11 @@ from falcon.unit_test import unit_test
 
 
 def loop_recovery(file_name, code, source_platform, target_platform):
-    print("[INFO]*****org code: ", code)
     try:
         final_code = run_loop_recovery(code, source_platform)
-        print("[INFO]************final_code: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop recovery error")
-    except RuntimeError as e:
+    except RuntimeError:
         final_code = ast_loop_recovery(code, source_platform)
     return final_code
 
@@ -60,7 +58,6 @@ def detensorization(file_name, code, source_platform, target_platform):
             raise RuntimeError("detensorization error")
     except RuntimeError:
         final_code = ast_detensorization(code, source_platform)
-    print("[INFO]*************final code: ", final_code)
     return final_code
 
 
@@ -103,8 +100,7 @@ def loop_contraction(file_name, code, source_platform, target_platform):
         final_code = run_loop_contraction(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_contraction error")
-    except RuntimeError as e:
-        print("[INFO]loop contraction error: ", e)
+    except RuntimeError:
         final_code = ast_loop_contraction(code)
     return final_code
 
@@ -116,8 +112,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
         final_code = run_thread_binding(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_bind error")
-    except RuntimeError as e:
-        print("[INFO]auto bind error: ", e)
+    except RuntimeError:
         final_code = ast_thread_binding(code, target_platform)
     return final_code
 
@@ -140,8 +135,7 @@ def auto_cache(file_name, code, source_platform, target_platform):
 
         if not unit_test(file_name, cache_code):
             raise RuntimeError("auto_cache error")
-    except RuntimeError as e:
-        print("[INFO]auto cache error: ", e)
+    except RuntimeError:
         cache_code = ast_auto_cache(code, space_maps)
     return cache_code
 
@@ -164,24 +158,23 @@ def auto_pipeline(file_name, code, source_platform, target_platform):
         final_code = run_double_buffer(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_pipeline error")
-    except RuntimeError as e:
-        print("[INFO]auto pipeline error: ", e)
+    except RuntimeError:
         final_code = smt_double_buffer(code)
     return final_code
 
 
 actions = [
     loop_recovery,
-    # stmt_split,
-    # detensorization,
-    # loop_fusion,
-    # loop_reorder,
-    # loop_split,
-    # loop_contraction,
-    # auto_bind,
-    # auto_cache,
-    # auto_tensorization,
-    # auto_pipeline,
+    stmt_split,
+    detensorization,
+    loop_fusion,
+    loop_reorder,
+    loop_split,
+    loop_contraction,
+    auto_bind,
+    auto_cache,
+    auto_tensorization,
+    auto_pipeline,
 ]
 
 if __name__ == "__main__":

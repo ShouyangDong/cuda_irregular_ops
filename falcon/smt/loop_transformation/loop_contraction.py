@@ -98,29 +98,19 @@ def ast_loop_contraction(c_code):
 
 if __name__ == "__main__":
     code = r"""
-    void kernel(float A[N][M], float B[N][M], float C[N][M], float D[N][M]) {
-      for(int i = 0; i < N; i++) {
-        for(int j = 0; j < M; j++) {
-          A[i][j] = B[i][j] + C[i][j];
-        }
-      }
-
-      for(int i = 0; i < N; i++) {
-        for(int j = 0; j < M; j++) {
-          D[i][j] = A[i][j] * 2;
-        }
+  void kernel(float A[N][M], float B[N][M], float C[N][M], float D[N][M]) {
+    for(int i = 0; i < N; i++) {
+      for(int j = 0; j < M; j++) {
+        A[i][j] = B[i][j] + C[i][j];
       }
     }
-    """
 
-    # 1. 解析
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-
-    # 2. 转换（融合循环）
-    visitor = LoopNestFusionVisitor()
-    new_ast = visitor.visit(ast)
-
-    # 3. 生成 C 代码
-    generator = c_generator.CGenerator()
-    print(generator.visit(new_ast))
+    for(int i = 0; i < N; i++) {
+      for(int j = 0; j < M; j++) {
+        D[i][j] = A[i][j] * 2;
+      }
+    }
+  }
+  """
+    code = ast_loop_contraction(code)
+    print(code)

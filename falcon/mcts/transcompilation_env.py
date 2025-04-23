@@ -117,7 +117,6 @@ class FalconGo:
         with open(new_file, "w", encoding="utf-8") as f:
             f.write(code)
         score = objective(new_file, target)
-        print("[IFNO]*************score: ", score)
         return code, score
 
     @jit

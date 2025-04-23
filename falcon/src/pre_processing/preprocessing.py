@@ -14,8 +14,8 @@ from falcon.src.pre_processing.preprocessing_prompt import (
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import NodeTransformer, remove_target_prefix, add_memory_prefix
-from falcon.util import get_target
+from falcon.util import make_full_func
+
 model_name = """gpt-4-turbo"""
 openai.api_key = "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"
 
@@ -62,9 +62,7 @@ def run_loop_recovery(code, target):
         code_content = match.group(1).strip()
         code_content = code_content.replace("coreId", "core_id")
         code_content = code_content.replace("clusterId", "cluster_id")
-        target, _ = get_target(code)
-        if target == "mlu":
-            code_content = add_memory_prefix(code_content)
+        code_content = make_full_func(code_content)
         return code_content
     return None
 
