@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 
 import openai
@@ -18,6 +19,14 @@ from benchmark.zero_shot.zero_shot_prompt import (
     MLU_TO_CUDA_PROMPT,
     MLU_TO_HIP_PROMPT,
 )
+
+ext_map = {
+    "cuda": "cu",
+    "hip": "hip",
+    "cpu": "cpp",
+    "mlu": "mlu",
+}
+
 
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
@@ -58,7 +67,14 @@ def code_transform(input_code: str, prompt_template: str) -> str:
         ],
         temperature=0.0,
     )
-    return response.choices[0].message.content
+    output = response.choices[0].message.content
+    match = re.search(r"```cpp(.*?)```", output, re.DOTALL)
+    if not match:
+        print("No C++ code block found.")
+        return False
+
+    cpp_code = match.group(1).strip()
+    return cpp_code
 
 
 def main():
@@ -102,7 +118,10 @@ def main():
 
     base_name = os.path.basename(args.source_file)
     output_path = os.path.join(output_dir, base_name)
-    print("[INFO]*******translated_code: ", translated_code)
+    file_stem = os.path.splitext(os.path.basename(args.source_file))[0]
+    target_ext = ext_map[args.dest_platform]
+    output_path = os.path.join(output_dir, f"{file_stem}.{target_ext}")
+
     with open(output_path, "w", encoding="utf-8") as out_file:
         out_file.write(translated_code)
 
