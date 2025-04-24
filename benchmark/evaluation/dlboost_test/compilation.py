@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 import glob
 import os
-import subprocess
+import sys
 from concurrent.futures import ProcessPoolExecutor
 
 from tqdm import tqdm
@@ -8,59 +9,68 @@ from tqdm import tqdm
 from benchmark.utils import run_dlboost_compilation as run_compilation
 
 
-def compile_cpp_file(file_name):
-    base_name = os.path.basename(file_name)
+def compile_cpp_file(file_path):
+    """
+    Compile a single .cpp file (with DL Boost macros) into a .so and clean up.
+    Returns True on success, False on failure.
+    """
+    dir_name, base_name = os.path.split(file_path)
+    name_no_ext, _ = os.path.splitext(base_name)
+    so_path = os.path.join(dir_name, f"{name_no_ext}.so")
 
-    with open(file_name, "r") as f:
-        code = f.read()
-
-    with open("benchmark/macro/dlboost_macro.txt", "r") as f:
+    # Read source code
+    with open(file_path, "r") as f:
+        src = f.read()
+    # Read macro
+    macro_path = os.path.join("benchmark", "macro", "dlboost_macro.txt")
+    with open(macro_path, "r") as f:
         macro = f.read()
 
-    # Combine macro with code
-    code = macro + code
-    bak_file_name = file_name.replace(
-        base_name.replace(".cpp", ""), base_name + "_bak.cpp"
-    )
+    # Write temporary backup file
+    bak_path = os.path.join(dir_name, f"{name_no_ext}_bak.cpp")
+    with open(bak_path, "w") as f:
+        f.write(macro + src)
 
-    # Write the modified code to a new temporary file
-    with open(bak_file_name, mode="w") as f:
-        f.write(code)
+    # Compile
+    success, output = run_compilation(so_path, bak_path)
 
-    so_name = base_name.replace("cpp", "so")
-    so_name = os.path.join("benchmark/data/dlboost_code_test/", so_name)
+    # Clean up
+    os.remove(bak_path)
+    if success and os.path.exists(so_path):
+        os.remove(so_path)
+    elif not success:
+        print(f"[ERROR] Compilation failed for {file_path}", file=sys.stderr)
+        print(output, file=sys.stderr)
 
-    success, output = run_compilation(so_name, bak_file_name)
-    os.remove(bak_file_name)  # Clean up temporary file
-
-    return (
-        success,
-        output,
-        so_name,
-    )  # Return the result and the generated .so file name
+    return success
 
 
-if __name__ == "__main__":
-    files = glob.glob("benchmark/data/dlboost_code_test/*.cpp")
-    counter = 0
+def main():
+    if len(sys.argv) != 2:
+        print(
+            f"Usage: {sys.argv[0]} <dlboost_source_directory>", file=sys.stderr
+        )
+        sys.exit(1)
 
-    # Using ProcessPoolExecutor for parallel compilation
+    src_dir = sys.argv[1]
+    pattern = os.path.join(src_dir, "*.cpp")
+    files = glob.glob(pattern)
+    if not files:
+        print(f"[WARN] No .cpp files found in {src_dir}", file=sys.stderr)
+        sys.exit(0)
+
+    # Parallel compilation
     with ProcessPoolExecutor() as executor:
         results = list(
             tqdm(executor.map(compile_cpp_file, files), total=len(files))
         )
 
-    # Process the results
-    for success, output, so_name in results:
-        if success:
-            counter += 1
-            subprocess.run(["rm", so_name])  # Remove the compiled .so file
-        else:
-            print(output)
-
-    print(counter)
-    print(len(files))
+    total = len(files)
+    succ = sum(results)
     print(
-        "[INFO]*******************CPP Compilation success rate: ",
-        counter / len(files),
+        f"[INFO] DLBoost compilation success rate: {succ}/{total} = {succ/total:.2%}"
     )
+
+
+if __name__ == "__main__":
+    main()
