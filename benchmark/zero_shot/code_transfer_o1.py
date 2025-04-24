@@ -1,8 +1,32 @@
 import argparse
 import os
+import re
 import sys
 
 import openai
+
+from benchmark.zero_shot.zero_shot_prompt import (
+    CPU_TO_CUDA_PROMPT,
+    CPU_TO_HIP_PROMPT,
+    CPU_TO_MLU_PROMPT,
+    CUDA_TO_AMD_PROMPT,
+    CUDA_TO_CPU_PROMPT,
+    CUDA_TO_MLU_PROMPT,
+    HIP_TO_CPU_PROMPT,
+    HIP_TO_CUDA_PROMPT,
+    HIP_TO_MLU_PROMPT,
+    MLU_TO_CPU_PROMPT,
+    MLU_TO_CUDA_PROMPT,
+    MLU_TO_HIP_PROMPT,
+)
+
+ext_map = {
+    "cuda": "cu",
+    "hip": "hip",
+    "cpu": "cpp",
+    "mlu": "mlu",
+}
+
 
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
@@ -30,10 +54,10 @@ PROMPT_MAP = {
 
 
 def code_transform(input_code: str, prompt_template: str) -> str:
-    """Call the OpenAI o1 endpoint to perform zero-shot code translation."""
+    """Call the GPT-4 API to perform code translation."""
     prompt = prompt_template.format(input_code=input_code)
     response = openai.ChatCompletion.create(
-        model="gpt-4o1",  # use the ‘o1’ optimized model for zero-shot
+        model="gpt-4o1",
         messages=[
             {
                 "role": "system",
@@ -43,12 +67,19 @@ def code_transform(input_code: str, prompt_template: str) -> str:
         ],
         temperature=0.0,
     )
-    return response.choices[0].message.content
+    output = response.choices[0].message.content
+    match = re.search(r"```cpp(.*?)```", output, re.DOTALL)
+    if not match:
+        print("No C++ code block found.")
+        return False
+
+    cpp_code = match.group(1).strip()
+    return cpp_code
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Zero-shot code translation between CUDA/CPU/AMD/MLU using o1"
+        description="Zero-shot code translation between CUDA/CPU/hip/MLU"
     )
     parser.add_argument(
         "source_file", help="Path to the source code file to translate"
@@ -73,17 +104,23 @@ def main():
         )
         sys.exit(1)
 
+    # Read the source code
     with open(args.source_file, "r", encoding="utf-8") as f:
         input_code = f.read()
 
+    # Perform translation
     prompt_template = PROMPT_MAP[direction]
     translated_code = code_transform(input_code, prompt_template)
 
+    # Write output to directory named "<source>_<dest>"
     output_dir = f"{args.source_platform}_{args.dest_platform}"
     os.makedirs(output_dir, exist_ok=True)
 
     base_name = os.path.basename(args.source_file)
     output_path = os.path.join(output_dir, base_name)
+    file_stem = os.path.splitext(os.path.basename(args.source_file))[0]
+    target_ext = ext_map[args.dest_platform]
+    output_path = os.path.join(output_dir, f"{file_stem}.{target_ext}")
 
     with open(output_path, "w", encoding="utf-8") as out_file:
         out_file.write(translated_code)
