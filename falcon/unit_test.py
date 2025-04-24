@@ -85,7 +85,7 @@ def unit_test(file_name, code):
         device_code = re.sub(r'extern "C"\s+', "", code)
         code = device_code + host_code
 
-    elif target == "cpp":
+    elif target == "cpu":
         code = code.replace(
             "void " + op_name + "(", "void " + op_name + "_kernel("
         )

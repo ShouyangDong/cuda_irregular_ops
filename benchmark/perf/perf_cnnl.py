@@ -1,8 +1,11 @@
+import csv
 import glob
 import os
+import shutil
 
 import torch
 import torch.nn.functional as F
+import torch_mlu  # fmt: skip
 
 device = torch.device("mlu")
 
@@ -722,7 +725,7 @@ if __name__ == "__main__":
     transposed_data.insert(0, header)
 
     # 保存为CSV文件
-    # with open("benchmark/perf/cnnl_output.csv", "w", newline="") as file:
-    #     writer = csv.writer(file)
-    #     writer.writerows(transposed_data)
-    # shutil.rmtree("./time")
+    with open("benchmark/perf/cnnl_output.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerows(transposed_data)
+    shutil.rmtree("./time")

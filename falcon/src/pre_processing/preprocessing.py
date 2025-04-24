@@ -126,6 +126,7 @@ def run_detensorization(code, target):
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)
+    code = make_full_func(code)
     return code
 
 

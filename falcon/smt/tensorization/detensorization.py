@@ -5,7 +5,7 @@ from pycparser import c_ast, c_generator, c_parser
 from falcon.buffer_inline import ast_buffer_inline
 from falcon.simplification import simplify_code
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import NodeTransformer, remove_target_prefix
+from falcon.util import NodeTransformer, make_full_func, remove_target_prefix
 
 file_name = "falcon/documents/op_tensorization.json"
 
@@ -75,6 +75,7 @@ def ast_detensorization(code, target):
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)
+    code = make_full_func(code)
     return code
 
 

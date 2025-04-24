@@ -52,12 +52,14 @@ def stmt_split(file_name, code, source_platform, target_platform):
 
 
 def detensorization(file_name, code, source_platform, target_platform):
+    print("[INFO]**********code: ", code)
     try:
         final_code = run_detensorization(code, source_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("detensorization error")
     except RuntimeError:
         final_code = ast_detensorization(code, source_platform)
+    print("[INFO]**********final code: ", final_code)
     return final_code
 
 
@@ -73,6 +75,7 @@ def loop_fusion(file_name, code, source_platform, target_platform):
 
 
 def loop_reorder(file_name, code, source_platform, target_platform):
+    print("[INFO]***********loop reorder code: ", code)
     try:
         final_code = run_loop_reorder(code)
         if not unit_test(file_name, final_code):
@@ -80,6 +83,7 @@ def loop_reorder(file_name, code, source_platform, target_platform):
     except RuntimeError as e:
         print("[INFO]loop reorder error: ", e)
         final_code = ast_loop_reorder(code)
+    print("[INFO]***************final code: ", final_code)
     return final_code
 
 
