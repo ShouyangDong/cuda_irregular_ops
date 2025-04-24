@@ -10,6 +10,7 @@ from absl import app, flags
 from jax import jit, lax, vmap
 
 from benchmark.perf import perf_bang, perf_cuda, perf_dlboost
+from falcon.mcts.action_logit import generate_prior_from_src
 from falcon.mcts.actions import actions as ActionSpace
 from falcon.mcts.invalid_actions import get_invalid_actions
 from falcon.mcts.utils import open_file
@@ -229,14 +230,19 @@ def get_recurrent_fn(env):
         depth_val = int(jax.device_get(depth)[0])
         cur_action_ids = lax.dynamic_slice(trajectory, (0, 0), (1, depth_val))
         jax.device_get(cur_action_ids)[0].tolist()
-        
+
         code_embedding = [int(arr) for arr in embedding_state[0]]
         code = encoder.decode(code_embedding)
         invalid_mask = jnp.array(
             get_invalid_actions(code, env.source_platform, env.target_platform)
         ).reshape(1, -1)
         reward = rewards[0, 0, depth - 1, actions]
-        prior_logits = jax.random.uniform(subkey, shape=(1, A_Length))
+        # prior_logits = jax.random.uniform(subkey, shape=(1, A_Length))
+        prior_logits = jnp.array(
+            generate_prior_from_src(
+                code, env.source_platform, env.target_platform
+            )
+        ).reshape(1, -1)
 
         return (
             mctx.RecurrentFnOutput(
@@ -265,7 +271,11 @@ def _run_demo(env, rng_key):
     invalid_actions = jnp.array(
         get_invalid_actions(code, env.source_platform, env.target_platform)
     ).reshape(1, -1)
-    prior_logits = jnp.ones((1, A_Length)) / A_Length
+    # prior_logits = jnp.ones((1, A_Length)) / A_Length
+    prior_logits = jnp.array(
+        generate_prior_from_src(code, env.source_platform, env.target_platform)
+    ).reshape(1, -1)
+    print("[INFO]**********prior_logits: ", prior_logits)
     root = mctx.RootFnOutput(
         prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
         value=jnp.zeros([BS]),
