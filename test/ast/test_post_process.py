@@ -19,12 +19,12 @@ def post_processing_pipeline(code, target):
     :return: Transformed code after applying the two transformations."""
     code = constant_inline(code)
     code = ast_thread_binding(code, target)
-    # when target is "BANG" or "DLBOOST", insert tensorization process.
-    if target in ["BANG", "DLBOOST"]:
+    # when target is "mlu" or "DLBOOST", insert tensorization process.
+    if target in ["mlu", "DLBOOST"]:
         code = run_code_decoration(code)
         print("[INFO] decorated: ", code)
         op_pragma = {}
-        if target == "BANG":
+        if target == "mlu":
             op_pragma = json.load(
                 open(
                     "./falcon/documents/operation_bang_C_instruction_map.json",
@@ -61,5 +61,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = post_processing_pipeline(code, "BANG")
+    code = post_processing_pipeline(code, "mlu")
     print(code)

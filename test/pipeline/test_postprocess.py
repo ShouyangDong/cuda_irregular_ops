@@ -17,12 +17,12 @@ def falcon_postprocess_pipeline(code, file_name, target):
     if not unit_test(file_name, final_code):
         final_code = ast_thread_binding(code, target)
     print("[INFO] final_code: ", final_code)
-    # when target is "BANG" or "DLBOOST", insert tensorization process.
-    if target in ["BANG", "DLBOOST"]:
+    # when target is "mlu" or "DLBOOST", insert tensorization process.
+    if target in ["mlu", "DLBOOST"]:
         code = run_code_decoration(final_code)
         print("[INFO] decorate code: ", code)
         op_pragma = {}
-        if target == "BANG":
+        if target == "mlu":
             op_pragma = json.load(
                 open(
                     "./falcon/documents/operation_bang_C_instruction_map.json",
@@ -59,9 +59,9 @@ if __name__ == "__main__":
     """
     cuda_file_name = "./add_4_4_128_128."
     code = falcon_postprocess_pipeline(
-        code, cuda_file_name + "mlu", target="BANG"
+        code, cuda_file_name + "mlu", target="mlu"
     )
     print(code)
 
-    # code = falcon_postprocess_pipeline(code, cuda_file_name + "cu", target="CUDA")
+    # code = falcon_postprocess_pipeline(code, cuda_file_name + "cu", target="cuda")
     # print(code)

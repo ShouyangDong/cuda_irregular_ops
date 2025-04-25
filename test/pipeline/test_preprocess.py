@@ -17,7 +17,7 @@ def falcon_preprocess_pipeline(file_name, target):
     if not unit_test(file_name, code):
         code = ast_loop_recovery(org_code, target)
 
-    if target in ["BANG"]:
+    if target in ["mlu"]:
         modi_code = run_detensorization(code, target)
         if not unit_test(file_name, modi_code):
             modi_code = ast_detensorization(code, target)
@@ -27,9 +27,9 @@ def falcon_preprocess_pipeline(file_name, target):
 
 if __name__ == "__main__":
     bang_file_name = "benchmark/data/mlu_code_test/sign_45_25.mlu"
-    code = falcon_preprocess_pipeline(bang_file_name, target="BANG")
+    code = falcon_preprocess_pipeline(bang_file_name, target="mlu")
     print(code)
 
     # cuda_file_name = "benchmark/data/cuda_code_test/add_3_3_256.cu"
-    # code = falcon_preprocess_pipeline(cuda_file_name, target="CUDA")
+    # code = falcon_preprocess_pipeline(cuda_file_name, target="cuda")
     # print(code)

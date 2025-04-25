@@ -36,7 +36,13 @@ flags.DEFINE_string(
     "./tvm_search_tree.png",
     "The output file for the visualization.",
 )
-
+flags.DEFINE_string("source", "mlu", "Source platform identifier.")
+flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
+flags.DEFINE_string(
+    "file_name",
+    "benchmark/data/mlu_code_test/add_3_3_256.mlu",
+    "Path to the input kernel file.",
+)
 jax.config.update("jax_disable_jit", True)
 jax.config.update("jax_enable_x64", True)
 jax.disable_jit()
@@ -201,7 +207,7 @@ class FalconGo:
         return self.action_len
 
 
-def build_env(file_name, source_platform="BANG", target_platform="DL Boost"):
+def build_env(file_name, source_platform="mlu", target_platform="cpu"):
     action_len = len(ActionSpace)
     base_name = os.path.basename(file_name)
     op_name = base_name.split("_")[0]
@@ -299,11 +305,9 @@ def _run_demo(env, rng_key):
 
 
 def main(argv):
-    source = "BANG"
-    target = "DL Boost"
-    name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
+
     rng_key = jax.random.PRNGKey(FLAGS.seed)
-    falcon_env = build_env(name, source, target)
+    falcon_env = build_env(FLAGS.file_name, FLAGS.source, FLAGS.target)
 
     start_time = time.time()
     policy_output = _run_demo(falcon_env, rng_key)

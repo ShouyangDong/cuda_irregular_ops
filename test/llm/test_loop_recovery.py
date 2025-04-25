@@ -32,14 +32,14 @@ def run_loop_recovery(code, target):
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_des = None
-    if target == "CUDA":
+    if target == "cuda":
         prompt_des = LOOP_RECOVERY_PROMPT_CUDA
-    elif target == "BANG":
+    elif target == "mlu":
         prompt_des = LOOP_RECOVERY_PROMPT_BANG
     prompt_demo = None
-    if target == "CUDA":
+    if target == "cuda":
         prompt_demo = LOOP_RECOVERY_DEMO_CUDA
-    elif target == "BANG":
+    elif target == "mlu":
         prompt_demo = LOOP_RECOVERY_DEMO_BANG
 
     PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", prompt_des)
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_loop_recovery(code, target="CUDA")
+    code = run_loop_recovery(code, target="cuda")
     print(code)
 
     code = """
@@ -79,5 +79,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_loop_recovery(code, target="BANG")
+    code = run_loop_recovery(code, target="mlu")
     print(code)

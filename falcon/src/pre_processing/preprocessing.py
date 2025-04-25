@@ -8,9 +8,9 @@ from falcon.simplification import simplify_code
 from falcon.src.pre_processing.preprocessing_prompt import (
     DETENSORIZATION_PROMPT_BANG,
     LOOP_RECOVERY_DEMO_BANG,
-    LOOP_RECOVERY_DEMO_CUDA,
     LOOP_RECOVERY_PROMPT_BANG,
-    LOOP_RECOVERY_PROMPT_CUDA,
+    LOOP_RECOVERY_DEMO_cuda,
+    LOOP_RECOVERY_PROMPT_cuda,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
@@ -29,7 +29,7 @@ def run_loop_recovery(code, target):
     Example:
     {LOOP_RECOVERY_DEMO}
 
-    Input CUDA Code:
+    Input cuda Code:
     {code}
     Output C++ Code:
 
@@ -38,14 +38,14 @@ def run_loop_recovery(code, target):
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_des = None
-    if target == "CUDA":
-        prompt_des = LOOP_RECOVERY_PROMPT_CUDA
-    elif target == "BANG":
+    if target == "cuda":
+        prompt_des = LOOP_RECOVERY_PROMPT_cuda
+    elif target == "mlu":
         prompt_des = LOOP_RECOVERY_PROMPT_BANG
     prompt_demo = None
-    if target == "CUDA":
-        prompt_demo = LOOP_RECOVERY_DEMO_CUDA
-    elif target == "BANG":
+    if target == "cuda":
+        prompt_demo = LOOP_RECOVERY_DEMO_cuda
+    elif target == "mlu":
         prompt_demo = LOOP_RECOVERY_DEMO_BANG
 
     PROMPT = PROMPT.replace("{TENSORIZATION_PROMPT}", prompt_des)
@@ -132,11 +132,11 @@ def run_detensorization(code, target):
 
 def pre_processing_pipeline(code, target):
     """This function transforms the given code by performing two main transformations:
-        1. Convert parallel loop variables (e.g., OpenMP, CUDA) into standard C for loops.
+        1. Convert parallel loop variables (e.g., OpenMP, cuda) into standard C for loops.
         2. Convert SIMD tensor operations into scalar for-loop based calculations.
     :param func_content: The content of the function (code) to be transformed.
     :return: Transformed code after applying the two transformations."""
     code = run_loop_recovery(code, target)
-    if target in ["BANG"]:
+    if target in ["mlu"]:
         code = run_detensorization(code, target)
     return code

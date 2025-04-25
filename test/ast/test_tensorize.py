@@ -36,5 +36,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = ast_tensorization(code, target="BANG")
+    code = ast_tensorization(code, target="mlu")
     print(code)

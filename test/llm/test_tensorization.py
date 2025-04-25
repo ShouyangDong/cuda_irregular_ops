@@ -26,7 +26,7 @@ if __name__ == "__main__":
         C[(clusterId * 4 + coreId) * 64 + col] = C_nram[col];
     }
     """
-    code = run_tensorization(code, target="BANG")
+    code = run_tensorization(code, target="mlu")
     print(code)
 
     code = """
@@ -64,5 +64,5 @@ if __name__ == "__main__":
     }
     }
     """
-    code = run_tensorization(code, target="BANG")
+    code = run_tensorization(code, target="mlu")
     print(code)

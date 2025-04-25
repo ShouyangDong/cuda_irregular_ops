@@ -25,18 +25,18 @@ from falcon.unit_test import unit_test
 
 # Compile Script
 compile_script = {
-    "DL Boost": "benchmark/evaluation/dlboost_test/compilation.py",
+    "cpu": "benchmark/evaluation/dlboost_test/compilation.py",
     "MLU": "benchmark/evaluation/mlu_test/compilation.py",
-    "CUDA": "benchmark/evaluation/cuda_test/compilation.py"
-    "HIP": "benchmark/evaluation/hip_test/compilation.py"
+    "cuda": "benchmark/evaluation/cuda_test/compilation.py"
+    "hip": "benchmark/evaluation/hip_test/compilation.py"
 }
 
 # Test Script
 test_script = {
-    "DL Boost": "benchmark/evaluation/dlboost_test/result_test.py"
+    "cpu": "benchmark/evaluation/dlboost_test/result_test.py"
     "MLU": "benchmark/evaluation/mlu_test/result_test.py"
-    "CUDA": "benchmark/evaluation/cuda_test/result_test.py"
-    "HIP": "benchmark/evaluation/hip_test/result_test.py"
+    "cuda": "benchmark/evaluation/cuda_test/result_test.py"
+    "hip": "benchmark/evaluation/hip_test/result_test.py"
 }
 
 
@@ -155,7 +155,7 @@ def loop_contraction(file_name, code, source_platform, target_platform):
 
 
 def auto_bind(file_name, code, source_platform, target_platform):
-    if target_platform not in ["BANG", "CUDA", "HIP"]:
+    if target_platform not in ["mlu", "cuda", "hip"]:
         return code
 
     final_code = run_thread_binding(code, target_platform)
@@ -174,7 +174,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
 def auto_cache(file_name, code, source_platform, target_platform):
     code = run_code_decoration(code)
     op_pragma = {}
-    if target_platform == "BANG":
+    if target_platform == "mlu":
         op_pragma = json.load(
             open(
                 "./falcon/documents/operation_bang_C_instruction_map.json", "r"
@@ -214,7 +214,7 @@ def auto_tensorization(file_name, code, source_platform, target_platform):
 
 
 def auto_pipeline(file_name, code, source_platform, target_platform):
-    if target_platform not in ["BANG"]:
+    if target_platform not in ["mlu"]:
         return code
 
     final_code = run_double_buffer(code, target_platform)
@@ -256,8 +256,8 @@ if __name__ == "__main__":
         }
     }
     """
-    source_platform = "CUDA"
-    target_platform = "BANG"
+    source_platform = "cuda"
+    target_platform = "mlu"
     file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
     selected_function = random.choice(actions)
     # 调用随机选择的函数

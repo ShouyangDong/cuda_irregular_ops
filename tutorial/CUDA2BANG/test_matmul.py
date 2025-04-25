@@ -57,7 +57,7 @@ def run_transcompile_code(file_name, source, target):
     code = run_code_decoration(final_code)
     print("[INFO] decorate code: ", code)
     op_pragma = {}
-    if target == "BANG":
+    if target == "mlu":
         op_pragma = json.load(
             open(
                 "./falcon/documents/operation_bang_C_instruction_map.json", "r"
@@ -79,5 +79,5 @@ def run_transcompile_code(file_name, source, target):
 
 if __name__ == "__main__":
     file_name = "benchmark/data/cuda_code_test/gemm_32_128_128.cu"
-    code = run_transcompile_code(file_name, source="CUDA", target="BANG")
+    code = run_transcompile_code(file_name, source="cuda", target="mlu")
     print(code)

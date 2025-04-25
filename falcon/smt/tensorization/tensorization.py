@@ -201,7 +201,7 @@ class PragmaToSIMDTransformer(NodeTransformer):
         return self.generic_visit(node)
 
 
-def ast_tensorization(code, target="BANG"):
+def ast_tensorization(code, target="mlu"):
     code = remove_target_prefix(code)
 
     # 解析代码
@@ -215,7 +215,7 @@ def ast_tensorization(code, target="BANG"):
     # 输出修改后的代码
     generator = c_generator.CGenerator()
     tensorized_code = generator.visit(ast)
-    if target == "BANG":
+    if target == "mlu":
         return add_memory_prefix(tensorized_code)
     return tensorized_code
 

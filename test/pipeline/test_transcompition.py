@@ -27,7 +27,7 @@ def run_transcompile_code(file_name, source, target):
         code = ast_loop_recovery(device_code, source)
 
     print("[INFO]*********loop recovery: ", code)
-    if source in ["BANG"]:
+    if source in ["mlu"]:
         try:
             modi_code = run_detensorization(code, source)
         except BaseException:
@@ -60,5 +60,5 @@ def run_transcompile_code(file_name, source, target):
 
 if __name__ == "__main__":
     file_name = "benchmark/data/mlu_code_test/add_4_4_4_64.mlu"
-    code = run_transcompile_code(file_name, source="BANG", target="CUDA")
+    code = run_transcompile_code(file_name, source="mlu", target="cuda")
     print(code)

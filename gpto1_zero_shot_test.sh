@@ -10,6 +10,16 @@ BENCH_DIR="benchmark/data"
 DIRECTIONS=(
   "mlu:cpu"
   "cpu:mlu"
+  "mlu:hip"
+  "mlu:cuda"
+  "cpu:hip"
+  "cpu:cuda"
+  "cuda:mlu"
+  "cuda:hip"
+  "cuda:cpu"
+  "hip:mlu"
+  "hip:cuda"
+  "hip:cpu"
 )
 
 # 编译脚本映射

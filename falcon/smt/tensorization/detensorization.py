@@ -62,7 +62,7 @@ def ast_detensorization(code, target):
     - Extend the visitor to handle more complex loop structures.
     """
     code = remove_target_prefix(code)
-    if target == "BANG":
+    if target == "mlu":
         parser = c_parser.CParser()
         ast = parser.parse(code)
         with open(file_name) as json_file:
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         __memcpy(((float *)add_1515 + (((((int)clusterId) * 256) + (((int)coreId) * 64)))), ((float *)lhs_local_nram + (0)), 256, NRAM2GDRAM);
     }
     """
-    code = ast_detensorization(code, "BANG")
+    code = ast_detensorization(code, "mlu")
     print(code)
     code = """
         void tanh(float* input0, float* active_tanh_210) {
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
     }
     """
-    code = ast_detensorization(code, "BANG")
+    code = ast_detensorization(code, "mlu")
     print(code)
     code = """
     void softmax(float *A, float *output)
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         }
     }
     """
-    code = ast_detensorization(code, "BANG")
+    code = ast_detensorization(code, "mlu")
     print(code)
 
     bang_code = """
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         }
     }
     """
-    converted_code = ast_detensorization(bang_code, "BANG")
+    converted_code = ast_detensorization(bang_code, "mlu")
     print(converted_code)
 
     bang_code = """
@@ -177,5 +177,5 @@ if __name__ == "__main__":
     }
     }
     """
-    converted_code = ast_detensorization(bang_code, "BANG")
+    converted_code = ast_detensorization(bang_code, "mlu")
     print(converted_code)

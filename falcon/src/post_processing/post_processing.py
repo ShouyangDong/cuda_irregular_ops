@@ -13,9 +13,9 @@ from falcon.src.post_processing.post_processing_prompt import (
     DOUBLE_BUFFER_PROMPT,
     TENSORIZATION_PROMPT,
     THREAD_BINDING_DEMO_BANG,
-    THREAD_BINDING_DEMO_CUDA,
     THREAD_BINDING_PROMPT_BANG,
-    THREAD_BINDING_PROMPT_CUDA,
+    THREAD_BINDING_DEMO_cuda,
+    THREAD_BINDING_PROMPT_cuda,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
@@ -36,10 +36,10 @@ def run_thread_binding(code, target):
     prompt_demo = None
     THREAD_BINDING_PROMPT = None
     print("[INFO]***********target: ", target)
-    if target == "CUDA":
-        prompt_demo = THREAD_BINDING_DEMO_CUDA
-        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_CUDA
-    elif target == "BANG":
+    if target == "cuda":
+        prompt_demo = THREAD_BINDING_DEMO_cuda
+        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_cuda
+    elif target == "mlu":
         prompt_demo = THREAD_BINDING_DEMO_BANG
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_BANG
 
@@ -332,18 +332,18 @@ def run_double_buffer(code, target):
 
 def post_processing_pipeline(code, target):
     """This function transforms the given code by performing two main transformations:
-        1. Convert parallel loop variables (e.g., OpenMP, CUDA) into standard C for loops.
+        1. Convert parallel loop variables (e.g., OpenMP, cuda) into standard C for loops.
         2. Convert SIMD tensor operations into scalar for-loop based calculations.
     :param func_content: The content of the function (code) to be transformed.
 
     :return: Transformed code after applying the two transformations."""
     code = run_thread_binding(code, target)
 
-    # when target is "BANG" or "DLBOOST", insert tensorization process.
-    if target in ["BANG", "DLBOOST"]:
+    # when target is "mlu" or "DLBOOST", insert tensorization process.
+    if target in ["mlu", "DLBOOST"]:
         code = run_code_decoration(code)
         op_pragma = {}
-        if target == "BANG":
+        if target == "mlu":
             op_pragma = json.load(
                 open(
                     "./falcon/documents/operation_bang_C_instruction_map.json",

@@ -27,13 +27,13 @@ def visit_func_call(code):
 def get_invalid_actions(code, source_platform, target_platform):
     invalid_mask = [0] * len(ActionSpace)
 
-    if source_platform == "DL Boost":
+    if source_platform == "cpu":
         invalid_mask[0] = 1
 
     if not visit_func_call(code):
         invalid_mask[2] = 1
 
-    if target_platform == "DL Boost":
+    if target_platform == "cpu":
         invalid_mask[7] = 1
         invalid_mask[8] = 1
         invalid_mask[10] = 1

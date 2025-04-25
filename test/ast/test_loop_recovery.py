@@ -69,14 +69,14 @@ class LoopRecoveryVisitor(NodeTransformer):
         return c_ast.ID(name=name + filed)
 
 
-def ast_loop_recovery(code, target="CUDA"):
+def ast_loop_recovery(code, target="cuda"):
     ParaVar = update_dim(code)
     builtin_map = {}
-    if target == "CUDA":
+    if target == "cuda":
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
-    elif target == "BANG":
+    elif target == "mlu":
         for builtin_var in mlu_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         }
     }
     """
-    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    converted_code = ast_loop_recovery(cuda_code, "cuda")
     print(converted_code)
 
     bang_code = """
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         }
     }
     """
-    converted_code = ast_loop_recovery(bang_code, "BANG")
+    converted_code = ast_loop_recovery(bang_code, "mlu")
     print(converted_code)
 
     cuda_code = """
@@ -120,5 +120,5 @@ if __name__ == "__main__":
         T_add[((int)threadIdx.x)] = (A[((int)threadIdx.x)] + B[((int)threadIdx.x)]);
     }
     """
-    converted_code = ast_loop_recovery(cuda_code, "CUDA")
+    converted_code = ast_loop_recovery(cuda_code, "cuda")
     print(converted_code)

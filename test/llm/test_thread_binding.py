@@ -26,10 +26,10 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_demo = None
     THREAD_BINDING_PROMPT = None
-    if target == "CUDA":
+    if target == "cuda":
         prompt_demo = THREAD_BINDING_DEMO_CUDA
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_CUDA
-    elif target == "BANG":
+    elif target == "mlu":
         prompt_demo = THREAD_BINDING_DEMO_BANG
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_BANG
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = run_thread_binding(code, "BANG")
+    output_code = run_thread_binding(code, "mlu")
     print(output_code)
 
     code = """
@@ -83,5 +83,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_thread_binding(code, target="CUDA")
+    code = run_thread_binding(code, target="cuda")
     print(code)

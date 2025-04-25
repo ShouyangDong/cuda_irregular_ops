@@ -110,7 +110,7 @@ def loop_contraction(file_name, code, source_platform, target_platform):
 
 
 def auto_bind(file_name, code, source_platform, target_platform):
-    if target_platform not in ["BANG", "CUDA", "HIP"]:
+    if target_platform not in ["mlu", "cuda", "hip"]:
         return code
     try:
         final_code = run_thread_binding(code, target_platform)
@@ -124,7 +124,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
 def auto_cache(file_name, code, source_platform, target_platform):
     code = run_code_decoration(code)
     op_pragma = {}
-    if target_platform == "BANG":
+    if target_platform == "mlu":
         op_pragma = json.load(
             open(
                 "./falcon/documents/operation_bang_C_instruction_map.json", "r"
@@ -156,7 +156,7 @@ def auto_tensorization(file_name, code, source_platform, target_platform):
 
 
 def auto_pipeline(file_name, code, source_platform, target_platform):
-    if target_platform not in ["BANG"]:
+    if target_platform not in ["mlu"]:
         return code
     try:
         final_code = run_double_buffer(code, target_platform)
@@ -193,8 +193,8 @@ if __name__ == "__main__":
         }
     }
     """
-    source_platform = "CUDA"
-    target_platform = "BANG"
+    source_platform = "cuda"
+    target_platform = "mlu"
     file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
     selected_function = random.choice(actions)
     # 调用随机选择的函数

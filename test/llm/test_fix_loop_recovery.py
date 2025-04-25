@@ -17,7 +17,7 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_loop_recovery(code, target="CUDA")
+    code = run_loop_recovery(code, target="cuda")
     print(code)
 
     code = """
@@ -30,5 +30,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_loop_recovery(code, target="BANG")
+    code = run_loop_recovery(code, target="mlu")
     print(code)

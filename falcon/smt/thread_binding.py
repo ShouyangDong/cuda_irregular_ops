@@ -8,8 +8,8 @@ from falcon.util import (
 )
 
 builtin_var = {
-    "CUDA": ["threadIdxx", "blockIdxx"],
-    "BANG": ["coreId", "clusterId"],
+    "cuda": ["threadIdxx", "blockIdxx"],
+    "mlu": ["coreId", "clusterId"],
 }
 builtin_dim = {
     "threadIdxx": 256,
@@ -21,7 +21,7 @@ builtin_dim = {
 
 # Temporarily, we will binding the outermost with thread
 class ThreadBindingTransformer(NodeTransformer):
-    def __init__(self, parallel_loops, target="BANG"):
+    def __init__(self, parallel_loops, target="mlu"):
         self.binding_map = {}
         self.parallel_loops = parallel_loops
         self.target = target
@@ -38,7 +38,7 @@ class ThreadBindingTransformer(NodeTransformer):
 
         # 如果循环变量是绑定变量，返回循环体
         if (
-            self.target == "BANG"
+            self.target == "mlu"
             and self.parallel_loops >= 2
             and self.current_depth == 1
         ):
@@ -47,7 +47,7 @@ class ThreadBindingTransformer(NodeTransformer):
             self.binding_map[loop_var] = thread_var
             return self.generic_visit(new_node)
 
-        elif self.target == "CUDA" and self.current_depth == 1:
+        elif self.target == "cuda" and self.current_depth == 1:
             thread_var = self._generate_thread_var(extend, 1024)
             new_node = self._generate_new_node(thread_var, node)
             self.binding_map[loop_var] = thread_var
@@ -101,7 +101,7 @@ class LoopVisitor(c_ast.NodeVisitor):
         self.current_depth -= 1
 
 
-def ast_thread_binding(code, target="BANG"):
+def ast_thread_binding(code, target="mlu"):
     code = remove_target_prefix(code)
     # 解析代码
     parser = c_parser.CParser()
@@ -117,7 +117,7 @@ def ast_thread_binding(code, target="BANG"):
     generator = c_generator.CGenerator()
     binding_code = generator.visit(ast)
 
-    if target == "BANG":
+    if target == "mlu":
         return add_memory_prefix(binding_code)
     else:
         return add_parallel_variable_prefix(binding_code)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = ast_thread_binding(code, target="BANG")
+    output_code = ast_thread_binding(code, target="mlu")
     print(output_code)
 
     code = """
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = ast_thread_binding(code, target="CUDA")
+    output_code = ast_thread_binding(code, target="cuda")
     print(output_code)
 
     code = """
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = ast_thread_binding(code, target="CUDA")
+    output_code = ast_thread_binding(code, target="cuda")
     print(output_code)
 
     code = """
@@ -220,7 +220,7 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = ast_thread_binding(code, target="BANG")
+    output_code = ast_thread_binding(code, target="mlu")
     print(output_code)
 
     code = """
@@ -233,5 +233,5 @@ if __name__ == "__main__":
         }
     }
     """
-    output_code = ast_thread_binding(code, target="BANG")
+    output_code = ast_thread_binding(code, target="mlu")
     print(output_code)

@@ -15,34 +15,34 @@ def generate_prior_from_src(code, src_target, dst_target):
     """
     logit_prior = [0.2] * len(ActionSpace)
 
-    if src_target == "CUDA" and "thread" in code:
+    if src_target == "cuda" and "thread" in code:
         logit_prior[0] = 0.5
 
-    if src_target == "BANG" and "coreId" in code:
+    if src_target == "mlu" and "coreId" in code:
         logit_prior[0] = 0.5
 
-    if src_target == "HIP" and "thread" in code:
+    if src_target == "hip" and "thread" in code:
         logit_prior[0] = 0.5
 
-    if src_target == "CUDA" and "mma_sync" in code:
+    if src_target == "cuda" and "mma_sync" in code:
         logit_prior[2] = 0.5
 
-    if src_target == "HIP" and "amdgcn" in code:
+    if src_target == "hip" and "amdgcn" in code:
         logit_prior[2] = 0.5
 
-    if src_target == "BANG" and "__bang" in code:
+    if src_target == "mlu" and "__bang" in code:
         logit_prior[2] = 0.5
 
-    if src_target == "DL Boost" and "dpbusd" in code:
+    if src_target == "cpu" and "dpbusd" in code:
         logit_prior[2] = 0.5
 
-    if dst_target == "CUDA" or dst_target == "HIP" and "thread" not in code:
+    if dst_target == "cuda" or dst_target == "hip" and "thread" not in code:
         logit_prior[7] = 0.4
 
-    if dst_target == "BANG" and "coreId" not in code:
+    if dst_target == "mlu" and "coreId" not in code:
         logit_prior[7] = 0.4
 
-    if dst_target == "BANG" and "__bang" not in code:
+    if dst_target == "mlu" and "__bang" not in code:
         logit_prior[9] = 0.4
 
     return logit_prior

@@ -23,7 +23,7 @@ if __name__ == "__main__":
         __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
     }
     """
-    code = pre_processing_pipeline(func_content, target="BANG")
+    code = pre_processing_pipeline(func_content, target="mlu")
     print(code)
 
     func_content = """
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         }
     }
     """
-    code = pre_processing_pipeline(func_content, target="CUDA")
+    code = pre_processing_pipeline(func_content, target="cuda")
     print(code)
     code = """
     extern "C" __mlu_global__ void add(float* lhs, float* rhs, float* add_1935) {
@@ -44,5 +44,5 @@ if __name__ == "__main__":
         __memcpy(((float *)add_1935 + ((((int)coreId) * 1024))), ((float *)lhs_local_nram + (0)), 4096, NRAM2GDRAM);
     }
     """
-    code = pre_processing_pipeline(code, target="BANG")
+    code = pre_processing_pipeline(code, target="mlu")
     print(code)

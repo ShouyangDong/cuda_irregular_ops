@@ -76,5 +76,5 @@ if __name__ == "__main__":
         __memcpy(((float *)active_tanh_210 + (((((int)clusterId) * 2560) + (((int)coreId) * 640)))), ((float *)input0_local_nram + (0)), 2560, NRAM2GDRAM);
     }
     """
-    code = run_detensorization(code, target="BANG")
+    code = run_detensorization(code, target="mlu")
     print(code)

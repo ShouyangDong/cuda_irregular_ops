@@ -20,5 +20,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = post_processing_pipeline(code, "BANG")
+    code = post_processing_pipeline(code, "mlu")
     print(code)

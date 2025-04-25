@@ -55,5 +55,5 @@ def run_transcompile_code(file_name, source, target):
 
 if __name__ == "__main__":
     file_name = "benchmark/data/mlu_code_test/add_4_4_4_64.mlu"
-    code = run_transcompile_code(file_name, source="BANG", target="CUDA")
+    code = run_transcompile_code(file_name, source="mlu", target="cuda")
     print(code)

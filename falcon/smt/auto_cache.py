@@ -236,7 +236,7 @@ class CacheTransformationVisitor(NodeTransformer):
         )
 
 
-def ast_auto_cache(code, space_map, target="BANG"):
+def ast_auto_cache(code, space_map, target="mlu"):
     code = remove_target_prefix(code)
 
     # 解析代码
@@ -253,7 +253,7 @@ def ast_auto_cache(code, space_map, target="BANG"):
     # 输出最终代码
     generator = c_generator.CGenerator()
     cache_code = generator.visit(ast)
-    if target == "BANG":
+    if target == "mlu":
         return add_memory_prefix(cache_code)
     else:
         return "__global__ " + cache_code

@@ -63,5 +63,5 @@ if __name__ == "__main__":
         }
     }
     """
-    code = run_double_buffer(code, target="BANG")
+    code = run_double_buffer(code, target="mlu")
     print(code)
