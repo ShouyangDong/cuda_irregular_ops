@@ -10,6 +10,59 @@ import torch_mlu  # fmt: skip
 device = torch.device("mlu")
 
 
+@torch.no_grad()
+def deformable_attention_pytorch(
+    value, value_spatial_shapes, sampling_locations, attention_weights
+):
+    """Pytorch implementation of deformable attention from
+    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py
+    """
+    # for debug and test only,
+    # need to use cuda version instead
+    N_, S_, M_, D_ = value.shape
+    _, Lq_, M_, L_, P_, _ = sampling_locations.shape
+    value_list = value.split(
+        [H_ * W_ for H_, W_ in value_spatial_shapes], dim=1
+    )
+    sampling_grids = 2 * sampling_locations - 1
+    sampling_value_list = []
+    for lid_, (H_, W_) in enumerate(value_spatial_shapes):
+        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_,
+        # D_, H_, W_
+        value_l_ = (
+            value_list[lid_]
+            .flatten(2)
+            .transpose(1, 2)
+            .reshape(N_ * M_, D_, H_, W_)
+        )
+        # N_, Lq_, M_, P_, 2 -> N_, M_, Lq_, P_, 2 -> N_*M_, Lq_, P_, 2
+        sampling_grid_l_ = (
+            sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        )
+        # N_*M_, D_, Lq_, P_
+        sampling_value_l_ = F.grid_sample(
+            value_l_,
+            sampling_grid_l_,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=False,
+        )
+        sampling_value_list.append(sampling_value_l_)
+    # (N_, Lq_, M_, L_, P_) -> (N_, M_, Lq_, L_, P_) -> (N_, M_, 1, Lq_, L_*P_)
+    attention_weights = attention_weights.transpose(1, 2).reshape(
+        N_ * M_, 1, Lq_, L_ * P_
+    )
+    output = (
+        (
+            torch.stack(sampling_value_list, dim=-2).flatten(-2)
+            * attention_weights
+        )
+        .sum(-1)
+        .view(N_, M_ * D_, Lq_)
+    )
+    return output.transpose(1, 2).contiguous()
+
+
 def perf_elementwise(name, shape):
     x = torch.randn(shape, device=device)
     y = torch.randn(shape, device=device)
@@ -25,10 +78,7 @@ def perf_elementwise(name, shape):
         nb_iters = 1000
         start.record()
         with torch.profiler.profile(
-            activities=(
-                torch.profiler.ProfilerActivity.CPU,
-                torch.profiler.ProfilerActivity.MLU,
-            ),
+            activities=(torch.profiler.ProfilerActivity.MLU,),
             record_shapes=True,
             on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
         ) as p:
@@ -53,10 +103,7 @@ def perf_elementwise(name, shape):
         nb_iters = 1000
         start.record()
         with torch.profiler.profile(
-            activities=(
-                torch.profiler.ProfilerActivity.CPU,
-                torch.profiler.ProfilerActivity.MLU,
-            ),
+            activities=(torch.profiler.ProfilerActivity.MLU,),
             record_shapes=True,
             on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
         ) as p:
@@ -143,10 +190,7 @@ def perf_pooling(name, shape, kernel, stride):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -176,10 +220,7 @@ def perf_bmm(name, shape_A, shape_B):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -213,10 +254,7 @@ def perf_activation(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -253,10 +291,7 @@ def perf_conv2d_nchw(
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -298,10 +333,7 @@ def perf_conv2d_nhwc(
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -330,10 +362,7 @@ def perf_gemv(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -361,10 +390,7 @@ def perf_conv1d(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -408,10 +434,7 @@ def perf_depthwise_conv2d(name, shape, kernel_size):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -440,10 +463,7 @@ def perf_layernorm(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -473,10 +493,7 @@ def perf_rmsnorm(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -509,13 +526,11 @@ def perf_deformable(name, shape):
     )
 
     def test_deformable():
-        MSDA.ms_deform_attn_forward(
-            value_pt,
-            shapes_pt,
-            value_level_start_index_pt,
-            sampling_locations_pt,
-            attention_weights_pt,
-            64,
+        deformable_attention_pytorch(
+            value,
+            shapes,
+            sampling_locations,
+            attention_weights,
         )
         # necessary because kernel launches are async
 
@@ -527,10 +542,7 @@ def perf_deformable(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -560,10 +572,7 @@ def perf_scaled_dot_product_attention(name, shape):
     nb_iters = 1000
     start.record()
     with torch.profiler.profile(
-        activities=(
-            torch.profiler.ProfilerActivity.CPU,
-            torch.profiler.ProfilerActivity.MLU,
-        ),
+        activities=(torch.profiler.ProfilerActivity.MLU,),
         record_shapes=True,
         on_trace_ready=torch.profiler.tensorboard_trace_handler("./time"),
     ) as p:
@@ -698,12 +707,10 @@ if __name__ == "__main__":
             times.append(execution_time)
 
         elif name == "deformable":
-            # shapes = base_name.split(".")[0]
-            # shape = [int(intg) for intg in shapes.split("_")[1:]]
-            # perf_deformable(base_name, shape)
-            # times.append(execution_time)
-            # FIXME: incompatible pytorch version with RMSNorm
-            continue
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_deformable(base_name, shape)
+            times.append(execution_time)
             times.append(0)
 
         elif name == "mha":
@@ -721,7 +728,7 @@ if __name__ == "__main__":
     transposed_data = list(zip(*table))
 
     # 添加标题行
-    header = ["file", "time(us)"]
+    header = ["file", "time(ms)"]
     transposed_data.insert(0, header)
 
     # 保存为CSV文件

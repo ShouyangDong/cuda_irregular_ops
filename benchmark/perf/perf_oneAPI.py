@@ -7,6 +7,59 @@ import torch
 import torch.nn.functional as F
 
 
+@torch.no_grad()
+def deformable_attention_pytorch(
+    value, value_spatial_shapes, sampling_locations, attention_weights
+):
+    """Pytorch implementation of deformable attention from
+    https://github.com/fundamentalvision/Deformable-DETR/blob/main/models/ops/functions/ms_deform_attn_func.py
+    """
+    # for debug and test only,
+    # need to use cuda version instead
+    N_, S_, M_, D_ = value.shape
+    _, Lq_, M_, L_, P_, _ = sampling_locations.shape
+    value_list = value.split(
+        [H_ * W_ for H_, W_ in value_spatial_shapes], dim=1
+    )
+    sampling_grids = 2 * sampling_locations - 1
+    sampling_value_list = []
+    for lid_, (H_, W_) in enumerate(value_spatial_shapes):
+        # N_, H_*W_, M_, D_ -> N_, H_*W_, M_*D_ -> N_, M_*D_, H_*W_ -> N_*M_,
+        # D_, H_, W_
+        value_l_ = (
+            value_list[lid_]
+            .flatten(2)
+            .transpose(1, 2)
+            .reshape(N_ * M_, D_, H_, W_)
+        )
+        # N_, Lq_, M_, P_, 2 -> N_, M_, Lq_, P_, 2 -> N_*M_, Lq_, P_, 2
+        sampling_grid_l_ = (
+            sampling_grids[:, :, :, lid_].transpose(1, 2).flatten(0, 1)
+        )
+        # N_*M_, D_, Lq_, P_
+        sampling_value_l_ = F.grid_sample(
+            value_l_,
+            sampling_grid_l_,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=False,
+        )
+        sampling_value_list.append(sampling_value_l_)
+    # (N_, Lq_, M_, L_, P_) -> (N_, M_, Lq_, L_, P_) -> (N_, M_, 1, Lq_, L_*P_)
+    attention_weights = attention_weights.transpose(1, 2).reshape(
+        N_ * M_, 1, Lq_, L_ * P_
+    )
+    output = (
+        (
+            torch.stack(sampling_value_list, dim=-2).flatten(-2)
+            * attention_weights
+        )
+        .sum(-1)
+        .view(N_, M_ * D_, Lq_)
+    )
+    return output.transpose(1, 2).contiguous()
+
+
 def perf_elementwise(name, shape):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -281,6 +334,7 @@ def perf_rmsnorm(name, shape):
 
 
 def perf_deformable(name, shape):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     N, M, D = shape[:3]
     Lq, L, P = shape[3:]
     shapes = torch.as_tensor(
@@ -290,24 +344,22 @@ def perf_deformable(name, shape):
     )
     level_start_index = torch.cat(
         (shapes.new_zeros((1,)), shapes.prod(1).cumsum(0)[:-1])
-    ).cuda()
+    )
     S = sum([(H * W).item() for H, W in shapes])
 
     value = torch.rand(N, S, M, D, device=device) * 0.01
     sampling_locations = torch.rand(N, Lq, M, L, P, 2, device=device)
     attention_weights = torch.rand(N, Lq, M, L, P, device=device) + 1e-5
-    attention_weights /= (
-        attention_weights.sum(-1, keepdim=True).sum(-2, keepdim=True).cuda()
+    attention_weights /= attention_weights.sum(-1, keepdim=True).sum(
+        -2, keepdim=True
     )
 
     def test_deformable():
-        MSDA.ms_deform_attn_forward(
-            value_pt,
-            shapes_pt,
-            value_level_start_index_pt,
-            sampling_locations_pt,
-            attention_weights_pt,
-            64,
+        deformable_attention_pytorch(
+            value,
+            shapes,
+            sampling_locations,
+            attention_weights,
         )
         # necessary because kernel launches are async
 
@@ -446,15 +498,10 @@ if __name__ == "__main__":
             shapes = base_name.split(".")[0]
             shape = [int(intg) for intg in shapes.split("_")[1:]]
             execution_time = perf_rmsnorm(base_name, shape)
-            # continue
-            # times.append(0)
         elif name == "deformable":
-            # shapes = base_name.split(".")[0]
-            # shape = [int(intg) for intg in shapes.split("_")[1:]]
-            # perf_deformable(base_name, shape)
-            # FIXME: incompatible pytorch version with RMSNorm
-            continue
-            times.append(0)
+            shapes = base_name.split(".")[0]
+            shape = [int(intg) for intg in shapes.split("_")[1:]]
+            perf_deformable(base_name, shape)
 
         elif name == "mha":
             shapes = base_name.split(".")[0]
