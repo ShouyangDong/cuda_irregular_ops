@@ -100,4 +100,4 @@ def unit_test(file_name, code):
     success, output = run_test(tmp_file_name, test_file)
     logging.info(output)
     shutil.rmtree(tmp_dir)
-    return success
+    return success, output

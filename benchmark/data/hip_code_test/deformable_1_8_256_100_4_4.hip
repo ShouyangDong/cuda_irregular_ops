@@ -143,24 +143,24 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
   int d = 256;
   int p = 4;
 
-  cudaMalloc(&d_value, n * s * m * d * sizeof(float));
-  cudaMalloc(&d_value_spatial_shapes, l * 2 * sizeof(int));
-  cudaMalloc(&d_value_level_start_index, l * sizeof(int));
-  cudaMalloc(&d_sampling_locations, n * lq * m * l * p * 2 * sizeof(float));
-  cudaMalloc(&d_attention_weights, n * lq * m * l * p * sizeof(float));
-  cudaMalloc(&d_output, n * lq * m * d * sizeof(float));
+  hipMalloc(&d_value, n * s * m * d * sizeof(float));
+  hipMalloc(&d_value_spatial_shapes, l * 2 * sizeof(int));
+  hipMalloc(&d_value_level_start_index, l * sizeof(int));
+  hipMalloc(&d_sampling_locations, n * lq * m * l * p * 2 * sizeof(float));
+  hipMalloc(&d_attention_weights, n * lq * m * l * p * sizeof(float));
+  hipMalloc(&d_output, n * lq * m * d * sizeof(float));
 
   // Copy data from host to device
-  cudaMemcpy(d_value, value, n * s * m * d * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(d_value_spatial_shapes, value_spatial_shapes, l * 2 * sizeof(int),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(d_value_level_start_index, level_start_index, l * sizeof(int),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(d_sampling_locations, sampling_locations,
-             n * lq * m * l * p * 2 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_attention_weights, attention_weights,
-             n * lq * m * l * p * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_value, value, n * s * m * d * sizeof(float),
+             hipMemcpyHostToDevice);
+  hipMemcpy(d_value_spatial_shapes, value_spatial_shapes, l * 2 * sizeof(int),
+             hipMemcpyHostToDevice);
+  hipMemcpy(d_value_level_start_index, level_start_index, l * sizeof(int),
+             hipMemcpyHostToDevice);
+  hipMemcpy(d_sampling_locations, sampling_locations,
+             n * lq * m * l * p * 2 * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_attention_weights, attention_weights,
+             n * lq * m * l * p * sizeof(float), hipMemcpyHostToDevice);
 
   // Define grid and block dimensions
   dim3 blockSize(d / 4);
@@ -169,14 +169,14 @@ extern "C" void deformable_kernel(float *value, int *value_spatial_shapes,
   deformable<<<numBlocks, blockSize>>>(d_attention_weights, d_output, d_sampling_locations, d_value,d_value_level_start_index, d_value_spatial_shapes);
 
   // Copy the result back to host
-  cudaMemcpy(output, d_output, n * lq * m * d * sizeof(float),
-             cudaMemcpyDeviceToHost);
+  hipMemcpy(output, d_output, n * lq * m * d * sizeof(float),
+             hipMemcpyDeviceToHost);
 
   // Free device memory
-  cudaFree(d_value);
-  cudaFree(d_value_spatial_shapes);
-  cudaFree(d_value_level_start_index);
-  cudaFree(d_sampling_locations);
-  cudaFree(d_attention_weights);
-  cudaFree(d_output);
+  hipFree(d_value);
+  hipFree(d_value_spatial_shapes);
+  hipFree(d_value_level_start_index);
+  hipFree(d_sampling_locations);
+  hipFree(d_attention_weights);
+  hipFree(d_output);
 }

@@ -46,15 +46,15 @@ extern "C" void conv2dnchw_kernel(float *input, float *output, float *kernel,
 
   // 分配设备内存
   float *d_input, *d_kernel, *d_output;
-  cudaMalloc(&d_input, input_size * sizeof(float));
-  cudaMalloc(&d_kernel, kernel_size * sizeof(float));
-  cudaMalloc(&d_output, output_size * sizeof(float));
+  hipMalloc(&d_input, input_size * sizeof(float));
+  hipMalloc(&d_kernel, kernel_size * sizeof(float));
+  hipMalloc(&d_output, output_size * sizeof(float));
 
   // 复制数据到设备
-  cudaMemcpy(d_input, input, input_size * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(d_kernel, kernel, kernel_size * sizeof(float),
-             cudaMemcpyHostToDevice);
+  hipMemcpy(d_input, input, input_size * sizeof(float),
+             hipMemcpyHostToDevice);
+  hipMemcpy(d_kernel, kernel, kernel_size * sizeof(float),
+             hipMemcpyHostToDevice);
 
   // 定义块和网格尺寸
   dim3 blockSize(output_width,
@@ -66,11 +66,11 @@ conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
 
   // 将输出数据复制回主机
-  cudaMemcpy(output, d_output, output_size * sizeof(float),
-             cudaMemcpyDeviceToHost);
+  hipMemcpy(output, d_output, output_size * sizeof(float),
+             hipMemcpyDeviceToHost);
 
   // 释放设备和主机内存
-  cudaFree(d_input);
-  cudaFree(d_kernel);
-  cudaFree(d_output);
+  hipFree(d_input);
+  hipFree(d_kernel);
+  hipFree(d_output);
 }

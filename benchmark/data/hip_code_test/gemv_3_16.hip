@@ -12,21 +12,21 @@ __global__ void gemv(float *A, float *x, float *y) {
 extern "C" void gemv_kernel(float *A, float *x, float *y, int m, int n) {
   float *d_A, *d_x, *d_y;
 
-  cudaMalloc(&d_A, m * n * sizeof(float));
-  cudaMalloc(&d_x, n * sizeof(float));
-  cudaMalloc(&d_y, m * sizeof(float));
+  hipMalloc(&d_A, m * n * sizeof(float));
+  hipMalloc(&d_x, n * sizeof(float));
+  hipMalloc(&d_y, m * sizeof(float));
 
-  cudaMemcpy(d_A, A, m * n * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_x, x, n * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, m * n * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_x, x, n * sizeof(float), hipMemcpyHostToDevice);
 
   int blockSize = 3;
   int numBlocks = (m + blockSize - 1) / blockSize;
 
   gemv<<<numBlocks, blockSize>>>(d_y, d_A, d_x);
 
-  cudaMemcpy(y, d_y, m * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(y, d_y, m * sizeof(float), hipMemcpyDeviceToHost);
 
-  cudaFree(d_A);
-  cudaFree(d_x);
-  cudaFree(d_y);
+  hipFree(d_A);
+  hipFree(d_x);
+  hipFree(d_y);
 }

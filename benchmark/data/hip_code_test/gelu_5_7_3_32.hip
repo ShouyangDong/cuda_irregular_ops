@@ -17,10 +17,10 @@ extern "C" void gelu_kernel(float *A, float *C, int size) {
   float *d_A;
   float *d_C;
 
-  cudaMalloc(&d_A, size * sizeof(float));
-  cudaMalloc(&d_C, size * sizeof(float));
+  hipMalloc(&d_A, size * sizeof(float));
+  hipMalloc(&d_C, size * sizeof(float));
 
-  cudaMemcpy(d_A, A, size * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, size * sizeof(float), hipMemcpyHostToDevice);
 
   dim3 blockSize(1024);
   dim3 numBlocks((size + 1024 - 1) / 1024);
@@ -28,8 +28,8 @@ extern "C" void gelu_kernel(float *A, float *C, int size) {
   gelu<<<numBlocks, blockSize>>>(d_A, d_C);
 
 
-  cudaMemcpy(C, d_C, size * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(C, d_C, size * sizeof(float), hipMemcpyDeviceToHost);
 
-  cudaFree(d_A);
-  cudaFree(d_C);
+  hipFree(d_A);
+  hipFree(d_C);
 }

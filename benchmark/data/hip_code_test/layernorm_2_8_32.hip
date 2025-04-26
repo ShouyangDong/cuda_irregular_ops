@@ -46,15 +46,15 @@ extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
   // Allocate memory on the device
   float *d_A, *d_B, *d_gamma, *d_beta;
   int num_elements = batch_size * seq_length * d_model;
-  cudaMalloc(&d_A, num_elements * sizeof(float));
-  cudaMalloc(&d_B, num_elements * sizeof(float));
-  cudaMalloc(&d_gamma, d_model * sizeof(float));
-  cudaMalloc(&d_beta, d_model * sizeof(float));
+  hipMalloc(&d_A, num_elements * sizeof(float));
+  hipMalloc(&d_B, num_elements * sizeof(float));
+  hipMalloc(&d_gamma, d_model * sizeof(float));
+  hipMalloc(&d_beta, d_model * sizeof(float));
 
   // Copy data from host to device
-  cudaMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_gamma, gamma, d_model * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_beta, beta, d_model * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, num_elements * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_gamma, gamma, d_model * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_beta, beta, d_model * sizeof(float), hipMemcpyHostToDevice);
 
   // Define grid and block dimensions
   int block_size = 16;
@@ -62,10 +62,10 @@ extern "C" void layernorm_kernel(float *A, float *gamma, float *beta, float *B,
 
   layernorm<<<num_blocks, block_size>>>(d_A, d_gamma, d_beta, d_B);
   // Copy the result back to host
-  cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(B, d_B, num_elements * sizeof(float), hipMemcpyDeviceToHost);
   // Free device memory
-  cudaFree(d_A);
-  cudaFree(d_B);
-  cudaFree(d_gamma);
-  cudaFree(d_beta);
+  hipFree(d_A);
+  hipFree(d_B);
+  hipFree(d_gamma);
+  hipFree(d_beta);
 }

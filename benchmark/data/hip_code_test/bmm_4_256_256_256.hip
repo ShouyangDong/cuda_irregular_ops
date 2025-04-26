@@ -34,20 +34,20 @@ extern "C" void bmm_kernel(half *A, half *B, float *C,  int b, int m, int k,
   half *d_B;
   float *d_C;
 
-  cudaMalloc(&d_A, b * m * k * sizeof(half));
-  cudaMalloc(&d_B, b * k * n * sizeof(half));
-  cudaMalloc(&d_C, b * m * n * sizeof(float));
+  hipMalloc(&d_A, b * m * k * sizeof(half));
+  hipMalloc(&d_B, b * k * n * sizeof(half));
+  hipMalloc(&d_C, b * m * n * sizeof(float));
 
-  cudaMemcpy(d_A, A, b * m * k * sizeof(half), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_B, B, b * k * n * sizeof(half), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, b * m * k * sizeof(half), hipMemcpyHostToDevice);
+  hipMemcpy(d_B, B, b * k * n * sizeof(half), hipMemcpyHostToDevice);
 
   dim3 blockSize(32);
   dim3 numBlocks((n + 16 - 1) / 16, (m + 16 - 1) / 16);
   bmm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
-  cudaMemcpy(C, d_C, b * m * n * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(C, d_C, b * m * n * sizeof(float), hipMemcpyDeviceToHost);
 
-  cudaFree(d_A);
-  cudaFree(d_B);
-  cudaFree(d_C);
+  hipFree(d_A);
+  hipFree(d_B);
+  hipFree(d_C);
 }

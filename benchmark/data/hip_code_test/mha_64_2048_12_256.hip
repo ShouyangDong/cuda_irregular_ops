@@ -49,24 +49,24 @@ extern "C" void mha_kernel(float *queries, float *keys, float *values,
 
   int size = batch_size * seq_len * num_heads * head_dim;
   float *d_queries, *d_keys, *d_values, *d_output;
-  cudaMalloc(&d_queries, size * sizeof(float));
-  cudaMalloc(&d_keys, size * sizeof(float));
-  cudaMalloc(&d_values, size * sizeof(float));
-  cudaMalloc(&d_output, size * sizeof(float));
+  hipMalloc(&d_queries, size * sizeof(float));
+  hipMalloc(&d_keys, size * sizeof(float));
+  hipMalloc(&d_values, size * sizeof(float));
+  hipMalloc(&d_output, size * sizeof(float));
 
-  cudaMemcpy(d_queries, queries, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_keys, keys, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_values, values, size * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_queries, queries, size * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_keys, keys, size * sizeof(float), hipMemcpyHostToDevice);
+  hipMemcpy(d_values, values, size * sizeof(float), hipMemcpyHostToDevice);
 
   dim3 grid(batch_size, seq_len);
   dim3 block(num_heads);
 
   scaled_dot_product_attention<<<grid, block>>>(d_queries, d_keys, d_values, d_output);
 
-  cudaMemcpy(output, d_output, size * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(output, d_output, size * sizeof(float), hipMemcpyDeviceToHost);
 
-  cudaFree(d_queries);
-  cudaFree(d_keys);
-  cudaFree(d_values);
-  cudaFree(d_output);
+  hipFree(d_queries);
+  hipFree(d_keys);
+  hipFree(d_values);
+  hipFree(d_output);
 }

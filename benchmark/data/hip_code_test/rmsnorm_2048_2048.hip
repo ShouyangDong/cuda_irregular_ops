@@ -26,11 +26,11 @@ extern "C" void rmsnorm_kernel(float *A, float *B, int size_1, int size_2) {
   // Allocate memory on the device
   float *d_A, *d_B;
   int num_elements = size_1 * size_2;
-  cudaMalloc(&d_A, num_elements * sizeof(float));
-  cudaMalloc(&d_B, num_elements * sizeof(float));
+  hipMalloc(&d_A, num_elements * sizeof(float));
+  hipMalloc(&d_B, num_elements * sizeof(float));
 
   // Copy data from host to device
-  cudaMemcpy(d_A, A, num_elements * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, num_elements * sizeof(float), hipMemcpyHostToDevice);
 
   // Define grid and block dimensions
   int block_size = 1024;
@@ -39,8 +39,8 @@ extern "C" void rmsnorm_kernel(float *A, float *B, int size_1, int size_2) {
   // Launch kernel
   rmsnorm<<<num_blocks, block_size>>>(d_A, d_B);
   // Copy the result back to host
-  cudaMemcpy(B, d_B, num_elements * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(B, d_B, num_elements * sizeof(float), hipMemcpyDeviceToHost);
   // Free device memory
-  cudaFree(d_A);
-  cudaFree(d_B);
+  hipFree(d_A);
+  hipFree(d_B);
 }

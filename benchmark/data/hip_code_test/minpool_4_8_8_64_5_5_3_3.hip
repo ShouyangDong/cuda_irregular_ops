@@ -25,20 +25,20 @@ extern "C" void minpool_kernel(float *input, float *output, int batch_size,
   int output_H = (input_H - kernel_size) / stride + 1;
   int input_size = batch_size * input_H * input_H * channels;
   int output_size = batch_size * output_H * output_H * channels;
-  cudaMalloc(&d_input, input_size * sizeof(float));
-  cudaMalloc(&d_output, output_size * sizeof(float));
+  hipMalloc(&d_input, input_size * sizeof(float));
+  hipMalloc(&d_output, output_size * sizeof(float));
 
-  cudaMemcpy(d_input, input, input_size * sizeof(float),
-             cudaMemcpyHostToDevice);
+  hipMemcpy(d_input, input, input_size * sizeof(float),
+             hipMemcpyHostToDevice);
 
   dim3 blockSize(1024);
   dim3 numBlocks((output_size + blockSize.x - 1) / blockSize.x);
 
   minpool<<<numBlocks, blockSize>>>(d_input, d_output);
 
-  cudaMemcpy(output, d_output, output_size * sizeof(float),
-             cudaMemcpyDeviceToHost);
+  hipMemcpy(output, d_output, output_size * sizeof(float),
+             hipMemcpyDeviceToHost);
 
-  cudaFree(d_input);
-  cudaFree(d_output);
+  hipFree(d_input);
+  hipFree(d_output);
 }

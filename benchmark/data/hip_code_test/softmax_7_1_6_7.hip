@@ -26,18 +26,18 @@ extern "C" void softmax_kernel(float *A, float *C, int size1, int size2) {
   float *d_A;
   float *d_C;
 
-  cudaMalloc(&d_A, size1 * size2 * sizeof(float));
-  cudaMalloc(&d_C, size1 * size2 * sizeof(float));
+  hipMalloc(&d_A, size1 * size2 * sizeof(float));
+  hipMalloc(&d_C, size1 * size2 * sizeof(float));
 
-  cudaMemcpy(d_A, A, size1 * size2 * sizeof(float), cudaMemcpyHostToDevice);
+  hipMemcpy(d_A, A, size1 * size2 * sizeof(float), hipMemcpyHostToDevice);
 
   dim3 blockSize(42);
   dim3 numBlocks((size1 + 42 - 1) / 42);
 
   softmax<<<numBlocks, blockSize>>>(d_A, d_C);
 
-  cudaMemcpy(C, d_C, size1 * size2 * sizeof(float), cudaMemcpyDeviceToHost);
+  hipMemcpy(C, d_C, size1 * size2 * sizeof(float), hipMemcpyDeviceToHost);
 
-  cudaFree(d_A);
-  cudaFree(d_C);
+  hipFree(d_A);
+  hipFree(d_C);
 }

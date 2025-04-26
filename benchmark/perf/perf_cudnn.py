@@ -728,9 +728,7 @@ if __name__ == "__main__":
     transposed_data.insert(0, header)
 
     # 保存为CSV文件
-    with open(
-        "benchmark/perf/cudnn_output_maxpool.csv", "w", newline=""
-    ) as file:
+    with open("benchmark/perf/cudnn_output.csv", "w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(transposed_data)
     shutil.rmtree("./time")

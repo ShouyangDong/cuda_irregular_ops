@@ -35,14 +35,14 @@ extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output,
   int output_width = input_height - kernel_size + 1;
   int filter_size = kernel_size * kernel_size * input_channels;
   int output_size = output_height * output_width * input_channels;
-  cudaMalloc(&d_input, input_size * sizeof(float));
-  cudaMalloc(&d_kernel, filter_size * sizeof(float));
-  cudaMalloc(&d_output, output_size * sizeof(float));
+  hipMalloc(&d_input, input_size * sizeof(float));
+  hipMalloc(&d_kernel, filter_size * sizeof(float));
+  hipMalloc(&d_output, output_size * sizeof(float));
 
-  cudaMemcpy(d_input, input, input_size * sizeof(float),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(d_kernel, kernel, filter_size * sizeof(float),
-             cudaMemcpyHostToDevice);
+  hipMemcpy(d_input, input, input_size * sizeof(float),
+             hipMemcpyHostToDevice);
+  hipMemcpy(d_kernel, kernel, filter_size * sizeof(float),
+             hipMemcpyHostToDevice);
 
   // 定义块和网格尺寸
   dim3 blockSize(32, 32);
@@ -52,10 +52,10 @@ extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output,
 
   depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
-  cudaMemcpy(output, d_output, output_size * sizeof(float),
-             cudaMemcpyDeviceToHost);
+  hipMemcpy(output, d_output, output_size * sizeof(float),
+             hipMemcpyDeviceToHost);
 
-  cudaFree(d_input);
-  cudaFree(d_kernel);
-  cudaFree(d_output);
+  hipFree(d_input);
+  hipFree(d_kernel);
+  hipFree(d_output);
 }

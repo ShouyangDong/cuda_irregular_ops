@@ -194,6 +194,30 @@ def run_cuda_compilation(so_name, file_name):
         return False, e.output
 
 
+def run_hip_compilation(so_name, file_name):
+    try:
+        output = subprocess.run(
+            [
+                "hipcc",
+                "-fPIC",
+                "-shared",
+                "-arch=sm_80",
+                "-o",
+                so_name,
+                file_name,
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            encoding="utf-8",
+            check=True,
+            text=True,
+            timeout=15,
+        )
+        return True, output
+    except subprocess.CalledProcessError as e:
+        return False, e.output
+
+
 def run_test(file_name, test_file):
     try:
         output = subprocess.run(
