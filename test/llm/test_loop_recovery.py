@@ -32,12 +32,12 @@ def run_loop_recovery(code, target):
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_des = None
-    if target == "cuda":
+    if target == "cuda" or target == "hip":
         prompt_des = LOOP_RECOVERY_PROMPT_CUDA
     elif target == "mlu":
         prompt_des = LOOP_RECOVERY_PROMPT_BANG
     prompt_demo = None
-    if target == "cuda":
+    if target == "cuda" or target == "hip":
         prompt_demo = LOOP_RECOVERY_DEMO_CUDA
     elif target == "mlu":
         prompt_demo = LOOP_RECOVERY_DEMO_BANG

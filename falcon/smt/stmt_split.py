@@ -48,7 +48,7 @@ class LoopSplitter(NodeTransformer):
         return self.generic_visit(node)
 
 
-def ast_stmt_split(code):
+def ast_stmt_split(code, target="None"):
     # Parse code and apply loop splitting
     code = constant_inline(code)
     parser = c_parser.CParser()
@@ -61,7 +61,7 @@ def ast_stmt_split(code):
     # Generate and print transformed code
     generator = c_generator.CGenerator()
     code = generator.visit(split_ast)
-    code = make_full_func(code)
+    code = make_full_func(code, target)
     return code
 
 

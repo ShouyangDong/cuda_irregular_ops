@@ -72,7 +72,7 @@ class LoopRecoveryVisitor(NodeTransformer):
 def ast_loop_recovery(code, target="cuda"):
     ParaVar = update_dim(code)
     builtin_map = {}
-    if target == "cuda":
+    if target == "cuda" or target == "hip":
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]

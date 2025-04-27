@@ -8,9 +8,9 @@ from falcon.simplification import simplify_code
 from falcon.src.pre_processing.preprocessing_prompt import (
     DETENSORIZATION_PROMPT_BANG,
     LOOP_RECOVERY_DEMO_BANG,
+    LOOP_RECOVERY_DEMO_CUDA,
     LOOP_RECOVERY_PROMPT_BANG,
-    LOOP_RECOVERY_DEMO_cuda,
-    LOOP_RECOVERY_PROMPT_cuda,
+    LOOP_RECOVERY_PROMPT_CUDA,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 from falcon.stmt_simplification import ast_stmt_simplification
@@ -38,13 +38,13 @@ def run_loop_recovery(code, target):
 
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_des = None
-    if target == "cuda":
-        prompt_des = LOOP_RECOVERY_PROMPT_cuda
+    if target == "cuda" or target == "hip":
+        prompt_des = LOOP_RECOVERY_PROMPT_CUDA
     elif target == "mlu":
         prompt_des = LOOP_RECOVERY_PROMPT_BANG
     prompt_demo = None
-    if target == "cuda":
-        prompt_demo = LOOP_RECOVERY_DEMO_cuda
+    if target == "cuda" or target == "hip":
+        prompt_demo = LOOP_RECOVERY_DEMO_CUDA
     elif target == "mlu":
         prompt_demo = LOOP_RECOVERY_DEMO_BANG
 
@@ -62,7 +62,7 @@ def run_loop_recovery(code, target):
         code_content = match.group(1).strip()
         code_content = code_content.replace("coreId", "core_id")
         code_content = code_content.replace("clusterId", "cluster_id")
-        code_content = make_full_func(code_content)
+        code_content = make_full_func(code_content, target)
         return code_content
     return None
 
@@ -126,7 +126,7 @@ def run_detensorization(code, target):
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)
-    code = make_full_func(code)
+    code = make_full_func(code, target)
     return code
 
 

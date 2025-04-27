@@ -13,9 +13,8 @@ from falcon.src.post_processing.post_processing_prompt import (
     DOUBLE_BUFFER_PROMPT,
     TENSORIZATION_PROMPT,
     THREAD_BINDING_DEMO_BANG,
+    THREAD_BINDING_DEMO_CUDA,
     THREAD_BINDING_PROMPT_BANG,
-    THREAD_BINDING_DEMO_cuda,
-    THREAD_BINDING_PROMPT_cuda,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
@@ -36,9 +35,9 @@ def run_thread_binding(code, target):
     prompt_demo = None
     THREAD_BINDING_PROMPT = None
     print("[INFO]***********target: ", target)
-    if target == "cuda":
-        prompt_demo = THREAD_BINDING_DEMO_cuda
-        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_cuda
+    if target == "cuda" or target == "hip":
+        prompt_demo = THREAD_BINDING_DEMO_CUDA
+        THREAD_BINDING_PROMPT = THREAD_BINDING_DEMO_CUDA
     elif target == "mlu":
         prompt_demo = THREAD_BINDING_DEMO_BANG
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_BANG

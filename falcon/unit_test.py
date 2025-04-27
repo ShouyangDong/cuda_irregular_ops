@@ -85,6 +85,19 @@ def unit_test(file_name, code):
         device_code = re.sub(r'extern "C"\s+', "", code)
         code = device_code + host_code
 
+    if target == "hip":
+        with open(
+            os.path.join(
+                "benchmark/data/hip_code_test", os.path.basename(filename)
+            ),
+            "r",
+        ) as f:
+            host_code = f.read()
+            host_code = "extern" + host_code.split("extern")[1]
+            f.close()
+        device_code = re.sub(r'extern "C"\s+', "", code)
+        code = device_code + host_code
+
     elif target == "cpu":
         code = code.replace(
             "void " + op_name + "(", "void " + op_name + "_kernel("

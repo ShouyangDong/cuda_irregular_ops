@@ -81,7 +81,7 @@ def loop_recovery(file_name, code, source_platform, target_platform):
 
 def stmt_split(file_name, code, source_platform, target_platform):
     # TODO:add llm stmt split and unit test
-    return ast_stmt_split(code)
+    return ast_stmt_split(code, target_platform)
 
 
 def detensorization(file_name, code, source_platform, target_platform):

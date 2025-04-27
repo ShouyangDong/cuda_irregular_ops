@@ -1,31 +1,58 @@
 __global__ void bmm(half *A, half *B, float *C) {
-  wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
-  wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
-  wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
+    using float16x4 = __attribute__((__vector_size__(4 * sizeof(float16_t)))) float16_t;
+    using floatx4 = __attribute__((__vector_size__(4 * sizeof(float)))) float;
 
-  int blockRow = blockIdx.y * 16;
-  int blockCol = blockIdx.x * 16;
+    // 矩阵维度参数
+    const int M = 128, K = 256, N = 512;
+    const int LDA = K;   // A的列数（行主序）
+    const int LDB = N;   // B的列数
+    const int LDC = N;   // C的列数
+    const int BATCH = 4; // 批次数
 
-  for (int batch = 0; batch < 4; ++batch) {
+    // 计算三维网格中的位置
+    const int batch_id = blockIdx.z;                   // 批次索引 [0~3]
+    const int c_row_base = blockIdx.y * 16;            // C块行起始 [0,16,...,112]
+    const int c_col_base = blockIdx.x * 16;            // C块列起始 [0,16,...,496]
 
-    if (blockRow < 128 && blockCol < 512) {
+    // 获取当前批次的矩阵指针
+    float16_t* batch_A = A + batch_id * M * K;
+    float16_t* batch_B = B + batch_id * K * N;
+    float* batch_C = C + batch_id * M * N;
 
-      wmma::fill_fragment(c_frag, 0.0f);
+    // 初始化累加器
+    floatx4 d = {0.0f};
 
-      for (int k = 0; k < 256; k += 16) {
+    // 主计算循环（K=256，分块步长16）
+    for (int k_step = 0; k_step < K; k_step += 16) {
+        float16x4 a, b;
 
-        wmma::load_matrix_sync(a_frag,
-                               A + batch * 128 * 256 + blockRow * 256 + k, 256);
-        wmma::load_matrix_sync(b_frag,
-                               B + batch * 256 * 512 + k * 512 + blockCol, 512);
+        // 向量化加载A和B的子矩阵
+        #pragma unroll
+        for (int i = 0; i < 4; ++i) {
+            // A的索引：行由C块行决定，列按K分块
+            int a_row = c_row_base + threadIdx.x;
+            int a_col = k_step + threadIdx.y * 4 + i;
+            a[i] = batch_A[a_row * LDA + a_col];
 
-        wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
-      }
+            // B的索引：行按K分块，列由C块列决定
+            int b_row = k_step + threadIdx.y * 4 + i;
+            int b_col = c_col_base + threadIdx.x;
+            b[i] = batch_B[b_row * LDB + b_col];
+        }
 
-      wmma::store_matrix_sync(C + batch * 128 * 512 + blockRow * 512 + blockCol,
-                              c_frag, 512, wmma::mem_row_major);
+        // 执行矩阵核心运算（16x16x16 MFMA）
+        d = __builtin_amdgcn_mfma_f32_16x16x16f16(a, b, d, 0, 0, 0);
     }
-  }
+
+    // 写回结果到C矩阵
+    #pragma unroll
+    for (int i = 0; i < 4; ++i) {
+        int c_row = c_row_base + threadIdx.x;
+        int c_col = c_col_base + threadIdx.y * 4 + i;
+        if (c_row < M && c_col < N) { // 边界保护
+            batch_C[c_row * LDC + c_col] = d[i];
+        }
+    }
 }
 
 extern "C" void bmm_kernel(half *A, half *B, float *C,  int b, int m, int k,
@@ -41,8 +68,8 @@ extern "C" void bmm_kernel(half *A, half *B, float *C,  int b, int m, int k,
   hipMemcpy(d_A, A, b * m * k * sizeof(half), hipMemcpyHostToDevice);
   hipMemcpy(d_B, B, b * k * n * sizeof(half), hipMemcpyHostToDevice);
 
-  dim3 blockSize(32);
-  dim3 numBlocks((n + 16 - 1) / 16, (m + 16 - 1) / 16);
+  dim3 blockSize(64);
+  dim3 numBlocks((n + 16 - 1) / 16, (m + 16 - 1) / 16, 4);
   bmm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 
   hipMemcpy(C, d_C, b * m * n * sizeof(float), hipMemcpyDeviceToHost);

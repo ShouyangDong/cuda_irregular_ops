@@ -127,7 +127,7 @@ def run_apply_split(code):
     return None
 
 
-def run_loop_contraction(code):
+def run_loop_contraction(code, target):
     code = simplify_code(code)
     PROMPT = """
     {SYSTEM_PROMPT}
@@ -154,6 +154,6 @@ def run_loop_contraction(code):
         code_content = match.group(1).strip()
         code_content = constant_inline(code_content)
         code_content = ast_stmt_simplification(code_content)
-        code_content = make_full_func(code_content)
+        code_content = make_full_func(code_content, target)
         return code_content
     return None

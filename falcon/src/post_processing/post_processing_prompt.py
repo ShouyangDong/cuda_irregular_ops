@@ -247,7 +247,7 @@ __mlu_entry__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*
 ```
 """
 
-THREAD_BINDING_PROMPT_CUDA = """
+THREAD_BINDING_DEMO_CUDA = """
 Thread Binding
 
 Function Overview:

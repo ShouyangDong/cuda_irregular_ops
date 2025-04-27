@@ -96,7 +96,7 @@ def ast_loop_recovery(code, target="cuda"):
     ParaVar = update_dim(code)
     code = remove_target_prefix(code)
     builtin_map = {}
-    if target == "cuda":
+    if target == "cuda" or target == "hip":
         for builtin_var in cuda_paravar:
             if builtin_var in code:
                 builtin_map[builtin_var] = ParaVar[builtin_var]
@@ -119,7 +119,7 @@ def ast_loop_recovery(code, target="cuda"):
     # TODO: change the code
     code = code.replace("coreId", "core_id")
     code = code.replace("clusterId", "cluster_id")
-    code = make_full_func(code)
+    code = make_full_func(code, target)
     return code
 
 

@@ -10,6 +10,7 @@ from falcon.util import (
 builtin_var = {
     "cuda": ["threadIdxx", "blockIdxx"],
     "mlu": ["coreId", "clusterId"],
+    "hip": ["threadIdxx", "blockIdxx"],
 }
 builtin_dim = {
     "threadIdxx": 256,
@@ -47,7 +48,11 @@ class ThreadBindingTransformer(NodeTransformer):
             self.binding_map[loop_var] = thread_var
             return self.generic_visit(new_node)
 
-        elif self.target == "cuda" and self.current_depth == 1:
+        elif (
+            self.target == "cuda"
+            or self.target == "hip"
+            and self.current_depth == 1
+        ):
             thread_var = self._generate_thread_var(extend, 1024)
             new_node = self._generate_new_node(thread_var, node)
             self.binding_map[loop_var] = thread_var

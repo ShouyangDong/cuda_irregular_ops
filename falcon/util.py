@@ -110,10 +110,12 @@ def remove_target_prefix(code):
     return code
 
 
-def get_target(code):
+def get_target(code, target):
     # 判断文件类型并设置目标
     if "__mlu_global" in code or "__bang" in code or "coreId" in code:
         target, file_type = "mlu", ".mlu"
+    elif target == "hip":
+        target, file_type = "hip", ".hip"
     elif "__global__" in code:
         target, file_type = "cuda", ".cu"
     else:
@@ -121,8 +123,8 @@ def get_target(code):
     return target, file_type
 
 
-def make_full_func(code):
-    target, file_type = get_target(code)
+def make_full_func(code, target):
+    target, file_type = get_target(code, target)
     if target == "mlu":
         code = add_memory_prefix(code)
     return code

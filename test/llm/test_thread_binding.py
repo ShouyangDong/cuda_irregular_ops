@@ -6,7 +6,6 @@ from falcon.src.post_processing.post_processing_prompt import (
     THREAD_BINDING_DEMO_BANG,
     THREAD_BINDING_DEMO_CUDA,
     THREAD_BINDING_PROMPT_BANG,
-    THREAD_BINDING_PROMPT_CUDA,
 )
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
@@ -26,9 +25,9 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
     prompt_demo = None
     THREAD_BINDING_PROMPT = None
-    if target == "cuda":
+    if target == "cuda" or target == "hip":
         prompt_demo = THREAD_BINDING_DEMO_CUDA
-        THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_CUDA
+        THREAD_BINDING_PROMPT = THREAD_BINDING_DEMO_CUDA
     elif target == "mlu":
         prompt_demo = THREAD_BINDING_DEMO_BANG
         THREAD_BINDING_PROMPT = THREAD_BINDING_PROMPT_BANG

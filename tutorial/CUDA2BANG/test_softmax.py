@@ -34,7 +34,7 @@ def run_transcompile_code(file_name, source, target):
         code = ast_loop_recovery(device_code, source)
 
     print("[INFO]*********loop recovery: ", code)
-    modi_code = ast_stmt_split(code)
+    modi_code = ast_stmt_split(code, target)
     print("[INFO]***********detensorization: ", modi_code)
     # loop transformation
     fusion_code = run_loop_fusion(modi_code)

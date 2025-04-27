@@ -9,7 +9,7 @@ import tiktoken
 from absl import app, flags
 from jax import jit, lax, vmap
 
-from benchmark.perf import perf_bang, perf_cuda, perf_dlboost
+from benchmark.perf import perf_bang, perf_cuda, perf_dlboost, perf_hip
 from falcon.mcts.action_logit import generate_prior_from_src
 from falcon.mcts.action_self_debugging import actions as ActionSpace
 from falcon.mcts.invalid_actions import get_invalid_actions
@@ -61,8 +61,8 @@ def objective(file_name, target):
             time_ms = perf_bang.benchmark(file_name)
         elif target == "cpp":
             time_ms = perf_dlboost.benchmark(file_name)
-        # elif target == "hip":
-        #     continue
+        elif target == "hip":
+            time_ms = perf_hip.benchmark(file_name)
         return GFLOPS / (time_ms / 1e3)
     except Exception:
         return 0.0
