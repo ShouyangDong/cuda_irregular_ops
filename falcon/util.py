@@ -57,19 +57,24 @@ def add_memory_prefix(code):
     }
 
     # Regex pattern to match the variable declarations
-    pattern = r"\bfloat\s+(\w+_(Nram|Wram|nram|wram|Gdram))\b"
+    pattern = re.compile(
+        r"(?<!__nram__\s)(?<!__wram__\s)float\s+"
+        r"(\w+_(?:Nram|Wram|nram|wram|Gdram))\b"
+    )
 
     # Function to replace matched float declarations with the appropriate
     # prefix
     def replacer(match):
-        var_name = match.group(1)
-        suffix = match.group(2)
-        if f"_{suffix}" in prefix_map:
-            return f"{prefix_map[f'_{suffix}']} {var_name}"
+        var_name = match.group(1)  # 变量名，如 "lhs_local_Nram"
+        suffix = "_" + match.group(1).split("_")[-1]  # "_Nram"
+        # 如果在映射里，就替换
+        if suffix in prefix_map:
+            return f"{prefix_map[suffix]} {var_name}"
+        # 否则保留原样
         return match.group(0)
 
     # Substitute in the code using regex
-    modified_code = re.sub(pattern, replacer, code)
+    modified_code = pattern.sub(replacer, code)
     if "memcpy" in modified_code and "__memcpy" not in modified_code:
         modified_code = modified_code.replace("memcpy", "__memcpy")
     return (

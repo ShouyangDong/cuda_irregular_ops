@@ -130,6 +130,8 @@ class FalconGo:
         with open(new_file, "w", encoding="utf-8") as f:
             f.write(code)
         score = objective(new_file, target)
+        if target != self.target_platform:
+            score = 0
         return code, score
 
     @jit

@@ -111,7 +111,7 @@ The same logic rewritten using nested `for` loops to emulate the multi-core beha
 4. Replace the multi-core indexing expressions with loop index variables (e.g., `clusterId * 4 + coreId` becomes a C++ loop with the same arithmetic).
 
 ### GPT Task:
-Transform the following NPU code into equivalent C++ for-loop code that sequentially emulates the multi-cluster and multi-core indexing logic. The output should use nested `for` loops to replace the MLU indexing logic.
+Transform the following NPU code into equivalent C++ for-loop code that sequentially emulates the multi-cluster and multi-core indexing logic. The output should use nested `for` loops to replace the MLU indexing logic. Do not change the function call sematics.
 """
 
 
@@ -131,4 +131,21 @@ for (int coreId = 0; coreId < 4; coreId++) {
     }
 }
 ```
+Example 2:
+// before:
+```
+__memcpy(
+    ((float *)lhs_local_nram + (0)),
+    ((float *)lhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+    1024, GDRAM2NRAM);
+```
+//after
+for (int clusterId = 0; clusterId < 4; clusterId++) {
+    for (int coreId = 0; coreId < 4; coreId++) {
+        __memcpy(
+            ((float *)lhs_local_nram + (0)),
+            ((float *)lhs + (((((int)clusterId) * 1024) + (((int)coreId) * 256)))),
+            1024, GDRAM2NRAM);
+    }
+}
 """

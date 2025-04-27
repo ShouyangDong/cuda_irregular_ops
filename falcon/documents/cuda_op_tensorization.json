@@ -1,0 +1,9 @@
+{
+    "wmma_load_matrix_sync" : void wmma_load_matrix_sync(half* a, half* b, int c) {
+        for(int i = 0; i < 16;++i) {
+            for (int j = 0; j < 16; ++j) {
+                a[i * 16 + j] = b[i * c + j];
+            }
+        }
+    }
+}
