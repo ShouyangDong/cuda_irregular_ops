@@ -1,26 +1,50 @@
 __global__ void gemm(half *A, half *B, float *C) {
-  wmma::fragment<wmma::matrix_a, 16, 16, 16, half, wmma::row_major> a_frag;
-  wmma::fragment<wmma::matrix_b, 16, 16, 16, half, wmma::col_major> b_frag;
-  wmma::fragment<wmma::accumulator, 16, 16, 16, float> c_frag;
+    using float16x4 = __attribute__((__vector_size__(4 * sizeof(float16_t)))) float16_t;
+    using floatx4 = __attribute__((__vector_size__(4 * sizeof(float)))) float;
 
-  int blockRow = blockIdx.y * 16;
-  int blockCol = blockIdx.x * 16;
+    // 矩阵维度参数
+    const int M = 32, K = 128, N = 1024;
+    const int LDA = K;    // A的列维度
+    const int LDB = N;    // B的列维度
+    const int LDC = N;    // C的列维度
+    const int TILE_SIZE = 16; // 矩阵核心分块尺寸
 
-  if (blockRow < 32 && blockCol < 1024) {
+    // 计算线程块映射
+    const int c_row_base = blockIdx.y * TILE_SIZE;    // 行分块 (32/16=2块)
+    const int c_col_base = blockIdx.x * TILE_SIZE;    // 列分块 (1024/16=64块)
 
-    wmma::fill_fragment(c_frag, 0.0f);
+    // 初始化累加器
+    floatx4 d = {0.0f};
 
-    for (int k = 0; k < 128; k += 16) {
+    // K维度分块循环 (128/16=8次)
+    for(int k_step = 0; k_step < K; k_step += TILE_SIZE) {
+        float16x4 a, b;
 
-      wmma::load_matrix_sync(a_frag, A + blockRow * 128 + k, 128);
-      wmma::load_matrix_sync(b_frag, B + k * 1024 + blockCol, 1024);
+        // 向量化加载数据 (每个线程加载4个连续元素)
+        #pragma unroll
+        for(int i = 0; i < 4; ++i) {
+            // A矩阵索引: [行][k_step+列偏移]
+            int a_row = c_row_base + threadIdx.x;
+            int a_col = k_step + threadIdx.y * 4 + i;
+            a[i] = A[a_row * LDA + a_col];
 
-      wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+            // B矩阵索引: [k_step+行偏移][列]
+            int b_row = k_step + threadIdx.y * 4 + i;
+            int b_col = c_col_base + threadIdx.x;
+            b[i] = B[b_row * LDB + b_col];
+        }
+
+        // 执行矩阵核心指令 (16x16x16 MFMA)
+        d = __builtin_amdgcn_mfma_f32_16x16x16f16(a, b, d, 0, 0, 0);
     }
 
-    wmma::store_matrix_sync(C + blockRow * 1024 + blockCol, c_frag, 1024,
-                            wmma::mem_row_major);
-  }
+    // 结果写回全局内存
+    #pragma unroll
+    for(int i = 0; i < 4; ++i) {
+        int c_row = c_row_base + threadIdx.x;
+        int c_col = c_col_base + threadIdx.y * 4 + i;
+        C[c_row * LDC + c_col] = d[i];
+    }
 }
 
 extern "C" void gemm_kernel(half *A, half *B, float *C,  int m, int k, int n) {
@@ -35,7 +59,7 @@ extern "C" void gemm_kernel(half *A, half *B, float *C,  int m, int k, int n) {
   hipMemcpy(d_A, A, m * k * sizeof(half), hipMemcpyHostToDevice);
   hipMemcpy(d_B, B, k * n * sizeof(half), hipMemcpyHostToDevice);
 
-  dim3 blockSize(32);
+  dim3 blockSize(64);
   dim3 numBlocks((n + 16 - 1) / 16, (m + 16 - 1) / 16);
   gemm<<<numBlocks, blockSize>>>(d_A, d_B, d_C);
 

@@ -55,7 +55,7 @@ def loop_split(file_name, code, source_platform, target_platform):
 
 
 def loop_contraction(file_name, code, source_platform, target_platform):
-    final_code = run_loop_contraction(code)
+    final_code = run_loop_contraction(code, None)
     return final_code
 
 

@@ -101,6 +101,11 @@ class FalconGo:
         self.best_optimizer_ids = None
         self.iteration = 0
         self.best_actions = None
+        self.output_dir = os.path.join(
+            f"{self.source_platform}_{self.target_platform}"
+        )
+        # 确保目录存在
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def perform_action(self, actions):
         """Generates a design space for a given `action`. It calls `generate_design_space()`
@@ -116,7 +121,7 @@ class FalconGo:
                 self.target_platform,
             )
         print("[INFO]*******actions: ", actions)
-        target, file_type = get_target(code)
+        target, file_type = get_target(code, self.target_platform)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
         base_name = os.path.basename(self.file_name)
@@ -139,11 +144,18 @@ class FalconGo:
         cur_actions = [ActionSpace[_i] for _i in cur_action_list]
 
         # try:
-        tvm_module, reward = self.perform_action(cur_actions)
+        code, reward = self.perform_action(cur_actions)
         if reward > self.best_reward:
             self.best_reward = reward
             self.best_actions = cur_action_list
-
+            # save the file into success transcompiled folder
+            # Extract base name and replace extension
+            base_name = os.path.basename(self.file_name)
+            name_no_ext, _ = os.path.splitext(base_name)
+            target, file_type = get_target(code, self.target_platform)
+            new_file = os.path.join(self.output_dir, name_no_ext + file_type)
+            with open(new_file, "w", encoding="utf-8") as f:
+                f.write(code)
         # except Exception:
         #     tvm_module = None
         #     reward = -10000
@@ -181,7 +193,7 @@ class FalconGo:
 
         return (
             next_env_state,
-            encoder.encode(str(tvm_module)),
+            encoder.encode(code),
             self.best_reward,
             terminal,
             None,

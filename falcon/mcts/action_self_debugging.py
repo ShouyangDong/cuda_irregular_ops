@@ -141,7 +141,7 @@ def loop_split(file_name, code, source_platform, target_platform):
 
 
 def loop_contraction(file_name, code, source_platform, target_platform):
-    final_code = run_loop_contraction(code)
+    final_code = run_loop_contraction(code, target_platform)
     success, output = unit_test(file_name, final_code)
     if success:
         return final_code

@@ -116,7 +116,7 @@ class FalconGo:
                 self.target_platform,
             )
         print("[INFO]*******actions: ", actions)
-        target, file_type = get_target(code)
+        target, file_type = get_target(code, self.target_platform)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
         base_name = os.path.basename(self.file_name)

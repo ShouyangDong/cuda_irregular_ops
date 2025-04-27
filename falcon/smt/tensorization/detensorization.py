@@ -7,7 +7,10 @@ from falcon.simplification import simplify_code
 from falcon.stmt_simplification import ast_stmt_simplification
 from falcon.util import NodeTransformer, make_full_func, remove_target_prefix
 
-file_name = "falcon/documents/op_tensorization.json"
+mlu_file_name = "falcon/documents/mlu_op_tensorization.json"
+cuda_file_name = "falcon/documents/cuda_op_tensorization.json"
+hip_file_name = "falcon/documents/hip_op_tensorization.json"
+cpu_file_name = "falcon/documents/cpu_op_tensorization.json"
 
 
 class Detensorizer(NodeTransformer):
@@ -65,13 +68,45 @@ def ast_detensorization(code, target):
     if target == "mlu":
         parser = c_parser.CParser()
         ast = parser.parse(code)
-        with open(file_name) as json_file:
+        with open(mlu_file_name) as json_file:
             func_defs = json.load(json_file)
         visitor = Detensorizer(func_defs)
         visitor.visit(ast)
         generator = c_generator.CGenerator()
         code = generator.visit(ast)
 
+    elif target == "cuda":
+        parser = c_parser.CParser()
+        ast = parser.parse(code)
+        with open(cuda_file_name) as json_file:
+            func_defs = json.load(json_file)
+        visitor = Detensorizer(func_defs)
+        visitor.visit(ast)
+        generator = c_generator.CGenerator()
+        code = generator.visit(ast)
+
+    elif target == "hip":
+        parser = c_parser.CParser()
+        ast = parser.parse(code)
+        with open(hip_file_name) as json_file:
+            func_defs = json.load(json_file)
+        visitor = Detensorizer(func_defs)
+        visitor.visit(ast)
+        generator = c_generator.CGenerator()
+        code = generator.visit(ast)
+
+    elif target == "cpu":
+        parser = c_parser.CParser()
+        ast = parser.parse(code)
+        with open(cpu_file_name) as json_file:
+            func_defs = json.load(json_file)
+        visitor = Detensorizer(func_defs)
+        visitor.visit(ast)
+        generator = c_generator.CGenerator()
+        code = generator.visit(ast)
+
+    else:
+        raise RuntimeError("unsuppored target.")
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)

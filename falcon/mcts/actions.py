@@ -52,14 +52,12 @@ def stmt_split(file_name, code, source_platform, target_platform):
 
 
 def detensorization(file_name, code, source_platform, target_platform):
-    print("[INFO]**********code: ", code)
     try:
         final_code = run_detensorization(code, source_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("detensorization error")
     except RuntimeError:
         final_code = ast_detensorization(code, source_platform)
-    print("[INFO]**********final code: ", final_code)
     return final_code
 
 
@@ -101,7 +99,7 @@ def loop_split(file_name, code, source_platform, target_platform):
 
 def loop_contraction(file_name, code, source_platform, target_platform):
     try:
-        final_code = run_loop_contraction(code)
+        final_code = run_loop_contraction(code, None)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_contraction error")
     except RuntimeError:

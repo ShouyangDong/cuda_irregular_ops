@@ -110,11 +110,11 @@ def remove_target_prefix(code):
     return code
 
 
-def get_target(code, target):
+def get_target(code, target=None):
     # 判断文件类型并设置目标
     if "__mlu_global" in code or "__bang" in code or "coreId" in code:
         target, file_type = "mlu", ".mlu"
-    elif target == "hip":
+    elif "__global__" in code and target == "hip":
         target, file_type = "hip", ".hip"
     elif "__global__" in code:
         target, file_type = "cuda", ".cu"
