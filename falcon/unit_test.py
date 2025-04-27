@@ -103,12 +103,14 @@ def unit_test(file_name, code):
             "void " + op_name + "(", "void " + op_name + "_kernel("
         )
         code = 'extern "C" ' + code if "extern" not in code else code
-
+    print("[INFO]***********finle_code: ", code)
+    print("[INFO]***********tmp_file_name: ", tmp_file_name)
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
     with open(tmp_file_name, mode="w") as f:
         f.write(code)
 
     test_file = test_file_map.get(op_name, "").format(target=target)
+    print("[[INFO]***********test_file: ", test_file)
     # 运行测试
     success, output = run_test(tmp_file_name, test_file)
     logging.info(output)

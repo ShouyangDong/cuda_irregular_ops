@@ -104,6 +104,12 @@ def remove_target_prefix(code):
         (r"__launch_bounds__\(\d+\)\s+", ""),  # 移除 `__launch_bounds__`
         (r"\b__restrict__\b", ""),  # 移除 `__restrict__`
         (r"//.*?\n|/\*.*?\*/", "", re.S),  # 移除所有 C/C++ 注释
+        (r"\bthreadIdxx\b", "threadIdxx"),  # 改为下划线风格
+        (r"\bthreadIdxy\b", "threadIdxy"),
+        (r"\bthreadIdxz\b", "threadIdxz"),
+        (r"\bblockIdxx\b", "blockIdxx"),
+        (r"\bblockIdxy\b", "blockIdxy"),
+        (r"\bblockIdxz\b", "blockIdxz"),
     ]
 
     # 遍历模式列表，应用替换
@@ -119,9 +125,9 @@ def get_target(code, target=None):
     # 判断文件类型并设置目标
     if "__mlu_global" in code or "__bang" in code or "coreId" in code:
         target, file_type = "mlu", ".mlu"
-    elif "__global__" in code and target == "hip":
+    elif target == "hip" and ("__global__" in code or "threadIdx.x" in code):
         target, file_type = "hip", ".hip"
-    elif "__global__" in code:
+    elif "__global__" in code or "threadIdx.x" in code:
         target, file_type = "cuda", ".cu"
     else:
         target, file_type = "cpu", ".cpp"
@@ -132,4 +138,6 @@ def make_full_func(code, target):
     target, file_type = get_target(code, target)
     if target == "mlu":
         code = add_memory_prefix(code)
+    elif target in ["cuda", "hip"]:
+        code = add_parallel_variable_prefix(code)
     return code

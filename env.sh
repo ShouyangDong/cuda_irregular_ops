@@ -4,3 +4,4 @@ export PYTHONPATH="/projs/AE/dongshouyang/cuda_irregular_ops/3rdparty/tenspiler:
 export PATH="/projs/AE/dongshouyang/code_transfer/3rdparty/racket/bin/:$PATH"
 export PATH="/projs/AE/dongshouyang/cuda_irregular_ops/3rdparty/cvc5/build/bin/:$PATH"
 export LD_LIBRARY_PATH="/projs/AE/dongshouyang/cuda_irregular_ops/3rdparty/cadical/build/:$LD_LIBRARY_PATH"
+export PATH="/projs/AE/dongshouyang/cuda_irregular_ops/3rdparty/bitwuzla/build/bin:$PATH"

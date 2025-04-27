@@ -36,11 +36,11 @@ flags.DEFINE_string(
     "./tvm_search_tree.png",
     "The output file for the visualization.",
 )
-flags.DEFINE_string("source", "mlu", "Source platform identifier.")
+flags.DEFINE_string("source", "cuda", "Source platform identifier.")
 flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/mlu_code_test/add_3_3_256.mlu",
+    "benchmark/data/cuda_code_test/add_3_3_256.cu",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)
@@ -113,6 +113,11 @@ class FalconGo:
         The function returns a new `ProgramState` object, which represents the new program
         state after applying the action."""
         code = open_file(self.file_name)
+        code = (
+            code.split("extern")[0]
+            if self.source_platform in ["cuda", "hip"]
+            else code
+        )
         for action in actions:
             code = action(
                 self.file_name,
@@ -121,6 +126,9 @@ class FalconGo:
                 self.target_platform,
             )
         target, file_type = get_target(code, self.target_platform)
+        print("[INFO]***********target: ", target)
+        print("[INFO]************file_type: ", file_type)
+        print("[INFO]************code: ", code)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
         base_name = os.path.basename(self.file_name)
@@ -202,7 +210,13 @@ class FalconGo:
 
     @partial(jit, static_argnums=(0,))
     def reset(self, key):
-        embedding_state = jnp.array(encoder.encode(open_file(self.file_name)))
+        code = open_file(self.file_name)
+        code = (
+            code.split("extern")[0]
+            if self.source_platform in ["cuda", "hip"]
+            else code
+        )
+        embedding_state = jnp.array(encoder.encode(code))
         trajectory = jnp.zeros(self.optimizer_len, dtype=int)
         depth = 0
         rewards = jnp.zeros(
@@ -287,6 +301,11 @@ def _run_demo(env, rng_key):
     key, logits_rng = jax.random.split(key)
     rng_key, logits_rng, q_rng, search_rng = jax.random.split(key, 4)
     code = open_file(env.file_name)
+    code = (
+        code.split("extern")[0]
+        if env.source_platform in ["cuda", "hip"]
+        else code
+    )
     invalid_actions = jnp.array(
         get_invalid_actions(code, env.source_platform, env.target_platform)
     ).reshape(1, -1)

@@ -48,6 +48,7 @@ def loop_recovery(file_name, code, source_platform, target_platform):
 
 def stmt_split(file_name, code, source_platform, target_platform):
     # TODO:add llm stmt split and unit test
+    print(ast_stmt_split(code, target_platform))
     return ast_stmt_split(code, target_platform)
 
 

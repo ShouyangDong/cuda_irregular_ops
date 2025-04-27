@@ -42,7 +42,7 @@ if __name__ == "__main__":
         macro = f.read()
         f.close()
     code = macro + code
-
+    print("[INFO]******************code: ", code)
     file_name = args.file.replace(
         base_name.replace(".cu", ""), base_name + "_bak.cu"
     )
