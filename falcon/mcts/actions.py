@@ -52,10 +52,8 @@ def stmt_split(file_name, code, source_platform, target_platform):
 
 
 def detensorization(file_name, code, source_platform, target_platform):
-    # print("[INFO]**********code: ", code)
     try:
         final_code = run_detensorization(code, source_platform)
-        # print('[INFO]**********final_code:', final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("detensorization error")
     except RuntimeError:
@@ -68,22 +66,18 @@ def loop_fusion(file_name, code, source_platform, target_platform):
         final_code = run_loop_fusion(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop fusion error")
-    except RuntimeError as e:
-        print("[INFO]loop fusion error: ", e)
+    except RuntimeError:
         final_code = ast_loop_fusion(code)
     return final_code
 
 
 def loop_reorder(file_name, code, source_platform, target_platform):
-    # print("[INFO]***********loop reorder code: ", code)
     try:
         final_code = run_loop_reorder(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_reorder error")
-    except RuntimeError as e:
-        print("[INFO]loop reorder error: ", e)
+    except RuntimeError:
         final_code = ast_loop_reorder(code)
-    # print("[INFO]***************final code: ", final_code)
     return final_code
 
 
@@ -93,17 +87,14 @@ def loop_split(file_name, code, source_platform, target_platform):
         final_code = run_apply_split(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_split error")
-    except RuntimeError as e:
-        print("[INFO]loop split error: ", e)
+    except RuntimeError:
         final_code = ast_loop_split(code)
     return final_code
 
 
 def loop_contraction(file_name, code, source_platform, target_platform):
-    # print("[INFO]********code: ", code)
     try:
         final_code = run_loop_contraction(code, None)
-        # print("[INFO]********final_code: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_contraction error")
     except RuntimeError:

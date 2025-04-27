@@ -16,7 +16,7 @@ from falcon.mcts.invalid_actions import get_invalid_actions
 from falcon.mcts.utils import open_file
 from falcon.util import get_target
 
-# TODO(michale): replace with shape calculation
+# TODO(michael): replace with shape calculation
 GFLOPS = 64 * 1280 * 2 / 1e9
 A_Length = len(ActionSpace)
 
@@ -59,7 +59,7 @@ def objective(file_name, target):
             time_ms = perf_cuda.benchmark(file_name)
         elif target == "mlu":
             time_ms = perf_bang.benchmark(file_name)
-        elif target == "cpp":
+        elif target == "cpu":
             time_ms = perf_dlboost.benchmark(file_name)
         elif target == "hip":
             time_ms = perf_hip.benchmark(file_name)
@@ -120,7 +120,6 @@ class FalconGo:
                 self.source_platform,
                 self.target_platform,
             )
-        print("[INFO]*******actions: ", actions)
         target, file_type = get_target(code, self.target_platform)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
@@ -295,7 +294,6 @@ def _run_demo(env, rng_key):
     prior_logits = jnp.array(
         generate_prior_from_src(code, env.source_platform, env.target_platform)
     ).reshape(1, -1)
-    print("[INFO]**********prior_logits: ", prior_logits)
     root = mctx.RootFnOutput(
         prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
         value=jnp.zeros([BS]),

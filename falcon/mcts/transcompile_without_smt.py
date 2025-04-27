@@ -59,7 +59,7 @@ def objective(file_name, target):
             time_ms = perf_cuda.benchmark(file_name)
         elif target == "mlu":
             time_ms = perf_bang.benchmark(file_name)
-        elif target == "cpp":
+        elif target == "cpu":
             time_ms = perf_dlboost.benchmark(file_name)
         elif target == "hip":
             time_ms = perf_hip.benchmark(file_name)
@@ -281,7 +281,6 @@ def _run_demo(env, rng_key):
     prior_logits = jnp.array(
         generate_prior_from_src(code, env.source_platform, env.target_platform)
     ).reshape(1, -1)
-    print("[INFO]**********prior_logits: ", prior_logits)
     root = mctx.RootFnOutput(
         prior_logits=prior_logits,  # jnp.full([batch_size, num_actions],
         value=jnp.zeros([BS]),
