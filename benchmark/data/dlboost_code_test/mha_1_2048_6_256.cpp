@@ -1,4 +1,4 @@
-extern "C" void mha_kernel(float *Q, float *K, float *V, float *output) {
+extern "C" void mha(float *Q, float *K, float *V, float *output) {
   int8_t arr_a[64];
   int8_t arr_b[64];
   int32_t arr_d[16]; // AVX-512 寄存器能同时处理 16 个 int32 元素

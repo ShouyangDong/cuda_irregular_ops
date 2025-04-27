@@ -1,4 +1,4 @@
-extern "C" void bmm_kernel(float *A, float *B, float *result) {
+extern "C" void bmm(float *A, float *B, float *result) {
   int8_t arr_a[16];
   int8_t arr_b[16];
   int32_t arr_d[4];

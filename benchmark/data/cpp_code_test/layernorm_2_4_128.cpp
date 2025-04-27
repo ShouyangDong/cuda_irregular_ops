@@ -1,5 +1,5 @@
 
-extern "C" void layernorm_kernel(float *input, // shape=[2, 4, 128]
+extern "C" void layernorm(float *input, // shape=[2, 4, 128]
                                  float *gamma, float *beta,
                                  float *output) // shape=[2, 4, 128]
 {

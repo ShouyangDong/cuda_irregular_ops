@@ -1,4 +1,4 @@
-extern "C" void add_kernel(float *input1, float *input2, float *output) {
+extern "C" void add(float *input1, float *input2, float *output) {
   int dim1 = 1;
   int dim2 = 15;
   int dim3 = 64;

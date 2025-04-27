@@ -1,5 +1,5 @@
 
-extern "C" void conv2d_kernel(float *input, float *kernel, float *output) {
+extern "C" void conv2d(float *input, float *kernel, float *output) {
   int batch_size = 16;
   int input_height = 8;
   int input_width = 8;

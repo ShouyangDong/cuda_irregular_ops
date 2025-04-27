@@ -8,7 +8,7 @@ float signf(float input) {
     return 0;
   }
 }
-extern "C" void sign_kernel(float *input, float *output) {
+extern "C" void sign(float *input, float *output) {
   for (int i = 0; i < 45; i++) {
     for (int j = 0; j < 25; j++) {
       output[i * 25 + j] = signf(input[i * 25 + j]);

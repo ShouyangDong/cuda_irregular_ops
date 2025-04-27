@@ -1,4 +1,4 @@
-extern "C" void softmax_kernel(float *input, float *output) {
+extern "C" void softmax(float *input, float *output) {
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 7; j++) {
       for (int k = 0; k < 3; k++) {

@@ -1,4 +1,4 @@
-extern "C" void bmm_kernel(float *A, float *B, float *result) {
+extern "C" void bmm(float *A, float *B, float *result) {
   for (int i = 0; i < 1; i++) {
     for (int j = 0; j < 4; j++) {
       for (int k = 0; k < 128; k++) {

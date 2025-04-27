@@ -1,4 +1,4 @@
-extern "C" void gemm_kernel(float *A, float *B, float *result) {
+extern "C" void gemm(float *A, float *B, float *result) {
   for (int j = 0; j < 32; j++) {
     for (int k = 0; k < 6; k++) {
       result[j * 6 + k] = 0;

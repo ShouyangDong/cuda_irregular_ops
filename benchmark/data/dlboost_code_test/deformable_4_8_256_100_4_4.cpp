@@ -1,6 +1,6 @@
 
 
-extern "C" void deformable_kernel(float *value_, int *value_spatial_shapes_,
+extern "C" void deformable(float *value_, int *value_spatial_shapes_,
                                   float *sampling_locations_,
                                   float *attention_weights_, float *output_) {
   float attention_sum[8192];

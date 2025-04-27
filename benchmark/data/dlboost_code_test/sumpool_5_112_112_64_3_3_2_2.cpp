@@ -1,4 +1,4 @@
-extern "C" void sumpool_kernel(float *x, float *output) {
+extern "C" void sumpool(float *x, float *output) {
   int N = 5;
   int H = 112;
   int W = 112;

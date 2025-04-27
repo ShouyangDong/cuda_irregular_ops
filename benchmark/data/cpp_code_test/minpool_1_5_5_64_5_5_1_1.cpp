@@ -1,4 +1,4 @@
-extern "C" void minpool_kernel(float *x, float *output) {
+extern "C" void minpool(float *x, float *output) {
   int N = 1;
   int H = 5;
   int W = 5;

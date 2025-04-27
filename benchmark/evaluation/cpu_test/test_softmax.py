@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # 加载 C 库
     lib = CDLL(os.path.join(os.getcwd(), so_name))
-    function = getattr(lib, name + "_kernel")
+    function = getattr(lib, name)
 
     # 定义函数参数和返回类型
     function.argtypes = [

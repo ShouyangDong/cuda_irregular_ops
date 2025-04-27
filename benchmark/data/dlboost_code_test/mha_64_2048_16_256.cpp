@@ -1,4 +1,4 @@
-extern "C" void mha_kernel(float *Q, float *K, float *V, float *output) {
+extern "C" void mha(float *Q, float *K, float *V, float *output) {
   // 定义所需的数组，使用不同的变量名以避免重定义
   int8_t arr_a_64[64];
   int8_t arr_b_64[64];
