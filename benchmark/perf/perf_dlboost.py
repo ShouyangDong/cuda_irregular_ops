@@ -73,9 +73,10 @@ def perf_function(file_name):
     pattern = r'extern\s*"C"\s*'
     # 使用 re.sub 替换匹配部分为空字符串
     cleaned_code = re.sub(pattern, "", original_function)
-
-    called_param_list = param_list.replace("float *", "")
-    called_param_list = called_param_list.replace("int *", "")
+    # 使用正则表达式替换所有形式的 float* 和 int*
+    called_param_list = re.sub(
+        r"\s*\*\s*|\s*(?:float|int|double)\s*\*", "", param_list
+    )
 
     # 动态替换模板
     new_code = cpp_pef_template.substitute(
@@ -96,7 +97,6 @@ def perf_pipeline(file_name):
     backup_file_name = file_name.replace(".cpp", "_bak.cpp")
     so_name = file_name.replace(".cpp", ".so")
     success, output = run_compilation(so_name, backup_file_name)
-    print(output)
 
 
 def perf_unary(shape, function, dtype="float32"):

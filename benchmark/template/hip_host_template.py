@@ -198,7 +198,7 @@ extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
         size_list=size_list,
         memcpy_alloc_list=memcpy_alloc_list,
     )
-    print("[INFO]***************new_code: ", new_code)
+
     output_file = file_name.replace(".cu", "_bak.cu")
     with open(output_file, "w") as f:
         f.write(new_code)

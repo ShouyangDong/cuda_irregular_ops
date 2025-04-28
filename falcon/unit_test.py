@@ -66,10 +66,7 @@ def unit_test(file_name, code):
     # 去掉扩展名
     filename_no_ext, _ = os.path.splitext(file_name)
     # 判断文件类型并设置目标
-    print("[INFO]code: ", code)
     target, file_type = get_target(code)
-    print("[INFO]*************target: ", target)
-    print("[INFO]*************file_type: ", file_type)
     # 生成目标文件名
     filename = filename_no_ext + file_type
     # 提取操作名称，并生成测试文件路径
@@ -102,17 +99,13 @@ def unit_test(file_name, code):
         code = device_code + host_code
 
     elif target == "cpu":
-        code = code.replace(
-            "void " + op_name + "(", "void " + op_name + "_kernel("
-        )
         code = 'extern "C" ' + code if "extern" not in code else code
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
     with open(tmp_file_name, mode="w") as f:
         f.write(code)
 
     test_file = test_file_map.get(op_name, "").format(target=target)
-    print("[IFNO]*****tmp_file_name: ", tmp_file_name)
-    print("[IFNO]*****test_file: ", test_file)
+
     # 运行测试
     success, output = run_test(tmp_file_name, test_file)
     logging.info(output)

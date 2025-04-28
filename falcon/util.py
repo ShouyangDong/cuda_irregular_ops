@@ -140,4 +140,4 @@ def make_full_func(code, target):
         code = add_memory_prefix(code)
     elif target in ["cuda", "hip"]:
         code = add_parallel_variable_prefix(code)
-    return code
+    return 'extern "C" ' + code if "extern" not in code else code

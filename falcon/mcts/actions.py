@@ -1,5 +1,4 @@
 import json
-import random
 
 from falcon.smt.auto_cache import ast_auto_cache
 from falcon.smt.loop_transformation.loop_contraction import (
@@ -39,10 +38,12 @@ from falcon.unit_test import unit_test
 def loop_recovery(file_name, code, source_platform, target_platform):
     try:
         final_code = run_loop_recovery(code, source_platform)
+        print("[INFO]********final_code: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop recovery error")
-    except Exception as e:
+    except Exception:
         final_code = ast_loop_recovery(code, source_platform)
+    print("[INFO]***********fix_code: ", final_code)
     return final_code
 
 
@@ -56,7 +57,7 @@ def detensorization(file_name, code, source_platform, target_platform):
         final_code = run_detensorization(code, source_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("detensorization error")
-    except Exception as e:
+    except Exception:
         final_code = ast_detensorization(code, source_platform)
     return final_code
 
@@ -66,7 +67,7 @@ def loop_fusion(file_name, code, source_platform, target_platform):
         final_code = run_loop_fusion(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop fusion error")
-    except Exception as e:
+    except Exception:
         final_code = ast_loop_fusion(code)
     return final_code
 
@@ -76,7 +77,7 @@ def loop_reorder(file_name, code, source_platform, target_platform):
         final_code = run_loop_reorder(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_reorder error")
-    except Exception as e:
+    except Exception:
         final_code = ast_loop_reorder(code)
     return final_code
 
@@ -87,7 +88,7 @@ def loop_split(file_name, code, source_platform, target_platform):
         final_code = run_apply_split(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_split error")
-    except Exception as e:
+    except Exception:
         final_code = ast_loop_split(code)
     return final_code
 
@@ -97,7 +98,7 @@ def loop_contraction(file_name, code, source_platform, target_platform):
         final_code = run_loop_contraction(code, None)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_contraction error")
-    except Exception as e:
+    except Exception:
         final_code = ast_loop_contraction(code)
     return final_code
 
@@ -109,7 +110,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
         final_code = run_thread_binding(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_bind error")
-    except Exception as e:
+    except Exception:
         final_code = ast_thread_binding(code, target_platform)
     return final_code
 
@@ -132,7 +133,7 @@ def auto_cache(file_name, code, source_platform, target_platform):
 
         if not unit_test(file_name, cache_code):
             raise RuntimeError("auto_cache error")
-    except Exception as e:
+    except Exception:
         cache_code = ast_auto_cache(code, space_maps)
     return cache_code
 
@@ -143,7 +144,7 @@ def auto_tensorization(file_name, code, source_platform, target_platform):
         final_code = run_tensorization(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_tensorization error")
-    except Exception as e:
+    except Exception:
         final_code = ast_tensorization(code, target_platform)
     return final_code
 
@@ -155,7 +156,7 @@ def auto_pipeline(file_name, code, source_platform, target_platform):
         final_code = run_double_buffer(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_pipeline error")
-    except Exception as e:
+    except Exception:
         final_code = smt_double_buffer(code)
     return final_code
 
@@ -175,16 +176,22 @@ actions = [
 ]
 
 if __name__ == "__main__":
-    file_name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
-    from falcon.mcts.utils import open_file
-    code = open_file(file_name)
-    for action_id in [2, 0]:
-        action = actions[action_id]
-        code = action(
-            file_name,
-            code,
-            "mlu",
-            "cpu",
-        )
-        print("[INFO]**********code: ", code)
-    print("[IFNO]**************final_code: ", code)
+    # file_name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
+    # from falcon.mcts.utils import open_file
+    # code = open_file(file_name)
+    # for action_id in [2, 0]:
+    #     action = actions[action_id]
+    #     code = action(
+    #         file_name,
+    #         code,
+    #         "mlu",
+    #         "cpu",
+    #     )
+    #     print("[INFO]**********code: ", code)
+    # print("[IFNO]**************final_code: ", code)
+    new_file = "./tmp/add_3_3_256.cpp"
+    from falcon.mcts.transcompile import objective
+
+    target = "cpu"
+    score = objective(new_file, target)
+    print(score)
