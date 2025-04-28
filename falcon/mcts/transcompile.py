@@ -36,11 +36,11 @@ flags.DEFINE_string(
     "./tvm_search_tree.png",
     "The output file for the visualization.",
 )
-flags.DEFINE_string("source", "cuda", "Source platform identifier.")
+flags.DEFINE_string("source", "mlu", "Source platform identifier.")
 flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/cuda_code_test/add_3_3_256.cu",
+    "benchmark/data/mlu_code_test/add_3_3_256.mlu",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)
@@ -126,9 +126,6 @@ class FalconGo:
                 self.target_platform,
             )
         target, file_type = get_target(code, self.target_platform)
-        print("[INFO]***********target: ", target)
-        print("[INFO]************file_type: ", file_type)
-        print("[INFO]************code: ", code)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
         base_name = os.path.basename(self.file_name)
