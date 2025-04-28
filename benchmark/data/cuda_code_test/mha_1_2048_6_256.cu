@@ -1,4 +1,4 @@
-__global__ void scaled_dot_product_attention(float *Q, float *K, float *V,
+__global__ void mha(float *Q, float *K, float *V,
                                              float *output) {
 
   __shared__ float score[36]; // 使用共享内存存储 score, 大小为 heads * heads
