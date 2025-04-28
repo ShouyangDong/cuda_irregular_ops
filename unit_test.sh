@@ -3,9 +3,9 @@ source env.sh
 echo "Running CPP tests..."
 
 echo "==============CPP Compilation Test==============="
-python benchmark/evaluation/cpu_test/compilation.py
+python benchmark/evaluation/cpu_test/compilation.py benchmark/data/cpp_code_test
 echo "==============CPP Computation Test==============="
-python benchmark/evaluation/cpu_test/result_test.py
+python benchmark/evaluation/cpu_test/result_test.py benchmark/data/cpp_code_test benchmark/evaluation/cpu_test/
 # Check for NVIDIA GPU presence
 if cnmon >/dev/null 2>&1; then
 	echo "Cambricon MLU detected. Running BANG tests..."
@@ -24,8 +24,8 @@ fi
 if nvidia-smi >/dev/null 2>&1; then
 	# echo "NVIDIA GPU detected. Running CUDA tests..."
 
-	# echo "==============GPU Compilation Test==============="
-	python benchmark/evaluation/cuda_test/compilation.py
+	echo "==============GPU Compilation Test==============="
+	python benchmark/evaluation/cuda_test/compilation.py benchmark/data/cuda_code_test
 	echo "==============GPU Computation Test==============="
-	python benchmark/evaluation/cuda_test/result_test.py
+	python benchmark/evaluation/cuda_test/result_test.py benchmark/data/cuda_code_test benchmark/evaluation/cuda_test/
 fi
