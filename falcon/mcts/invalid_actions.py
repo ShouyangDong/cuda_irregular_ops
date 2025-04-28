@@ -4,7 +4,7 @@ from falcon.mcts.actions import actions as ActionSpace
 from falcon.util import remove_target_prefix
 
 
-class NodeTransformer(c_ast.NodeVisitor):
+class CallNodeTransformer(c_ast.NodeVisitor):
     def __init__(self):
         self.func_call = False
 
@@ -19,9 +19,30 @@ def visit_func_call(code):
     ast = parser.parse(code)
 
     # 统计循环层数
-    loop_visitor = NodeTransformer()
+    loop_visitor = CallNodeTransformer()
     loop_visitor.visit(ast)
     return loop_visitor.func_call
+
+
+class CompoundNodeTransformer(c_ast.NodeVisitor):
+    def __init__(self):
+        self.has_compound_stmt = False  # 用于标记是否遇到 compound statement
+
+    def visit_Compound(self, node):
+        # 检查 compound statement 是否有多个语句
+        if len(node.block_items) > 1:
+            self.has_compound_stmt = True
+        self.generic_visit(node)
+
+def visit_compound_stmt(code):
+    code = remove_target_prefix(code)
+    
+    parser = c_parser.CParser()
+    ast = parser.parse(code)
+
+    compound_visitor = CompoundNodeTransformer()
+    compound_visitor.visit(ast)
+    return compound_visitor.has_compound_stmt
 
 
 def get_invalid_actions(code, source_platform, target_platform):
@@ -30,8 +51,12 @@ def get_invalid_actions(code, source_platform, target_platform):
     if source_platform == "cpu":
         invalid_mask[0] = 1
 
+    # add compound stmt check
     if not visit_func_call(code):
         invalid_mask[2] = 1
+
+    if not visit_compound_stmt(code):
+        invalid_mask[1] = 1
 
     if target_platform == "cpu":
         invalid_mask[7] = 1
