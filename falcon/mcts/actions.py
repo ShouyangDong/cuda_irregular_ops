@@ -41,14 +41,13 @@ def loop_recovery(file_name, code, source_platform, target_platform):
         final_code = run_loop_recovery(code, source_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop recovery error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_loop_recovery(code, source_platform)
     return final_code
 
 
 def stmt_split(file_name, code, source_platform, target_platform):
     # TODO:add llm stmt split and unit test
-    print(ast_stmt_split(code, target_platform))
     return ast_stmt_split(code, target_platform)
 
 
@@ -57,7 +56,7 @@ def detensorization(file_name, code, source_platform, target_platform):
         final_code = run_detensorization(code, source_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("detensorization error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_detensorization(code, source_platform)
     return final_code
 
@@ -67,7 +66,7 @@ def loop_fusion(file_name, code, source_platform, target_platform):
         final_code = run_loop_fusion(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop fusion error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_loop_fusion(code)
     return final_code
 
@@ -77,7 +76,7 @@ def loop_reorder(file_name, code, source_platform, target_platform):
         final_code = run_loop_reorder(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_reorder error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_loop_reorder(code)
     return final_code
 
@@ -88,7 +87,7 @@ def loop_split(file_name, code, source_platform, target_platform):
         final_code = run_apply_split(code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_split error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_loop_split(code)
     return final_code
 
@@ -98,7 +97,7 @@ def loop_contraction(file_name, code, source_platform, target_platform):
         final_code = run_loop_contraction(code, None)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop_contraction error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_loop_contraction(code)
     return final_code
 
@@ -110,7 +109,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
         final_code = run_thread_binding(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_bind error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_thread_binding(code, target_platform)
     return final_code
 
@@ -133,7 +132,7 @@ def auto_cache(file_name, code, source_platform, target_platform):
 
         if not unit_test(file_name, cache_code):
             raise RuntimeError("auto_cache error")
-    except RuntimeError:
+    except Exception as e:
         cache_code = ast_auto_cache(code, space_maps)
     return cache_code
 
@@ -144,7 +143,7 @@ def auto_tensorization(file_name, code, source_platform, target_platform):
         final_code = run_tensorization(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_tensorization error")
-    except RuntimeError:
+    except Exception as e:
         final_code = ast_tensorization(code, target_platform)
     return final_code
 
@@ -156,7 +155,7 @@ def auto_pipeline(file_name, code, source_platform, target_platform):
         final_code = run_double_buffer(code, target_platform)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_pipeline error")
-    except RuntimeError:
+    except Exception as e:
         final_code = smt_double_buffer(code)
     return final_code
 
@@ -176,25 +175,16 @@ actions = [
 ]
 
 if __name__ == "__main__":
-    code = """
-    __global__ void __launch_bounds__(1024)
-    add(float *__restrict__ A, float *__restrict__ B,
-        float *__restrict__ T_add) {
-        if (((((int)blockIdx.x) * 1024) + ((int)threadIdx.x)) < 2309) {
-            T_add[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] =
-                (A[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))] +
-                B[((((int)blockIdx.x) * 1024) + ((int)threadIdx.x))]);
-        }
-    }
-    """
-    source_platform = "cuda"
-    target_platform = "mlu"
-    file_name = "benchmark/data/cuda_code_test/add_18_128.cu"
-    selected_function = random.choice(actions)
-    # 调用随机选择的函数
-    result = selected_function(
-        file_name, code, source_platform, target_platform
-    )
-
-    # 输出结果
-    print("运行结果:", result)
+    file_name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
+    from falcon.mcts.utils import open_file
+    code = open_file(file_name)
+    for action_id in [2, 0]:
+        action = actions[action_id]
+        code = action(
+            file_name,
+            code,
+            "mlu",
+            "cpu",
+        )
+        print("[INFO]**********code: ", code)
+    print("[IFNO]**************final_code: ", code)
