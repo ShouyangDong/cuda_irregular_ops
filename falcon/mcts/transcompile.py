@@ -9,7 +9,7 @@ import tiktoken
 from absl import app, flags
 from jax import jit, lax, vmap
 
-from benchmark.perf import perf_bang, perf_cuda, perf_dlboost, perf_hip
+from benchmark.perf import perf_cuda, perf_dlboost, perf_hip, perf_mlu
 from falcon.mcts.action_logit import generate_prior_from_src
 from falcon.mcts.actions import actions as ActionSpace
 from falcon.mcts.invalid_actions import get_invalid_actions
@@ -36,11 +36,11 @@ flags.DEFINE_string(
     "./tvm_search_tree.png",
     "The output file for the visualization.",
 )
-flags.DEFINE_string("source", "cuda", "Source platform identifier.")
+flags.DEFINE_string("source", "mlu", "Source platform identifier.")
 flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/cuda_code_test/add_3_3_256.cu",
+    "benchmark/data/mlu_code_test/add_3_3_256.mlu",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)
@@ -58,7 +58,7 @@ def objective(file_name, target):
         if target == "cuda":
             time_ms = perf_cuda.benchmark(file_name)
         elif target == "mlu":
-            time_ms = perf_bang.benchmark(file_name)
+            time_ms = perf_mlu.benchmark(file_name)
         elif target == "cpu":
             time_ms = perf_dlboost.benchmark(file_name)
         elif target == "hip":
@@ -87,7 +87,6 @@ class FalconGo:
         target_platform,
         action_len=A_Length,
         optimizer_len=A_Length,
-        goal_reward=False,
         timeout=None,
     ):
         self.timeout = timeout

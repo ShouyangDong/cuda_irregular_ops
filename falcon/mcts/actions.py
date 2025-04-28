@@ -38,12 +38,10 @@ from falcon.unit_test import unit_test
 def loop_recovery(file_name, code, source_platform, target_platform):
     try:
         final_code = run_loop_recovery(code, source_platform)
-        print("[INFO]********final_code: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("loop recovery error")
     except Exception:
         final_code = ast_loop_recovery(code, source_platform)
-    print("[INFO]***********fix_code: ", final_code)
     return final_code
 
 
@@ -191,7 +189,12 @@ if __name__ == "__main__":
     # print("[IFNO]**************final_code: ", code)
     new_file = "./tmp/add_3_3_256.cpp"
     from falcon.mcts.transcompile import objective
+    from falcon.mcts.utils import open_file
+    from falcon.util import get_target
 
+    code = open_file(new_file)
     target = "cpu"
     score = objective(new_file, target)
     print(score)
+    target, file_type = get_target(code, "cpu")
+    print("[INFO]********target: ", target)
