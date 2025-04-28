@@ -42,7 +42,7 @@ def create_cuda_func(file_name, op_type="ewise"):
         param.split()[-1].replace("*", "").replace("__restrict__", "").strip()
         for param in params
     ]
-    print("[INFO]******params: ", params)
+
     device_vars = [f"{name}_cuda" for name in param_names]
 
     # Memory allocation and copy operations
@@ -198,7 +198,7 @@ extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
         size_list=size_list,
         memcpy_alloc_list=memcpy_alloc_list,
     )
-    print("[INFO]***************new_code: ", new_code)
+
     output_file = file_name.replace(".cu", "_bak.cu")
     with open(output_file, "w") as f:
         f.write(new_code)

@@ -244,7 +244,6 @@ def perf_pipeline(file_name, op_type="ewise"):
     backup_file_name = file_name.replace(".cu", "_bak.cu")
     so_name = file_name.replace(".cu", ".so")
     success, output = run_compilation(so_name, backup_file_name)
-    print("[INFO]***otput: ", output)
 
 
 def benchmark(file_name):
