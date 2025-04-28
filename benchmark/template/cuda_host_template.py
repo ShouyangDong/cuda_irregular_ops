@@ -2,19 +2,32 @@ import re
 from string import Template
 
 
-def infer_grid_dim_from_kernel(kernel_code: str) -> str:
-    use_x = bool(re.search(r"\bblockIdx\.x\b", kernel_code))
-    use_y = bool(re.search(r"\bblockIdx\.y\b", kernel_code))
-    use_z = bool(re.search(r"\bblockIdx\.z\b", kernel_code))
+def infer_grid_dim_from_kernel(kernel_code: str, thread_num: int) -> str:
+    # 推导 blockIdx 和 threadIdx 使用的维度
+    use_block_x = bool(re.search(r"\bblockIdx\.x\b", kernel_code))
+    use_block_y = bool(re.search(r"\bblockIdx\.y\b", kernel_code))
+    use_block_z = bool(re.search(r"\bblockIdx\.z\b", kernel_code))
 
-    if use_z:
-        return "3D"
-    elif use_y:
-        return "2D"
-    elif use_x:
-        return "1D"
-    else:
-        return "Unknown"
+    use_thread_x = bool(re.search(r"\bthreadIdx\.x\b", kernel_code))
+    use_thread_y = bool(re.search(r"\bthreadIdx\.y\b", kernel_code))
+    use_thread_z = bool(re.search(r"\bthreadIdx\.z\b", kernel_code))
+
+    # 设置 numBlocks
+    numBlocks_x = 256 if use_block_x else 1
+    numBlocks_y = 256 if use_block_y else 1
+    numBlocks_z = 256 if use_block_z else 1
+    numblocks_define = (
+        f"dim3 numBlocks({numBlocks_x}, {numBlocks_y}, {numBlocks_z});"
+    )
+
+    # 设置 blockSize
+    blockSize_x = thread_num if use_thread_x else 1
+    blockSize_y = 1024 if use_thread_y else 1
+    blockSize_z = 1024 if use_thread_z else 1
+    blocksize_define = (
+        f"dim3 blockSize({blockSize_x}, {blockSize_y}, {blockSize_z});"
+    )
+    return numblocks_define, blocksize_define
 
 
 def create_cuda_func(file_name, op_type="ewise"):
@@ -133,24 +146,15 @@ def create_cuda_func(file_name, op_type="ewise"):
 
     # Infer grid dimensions from kernel code
     device_code = original_function.split("extern")[0]
-    grid_dim = infer_grid_dim_from_kernel(device_code)
+    numblocks_define, blocksize_define = infer_grid_dim_from_kernel(
+        device_code
+    )
     if isinstance(size, list):
         size_list = ", ".join(
             arg for arg in ["int " + string for string in size]
         )
     else:
         size_list = "int size"
-    if grid_dim == "1D":
-        numblocks_define = f"dim3 numBlocks(256);"
-    elif grid_dim == "2D":
-        numblocks_define = f"dim3 numBlocks(256, 256); // 2D Grid, second dimension default to 8"
-    elif grid_dim == "3D":
-        numblocks_define = (
-            f"dim3 numBlocks(256, 256, 256); // 3D Grid, default 4x4"
-        )
-    else:
-        numblocks_define = f"dim3 numBlocks(1); // Unknown, default to 1D"
-
     # Create host function template
     host_func_template = Template(
         """
@@ -173,7 +177,7 @@ extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
     ${memcpy_alloc_list}
     ${memcpy_htod}
 
-    dim3 blockSize(${thread_num});
+    ${blockSize_define}
     ${numblocks_define}
     ${kernel_name}<<<numBlocks, blockSize>>>(${called_param_list});
 
@@ -190,6 +194,7 @@ extern "C" void ${kernel_name}_kernel(${param_list}, ${size_list}) {
         memcpy_htod="\n    ".join(memcpy),
         thread_num=thread_num,
         numblocks_define=numblocks_define,
+        blocksize_define=blocksize_define,
         called_param_list=", ".join(device_vars),
         memcpy_dtoh=memcpy_back,
         cuda_free="\n    ".join(

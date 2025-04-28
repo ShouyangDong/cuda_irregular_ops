@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from benchmark.template.cuda_evaluate_template import create_cuda_perf_func
-from benchmark.utils import avgpool_np, maxpool_np, minpool_np
+from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_cuda_compilation as run_compilation
 from benchmark.utils import sumpool_np
 
@@ -95,7 +95,15 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(A_ptr, B_ptr, output_ptr, np.prod(shape_A))
-    elif name in ["gemm", "gemv", "bmm", "conv2d", "conv1d", "depthwiseconv"]:
+    elif name in [
+        "gemm",
+        "gemv",
+        "bmm",
+        "conv2d",
+        "conv1d",
+        "depthwiseconv",
+        "conv2dnchw",
+    ]:
         function.argtypes = [
             ctypes.POINTER(ctypes.c_float),
             ctypes.POINTER(ctypes.c_float),
@@ -340,14 +348,19 @@ def benchmark(file_name):
         dtype = "float32"
 
         # generate data
-        data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
-            dtype
-        )
+        data_np = torch.rand(data_shape)
         kernel_np = np.random.uniform(
             low=1.0, high=2.0, size=kernel_shape
         ).astype(dtype)
         # cpu compute
-        result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
+        result_cpu = conv2d_nchw(
+            data_np,
+            kernel_shape[1],
+            kernel_shape[0],
+            kernel_shape[2],
+            stride_h,
+            pad,
+        )
         execution_time = perf_binary(
             name, data_shape, kernel_shape, result_cpu.shape, function
         )
@@ -434,7 +447,7 @@ def benchmark(file_name):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*.cu")
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*conv*.cu")
     )
     table = []
     times = []

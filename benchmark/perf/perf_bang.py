@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 from benchmark.template.mlu_evaluate_template import create_bang_perf_func
-from benchmark.utils import avgpool_np, maxpool_np, minpool_np
+from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_mlu_compilation as run_compilation
 from benchmark.utils import sumpool_np
 
@@ -340,14 +340,19 @@ def benchmark(file_name):
         dtype = "float32"
 
         # generate data
-        data_np = np.random.uniform(low=1.0, high=2.0, size=data_shape).astype(
-            dtype
-        )
+        data_np = torch.rand(data_shape)
         kernel_np = np.random.uniform(
             low=1.0, high=2.0, size=kernel_shape
         ).astype(dtype)
         # cpu compute
-        result_cpu = conv2d_nchw(data_np, kernel_np, stride_h, pad)
+        result_cpu = conv2d_nchw(
+            data_np,
+            kernel_shape[1],
+            kernel_shape[0],
+            kernel_shape[2],
+            stride_h,
+            pad,
+        )
         execution_time = perf_binary(
             name, data_shape, kernel_shape, result_cpu.shape, function
         )
