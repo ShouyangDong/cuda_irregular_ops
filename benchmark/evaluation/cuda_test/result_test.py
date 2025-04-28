@@ -65,10 +65,12 @@ def main():
     parser.add_argument(
         "source_dir",
         help="Directory containing translated .cu files (e.g. translated/nvidia_to_cuda/)",
+        default="benchmark/data/cuda_code_test",
     )
     parser.add_argument(
         "test_dir",
         help="Directory containing CUDA test scripts (e.g. benchmark/evaluation/cuda_test/)",
+        default="benchmark/evaluation/cuda_test/",
     )
     args = parser.parse_args()
 

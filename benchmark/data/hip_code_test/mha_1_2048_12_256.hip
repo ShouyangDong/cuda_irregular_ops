@@ -64,7 +64,7 @@ extern "C" void mha_kernel(float *queries, float *keys, float *values,
   dim3 grid(batch_size, seq_len);
   dim3 block(num_heads);
 
-  scaled_dot_product_attention<<<grid, block>>>(d_queries, d_keys, d_values, d_output);
+  mha<<<grid, block>>>(d_queries, d_keys, d_values, d_output);
 
   hipMemcpy(output, d_output, size * sizeof(float), hipMemcpyDeviceToHost);
 

@@ -51,6 +51,7 @@ def main():
     parser.add_argument(
         "src_dir",
         help="Directory containing .cu files to compile (e.g. translated/nvidia_cpu)",
+        default="benchmark/data/cuda_code_test",
     )
     args = parser.parse_args()
 
