@@ -34,9 +34,10 @@ class CompoundNodeTransformer(c_ast.NodeVisitor):
             self.has_compound_stmt = True
         self.generic_visit(node)
 
+
 def visit_compound_stmt(code):
     code = remove_target_prefix(code)
-    
+
     parser = c_parser.CParser()
     ast = parser.parse(code)
 

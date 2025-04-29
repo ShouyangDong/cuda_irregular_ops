@@ -87,6 +87,7 @@ def run_split_annotation(code):
     PROMPT = PROMPT.replace("{SPLIT_PRAGMA_PROMPT}", SPLIT_PRAGMA_PROMPT)
     PROMPT = PROMPT.replace("{SPLIT_PRAGMA_DEMO}", SPLIT_PRAGMA_DEMO)
     PROMPT = PROMPT.replace("{code}", code)
+
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": PROMPT}],
@@ -107,6 +108,8 @@ def run_apply_split(code):
     {LOOP_SPLIT_DEMO}
     Please return the output kernel function without any additional information.
     """
+    if "#pragma loop_split" not in code:
+        return code
     PROMPT = PROMPT.replace("{SYSTEM_PROMPT}", SYSTEM_PROMPT)
 
     PROMPT = PROMPT.replace("{LOOP_SPLIT_PROMPT}", LOOP_SPLIT_PROMPT)

@@ -28,6 +28,20 @@ for (int i = 0; i < 64/sizeof(float); i++) {
     input0_local_nram[i] = input0[(((clusterId * 256) + (coreId * 64))) + i];
 }
 ```
+
+exmaple 2:
+
+// before:
+```
+__memcpy((half *)input0_local_nram + (0), (half *)input0 + (((clusterId * 256) + (coreId * 64))), 64, GDRAM2NRAM);
+```
+
+// after:
+```
+for (int i = 0; i < 64/sizeof(half); i++) {
+    input0_local_nram[i] = input0[(((clusterId * 256) + (coreId * 64))) + i];
+}
+```
 """
 
 LOOP_RECOVERY_PROMPT_CUDA = """

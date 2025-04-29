@@ -16,7 +16,7 @@ builtin_dim = {
     "threadIdxx": 256,
     "blockIdxx": 1024,
     "coreId": 4,
-    "clusterId": 4,
+    "clusterId": 12,
 }
 
 

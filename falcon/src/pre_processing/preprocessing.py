@@ -113,22 +113,21 @@ def extract_bang_instructions(code):
 
 
 def run_detensorization(code, target):
-    op_dict = json.load(open("./falcon/documents/bang_c_user_guide.json", "r"))
-    instructions = extract_bang_instructions(code)
-    if "__memcpy" in code:
-        # First, detensorize memory
-        code = detensorization("__memcpy", code, op_dict["__memcpy"])
-    # print("[INFO]*********code faster memcpy: ", code)
-    if instructions is not None:
-        for inst in instructions:
-            code = detensorization(inst, code, op_dict[inst])
-    # print("[INFO]*********code after detensor: ", code)
+    if target == "mlu":
+        op_dict = json.load(
+            open("./falcon/documents/bang_c_user_guide.json", "r")
+        )
+        instructions = extract_bang_instructions(code)
+        if "__memcpy" in code:
+            code = detensorization("__memcpy", code, op_dict["__memcpy"])
+
+        if instructions is not None:
+            for inst in instructions:
+                code = detensorization(inst, code, op_dict[inst])
+
     code = simplify_code(code)
-    # print("[INFO]***********code: ", code)
     code = ast_stmt_simplification(code)
-    # print("[INFO]********sim: ", code)
     code = ast_buffer_inline(code)
-    # print("[INFO]*******inline: ", code)
     code = make_full_func(code, target)
     return code
 

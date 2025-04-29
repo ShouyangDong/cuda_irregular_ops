@@ -1,7 +1,9 @@
+import copy
+
 from pycparser import c_ast, c_generator, c_parser
 
 from falcon.util import NodeTransformer, remove_target_prefix
-import copy
+
 
 class ConstInlineTransformer(NodeTransformer):
     def __init__(self):
@@ -14,7 +16,7 @@ class ConstInlineTransformer(NodeTransformer):
         if node.init and isinstance(node.init, c_ast.Constant):
             if isinstance(node.type, c_ast.TypeDecl):
                 tnames = node.type.type.names
-                if 'int' in tnames or 'float' in tnames:
+                if "int" in tnames or "float" in tnames:
                     # 记录常量并删除声明
                     self.constants[node.name] = copy.deepcopy(node.init)
                     return None
@@ -22,9 +24,11 @@ class ConstInlineTransformer(NodeTransformer):
 
     def visit_Assignment(self, node):
         # 只记录简单赋值（如 x = CONSTANT;），不删除复杂赋值
-        if (isinstance(node.lvalue, c_ast.ID)
-                and isinstance(node.rvalue, c_ast.Constant)
-                and node.lvalue.name not in self.constants):
+        if (
+            isinstance(node.lvalue, c_ast.ID)
+            and isinstance(node.rvalue, c_ast.Constant)
+            and node.lvalue.name not in self.constants
+        ):
             self.constants[node.lvalue.name] = copy.deepcopy(node.rvalue)
             return None
         # 其他情况递归替换
@@ -73,8 +77,11 @@ class ConstInlineTransformer(NodeTransformer):
         self.generic_visit(node)
         # 清理因删除声明产生的空语句
         if node.body and node.body.block_items:
-            node.body.block_items = [stmt for stmt in node.body.block_items if stmt is not None]
+            node.body.block_items = [
+                stmt for stmt in node.body.block_items if stmt is not None
+            ]
         return node
+
 
 def constant_inline(code):
     code = remove_target_prefix(code)

@@ -1,154 +1,145 @@
-from pycparser import c_ast, c_generator, c_parser
+import re
 
-from falcon.util import NodeTransformer, remove_target_prefix
+import openai
 
+model_name = """gpt-4-turbo"""
+openai.api_key = "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"
 
-class InlineTransformer(NodeTransformer):
-    def visit_Compound(self, node):
-        """递归地遍历 Compound 节点，内联所有可以内联的语句"""
-        node.block_items = self.inline_statements(node.block_items)
-        return self.generic_visit(node)
+inline_prompt = """
 
-    def inline_statements(self, block_items):
-        """递归地检查和内联 block_items 中的语句"""
-        if not block_items:
-            return []
+```
+You are an expert in C code optimization and transformation. Your task is to receive a piece of C code and perform "Buffer Inlining" optimization on it.
 
-        new_block_items = []
-        i = 0
-        while i < len(block_items):
-            stmt = block_items[i]
+**Optimization Goal:**
+Identify and eliminate local intermediate buffers (typically fixed-size arrays, like `float buffer[...]`) used for temporary storage of element-wise or small-neighborhood calculation results within function bodies.
 
-            if i > 0 and isinstance(stmt, c_ast.Assignment):
-                # 获取前一个语句
-                prev_stmt = new_block_items[-1]
+**Patterns to Recognize:**
+This pattern typically appears inside loops, where data is read from one (or more) input pointers into a local buffer, operated on within the buffer, and then written from the buffer to an output pointer. For example:
 
-                # 检查是否可以内联
-                if isinstance(
-                    prev_stmt, c_ast.Assignment
-                ) and self.is_dependency(prev_stmt, stmt):
-                    # 内联当前语句到前一个语句
-                    inlined_stmt = self.create_inlined_stmt(prev_stmt, stmt)
-                    new_block_items[-1] = (
-                        inlined_stmt  # 更新最后一个语句为内联后的语句
-                    )
+1.  **Simple Operation (e.g., tanh):**
+    * Read input to buffer: `buffer[i] = input[offset + i];`
+    * Operate on buffer element: `buffer[i] = operation(buffer[i]);`
+    * Write result from buffer to output: `output[offset + i] = buffer[i];`
+    * **Expected Inlined Result:** `output[offset + i] = operation(input[offset + i]);`
 
-                    # 继续递归内联
-                    new_block_items = self.inline_statements(new_block_items)
-                    i += 1
-                    continue  # 跳过当前语句，已经被内联
-                else:
-                    new_block_items.append(stmt)
-            else:
-                new_block_items.append(stmt)
+2.  **Multi-input Operation (e.g., Add):**
+    * Read input 1 to a part of the buffer: `buffer[index1] = input1[offset1 + i];`
+    * Read input 2 to another part of the buffer: `buffer[index2] = input2[offset2 + i];`
+    * Operate within the buffer: `buffer[index3] = operation(buffer[index4], buffer[index5]);` (e.g., `buffer[i] += buffer[i+constant]`)
+    * Write result from buffer to output: `output[offset3 + i] = buffer[index6];`
+    * **Expected Inlined Result:** `output[offset3 + i] = operation(input1[offset1 + i], input2[offset2 + i]);` (Indices and offsets here need to correspond correctly)
 
-            i += 1
+**Specific Examples:**
 
-        return new_block_items
+Please strictly follow the transformation relationship between the original and expected inlined code in the examples below. Pay special attention to how the loop variable `i`, pointer type casting `(float *)`, and offset calculations `(((int) clusterId) * ...) + (((int) coreId) * ...)` are preserved and combined in the transformed code.
 
-    def is_dependency(self, stmt1, stmt2):
-        """检查 stmt1 的输出是否是 stmt2 的输入"""
-        # 确认 stmt1 的左值是否被 stmt2 右值引用
-        return self.nodes_equal(
-            stmt1.lvalue, stmt2.rvalue
-        ) or self.contains_reference(stmt2.rvalue, stmt1.lvalue)
+**Example 1 (tanh):**
 
-    def create_inlined_stmt(self, stmt1, stmt2):
-        """创建一个新的内联语句，将 stmt2 的右值更新为 stmt1 的左值"""
-        # 创建一个新的内联赋值语句
-        inlined_stmt = c_ast.Assignment(
-            op="=", lvalue=stmt2.lvalue, rvalue=stmt2.rvalue
-        )
+* **Original Code:**
+    ```c
+    void tanh_op(float *input0, float *active_tanh_210)
+    {
+    for (int clusterId = 0; clusterId < 4; ++clusterId)
+    {
+        for (int coreId = 0; coreId < 4; ++coreId)
+        {
+        float input0_local_nram[640]; // Local buffer
+        for (int i = 0; i < 640; i++)
+        {
+            (((float *) input0_local_nram) + 0)[i] = (((float *) input0) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i];
+            (((float *) input0_local_nram) + 0)[i] = tanh((((float *) input0_local_nram) + 0)[i]);
+            (((float *) active_tanh_210) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i] = (((float *) input0_local_nram) + 0)[i];
+        }
+        }
+    }
+    }
+    ```
 
-        # 将 stmt2 的右值中的引用替换为 stmt1 的右值
-        inlined_stmt.rvalue = self.replace_node(
-            stmt2.rvalue, stmt1.lvalue, stmt1.rvalue
-        )
-        return inlined_stmt
+* **Expected Inlined Code:**
+    ```c
+    void tanh_op(float *input0, float *active_tanh_210)
+    {
+    for (int clusterId = 0; clusterId < 4; ++clusterId)
+    {
+        for (int coreId = 0; coreId < 4; ++coreId)
+        {
+        // float input0_local_nram[640]; // Removed
+        for (int i = 0; i < 640; i++)
+        {
+            // Compute tanh directly and write to output
+            (((float *) active_tanh_210) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i] = tanh((((float *) input0) + ((((int) clusterId) * 2560) + (((int) coreId) * 640)))[i]);
+        }
+        }
+    }
+    }
+    ```
 
-    def replace_node(self, node, target, replacement):
-        """将 AST 中的 target 节点替换为 replacement 节点"""
-        if self.nodes_equal(node, target):
-            return replacement
-        for child_name, child in node.children():
-            setattr(
-                node, child_name, self.replace_node(child, target, replacement)
-            )
-        return node
+**Example 2 (add):**
 
-    def contains_reference(self, node, target):
-        """检查节点是否包含对目标的引用"""
-        if self.nodes_equal(node, target):
-            return True
-        for _, child in node.children():
-            if self.contains_reference(child, target):
-                return True
-        return False
+* **Original Code:**
+    ```c
+    void add_op(float *lhs, float *rhs, float *add_1605)
+    {
+        float lhs_local_nram[512]; // Local buffer
+        if (((clusterId * 4) + coreId) < 9)
+        {
+            for (int i = 0; i < 256; ++i)
+            {
+            lhs_local_nram[i] = lhs[((clusterId * 1024) + (coreId * 256)) + i];
+            lhs_local_nram[256 + i] = rhs[((clusterId * 1024) + (coreId * 256)) + i];
+            lhs_local_nram[i] += lhs_local_nram[256 + i]; // Operation within buffer
+            add_1605[((clusterId * 1024) + (coreId * 256)) + i] = lhs_local_nram[i];
+            }
+        }
+    }
+    ```
 
-    def nodes_equal(self, node1, node2):
-        """递归地比较两个 AST 节点是否相同"""
-        generator = c_generator.CGenerator()
-        return generator.visit(node1) == generator.visit(node2)
+* **Expected Inlined Code:**
+    ```c
+    void add_op(float *lhs, float *rhs, float *add_1605)
+    {
+        // float lhs_local_nram[512]; // Removed
+        if (((clusterId * 4) + coreId) < 9)
+        {
+            for (int i = 0; i < 256; ++i)
+            {
+                // Add lhs and rhs elements directly and write to add_1605
+                add_1605[((clusterId * 1024) + (coreId * 256)) + i] = lhs[((clusterId * 1024) + (coreId * 256)) + i] + rhs[((clusterId * 1024) + (coreId * 256)) + i];
+            }
+        }
+    }
+    ```
 
+**Your Task Instructions:**
 
-class UnusedMemoryRemover(NodeTransformer):
-    def visit_Compound(self, node):
-        """遍历 Compound 节点，删除未使用的内存分配语句"""
-        node.block_items = self.remove_unused_allocations(node.block_items)
-        return self.generic_visit(node)
+When you receive a piece of C code, please:
 
-    def remove_unused_allocations(self, block_items):
-        """检查并删除未使用的内存分配语句"""
-        new_block_items = []
-        for i in range(len(block_items)):
-            stmt = block_items[i]
-            # 如果是内存分配语句，并且其变量未被后续语句引用，则删除该语句
-            if isinstance(stmt, c_ast.Decl) and isinstance(
-                stmt.type, c_ast.ArrayDecl
-            ):
-                if not any(
-                    self.contains_reference(later_stmt, stmt.name)
-                    for later_stmt in block_items[i + 1 :]
-                ):
-                    continue  # 跳过未使用的内存分配语句
-            if isinstance(stmt, c_ast.Decl) and isinstance(
-                stmt.type, c_ast.TypeDecl
-            ):
-                if isinstance(stmt.type.type, c_ast.ArrayDecl):
-                    if not any(
-                        self.contains_reference(later_stmt, stmt.name)
-                        for later_stmt in block_items[i + 1 :]
-                    ):
-                        continue  # 删除未使用的数组声明
-            new_block_items.append(stmt)
-        return new_block_items
+1.  Carefully analyze the function definitions within the code.
+2.  Look for local array declarations (especially float arrays) which might be intermediate buffers.
+3.  Inside loops, look for sequences of statements that match the "Patterns to Recognize" described above, i.e., reading from input pointers into a local buffer, operating on elements indexed by the loop variable within the buffer, and then writing the result from the buffer back to an output pointer.
+4.  If a pattern matching these sequences is found, replace them with a single statement that reads directly from the input pointer(s), performs the operation, and writes directly to the output pointer.
+5.  Remove the declaration of the corresponding local buffer variable.
+6.  Keep all code that does not match the pattern or is outside the pattern (including outer loops, conditional statements, other variable declarations, etc.) unchanged.
+7.  **Output ONLY** the complete modified C code. Do not include any explanatory text, Markdown formatting (except for the code block), or additional notes. If no optimization opportunities matching the pattern are found in the code, output the original code as is.
 
-    def contains_reference(self, node, target):
-        """检查节点是否包含对目标的引用"""
-        if hasattr(node, "name") and node.name == target:
-            return True
-        for _, child in node.children():
-            if self.contains_reference(child, target):
-                return True
-        return False
+**Now, please apply the buffer inlining optimization to the following C code:**
+{input_code}
+"""
 
 
 def ast_buffer_inline(code):
-    code = remove_target_prefix(code)
-    # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    inline_prompt_filled = inline_prompt.replace("{input_code}", code)
+    transformation_completion = openai.ChatCompletion.create(
+        model=model_name,
+        messages=[{"role": "user", "content": inline_prompt_filled}],
+    )
 
-    # 进行内联转换
-    transformer = InlineTransformer()
-    ast = transformer.visit(ast)
-
-    # 删除未使用的内存分配
-    remover = UnusedMemoryRemover()
-    ast = remover.visit(ast)
-    # 输出修改后的代码
-    generator = c_generator.CGenerator()
-    return generator.visit(ast)
+    content = transformation_completion.choices[0].message["content"]
+    match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
+    if match:
+        code_content = match.group(1).strip()
+        return code_content
+    return None
 
 
 if __name__ == "__main__":
@@ -170,6 +161,26 @@ if __name__ == "__main__":
         }
         }
     }
+    }
+    """
+    code = ast_buffer_inline(code)
+    print(code)
+
+    code = """
+    void add(float *lhs, float *rhs, float *add_1605)
+    {
+        float lhs_local_nram[512];
+        if (((clusterId * 4) + coreId) < 9)
+        {
+            for (int i = 0; i < 256; ++i)
+            {
+            lhs_local_nram[i] = lhs[((clusterId * 1024) + (coreId * 256)) + i];
+            lhs_local_nram[256 + i] = rhs[((clusterId * 1024) + (coreId * 256)) + i];
+            lhs_local_nram[i] += lhs_local_nram[256 + i];
+            add_1605[((clusterId * 1024) + (coreId * 256)) + i] = lhs_local_nram[i];
+            }
+
+        }
     }
     """
     code = ast_buffer_inline(code)
