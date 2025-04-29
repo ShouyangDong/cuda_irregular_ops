@@ -195,7 +195,7 @@ if __name__ == "__main__":
     file_name = "benchmark/data/dlboost_code_test/add_3_3_256.cpp"
     from falcon.mcts.utils import open_file
     code = open_file(file_name)
-    for action_id in [9]:
+    for action_id in [1]:
         action = actions[action_id]
         code = action(
             file_name,
@@ -205,7 +205,7 @@ if __name__ == "__main__":
         )
         print("[INFO]**********code: ", code)
     
-    new_file = "./tmp/add_3_3_256.cu"
+    new_file = "./tmp/add_3_3_256.cpp"
     from falcon.mcts.transcompile import objective
     with open(new_file, "w", encoding="utf-8") as f:
         f.write(code)

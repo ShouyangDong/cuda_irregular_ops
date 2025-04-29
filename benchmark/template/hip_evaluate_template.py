@@ -145,7 +145,7 @@ def create_hip_perf_func(file_name, op_type="ewise"):
         memcpy_back = f"hipMemcpy({name}, {name}_hip, size1 * sizeof(float), hipMemcpyDeviceToHost);\n"
 
     # Infer grid dimensions from kernel code
-    original_function = original_function.replace('extern "C"', '')
+    original_function = original_function.replace('extern "C"', "")
     numblocks_define, blocksize_define = infer_grid_dim_from_kernel(
         original_function, thread_num
     )

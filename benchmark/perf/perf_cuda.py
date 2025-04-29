@@ -249,9 +249,12 @@ def perf_scaled_dot_product_attention(shape, function, dtype="float32"):
 
 def perf_pipeline(file_name, op_type="ewise"):
     create_cuda_perf_func(file_name, op_type)
-    backup_file_name = os.path.join(os.getcwd(), file_name.replace(".cu", "_bak.cu"))
+    backup_file_name = os.path.join(
+        os.getcwd(), file_name.replace(".cu", "_bak.cu")
+    )
     so_name = os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
     success, output = run_compilation(so_name, backup_file_name)
+
 
 def benchmark(file_name):
     execution_time = 0
@@ -259,7 +262,9 @@ def benchmark(file_name):
     name = base_name.split("_")[0]
     if name == "add":
         perf_pipeline(file_name, "ewise")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -267,7 +272,9 @@ def benchmark(file_name):
 
     elif name in ["avgpool", "maxpool", "minpool", "sumpool"]:
         perf_pipeline(file_name, "pool")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shape = base_name.split("_")[1:5]
         shape = [int(intg) for intg in shape]
@@ -279,7 +286,9 @@ def benchmark(file_name):
 
     elif name == "bmm":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -291,7 +300,9 @@ def benchmark(file_name):
 
     elif name == "gemm":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -302,7 +313,9 @@ def benchmark(file_name):
 
     elif name in ["sign", "relu", "sigmoid", "softmax", "rmsnorm", "gelu"]:
         perf_pipeline(file_name, "ewise")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -310,7 +323,9 @@ def benchmark(file_name):
 
     elif name == "conv2d":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         data_shape = base_name.split("_")[1:5]
         data_shape = [int(intg) for intg in data_shape]
@@ -335,7 +350,9 @@ def benchmark(file_name):
 
     elif name == "conv2dnchw":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         data_shape = base_name.split("_")[1:5]
         data_shape = [int(intg) for intg in data_shape]
@@ -361,7 +378,9 @@ def benchmark(file_name):
 
     elif name == "gemv":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -373,7 +392,9 @@ def benchmark(file_name):
 
     elif name == "conv1d":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -386,7 +407,9 @@ def benchmark(file_name):
 
     elif name == "depthwiseconv":
         perf_pipeline(file_name, "matmul")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_depthwiseconv_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
@@ -424,7 +447,9 @@ def benchmark(file_name):
 
     elif name == "layernorm":
         perf_pipeline(file_name, "layer_norm")
-        lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so")))
+        lib = ctypes.CDLL(
+            os.path.join(os.getcwd(), file_name.replace(".cu", "cuda.so"))
+        )
         function = getattr(lib, "timed_" + name + "_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]

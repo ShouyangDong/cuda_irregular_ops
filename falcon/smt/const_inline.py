@@ -6,63 +6,69 @@ from falcon.util import NodeTransformer, remove_target_prefix
 class ConstInlineTransformer(NodeTransformer):
     def __init__(self):
         super().__init__()
-        # 存储常量的字典
-        self.constants = {}
-
-
-class ConstInlineTransformer(NodeTransformer):
-    def __init__(self):
-        super().__init__()
-        # 存储常量的字典
         self.constants = {}
 
     def visit_Decl(self, node):
-        """找到并记录所有整数常量的值，并从 AST 中删除这些声明"""
-        # 记录整数常量
-        if isinstance(node.init, c_ast.Constant) and node.init.type == "int":
-            self.constants[node.name] = node.init
-            return None  # 返回 None 以删除该声明
-        # 记录计算表达式
-        if (
-            isinstance(node.init, (c_ast.BinaryOp, c_ast.UnaryOp))
-            and node.type.type.names[0] == "int"
-        ):
-            self.constants[node.name] = node.init
-            return None  # 返回 None 以删除该声明
+        """Find and record integer constants or expressions assigned to ints,
+           and remove these declarations from the AST."""
+        if node.name and node.init and node.type and hasattr(node.type, 'type'):
+            is_int_type = False
+            if isinstance(node.type, c_ast.TypeDecl) and \
+               isinstance(node.type.type, c_ast.IdentifierType) and \
+               'int' in node.type.type.names:
+                   is_int_type = True
 
-        return self.generic_visit(node)
+            if is_int_type:
+                if isinstance(node.init, c_ast.Constant) and node.init.type == "int":
+                    # print(f"DEBUG: Found constant decl: {node.name} = {node.init.value}")
+                    self.constants[node.name] = node.init
+                    return None # Remove declaration
+
+                elif isinstance(node.init, (c_ast.BinaryOp, c_ast.UnaryOp, c_ast.ID, c_ast.Constant)):
+                    # print(f"DEBUG: Found constant expression decl: {node.name} = <expression>")
+                    visited_init = self.visit(node.init)
+                    self.constants[node.name] = visited_init
+                    return None # Remove declaration
+
+        return self.generic_visit(node) # Visit children even if not removed
 
     def visit_ID(self, node):
-        """将变量替换为对应的常量值或表达式"""
-        # 用常量值或表达式替换变量
+        """Replace variable IDs with their corresponding constant value or expression node.
+           Crucially, recursively visit the replacement node."""
         if node.name in self.constants:
-            return self.constants[node.name]
+            replacement_node = self.constants[node.name]
+            # print(f"DEBUG: Replacing ID '{node.name}' with node type {type(replacement_node)}")
+            # Use deepcopy if there's a risk of modifying the stored node when
+            # it's inserted multiple times. Usually safe for constants/simple exprs.
+            # return self.visit(copy.deepcopy(replacement_node))
+            return self.visit(replacement_node) # Recursive visit is key
         return node
 
+    # ***** ADDED METHOD *****
     def visit_DeclList(self, node):
-        return node
-
-    def visit_Assignment(self, node):
-        """替换 'index' 的赋值表达式"""
-        # 如果左值是 'index'，将整个赋值替换为右值
-        if (
-            isinstance(node.lvalue, c_ast.ID)
-            and node.lvalue.name in self.constants
-        ):
-            return self.generic_visit(node.rvalue)
-        return self.generic_visit(node)
+        """
+        Visit a DeclList. If, after visiting the declarations within it,
+        the list becomes empty (because all declarations were removed, e.g., constants),
+        then remove the DeclList node itself to prevent CGenerator errors.
+        """
+        # First, let the generic visitor process the declarations in node.decls.
+        self.generic_visit(node)
+        # Now, check if the list of declarations is empty.
+        if not node.decls:
+            # print("DEBUG: Removing empty DeclList node.")
+            return None # Remove this empty DeclList node
+        else:
+            return node # Keep the non-empty DeclList
 
     def visit_FuncDef(self, node):
-        """在函数体中删除声明并替换计算表达式"""
-        # 首先调用 visit 函数删除声明并替换变量
+        """Visit function body and ensure None statements are removed."""
         self.generic_visit(node)
-        # 移除已经不需要的声明（删除 None）
-        node.body.block_items = [
-            stmt for stmt in node.body.block_items if stmt is not None
-        ]
+        if node.body and hasattr(node.body, 'block_items') and node.body.block_items is not None:
+             node.body.block_items = [
+                stmt for stmt in node.body.block_items if stmt is not None
+             ]
         return node
-
-
+    
 def constant_inline(code):
     code = remove_target_prefix(code)
     # 解析代码

@@ -285,7 +285,9 @@ def benchmark(file_name):
     base_name = os.path.basename(file_name)
     name = base_name.split("_")[0]
     perf_pipeline(file_name)
-    lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cpp", ".so")))
+    lib = ctypes.CDLL(
+        os.path.join(os.getcwd(), file_name.replace(".cpp", ".so"))
+    )
     function = getattr(lib, "timed_" + name)
     if name == "add":
         shapes = base_name.split(".")[0]

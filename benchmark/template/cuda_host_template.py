@@ -144,7 +144,7 @@ def create_cuda_func(file_name, op_type="ewise"):
         name = params[-1].split("*")[1]
         memcpy_back = f"cudaMemcpy({name}, {name}_cuda, size1 * sizeof(float), cudaMemcpyDeviceToHost);\n"
 
-    original_function = original_function.replace('extern "C"', '') 
+    original_function = original_function.replace('extern "C"', "")
     # Infer grid dimensions from kernel code
     numblocks_define, blocksize_define = infer_grid_dim_from_kernel(
         original_function,
