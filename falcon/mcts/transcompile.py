@@ -42,11 +42,11 @@ flags.DEFINE_string(
     "The output file for the visualization.",
 )
 
-flags.DEFINE_string("source", "cpu", "Source platform identifier.")
-flags.DEFINE_string("target", "cuda", "Destination platform identifier.")
+flags.DEFINE_string("source", "cuda", "Source platform identifier.")
+flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/dlboost_code_test/add_3_3_256.cpp",
+    "benchmark/data/cuda_code_test/add_3_3_256.cu",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)

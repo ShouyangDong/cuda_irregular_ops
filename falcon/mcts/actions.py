@@ -212,4 +212,3 @@ if __name__ == "__main__":
     target = "cuda"
     score = objective(new_file, target)
     print(score)
-
