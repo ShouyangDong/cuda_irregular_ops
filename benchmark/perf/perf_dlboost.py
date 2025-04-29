@@ -285,7 +285,7 @@ def benchmark(file_name):
     base_name = os.path.basename(file_name)
     name = base_name.split("_")[0]
     perf_pipeline(file_name)
-    lib = ctypes.CDLL(file_name.replace(".cpp", ".so"))
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), file_name.replace(".cpp", ".so")))
     function = getattr(lib, "timed_" + name)
     if name == "add":
         shapes = base_name.split(".")[0]
@@ -422,8 +422,8 @@ def benchmark(file_name):
     else:
         print("Undefined file: ", file_name)
 
-    os.remove(file_name.replace(".cpp", "_bak.cpp"))
-    os.remove(file_name.replace(".cpp", ".so"))
+    os.remove(os.path.join(os.getcwd(), file_name.replace(".cpp", "_bak.cpp")))
+    os.remove(os.path.join(os.getcwd(), file_name.replace(".cpp", ".so")))
     return execution_time
 
 

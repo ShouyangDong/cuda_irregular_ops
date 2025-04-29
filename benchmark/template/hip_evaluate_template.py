@@ -145,9 +145,9 @@ def create_hip_perf_func(file_name, op_type="ewise"):
         memcpy_back = f"hipMemcpy({name}, {name}_hip, size1 * sizeof(float), hipMemcpyDeviceToHost);\n"
 
     # Infer grid dimensions from kernel code
-    device_code = original_function.split("extern")[0]
+    original_function = original_function.replace('extern "C"', '')
     numblocks_define, blocksize_define = infer_grid_dim_from_kernel(
-        device_code, thread_num
+        original_function, thread_num
     )
     if isinstance(size, list):
         size_list = ", ".join(
@@ -211,7 +211,7 @@ extern "C" float timed_${kernel_name}_kernel(${param_list}, ${size_list}) {
     memcpy_alloc_list = "    ".join(alloc for alloc in device_memory_alloc)
     new_code = host_func_template.substitute(
         kernel_name=kernel_name,
-        original_function=device_code.strip(),
+        original_function=original_function.strip(),
         param_list=param_list,
         memcpy_htod="\n    ".join(memcpy),
         thread_num=thread_num,

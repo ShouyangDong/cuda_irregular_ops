@@ -1,7 +1,7 @@
 import os
 import time
 from functools import partial
-
+import logging
 import jax
 import jax.numpy as jnp
 import mctx
@@ -15,6 +15,11 @@ from falcon.mcts.actions import actions as ActionSpace
 from falcon.mcts.invalid_actions import get_invalid_actions
 from falcon.mcts.utils import open_file
 from falcon.util import get_target
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,  # 设置日志级别
+    format="%(asctime)s - %(levelname)s - %(message)s",  # 设置日志格式
+)
 
 # TODO(michael): replace with shape calculation
 GFLOPS = 64 * 1280 * 2 / 1e9
@@ -65,7 +70,8 @@ def objective(file_name, target):
         elif target == "hip":
             time_ms = perf_hip.benchmark(file_name)
         return GFLOPS / (time_ms / 1e3)
-    except Exception:
+    except Exception as e:
+        logging.info(e)
         return 0.0
 
 

@@ -46,7 +46,7 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{THREAD_BINDING_PROMPT}", THREAD_BINDING_PROMPT)
     PROMPT = PROMPT.replace("{THREAD_BINDING_DEMO}", prompt_demo)
     PROMPT = PROMPT.replace("{cpp_code}", code)
-    print("[INFO]prompt: ", PROMPT)
+
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": PROMPT}],
@@ -268,12 +268,16 @@ def get_operation_words(pragma_line):
 
 
 def run_tensorization(code, target):
-    op_dict = json.load(open("./falcon/documents/bang_c_op_map.json", "r"))
     op_list = get_operation_words(code)
-    for op in op_list:
-        op = "memcpy" if "memory" in op else op
-        op_document = op_dict[op]
-        code = tensorization(op, code, op_document)
+    if target == "mlu":
+        op_dict = json.load(open("./falcon/documents/bang_c_op_map.json", "r"))
+        for op in op_list:
+            op = "memcpy" if "memory" in op else op
+            op_document = op_dict[op]
+            code = tensorization(op, code, op_document)
+    elif target in ["cuda", "hip"]:
+        if "matmul" not in op_list:
+            return code
     return code
 
 

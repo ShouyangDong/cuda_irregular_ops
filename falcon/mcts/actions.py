@@ -106,12 +106,10 @@ def auto_bind(file_name, code, source_platform, target_platform):
         return code
     try:
         final_code = run_thread_binding(code, target_platform)
-        print("[INFO]**********auto_bind: ", final_code)
         if not unit_test(file_name, final_code):
             raise RuntimeError("auto_bind error")
     except Exception:
         final_code = ast_thread_binding(code, target_platform)
-        print("[INFO]*************fix final_code: ", final_code)
     return final_code
 
 
@@ -130,7 +128,6 @@ def auto_cache(file_name, code, source_platform, target_platform):
         return code
     try:
         cache_code = run_cache_process(code, space_maps)
-
         if not unit_test(file_name, cache_code):
             raise RuntimeError("auto_cache error")
     except Exception:
@@ -198,7 +195,7 @@ if __name__ == "__main__":
     file_name = "benchmark/data/dlboost_code_test/add_3_3_256.cpp"
     from falcon.mcts.utils import open_file
     code = open_file(file_name)
-    for action_id in [7]:
+    for action_id in [9]:
         action = actions[action_id]
         code = action(
             file_name,
