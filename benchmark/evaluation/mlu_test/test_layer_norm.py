@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import run_mlu_compilation as run_compilation
 
 
@@ -26,7 +26,7 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     so_name = args.file.replace(".mlu", ".so")
-    file_name = create_bang_func(args.file, op_type="layer_norm")
+    file_name = create_mlu_func(args.file, op_type="layer_norm")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))

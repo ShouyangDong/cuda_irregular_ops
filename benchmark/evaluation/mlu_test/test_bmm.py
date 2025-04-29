@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import run_mlu_compilation as run_compilation
 
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_int8))
     name = base_name.split("_")[0]
     so_name = args.file.replace(".mlu", ".so")
-    file_name = create_bang_func(args.file, op_type="matmul")
+    file_name = create_mlu_func(args.file, op_type="matmul")
     # Load the shared library with the batch matrix multiplication function
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)

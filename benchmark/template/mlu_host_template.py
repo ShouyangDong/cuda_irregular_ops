@@ -2,7 +2,7 @@ import re
 from string import Template
 
 
-def create_bang_func(file_name, op_type="ewise"):
+def create_mlu_func(file_name, op_type="ewise"):
     with open(file_name, "r") as f:
         original_function = f.read()
         f.close()
@@ -200,4 +200,4 @@ def create_bang_func(file_name, op_type="ewise"):
 
 
 if __name__ == "__main__":
-    create_bang_func("benchmark/data/mlu_code_test/add_1_15_64.mlu")
+    create_mlu_func("benchmark/data/mlu_code_test/add_1_15_64.mlu")

@@ -389,7 +389,7 @@ def benchmark(file_name):
     elif name == "depthwiseconv":
         perf_pipeline(file_name, "matmul")
         lib = ctypes.CDLL(file_name.replace(".cu", ".so"))
-        function = getattr(lib, "timed_depthwise_convolution_kernel")
+        function = getattr(lib, "timed_depthwiseconv_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         input_height, kernel_size, input_channels = (

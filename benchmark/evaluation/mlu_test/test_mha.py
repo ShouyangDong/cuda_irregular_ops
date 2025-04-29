@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import run_mlu_compilation as run_compilation
 
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     query = torch.randn(shape).to(dtype).contiguous()
     key = torch.randn(shape).to(dtype).contiguous()
     value = torch.randn(shape).to(dtype).contiguous()
-    file_name = create_bang_func(args.file)
+    file_name = create_mlu_func(args.file)
     so_name = args.file.replace(".mlu", ".so")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)

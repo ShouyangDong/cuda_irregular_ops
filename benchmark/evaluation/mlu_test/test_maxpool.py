@@ -6,7 +6,7 @@ import subprocess
 import numpy as np
 import torch
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import maxpool_np
 from benchmark.utils import run_mlu_compilation as run_compilation
 
@@ -23,7 +23,7 @@ def verify_pooling(base_name, file, shape, kernel_stride):
         ctypes.POINTER(ctypes.c_float)
     )
     so_name = file.replace(".mlu", ".so")
-    file_name = create_bang_func(file, op_type="pool")
+    file_name = create_mlu_func(file, op_type="pool")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
