@@ -26,6 +26,7 @@ def verify_add(base_name, file, shape):
 
     file_name = create_mlu_func(file)
     success, output = run_compilation(so_name, file_name)
+    print(output)
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     name = base_name.split("_")[0]

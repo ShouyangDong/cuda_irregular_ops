@@ -23,14 +23,15 @@ Additionally, existing cache reads should not be removed.
 - Existing cached buffers (e.g., if `A` is cached in Nram) should be retained.
 - If new buffers need to be cached (e.g., `B`), cache them in separate buffers.
 - The transformation should mimic the behavior of `cache_read` from TVM and not alter the computation.
+- Size of "Nram", "Wram" must be static.
 """
 
 CACHE_READ_DEMO = """
 ### Example Input:
 ```c
-for (int i = 0; i < N; i++) {
+for (int i = 0; i < 32; i++) {
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         C[i][j] = A[i][j] + B[i][j];
     }
 }
@@ -38,15 +39,15 @@ for (int i = 0; i < N; i++) {
 
 ### Example Output:
 ```c
-for (int i = 0; i < N; i++) {
-    {NAMESPACE} float A_{CACHE_NAME}[M];
+for (int i = 0; i < 32; i++) {
+    {NAMESPACE} float A_{CACHE_NAME}[48];
     // Cache read of A into {CACHE_NAME} memory
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         A_{CACHE_NAME}[j] = A[i][j];
     }
 
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         C[i][j] = A_{CACHE_NAME}[j] + B[i][j]; // Use cached version of A
     }
 }
@@ -104,14 +105,15 @@ Additionally, existing cache reads should not be removed.
 - Existing cached buffers (e.g., if `A` is cached in Nram) should be retained.
 - If new buffers need to be cached (e.g., `B`), cache them in separate buffers.
 - The transformation should mimic the behavior of `cache_read` from TVM and not alter the computation.
+- Size of "Nram", "Wram" must be static.
 """
 
 CACHE_WRITE_DEMO = """
 ### Example Input:
 ```c
-for (int i = 0; i < N; i++) {
+for (int i = 0; i < 32; i++) {
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         C[i][j] = A[i][j] + B[i][j];
     }
 }
@@ -121,14 +123,14 @@ for (int i = 0; i < N; i++) {
 ```c
 
 
-for (int i = 0; i < N; i++) {
-    {NAMESPACE} float C_{CACHE_NAME}[M];
+for (int i = 0; i < 32; i++) {
+    {NAMESPACE} float C_{CACHE_NAME}[48];
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         C_{CACHE_NAME}[j] = A[i][j] + B[i][j]; // Store result in {CACHE_NAME} cache
     }
     // Write back the cached results to C
-    for (int j = 0; j < M; j++) {
+    for (int j = 0; j < 48; j++) {
         C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original buffer
     }
 }

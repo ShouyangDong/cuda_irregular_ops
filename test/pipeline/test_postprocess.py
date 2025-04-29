@@ -30,7 +30,7 @@ def falcon_postprocess_pipeline(code, file_name, target):
                 )
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
-        cache_code = run_cache_process(code, space_maps)
+        cache_code = run_cache_process(code, space_maps, target)
 
         if not unit_test(file_name, cache_code):
             cache_code = ast_auto_cache(code, space_maps)

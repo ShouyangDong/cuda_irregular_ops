@@ -197,7 +197,7 @@ def generate_cache_write_prompt(buffer, space, code):
     return PROMPT
 
 
-def run_cache_process(code, space_maps):
+def run_cache_process(code, space_maps, target):
     # Get the list of intrinsics from the code
     intrinsic_list = get_intrinsic_content(code)
     # Ensure the intrinsic lists and spaces have matching lengths
@@ -226,7 +226,7 @@ def run_cache_process(code, space_maps):
             content = transformation_completion.choices[0].message["content"]
             match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
             code = match.group(1) if match else code
-    return code
+    return make_full_func(code, target)
 
 
 def tensorization(op, code, document):
@@ -358,7 +358,7 @@ def post_processing_pipeline(code, target):
                 )
             )
         code, space_maps = replace_operation_with_intrinsic(code, op_pragma)
-        code = run_cache_process(code, space_maps)
+        code = run_cache_process(code, space_maps, target)
         code = run_code_decoration(code)
         code = run_tensorization(code, target)
     return code

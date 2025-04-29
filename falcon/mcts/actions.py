@@ -1,6 +1,7 @@
 import json
 
 from falcon.smt.auto_cache import ast_auto_cache
+from falcon.smt.const_inline import constant_inline
 from falcon.smt.loop_transformation.loop_contraction import (
     ast_loop_contraction,
 )
@@ -114,6 +115,7 @@ def auto_bind(file_name, code, source_platform, target_platform):
 
 
 def auto_cache(file_name, code, source_platform, target_platform):
+    code = constant_inline(code)
     code = run_code_decoration(code)
     op_pragma = {}
     if target_platform == "mlu":
@@ -127,7 +129,7 @@ def auto_cache(file_name, code, source_platform, target_platform):
     if space_maps is None:
         return code
     try:
-        cache_code = run_cache_process(code, space_maps)
+        cache_code = run_cache_process(code, space_maps, target_platform)
         if not unit_test(file_name, cache_code):
             raise RuntimeError("auto_cache error")
     except Exception:
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     from falcon.mcts.utils import open_file
 
     code = open_file(file_name)
-    for action_id in [7]:
+    for action_id in [8]:
         action = actions[action_id]
         code = action(
             file_name,

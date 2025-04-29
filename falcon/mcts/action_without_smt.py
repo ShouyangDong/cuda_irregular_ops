@@ -80,7 +80,7 @@ def auto_cache(file_name, code, source_platform, target_platform):
     if space_maps is None:
         return code
 
-    cache_code = run_cache_process(code, space_maps)
+    cache_code = run_cache_process(code, space_maps, target_platform)
     return cache_code
 
 

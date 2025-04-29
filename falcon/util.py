@@ -77,7 +77,11 @@ def add_memory_prefix(code):
     modified_code = pattern.sub(replacer, code)
     if "memcpy" in modified_code and "__memcpy" not in modified_code:
         modified_code = modified_code.replace("memcpy", "__memcpy")
-    return re.sub('(extern\\s+"C"\\s+)(void)', "\\1__mlu_global__ \\2", code)
+
+    if "extern" in code:
+        return re.sub(r'(extern\s+"C"\s+)(void)', r"\1__mlu_global__ \2", code)
+    else:
+        return 'extern "C" __mlu_global__ ' + code
 
 
 def add_parallel_variable_prefix(code):
@@ -119,7 +123,12 @@ def remove_target_prefix(code):
 
 def get_target(code, target=None):
     # 判断文件类型并设置目标
-    if "__mlu_global" in code or "__bang" in code or "coreId" in code:
+    if (
+        "__mlu_global" in code
+        or "__bang" in code
+        or "coreId" in code
+        or "__nram__" in code
+    ):
         target, file_type = "mlu", ".mlu"
     elif target == "hip" and ("__global__" in code or "threadIdx.x" in code):
         target, file_type = "hip", ".hip"
@@ -130,7 +139,7 @@ def get_target(code, target=None):
     return target, file_type
 
 
-def make_full_func(code, target):
+def make_full_func(code, target=None):
     target, file_type = get_target(code, target)
     if target == "mlu":
         code = add_memory_prefix(code)
