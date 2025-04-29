@@ -9,7 +9,7 @@ import tiktoken
 from absl import app, flags
 from jax import jit, lax, vmap
 
-from benchmark.perf import perf_bang, perf_cuda, perf_dlboost, perf_hip
+from benchmark.perf import perf_cuda, perf_dlboost, perf_hip, perf_mlu
 from falcon.mcts.action_logit import generate_prior_from_src
 from falcon.mcts.action_self_debugging import actions as ActionSpace
 from falcon.mcts.invalid_actions import get_invalid_actions
@@ -58,7 +58,7 @@ def objective(file_name, target):
         if target == "cuda":
             time_ms = perf_cuda.benchmark(file_name)
         elif target == "mlu":
-            time_ms = perf_bang.benchmark(file_name)
+            time_ms = perf_mlu.benchmark(file_name)
         elif target == "cpu":
             time_ms = perf_dlboost.benchmark(file_name)
         elif target == "hip":

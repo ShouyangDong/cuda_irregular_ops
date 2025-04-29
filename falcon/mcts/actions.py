@@ -215,3 +215,12 @@ if __name__ == "__main__":
     target = "cuda"
     score = objective(new_file, target)
     print(score)
+    from falcon.mcts.utils import open_file
+    from falcon.util import get_target
+
+    code = open_file(new_file)
+    target = "cpu"
+    score = objective(new_file, target)
+    print(score)
+    target, file_type = get_target(code, "cpu")
+    print("[INFO]********target: ", target)
