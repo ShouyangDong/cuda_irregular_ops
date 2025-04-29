@@ -36,8 +36,8 @@ def create_mlu_func(file_name, op_type="ewise"):
     dim = None
     func_type = None
     if "clusterId" in original_function:
-        dim = "cnrtDim3_t dim = {16, 1, 1};"
-        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION4;"
+        dim = "cnrtDim3_t dim = {32, 1, 1};"
+        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION8;"
     elif "coreId" in original_function:
         dim = "cnrtDim3_t dim = {4, 1, 1};"
         func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;"

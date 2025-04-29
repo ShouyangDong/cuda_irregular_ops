@@ -5,20 +5,18 @@ import sys
 
 import openai
 
-from benchmark.zero_shot.zero_shot_prompt import (
-    CPU_TO_CUDA_PROMPT,
-    CPU_TO_HIP_PROMPT,
-    CPU_TO_MLU_PROMPT,
-    CUDA_TO_AMD_PROMPT,
-    CUDA_TO_CPU_PROMPT,
-    CUDA_TO_MLU_PROMPT,
-    HIP_TO_CPU_PROMPT,
-    HIP_TO_CUDA_PROMPT,
-    HIP_TO_MLU_PROMPT,
-    MLU_TO_CPU_PROMPT,
-    MLU_TO_CUDA_PROMPT,
-    MLU_TO_HIP_PROMPT,
-)
+from benchmark.zero_shot.zero_shot_prompt import (CPU_TO_CUDA_PROMPT,
+                                                  CPU_TO_HIP_PROMPT,
+                                                  CPU_TO_MLU_PROMPT,
+                                                  CUDA_TO_AMD_PROMPT,
+                                                  CUDA_TO_CPU_PROMPT,
+                                                  CUDA_TO_MLU_PROMPT,
+                                                  HIP_TO_CPU_PROMPT,
+                                                  HIP_TO_CUDA_PROMPT,
+                                                  HIP_TO_MLU_PROMPT,
+                                                  MLU_TO_CPU_PROMPT,
+                                                  MLU_TO_CUDA_PROMPT,
+                                                  MLU_TO_HIP_PROMPT)
 
 ext_map = {
     "cuda": "cu",

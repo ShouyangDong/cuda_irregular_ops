@@ -44,11 +44,11 @@ flags.DEFINE_string(
     "The output file for the visualization.",
 )
 
-flags.DEFINE_string("source", "mlu", "Source platform identifier.")
-flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
+flags.DEFINE_string("source", "cpu", "Source platform identifier.")
+flags.DEFINE_string("target", "mlu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/mlu_code_test/add_3_3_256.mlu",
+    "benchmark/data/dlboost_code_test/add_3_3_256.cpp",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)
@@ -68,7 +68,6 @@ def objective(file_name, target):
         elif target == "mlu":
             time_ms = perf_mlu.benchmark(file_name)
         elif target == "cpu":
-            print("-------------------------")
             time_ms = perf_dlboost.benchmark(file_name)
         elif target == "hip":
             time_ms = perf_hip.benchmark(file_name)

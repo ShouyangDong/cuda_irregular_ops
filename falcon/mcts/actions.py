@@ -173,26 +173,26 @@ actions = [
 ]
 
 if __name__ == "__main__":
-    file_name = "benchmark/data/mlu_code_test/add_3_3_256.mlu"
+    file_name = "benchmark/data/dlboost_code_test/add_3_3_256.cpp"
     from falcon.mcts.utils import open_file
 
     code = open_file(file_name)
-    for action_id in [2, 0]:
+    for action_id in [7]:
         action = actions[action_id]
         code = action(
             file_name,
             code,
-            "mlu",
             "cpu",
+            "mlu",
         )
         # print("[INFO]**********code: ", code)
     print("[IFNO]**************final_code: ", code)
-    new_file = "./tmp/add_3_3_256.cpp"
+    new_file = "./tmp/add_3_3_256.mlu"
     with open(new_file, "w", encoding="utf-8") as f:
         f.write(code)
     from falcon.mcts.transcompile import objective
 
-    target = "cpu"
+    target = "mlu"
     score = objective(new_file, target)
     print(score)
     # file_name = "benchmark/data/dlboost_code_test/add_3_3_256.cpp"

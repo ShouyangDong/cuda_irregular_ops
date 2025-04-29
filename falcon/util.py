@@ -77,11 +77,7 @@ def add_memory_prefix(code):
     modified_code = pattern.sub(replacer, code)
     if "memcpy" in modified_code and "__memcpy" not in modified_code:
         modified_code = modified_code.replace("memcpy", "__memcpy")
-    return (
-        "__mlu_global__ " + modified_code
-        if "__mlu_global__ " not in modified_code
-        else modified_code
-    )
+    return re.sub('(extern\\s+"C"\\s+)(void)', "\\1__mlu_global__ \\2", code)
 
 
 def add_parallel_variable_prefix(code):

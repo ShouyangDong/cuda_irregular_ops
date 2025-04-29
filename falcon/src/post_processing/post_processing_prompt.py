@@ -301,8 +301,15 @@ Thread Binding
 
 Function Overview:
 You are tasked with identifying parallelizable loops in C++ code and binding them to the available clusters and cores on an NPU.
-The target NPU has 4 clusters and 4 cores per cluster. Your goal is to transform the input code by mapping the loops onto specific
+The target NPU has 8 clusters and 4 cores per cluster. Your goal is to transform the input code by mapping the loops onto specific
 hardware resources (clusters and cores) for parallel execution.
+
+Target Hardware:
+
+8 clusters
+4 cores per cluster
+clusterId and coreId are built-in identifiers provided by the system — do not pass them as function arguments.
+(Think of them like blockIdx.x and threadIdx.x in CUDA.)
 
 
 Application Scenario:
@@ -311,21 +318,20 @@ This process accelerates the computation by exploiting the parallel nature of ha
 
 Input:
 The input is a C++/CUDA code snippet containing loops that can be parallelized. The goal is to bind these loops to cores and clusters on an NPU for parallel execution.
-The target hardware has 4 clusters and 4 cores per cluster, and the prompt will help map the loop dimensions accordingly.
+The target hardware has 8 clusters and 4 cores per cluster, and the prompt will help map the loop dimensions accordingly.
 
 Output:
 The transformed code should include appropriate thread binding directives, ensuring that iterations of the loop are distributed across the clusters and cores of the NPU for parallel execution.
 
 
  ### Steps for the transformation:
- 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is larger than the number of clusters (4) or cores (4).
+ 1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is larger than the number of clusters (8) or cores (4).
 
- 2. **Replace loop variables with `clusterId` and `coreId`:** - For loops where the iteration count is larger than the number of clusters (4) or cores (4), replace the loop variables with `clusterId` and `coreId` respectively. - If the loop’s iteration count is smaller than 4, add condition checks to ensure proper core binding. For example, `if (clusterId < dim)`.
+ 2. **Replace loop variables with `clusterId` and `coreId`:** - For loops where the iteration count is larger than the number of clusters (8) or cores (4), replace the loop variables with `clusterId` and `coreId` respectively. - If the loop’s iteration count is smaller than 4, add condition checks to ensure proper core binding. For example, `if (clusterId < dim)`.
 
  3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `clusterId` and `coreId`, and directly map iterations to hardware cores and clusters.
+ 4. Ensure the original computation logic remains unchanged; only the loop variables should be replaced.
 
-
-### Example
 {THREAD_BINDING_DEMO}
 
 ### GPT Task:
@@ -339,6 +345,7 @@ Please transform the following C++ by binding the parallel loops to NPU clusters
 
 ### Notes:
 - Replace the loop dimensions with `clusterId` and `coreId` where possible.
+- Do not pass clusterId and coreId as function parameters.
 - Ensure that the output code maintains the same computational logic while taking advantage of the parallel nature of the hardware.
 - The variables `clusterId` and `coreId` are built-in parallel variables and do not require initialization.
 """
@@ -360,14 +367,18 @@ for (int i = 0; i < 4; ++i) {
 ```
 
 ### Output Code with Cluster and Core Binding:
-- Bind loops to **4 clusters** and **4 cores** on the NPU.
+- Bind loops to **8 clusters** and **4 cores** on the NPU.
 - Ensure parallel execution across clusters and cores.
 
 Expected Output:
 
 ```cpp
-for (int k = 0; k <  7; k++) {
-    B[clusterId * 4 * 7 + coreId * 7 + k] = A[clusterId * 4 * 7 + coreId * 7 + k] + 1.0;
+if (clusterId < 4) {
+    if (coreId < 4) {
+        for (int k = 0; k <  7; k++) {
+            B[clusterId * 4 * 7 + coreId * 7 + k] = A[clusterId * 4 * 7 + coreId * 7 + k] + 1.0;
+        }
+    }
 }
 ```
 """
