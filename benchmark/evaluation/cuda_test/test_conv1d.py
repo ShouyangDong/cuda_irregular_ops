@@ -5,7 +5,15 @@ import subprocess
 
 import numpy as np
 
+from benchmark.template.cuda_host_template import create_cuda_func
 from benchmark.utils import run_cuda_compilation as run_compilation
+
+
+def ref_program(input_array, kernel):
+    # Calculate the result using numpy for comparison
+    output_np = np.convolve(input_array, kernel, mode="valid")
+    return output_np
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -27,28 +35,10 @@ if __name__ == "__main__":
     kernel_ptr = kernel.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_ctypes.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
-    # Calculate the result using numpy for comparison
-    output_np = np.convolve(input_array, kernel, mode="valid")
-
+    output_np = ref_program(input_array, kernel)
     # Load the shared library with the batch matrix multiplication function
     so_name = args.file.replace(".cu", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(
-        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
-    ) as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(
-        base_name.replace(".cu", ""), base_name + "_bak.cu"
-    )
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
+    file_name = create_cuda_func(file, op_type="matmul")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
 
@@ -61,10 +51,11 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.c_int,
         ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = None
     # Call the function with the matrices and dimensions
-    function(input_ptr, kernel_ptr, output_ptr, shape[1], shape[0])
+    function(input_ptr, kernel_ptr, output_ptr, shape[1], 3, shape[0])
     # Check if the results match
     np.testing.assert_allclose(
         output_ctypes,

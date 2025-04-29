@@ -27,5 +27,5 @@ if nvidia-smi >/dev/null 2>&1; then
 	echo "==============GPU Compilation Test==============="
 	python benchmark/evaluation/cuda_test/compilation.py benchmark/data/cuda_code_test
 	echo "==============GPU Computation Test==============="
-	python benchmark/evaluation/cuda_test/result_test.py benchmark/data/cuda_code_test benchmark/evaluation/cuda_test/
+	python benchmark/evaluation/cuda_test/result_test.py benchmark/data/cuda_code_test benchmark/evaluation/cuda_org_test/
 fi

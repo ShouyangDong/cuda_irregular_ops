@@ -3,8 +3,10 @@ import ctypes
 import os
 import subprocess
 
+import numpy as np
 import torch
 
+from benchmark.template.hip_host_template import create_hip_func
 from benchmark.utils import conv2d_nchw
 from benchmark.utils import run_hip_compilation as run_compilation
 
@@ -42,23 +44,7 @@ if __name__ == "__main__":
 
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".hip", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(
-        os.path.join(os.getcwd(), "benchmark/macro/hip_macro.txt"), "r"
-    ) as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(
-        base_name.replace(".hip", ""), base_name + "_bak.hip"
-    )
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
+    file_name = create_hip_func(args.file, op_type="matmul")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
 
@@ -72,9 +58,6 @@ if __name__ == "__main__":
         ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
     ]
     function.restype = None
     # Convert the matrices to contiguous memory for ctypes
@@ -82,7 +65,7 @@ if __name__ == "__main__":
     kernel_ptr = kernel_np.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
-    result_ctypes = torch.zeros(result_cpu.shape)
+    result_ctypes = torch.zeros(result_cpu.shape, dtype=np.float32)
     output_ptr = result_ctypes.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
@@ -91,12 +74,9 @@ if __name__ == "__main__":
         input_ptr,
         kernel_ptr,
         output_ptr,
-        data_shape[0],
-        data_shape[2],
-        data_shape[1],
-        kernel_shape[0],
-        kernel_shape[2],
-        stride_h,
+        np.prod(data_np.shape),
+        np.prod(kernel_np.shape),
+        np.prod(result_cpu.shape),
     )
     # Check if the results match
     torch.allclose(

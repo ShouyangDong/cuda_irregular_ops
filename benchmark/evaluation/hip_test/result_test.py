@@ -3,14 +3,14 @@ import argparse
 import glob
 import os
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from tqdm import tqdm
 
 from benchmark.utils import run_test
 
-# Map operator prefix to its HIP test script name
-TEST_SCRIPT_MAP = {
+# mapping from operator name prefix to its test script
+TEST_FILE_MAPPING = {
     "deformable": "test_deformable_attention.py",
     "layernorm": "test_layer_norm.py",
     "mha": "test_mha.py",
@@ -35,32 +35,28 @@ TEST_SCRIPT_MAP = {
 }
 
 
-def run_test_for_file(file_path, test_dir):
+def process_file(file_path, test_dir):
     """
-    Run the corresponding HIP test for a single .hip file.
-    Returns (base_name, success, output).
+    Run the corresponding test for a single .hip or .cpp file.
+    Returns (file_path, output) where output is the subprocess result or error string.
     """
     base_name = os.path.basename(file_path)
-    op_name = base_name.split("_")[0]
-    script_name = TEST_SCRIPT_MAP.get(op_name)
+    name = base_name.split("_")[0]
+    script_name = TEST_FILE_MAPPING.get(name)
     if not script_name:
-        return base_name, False, f"[WARN] no test mapping for '{op_name}'"
+        return file_path, f"[WARN] No test mapping for prefix '{name}'"
 
-    test_script = os.path.join(test_dir, script_name)
-    if not os.path.isfile(test_script):
-        return (
-            base_name,
-            False,
-            f"[ERROR] test script not found: {test_script}",
-        )
+    test_file = os.path.join(test_dir, script_name)
+    if not os.path.isfile(test_file):
+        return file_path, f"[ERROR] Test script not found: {test_file}"
 
-    success, output = run_test(file_path, test_script)
-    return base_name, success, output
+    success, output = run_test(file_path, test_file)
+    return file_path, output
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run HIP correctness tests on translated .hip files"
+        description="Run functional tests on translated hip programs"
     )
     parser.add_argument(
         "source_dir",
@@ -68,7 +64,7 @@ def main():
     )
     parser.add_argument(
         "test_dir",
-        help="Directory containing HIP test scripts (e.g. benchmark/evaluation/hip_test/)",
+        help="Directory containing test scripts (e.g. benchmark/evaluation/hip_test/)",
     )
     args = parser.parse_args()
 
@@ -83,27 +79,26 @@ def main():
     total = len(files)
     success_count = 0
 
-    with ThreadPoolExecutor() as executor:
-        futures = {
-            executor.submit(run_test_for_file, fp, args.test_dir): fp
+    with ProcessPoolExecutor() as executor:
+        future_to_file = {
+            executor.submit(process_file, fp, args.test_dir): fp
             for fp in files
         }
-        with tqdm(total=total, desc="Running HIP tests") as pbar:
-            for future in as_completed(futures):
-                pbar.update(1)
-                base_name, success, output = future.result()
-                if (
-                    success
-                    and hasattr(output, "stdout")
-                    and "验证通过！" in output.stdout
-                ):
-                    success_count += 1
-                else:
-                    print(f"--- {base_name} ---")
-                    print(output)
 
+        for future in tqdm(as_completed(future_to_file), total=total):
+            future_to_file[future]
+            file_path, output = future.result()
+            if hasattr(output, "stdout") and "验证通过！" in output.stdout:
+                success_count += 1
+            else:
+                # print failures or warnings
+                print(f"--- {os.path.basename(file_path)} ---")
+                print(output)
+
+    print(f"Successful tests: {success_count}")
+    print(f"Total files: {total}")
     rate = success_count / total if total else 0.0
-    print(f"Successful tests: {success_count}/{total} ({rate:.2%})")
+    print(f"[INFO] hip test success rate: {rate:.2%}")
 
 
 if __name__ == "__main__":

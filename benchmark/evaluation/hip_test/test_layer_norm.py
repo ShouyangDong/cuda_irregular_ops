@@ -2,10 +2,10 @@ import argparse
 import ctypes
 import os
 import subprocess
-from ctypes import CDLL
 
 import numpy as np
 
+from benchmark.template.hip_host_template import create_hip_func
 from benchmark.utils import run_hip_compilation as run_compilation
 
 
@@ -26,26 +26,10 @@ if __name__ == "__main__":
     shapes = base_name.split(".")[0]
     shape = [int(intg) for intg in shapes.split("_")[1:]]
     so_name = args.file.replace(".hip", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(
-        os.path.join(os.getcwd(), "benchmark/macro/hip_macro.txt"), "r"
-    ) as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(
-        base_name.replace(".hip", ""), base_name + "_bak.hip"
-    )
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
+    file_name = create_hip_func(args.file, op_type="layer_norm")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
-    lib = CDLL(os.path.join(os.getcwd(), so_name))
+    lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
@@ -53,7 +37,6 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.c_int,
         ctypes.c_int,
         ctypes.c_int,
     ]
@@ -74,7 +57,14 @@ if __name__ == "__main__":
     beta_ptr = beta_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     # 调用C函数
-    function(input_ptr, gamma_ptr, beta_ptr, output_ptr, *shape)
+    function(
+        input_ptr,
+        gamma_ptr,
+        beta_ptr,
+        output_ptr,
+        np.prod(shape),
+        np.prod(shape[-1:]),
+    )
     # 验证结果
 
     np.testing.assert_allclose(

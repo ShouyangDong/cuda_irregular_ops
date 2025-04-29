@@ -5,56 +5,30 @@ import subprocess
 
 import numpy as np
 
+from benchmark.template.cuda_host_template import create_cuda_func
 from benchmark.utils import run_cuda_compilation as run_compilation
 
+
 # Define the add function using numpy
-
-
 def add(A, B):
     return np.add(A, B)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--file", help="the source file")
-    args = parser.parse_args()
-    base_name = os.path.basename(args.file)
-    shapes = base_name.split(".")[0]
-    shape = [int(intg) for intg in shapes.split("_")[1:]]
-    # Generate random matrices for testing
+def verify_add(base_name, file, shape):
     A = np.random.rand(*shape).astype("float32")
     B = np.random.rand(*shape).astype("float32")
-    name = base_name.split("_")[0]
-    # Perform add using numpy
-    result_np = add(A, B)
-
     # Convert the matrices to contiguous memory for ctypes
     A_ptr = A.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     B_ptr = B.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
-    so_name = args.file.replace(".cu", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
+    result_np = add(A, B)
 
-    with open(
-        os.path.join(os.getcwd(), "benchmark/macro/cuda_macro.txt"), "r"
-    ) as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
+    so_name = file.replace(".cu", ".so")
 
-    file_name = args.file.replace(
-        base_name.replace(".cu", ""), base_name + "_bak.cu"
-    )
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
-
-    # Load the shared library with the add function
+    file_name = create_cuda_func(file)
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
-
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
+    name = base_name.split("_")[0]
     function = getattr(lib, name + "_kernel")
     # 定义函数参数和返回类型
     function.argtypes = [
@@ -79,4 +53,14 @@ if __name__ == "__main__":
         verbose=True,
     )
     print("验证通过！")
-    result = subprocess.run(["rm", so_name])
+    subprocess.run(["rm", so_name])
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", help="the source file")
+    args = parser.parse_args()
+    base_name = os.path.basename(args.file)
+    shapes = base_name.split(".")[0]
+    shape = [int(intg) for intg in shapes.split("_")[1:]]
+    verify_add(base_name, args.file, shape)

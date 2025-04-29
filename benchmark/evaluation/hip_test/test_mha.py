@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from benchmark.template.hip_host_template import create_hip_func
 from benchmark.utils import run_hip_compilation as run_compilation
 
 
@@ -40,25 +41,8 @@ if __name__ == "__main__":
     query = torch.randn(shape).to(dtype).contiguous()
     key = torch.randn(shape).to(dtype).contiguous()
     value = torch.randn(shape).to(dtype).contiguous()
-
+    file_name = create_hip_func(args.file)
     so_name = args.file.replace(".hip", ".so")
-    with open(args.file, "r") as f:
-        code = f.read()
-        f.close()
-
-    with open(
-        os.path.join(os.getcwd(), "benchmark/macro/hip_macro.txt"), "r"
-    ) as f:
-        macro = f.read()
-        f.close()
-    code = macro + code
-
-    file_name = args.file.replace(
-        base_name.replace(".hip", ""), base_name + "_bak.hip"
-    )
-    with open(file_name, mode="w") as f:
-        f.write(code)
-        f.close()
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     lib = CDLL(os.path.join(os.getcwd(), so_name))
@@ -70,9 +54,6 @@ if __name__ == "__main__":
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
-        ctypes.c_int,
-        ctypes.c_int,
-        ctypes.c_int,
         ctypes.c_int,
     ]
     function.restype = None
@@ -86,8 +67,8 @@ if __name__ == "__main__":
     input_ptr_v = value.numpy().ctypes.data_as(ctypes.POINTER(ctypes.c_float))
     output_ptr = output_array.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
 
-    # 调用HIP kernel
-    function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr, *shape)
+    # 调用CUDA kernel
+    function(input_ptr_q, input_ptr_k, input_ptr_v, output_ptr, np.prod(shape))
     # 验证结果
 
     # 验证结果

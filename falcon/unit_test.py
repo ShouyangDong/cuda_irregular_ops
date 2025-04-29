@@ -72,33 +72,7 @@ def unit_test(file_name, code):
     # 提取操作名称，并生成测试文件路径
     op_name = os.path.basename(filename_no_ext).split("_")[0]
 
-    if target == "cuda":
-        with open(
-            os.path.join(
-                "benchmark/data/cuda_code_test", os.path.basename(filename)
-            ),
-            "r",
-        ) as f:
-            host_code = f.read()
-            host_code = "extern" + host_code.split("extern")[1]
-            f.close()
-        device_code = re.sub(r'extern "C"\s+', "", code)
-        code = device_code + host_code
-
-    if target == "hip":
-        with open(
-            os.path.join(
-                "benchmark/data/hip_code_test", os.path.basename(filename)
-            ),
-            "r",
-        ) as f:
-            host_code = f.read()
-            host_code = "extern" + host_code.split("extern")[1]
-            f.close()
-        device_code = re.sub(r'extern "C"\s+', "", code)
-        code = device_code + host_code
-
-    elif target == "cpu":
+    if target == "cpu":
         code = 'extern "C" ' + code if "extern" not in code else code
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
     with open(tmp_file_name, mode="w") as f:

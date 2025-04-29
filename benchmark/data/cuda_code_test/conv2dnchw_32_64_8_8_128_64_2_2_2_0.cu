@@ -61,7 +61,7 @@ extern "C" void conv2dnchw_kernel(float *input, float *kernel, float *output,
                  output_height); // 每个块处理一个输出特征图的空间位置
   dim3 numBlocks(output_channels, 1, batch_size); // 每个输出通道对应一个块
 
-conv2d_nchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+  conv2dnchw<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
 
 
