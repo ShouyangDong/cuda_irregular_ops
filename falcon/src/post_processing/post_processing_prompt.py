@@ -247,7 +247,7 @@ __mlu_entry__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*
 ```
 """
 
-THREAD_BINDING_DEMO_CUDA = """
+THREAD_BINDING_PROMPT_CUDA = """
 Thread Binding
 
 Function Overview:
@@ -269,14 +269,15 @@ ensuring that each iteration of the loop is handled by different threads for par
 
 
 ### Steps for Insertion:
-1. **Identify parallelizable loops:** - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is smaller than the number of blocks (256) or threads (1024).
-2. Bind these loops to available hardware threads directly using CUDA constructs like `threadIdx.x` and `blockIdx.x`.
-    For loops where the iteration count is larger than the number of block (256) or threads (1024),
-    replace the loop variables with `blockIdx.x` and `threadIdx` respectively.
-    - If the loop’s iteration count is smaller than 1024, add condition checks to ensure proper core binding.
-    For example, `if (threadIdx.x < dim)`.
-3. **Remove unnecessary loops:** - After replacing loop variables, remove the corresponding `for` loops for `threadIdx.x` and `blockIdx.x`, and directly map iterations to hardware blocks and threads.
+1. Identify parallelizable loops: - Find the outermost or large loops suitable for parallelization. A loop is considered parallelizable if its iteration count is smaller than the number of blocks (256) or threads (1024).
 
+2. Bind these loops to available hardware threads directly using CUDA constructs like threadIdx.x and blockIdx.x. For loops where the iteration count is larger than the number of block (256) or threads (1024), replace the loop variables with blockIdx.x and threadIdx respectively.
+
+3. If the loop’s iteration count is smaller than 1024, add condition checks to ensure proper core binding. For example, if (threadIdx.x < dim).
+
+4. Remove unnecessary loops: - After replacing loop variables, remove the corresponding for loops for threadIdx.x and blockIdx.x, and directly map iterations to hardware blocks and threads.
+
+Preserve constants: - If loop bounds like dim1 = 3 are hard-coded constants, keep them as constant local variables inside the function, not as kernel arguments.
 ### Example
 {THREAD_BINDING_DEMO}
 

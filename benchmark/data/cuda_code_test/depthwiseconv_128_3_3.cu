@@ -1,4 +1,4 @@
-__global__ void depthwise_convolution(const float *input, const float *filter,
+__global__ void depthwiseconv(const float *input, const float *filter,
                                       float *output) {
   int tid_x = blockIdx.x * blockDim.x + threadIdx.x;
   int tid_y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -50,7 +50,7 @@ extern "C" void depthwiseconv_kernel(float *input, float *kernel, float *output,
                  (output_height + blockSize.y - 1) / blockSize.y,
                  input_channels); // 每个通道使用一个块
 
-  depthwise_convolution<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
+  depthwiseconv<<<numBlocks, blockSize>>>(d_input, d_kernel, d_output);
 
   cudaMemcpy(output, d_output, output_size * sizeof(float),
              cudaMemcpyDeviceToHost);

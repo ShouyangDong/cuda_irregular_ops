@@ -6,7 +6,7 @@ import subprocess
 import numpy as np
 import torch
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import conv2d_nhwc
 from benchmark.utils import run_mlu_compilation as run_compilation
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Load the shared library with the conv2d function
     so_name = args.file.replace(".mlu", ".so")
-    file_name = create_bang_func(args.file, op_type="matmul")
+    file_name = create_mlu_func(args.file, op_type="matmul")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
 

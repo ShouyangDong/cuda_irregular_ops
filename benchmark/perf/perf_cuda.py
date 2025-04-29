@@ -393,7 +393,7 @@ def benchmark(file_name):
     elif name == "depthwiseconv":
         perf_pipeline(file_name, "matmul")
         lib = ctypes.CDLL(file_name.replace(".cu", ".so"))
-        function = getattr(lib, "timed_depthwise_convolution_kernel")
+        function = getattr(lib, "timed_depthwiseconv_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         input_height, kernel_size, input_channels = (
@@ -447,7 +447,7 @@ def benchmark(file_name):
 
 if __name__ == "__main__":
     files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/*conv*.cu")
+        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/avg*.cu")
     )
     table = []
     times = []

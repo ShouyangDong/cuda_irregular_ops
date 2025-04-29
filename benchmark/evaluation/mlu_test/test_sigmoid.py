@@ -5,7 +5,7 @@ import subprocess
 
 import numpy as np
 
-from benchmark.template.mlu_host_template import create_bang_func
+from benchmark.template.mlu_host_template import create_mlu_func
 from benchmark.utils import run_mlu_compilation as run_compilation
 
 
@@ -22,7 +22,7 @@ def verify_sigmoid(base_name, file, shape):
 
     so_name = file.replace(".mlu", ".so")
 
-    file_name = create_bang_func(file)
+    file_name = create_mlu_func(file)
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))

@@ -95,7 +95,15 @@ def perf_binary(name, shape_A, shape_B, shape_C, function, dtype="float32"):
             ctypes.c_int,
         ]
         elapsed_time = function(A_ptr, B_ptr, output_ptr, np.prod(shape_A))
-    elif name in ["gemm", "gemv", "bmm", "conv2d", "conv1d", "depthwiseconv", "conv2dnchw"]:
+    elif name in [
+        "gemm",
+        "gemv",
+        "bmm",
+        "conv2d",
+        "conv1d",
+        "depthwiseconv",
+        "conv2dnchw",
+    ]:
         function.argtypes = [
             ctypes.POINTER(ctypes.c_float),
             ctypes.POINTER(ctypes.c_float),
@@ -345,7 +353,14 @@ def benchmark(file_name):
             low=1.0, high=2.0, size=kernel_shape
         ).astype(dtype)
         # cpu compute
-       result_cpu = conv2d_nchw(data_np, kernel_shape[1], kernel_shape[0], kernel_shape[2], stride_h, pad)
+        result_cpu = conv2d_nchw(
+            data_np,
+            kernel_shape[1],
+            kernel_shape[0],
+            kernel_shape[2],
+            stride_h,
+            pad,
+        )
         execution_time = perf_binary(
             name, data_shape, kernel_shape, result_cpu.shape, function
         )
@@ -378,7 +393,7 @@ def benchmark(file_name):
     elif name == "depthwiseconv":
         perf_pipeline(file_name, "matmul")
         lib = ctypes.CDLL(file_name.replace(".cu", ".so"))
-        function = getattr(lib, "timed_depthwise_convolution_kernel")
+        function = getattr(lib, "timed_depthwiseconv_kernel")
         shapes = base_name.split(".")[0]
         shape = [int(intg) for intg in shapes.split("_")[1:]]
         input_height, kernel_size, input_channels = (
