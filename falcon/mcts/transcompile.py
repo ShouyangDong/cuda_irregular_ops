@@ -45,7 +45,7 @@ flags.DEFINE_string(
 )
 
 flags.DEFINE_string("source", "cpu", "Source platform identifier.")
-flags.DEFINE_string("target", "mlu", "Destination platform identifier.")
+flags.DEFINE_string("target", "cuda", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
     "benchmark/data/dlboost_code_test/add_3_3_256.cpp",

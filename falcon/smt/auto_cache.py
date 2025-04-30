@@ -1,9 +1,10 @@
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
 from falcon.util import (
     NodeTransformer,
     add_memory_prefix,
-    remove_target_prefix,
+    generate_code,
+    parse_code_ast,
 )
 
 
@@ -237,11 +238,8 @@ class CacheTransformationVisitor(NodeTransformer):
 
 
 def ast_auto_cache(code, space_map, target="mlu"):
-    code = remove_target_prefix(code)
-
     # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
     # 进行缓存加载和写回插入
     cache_visitor = LoopVisitor()
     cache_visitor.visit(ast)
@@ -251,8 +249,7 @@ def ast_auto_cache(code, space_map, target="mlu"):
     ast = transformer.visit(ast)
 
     # 输出最终代码
-    generator = c_generator.CGenerator()
-    cache_code = generator.visit(ast)
+    cache_code = generate_code(ast)
     if target == "mlu":
         return add_memory_prefix(cache_code)
     else:

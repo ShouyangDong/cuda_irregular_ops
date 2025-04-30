@@ -1,7 +1,7 @@
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
 from falcon.simplification import simplify_code
-from falcon.util import NodeTransformer, remove_target_prefix
+from falcon.util import NodeTransformer, generate_code, parse_code_ast
 
 
 class LoopNestFusionVisitor(NodeTransformer):
@@ -107,16 +107,12 @@ class LoopNestFusionVisitor(NodeTransformer):
 
 
 def ast_loop_fusion(c_code):
-    c_code = remove_target_prefix(c_code)
-    # 解析 C 代码
-    parser = c_parser.CParser()
-    ast = parser.parse(c_code)
-    generator = c_generator.CGenerator()
+    ast = parse_code_ast(c_code)
     # 自定义访问者实例
     visitor = LoopNestFusionVisitor()
     # 访问 AST，合并可以合并的嵌套 for 循环
     visitor.visit(ast)
-    code = generator.visit(ast)
+    code = generate_code(ast)
     code = simplify_code(code)
     return code
 

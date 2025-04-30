@@ -1,11 +1,17 @@
 import re
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
 from falcon.simplification import simplify_code
 from falcon.smt.const_inline import constant_inline
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import NodeTransformer, make_full_func, remove_target_prefix
+from falcon.util import (
+    NodeTransformer,
+    generate_code,
+    make_full_func,
+    parse_code_ast,
+    remove_target_prefix,
+)
 
 ParaVar = {
     "threadIdx.x": 1024,
@@ -107,12 +113,10 @@ def ast_loop_recovery(code, target="cuda"):
                 builtin_map[builtin_var] = ParaVar[builtin_var]
 
     # insert the parallel loop
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-    generator = c_generator.CGenerator()
+    ast = parse_code_ast(code)
     visitor = LoopRecoveryVisitor(builtin_map)
     visitor.visit(ast)
-    code = generator.visit(ast)
+    code = generate_code(ast)
     code = simplify_code(code)
     code = constant_inline(code)
     code = ast_stmt_simplification(code)

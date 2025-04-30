@@ -1,8 +1,8 @@
 import re
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast, c_generator
 
-from falcon.util import NodeTransformer, remove_target_prefix
+from falcon.util import NodeTransformer, generate_code, parse_code_ast
 
 
 class MergeLoopsAndIfsVisitor(NodeTransformer):
@@ -217,17 +217,14 @@ class MergeLoopsAndIfsVisitor(NodeTransformer):
 
 def ast_stmt_simplification(code):
     code = re.sub(r"//.*?\n|/\*.*?\*/", "", code, flags=re.S)
-    code = remove_target_prefix(code)
     # 解析代码并应用合并
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
     # 使用 MergeForLoopsVisitor 进行遍历和合并
     merge_visitor = MergeLoopsAndIfsVisitor()
     ast = merge_visitor.visit(ast)
 
     # 输出修改后的代码
-    generator = c_generator.CGenerator()
-    return generator.visit(ast)
+    return generate_code(ast)
 
 
 if __name__ == "__main__":

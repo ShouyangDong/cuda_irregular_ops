@@ -381,7 +381,6 @@ def postprocess(code: str) -> str:
 def ast_detensorization(code: str) -> str:
     # preprocess
     tmp = preprocess(code)
-    print("[INFO]*****temp: ", tmp)
     parser = CParser()
     ast = parser.parse(tmp)
     transformer = TensorCoreToScalar(M=32, N=32, K=16)  # 根据实际改

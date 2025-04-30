@@ -1,6 +1,7 @@
+import os
 import re
 
-from pycparser import c_ast
+from pycparser import c_ast, c_generator, parse_file
 
 
 class NodeTransformer(c_ast.NodeVisitor):
@@ -94,7 +95,7 @@ def add_parallel_variable_prefix(code):
     return "__global__ " + code if "__global__ " not in code else code
 
 
-def remove_target_prefix(code):
+def remove_target_prefix(code, target=None):
     patterns = [
         (r'extern "C"\s+', ""),  # 移除 `extern "C"`
         (r"__mlu_global__\s+", ""),  # 移除 `__mlu_global__`
@@ -110,6 +111,11 @@ def remove_target_prefix(code):
         (r"\bblockIdxx\b", "blockIdxx"),
         (r"\bblockIdxy\b", "blockIdxy"),
         (r"\bblockIdxz\b", "blockIdxz"),
+        (
+            r"static_cast<\s*([A-Za-z_][A-Za-z0-9_]*)\s*>\s*\(([^)]+?)\)",
+            r"(\1)(\2)",
+        ),
+        (r"reinterpret_cast<\s*([^>]+?)\s*>\s*\(([^)]+?)\)", r"(\1)(\2)"),
     ]
 
     # 遍历模式列表，应用替换
@@ -118,7 +124,17 @@ def remove_target_prefix(code):
             pattern, replacement, code, flags=flags[0] if flags else 0
         )
 
-    return code
+    needs_header = any(
+        kw in code for kw in ("int8_t", "int32_t", "__m128i", "_mm_")
+    )
+    has_stdint = '#include "stdint.h"' in code
+    has_simd = '#include "simd.h"' in code
+
+    if needs_header and not (has_stdint and has_simd):
+        header = '#include "stdint.h"\n#include "simd.h"\n\n'
+        return header + code
+    else:
+        return code
 
 
 def get_target(code, target=None):
@@ -146,3 +162,29 @@ def make_full_func(code, target=None):
     elif target in ["cuda", "hip"]:
         code = add_parallel_variable_prefix(code)
     return code
+
+
+def parse_code_ast(code, target=None):
+    code = remove_target_prefix(code, target=target)
+    filename = "./local_parse_test.c"
+    with open(filename, "w") as f:
+        f.write(code)
+    ast = parse_file(
+        filename,
+        use_cpp=True,
+        cpp_path="cpp",
+        cpp_args=["-Iutils/fake_libc_include"],
+    )
+    os.remove(filename)
+    return ast
+
+
+def generate_code(ast):
+    generator = c_generator.CGenerator()
+    # Collect all function definitions in the translation unit
+    func_defs = [ext for ext in ast.ext if isinstance(ext, c_ast.FuncDef)]
+    # Generate code for each function and join them with two newlines
+    all_functions_code = "\n\n".join(
+        generator.visit(func) for func in func_defs
+    )
+    return all_functions_code

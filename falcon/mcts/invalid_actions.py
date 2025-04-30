@@ -1,7 +1,7 @@
-from pycparser import c_ast, c_parser
+from pycparser import c_ast
 
 from falcon.mcts.actions import actions as ActionSpace
-from falcon.util import remove_target_prefix
+from falcon.util import parse_code_ast
 
 
 class CallNodeTransformer(c_ast.NodeVisitor):
@@ -12,12 +12,8 @@ class CallNodeTransformer(c_ast.NodeVisitor):
         self.func_call = True
 
 
-def visit_func_call(code):
-    code = remove_target_prefix(code)
-    # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-
+def visit_func_call(code, target=None):
+    ast = parse_code_ast(code, target=target)
     # 统计循环层数
     loop_visitor = CallNodeTransformer()
     loop_visitor.visit(ast)
@@ -35,12 +31,8 @@ class CompoundNodeTransformer(c_ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def visit_compound_stmt(code):
-    code = remove_target_prefix(code)
-
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-
+def visit_compound_stmt(code, target=None):
+    ast = parse_code_ast(code, target=target)
     compound_visitor = CompoundNodeTransformer()
     compound_visitor.visit(ast)
     return compound_visitor.has_compound_stmt
@@ -53,10 +45,10 @@ def get_invalid_actions(code, source_platform, target_platform):
         invalid_mask[0] = 1
 
     # add compound stmt check
-    if not visit_func_call(code):
+    if not visit_func_call(code, source_platform):
         invalid_mask[2] = 1
 
-    if not visit_compound_stmt(code):
+    if not visit_compound_stmt(code, source_platform):
         invalid_mask[1] = 1
 
     if target_platform == "cpu":

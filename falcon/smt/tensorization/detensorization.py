@@ -1,11 +1,16 @@
 import json
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast, c_parser
 
 from falcon.buffer_inline import ast_buffer_inline
 from falcon.simplification import simplify_code
 from falcon.stmt_simplification import ast_stmt_simplification
-from falcon.util import NodeTransformer, make_full_func, remove_target_prefix
+from falcon.util import (
+    NodeTransformer,
+    generate_code,
+    make_full_func,
+    parse_code_ast,
+)
 
 mlu_file_name = "falcon/documents/mlu_op_tensorization.json"
 cuda_file_name = "falcon/documents/cuda_op_tensorization.json"
@@ -64,46 +69,34 @@ def ast_detensorization(code, target):
     - Implement additional error checking for the input parameters.
     - Extend the visitor to handle more complex loop structures.
     """
-    code = remove_target_prefix(code)
+    ast = parse_code_ast(code)
     if target == "mlu":
-        parser = c_parser.CParser()
-        ast = parser.parse(code)
         with open(mlu_file_name) as json_file:
             func_defs = json.load(json_file)
         visitor = Detensorizer(func_defs)
         visitor.visit(ast)
-        generator = c_generator.CGenerator()
-        code = generator.visit(ast)
+        code = generate_code(ast)
 
     elif target == "cuda":
-        parser = c_parser.CParser()
-        ast = parser.parse(code)
         with open(cuda_file_name) as json_file:
             func_defs = json.load(json_file)
         visitor = Detensorizer(func_defs)
         visitor.visit(ast)
-        generator = c_generator.CGenerator()
-        code = generator.visit(ast)
+        code = generate_code(ast)
 
     elif target == "hip":
-        parser = c_parser.CParser()
-        ast = parser.parse(code)
         with open(hip_file_name) as json_file:
             func_defs = json.load(json_file)
         visitor = Detensorizer(func_defs)
         visitor.visit(ast)
-        generator = c_generator.CGenerator()
-        code = generator.visit(ast)
+        code = generate_code(ast)
 
     elif target == "cpu":
-        parser = c_parser.CParser()
-        ast = parser.parse(code)
         with open(cpu_file_name) as json_file:
             func_defs = json.load(json_file)
         visitor = Detensorizer(func_defs)
         visitor.visit(ast)
-        generator = c_generator.CGenerator()
-        code = generator.visit(ast)
+        code = generate_code(ast)
 
     else:
         raise RuntimeError("unsuppored target.")

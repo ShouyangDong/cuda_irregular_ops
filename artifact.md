@@ -11,10 +11,10 @@ This repository contains all the scripts and benchmarks needed to reproduce our 
 ## Prerequisites
 
 - **Linux** (Ubuntu 20.04+ recommended)  
-- **Python 3.8+**, with:
+- **Python 3.10+**, with:
   - `openai`
-  - `torch` (with CUDA and/or MLU support as needed)
-  - `tqdm`
+  - `torch` (with CUDA、Hip、DL Boost and/or MLU support as needed)
+
 - **Bash** shell (for the `.sh` scripts)  
 - Credentials:
   ```bash
@@ -107,8 +107,10 @@ Each will:
 |   |—— few_shot/              # LLM translation with few shot Python script
 |   |—— macro/                 # macro files for kernels
 ├── falcon*.sh                 # end-to-end pipelines
-├── gpt4_zero_shot_test.sh     # zero-shot translation driver
-├── gpt4_few_shot_test.sh      # few-shot translation driver
+├── gpt4_zero_shot_test.sh     # gpt4 zero-shot translation driver
+├── gpt4_few_shot_test.sh      # gpt4 few-shot translation driver
+├── gpto1_zero_shot_test.sh    # gpto1 zero-shot translation driver
+├── gpto1_few_shot_test.sh     # gpto1 few-shot translation driver
 └── README.md                  # this file
 ```
 
@@ -144,3 +146,12 @@ Each will:
    ```
 
 All scripts print progress bars and summary statistics. Refer to each script’s header for platform-specific configuration flags if needed.
+
+#Transcompiling#
+**A quick start for transcompiling**. Take Gemm operator from CUDA C to BANG C as an example, we show how to automatically
+transcompile with Falcon.
+```
+
+```
+**Comlplete evaluation**
+

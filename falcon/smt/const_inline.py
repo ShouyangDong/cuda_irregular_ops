@@ -1,8 +1,8 @@
 import copy
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
-from falcon.util import NodeTransformer, remove_target_prefix
+from falcon.util import NodeTransformer, generate_code, parse_code_ast
 
 
 class ConstInlineTransformer(NodeTransformer):
@@ -84,17 +84,11 @@ class ConstInlineTransformer(NodeTransformer):
 
 
 def constant_inline(code):
-    code = remove_target_prefix(code)
-    # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
     # 进行转换
     transformer = ConstInlineTransformer()
     ast = transformer.visit(ast)
-
-    # 输出转换后的代码
-    generator = c_generator.CGenerator()
-    return generator.visit(ast)
+    return generate_code(ast)
 
 
 if __name__ == "__main__":

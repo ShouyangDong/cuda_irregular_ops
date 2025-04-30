@@ -1,8 +1,13 @@
 import re
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
-from falcon.util import NodeTransformer, remove_target_prefix
+from falcon.util import (
+    NodeTransformer,
+    generate_code,
+    parse_code_ast,
+    remove_target_prefix,
+)
 
 
 class SimplifyConstants(NodeTransformer):
@@ -98,19 +103,17 @@ class SimplifyConstants(NodeTransformer):
 
 
 def simplify_code(source_code):
-    source_code = remove_target_prefix(source_code)
     # 移除所有 C/C++ 样式的注释
     source_code = re.sub(r"//.*?\n|/\*.*?\*/", "", source_code, flags=re.S)
+    source_code = remove_target_prefix(source_code)
     # 解析 C 代码
-    parser = c_parser.CParser()
-    ast = parser.parse(source_code)
-    generator = c_generator.CGenerator()
+    ast = parse_code_ast(source_code)
     # 创建自定义访问器实例
     visitor = SimplifyConstants()
     # 访问 AST 以进行常量折叠
     visitor.visit(ast)
     # 生成简化后的 C 代码
-    return generator.visit(ast)
+    return generate_code(ast)
 
 
 if __name__ == "__main__":

@@ -90,7 +90,7 @@ def detensorization(op, code, document):
     PROMPT = PROMPT.replace("{document}", document)
     PROMPT = PROMPT.replace("{code}", code)
     PROMPT = PROMPT.replace("{op}", op)
-    # print(PROMPT)
+
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": PROMPT}],

@@ -108,6 +108,10 @@ def main():
     with open(args.source_file, "r", encoding="utf-8") as f:
         input_code = f.read()
 
+    
+    if args.source_platform in ["cuda", "hip"]:
+        input_code = input_code.split("extern")[0]
+
     # Perform translation
     prompt_template = PROMPT_MAP[direction]
     translated_code = code_transform(input_code, prompt_template)

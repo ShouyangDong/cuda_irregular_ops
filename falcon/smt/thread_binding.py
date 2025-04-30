@@ -1,10 +1,11 @@
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
 from falcon.util import (
     NodeTransformer,
     add_memory_prefix,
     add_parallel_variable_prefix,
-    remove_target_prefix,
+    generate_code,
+    parse_code_ast,
 )
 
 builtin_var = {
@@ -107,10 +108,8 @@ class LoopVisitor(c_ast.NodeVisitor):
 
 
 def ast_thread_binding(code, target="mlu"):
-    code = remove_target_prefix(code)
     # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
 
     # 统计循环层数
     loop_visitor = LoopVisitor()
@@ -119,8 +118,7 @@ def ast_thread_binding(code, target="mlu"):
     transformer = ThreadBindingTransformer(loop_visitor.max_depth, target)
     ast = transformer.visit(ast)
     # 输出修改后的代码
-    generator = c_generator.CGenerator()
-    binding_code = generator.visit(ast)
+    binding_code = generate_code(ast)
 
     if target == "mlu":
         return add_memory_prefix(binding_code)

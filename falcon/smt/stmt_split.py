@@ -1,7 +1,7 @@
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast, c_generator
 
 from falcon.smt.const_inline import constant_inline
-from falcon.util import NodeTransformer, make_full_func
+from falcon.util import NodeTransformer, make_full_func, parse_code_ast
 
 
 class LoopSplitter(NodeTransformer):
@@ -51,9 +51,7 @@ class LoopSplitter(NodeTransformer):
 def ast_stmt_split(code, target="None"):
     # Parse code and apply loop splitting
     code = constant_inline(code)
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
-
+    ast = parse_code_ast(code)
     # Apply loop splitting transformation
     splitter = LoopSplitter()
     split_ast = splitter.visit(ast)

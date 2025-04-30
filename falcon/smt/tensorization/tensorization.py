@@ -1,12 +1,13 @@
 import re
 
 import numpy as np
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
 from falcon.util import (
     NodeTransformer,
     add_memory_prefix,
-    remove_target_prefix,
+    generate_code,
+    parse_code_ast,
 )
 
 
@@ -202,19 +203,15 @@ class PragmaToSIMDTransformer(NodeTransformer):
 
 
 def ast_tensorization(code, target="mlu"):
-    code = remove_target_prefix(code)
-
     # 解析代码
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
 
     # 进行 PragmaToSIMD 转换
     transformer = PragmaToSIMDTransformer()
     ast = transformer.visit(ast)
 
     # 输出修改后的代码
-    generator = c_generator.CGenerator()
-    tensorized_code = generator.visit(ast)
+    tensorized_code = generate_code(ast)
     if target == "mlu":
         return add_memory_prefix(tensorized_code)
     return tensorized_code

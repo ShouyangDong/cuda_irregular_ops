@@ -5,6 +5,8 @@ from pycparser import c_ast, c_generator, c_parser
 from falcon.util import (
     NodeTransformer,
     add_memory_prefix,
+    generate_code,
+    parse_code_ast,
     remove_target_prefix,
 )
 
@@ -196,15 +198,13 @@ def apply_software_pipeline(source_code: str) -> str:
 def smt_double_buffer(source_code):
     code = remove_target_prefix(source_code)
     code = apply_software_pipeline(code)
-    parser = c_parser.CParser()
-    ast = parser.parse(code)
+    ast = parse_code_ast(code)
     visitor = PragmaVisitor()
     visitor.visit(ast)
     if not visitor.inst:
         return source_code
     output_code = op_template[visitor.inst].substitute(inst=visitor.inst)
-    generator = c_generator.CGenerator()
-    modify_code = generator.visit(ast)
+    modify_code = generate_code(ast)
     return add_memory_prefix(output_code + modify_code)
 
 

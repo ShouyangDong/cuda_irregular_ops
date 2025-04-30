@@ -1,8 +1,8 @@
 import random
 
-from pycparser import c_ast, c_generator, c_parser
+from pycparser import c_ast
 
-from falcon.util import remove_target_prefix
+from falcon.util import generate_code, parse_code_ast
 
 
 class LoopReorderVisitor(c_ast.NodeVisitor):
@@ -39,16 +39,12 @@ class LoopReorderVisitor(c_ast.NodeVisitor):
 
 
 def ast_loop_reorder(c_code):
-    c_code = remove_target_prefix(c_code)
-    # 解析 C 代码
-    parser = c_parser.CParser()
-    ast = parser.parse(c_code)
-    generator = c_generator.CGenerator()
+    ast = parse_code_ast(c_code)
     # 创建访问者实例并进行循环交换
     visitor = LoopReorderVisitor()
     visitor.visit(ast)
     visitor.reorder_loops()
-    return generator.visit(ast)
+    return generate_code(ast)
 
 
 if __name__ == "__main__":
