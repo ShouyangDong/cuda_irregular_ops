@@ -47,7 +47,7 @@ def run_thread_binding(code, target):
     PROMPT = PROMPT.replace("{THREAD_BINDING_PROMPT}", THREAD_BINDING_PROMPT)
     PROMPT = PROMPT.replace("{THREAD_BINDING_DEMO}", prompt_demo)
     PROMPT = PROMPT.replace("{cpp_code}", code)
-    print("[INFO]*********prompt: ", PROMPT)
+
     transformation_completion = openai.ChatCompletion.create(
         model=model_name,
         messages=[{"role": "user", "content": PROMPT}],
@@ -57,7 +57,6 @@ def run_thread_binding(code, target):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
-        print("code content: ", code_content)
         return make_full_func(code_content, target)
     return None
 
@@ -274,8 +273,62 @@ def run_tensorization(code, target):
     if target == "mlu":
         op_dict = json.load(open("./falcon/documents/bang_c_op_map.json", "r"))
         for op in op_list:
-            op = "memcpy" if "memory" in op else op
-            op_document = op_dict[op]
+            if "memory" in op:
+                op_document = """
+                __memcpy(void *dst, const void *src, unsigned int size, mluMemcpyDirection_t dir)
+                Copies <size> bytes data from source address <src> to destination address <dst>. The copy direction is specified by <dir>.
+
+                Parameters
+                [out] dst: The address of destination area.
+
+                [in] src: The address of source area.
+
+                [in] size: The number of bytes to be copied.
+
+                [in] dir: The copy direction.
+
+                [in] id_dst_cluster: Destination cluster ID.
+
+                Usage Examples 1:
+                // before:
+                #pragma operation(memory(input[output_nram], output[output]))
+                for (int i = 0; i < 512; ++i) {
+                    for (int j = 0; j < 512; ++j) {
+                        output[i * 512 + j] = output_nram[i * 512 + j];
+                    }
+                }
+
+                // after:
+                __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
+
+                Usage Examples 2:
+                __nram__ float output_nram[512 * 512];
+                // before:
+                #pragma operation(memory(input[output], output[output_nram]))
+                for (int i = 0; i < 512; ++i) {
+                    for (int j = 0; j < 512; ++j) {
+                        output_nram[i * 512 + j] = output[i * 512 + j];
+                    }
+                }
+
+                // after:
+                __memcpy(output_nram, output, 512 * 512 * 4, NRAM2GDRAM);
+
+                Usage Examples 3:
+                __nram__ half output_nram[512 * 512];
+                // before:
+                #pragma operation(memory(input[output], output[output_nram]))
+                for (int i = 0; i < 512; ++i) {
+                    for (int j = 0; j < 512; ++j) {
+                        output_nram[i * 512 + j] = output[i * 512 + j];
+                    }
+                }
+
+                // after:
+                __memcpy(output_nram, output, 512 * 512 * 2, NRAM2GDRAM);
+                """
+            else:
+                op_document = op_dict[op]
             code = tensorization(op, code, op_document)
     elif target in ["cuda", "hip"]:
         if "matmul" not in op_list:
@@ -362,3 +415,49 @@ def post_processing_pipeline(code, target):
         code = run_code_decoration(code)
         code = run_tensorization(code, target)
     return code
+
+
+if __name__ == "__main__":
+    code = """
+     extern "C" __mlu_global__ void add(float *input1, float *input2, float *output)
+    {
+    __nram__ float input1_Nram[256];
+    __nram__ float input2_Nram[256];
+    __nram__ float output_Nram[256];
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+        #pragma operation(memory(input[input1], output[input1_Nram]))
+        for (int k = 0; k < 256; k++)
+        {
+            int index = (((i * 3) * 256) + (j * 256)) + k;
+            input1_Nram[k] = input1[index];
+        }
+
+        #pragma operation(memory(input[input2], output[input2_Nram]))
+        for (int k = 0; k < 256; k++)
+        {
+            int index = (((i * 3) * 256) + (j * 256)) + k;
+            input2_Nram[k] = input2[index];
+        }
+
+        #pragma operation(add(input[input1_Nram, input2_Nram], output[output_Nram]))
+        for (int k = 0; k < 256; k++)
+        {
+            output_Nram[k] = input1_Nram[k] + input2_Nram[k]; // Use both cached versions
+        }
+
+        #pragma operation(memory(input[output_Nram], output[output]))
+        for (int k = 0; k < 256; k++)
+        {
+            int index = (((i * 3) * 256) + (j * 256)) + k;
+            output[index] = output_Nram[k]; // Write cached result to original buffer
+        }
+        }
+    }
+    }
+    """
+    target = "mlu"
+    code = run_tensorization(code, target)
+    print("[INFO]***********code: ", code)

@@ -179,7 +179,7 @@ if __name__ == "__main__":
     from falcon.mcts.utils import open_file
 
     code = open_file(file_name)
-    for action_id in [8]:
+    for action_id in [8, 9]:
         action = actions[action_id]
         code = action(
             file_name,
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             "cpu",
             "mlu",
         )
-        # print("[INFO]**********code: ", code)
+        print("[INFO]**********code: ", code)
     print("[IFNO]**************final_code: ", code)
     new_file = "./tmp/add_3_3_256.mlu"
     with open(new_file, "w", encoding="utf-8") as f:

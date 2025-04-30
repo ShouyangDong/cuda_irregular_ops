@@ -170,8 +170,8 @@ Application Scenario:
 - SIMD-based tensorization can be applied to common linear algebra kernels such as matrix-vector multiplications (GEMV), matrix-matrix multiplications (GEMM), and vector dot products. SIMD instructions accelerate these operations by processing multiple elements of vectors or matrices in parallel.
 """
 
-TENSORIZATION_DEMO = """
-Usage Examples:
+TENSORIZATION_MLU_DEMO = """
+Usage Examples1:
 // before:
 #pragma operation(memory(input[output_nram], output[output]))
 for (int i = 0; i < 512; ++i) {
@@ -182,6 +182,18 @@ for (int i = 0; i < 512; ++i) {
 
 // after:
 __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
+
+Usage Examples:
+// before:
+#pragma operation(memory(input[output], output[output_nram]))
+for (int i = 0; i < 512; ++i) {
+    for (int j = 0; j < 512; ++j) {
+        output_nram[i * 512 + j] = output[i * 512 + j];
+    }
+}
+
+// after:
+__memcpy(output_nram, output, 512 * 512 * 4, NRAM2GDRAM);
 """
 
 DOUBLE_BUFFER_PROMPT = """
@@ -501,4 +513,11 @@ Please transform the following C++ code by inserting `#pragma operation( )` dire
 - The input should be replaced with the actual input C++ code containing loops with element-wise or matrix multiplication operations.
 - The output should focus on identifying and marking operations inside loops that are candidates for SIMD vectorization.
 - The Pragmas must be above the for loops.
+- You MUST insert #pragma operation(<operation_type>(input[<input_buffers>], output[<output_buffers>])) as an actual code line, not as a comment.
+- Do NOT use comments like // pragma or #pragma intrinsic(...).
+- Do NOT describe the operation in natural language — instead, always use the formal pragma syntax.
+- Place the pragma immediately before the for loop that contains the arithmetic operation.
+- The operation_type must be one of: add, sub, mul, div, or memory depending on the operation used in the loop.
+- input[...] and output[...] must refer to the actual variable names used in the operation.
+- This pragma is used in a later SIMD vectorization stage and MUST be preserved as-is.
 """
