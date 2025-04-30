@@ -147,11 +147,22 @@ Each will:
 
 All scripts print progress bars and summary statistics. Refer to each script’s header for platform-specific configuration flags if needed.
 
-#Transcompiling#
-**A quick start for transcompiling**. Take Gemm operator from CUDA C to BANG C as an example, we show how to automatically
-transcompile with Falcon.
-```
+# Transcompiling
+Our transcompilation times range from 1.2 to 7.8 hours. To better showcase Falcon’s capabilities, we provide the following examples:
 
+**A quick start for transcompiling**. Take `Batch GEMM` operator from CUDA C to BANG C as an example, you can invoke Falcon like this:
 ```
+python falcon/mcts/transcompile.py --source cuda --target mlu --file_name benchmark/data/cuda_code_test/bmm_4_128_128_128.cu
+```
+During execution, you’ll see log messages such as:
+```
+Step: 12	Action: [8, 7]	Reward: 0.8930	Best Reward: 0.9435	Best action: [7]
+```
+Once complete, the transcompiled code will be available in the ``cuda_mlu`` directory.
+
 **Comlplete evaluation**
-
+For complete evaluation, please run the corresponding scripts. For example, to evaluate code from CUDA C to BANG C shown in Figure 7, please use the following commands:
+```
+cd Figure7
+python run.py
+```
