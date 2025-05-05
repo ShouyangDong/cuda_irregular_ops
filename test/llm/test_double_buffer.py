@@ -52,7 +52,7 @@ def run_double_buffer(code, target):
 
 if __name__ == "__main__":
     code = """
-    __mlu_entry__ void kernel(float* c, float* a, float b) {
+    __mlu_global__ void kernel(float* c, float* a, float b) {
         __nram__ float a_tmp[128];
         __nram__ float c_tmp[128];
         #pragma double_buffer
