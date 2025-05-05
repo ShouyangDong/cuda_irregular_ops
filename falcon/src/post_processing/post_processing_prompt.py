@@ -32,7 +32,7 @@ CACHE_READ_DEMO = """
 for (int i = 0; i < 32; i++) {
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < 48; j++) {
-        C[i][j] = A[i][j] + B[i][j];
+        C[i * 48 + j] = A[i * 48 + j] + B[i * 48 + j];
     }
 }
 ```
@@ -43,12 +43,12 @@ for (int i = 0; i < 32; i++) {
     {NAMESPACE} float A_{CACHE_NAME}[48];
     // Cache read of A into {CACHE_NAME} memory
     for (int j = 0; j < 48; j++) {
-        A_{CACHE_NAME}[j] = A[i][j];
+        A_{CACHE_NAME}[j] = A[i * 48 + j];
     }
 
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < 48; j++) {
-        C[i][j] = A_{CACHE_NAME}[j] + B[i][j]; // Use cached version of A
+        C[i * 48 + j] = A_{CACHE_NAME}[j] + B[i * 48 + j]; // Use cached version of A
     }
 }
 ```
@@ -114,7 +114,7 @@ CACHE_WRITE_DEMO = """
 for (int i = 0; i < 32; i++) {
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < 48; j++) {
-        C[i][j] = A[i][j] + B[i][j];
+        C[i * 48 + j] = A[i * 48 + j] + B[i * 48 + j];
     }
 }
 ```
@@ -127,11 +127,11 @@ for (int i = 0; i < 32; i++) {
     {NAMESPACE} float C_{CACHE_NAME}[48];
     #pragma intrinsic(__bang_add(input[Nram, Nram], output[Nram]))
     for (int j = 0; j < 48; j++) {
-        C_{CACHE_NAME}[j] = A[i][j] + B[i][j]; // Store result in {CACHE_NAME} cache
+        C_{CACHE_NAME}[j] = A[i * 48 + j] + B[i * 48 + j]; // Store result in {CACHE_NAME} cache
     }
     // Write back the cached results to C
     for (int j = 0; j < 48; j++) {
-        C[i][j] = C_{CACHE_NAME}[j]; // Write cached result to original buffer
+        C[i * 48 + j] = C_{CACHE_NAME}[j]; // Write cached result to original buffer
     }
 }
 ```
@@ -463,6 +463,14 @@ for (int i = 0; i < 512; i++) {
 for (int col = 0; col < 64; col++) {
     C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
 }
+
+for (int i = 0; i < 64; i++) {
+  for (int j = 0; j < 64; j++) {
+    for (int k = 0; k < 64; k++) {
+      C[i * 64 + k] = A[i * 64 +j] * B[j * 64 + k];
+    }
+  }
+}
 ```
 
 #### Desired Output C++ Code with Pragmas for SIMD Preparation:
@@ -491,6 +499,15 @@ for (int i = 0; i < 512; i++) {
 #pragma operation(memory(input[C_nram], output[C]))
 for (int col = 0; col < 64; col++) {
     C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
+}
+
+#pragma operation(matmul(input[A, B], output[C]))
+for (int i = 0; i < 64; i++) {
+  for (int j = 0; j < 64; j++) {
+    for (int k = 0; k < 64; k++) {
+      C[i * 64 + k] = A[i * 64 +j] * B[j * 64 + k];
+    }
+  }
 }
 ```
 

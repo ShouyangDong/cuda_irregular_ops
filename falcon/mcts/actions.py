@@ -179,14 +179,15 @@ if __name__ == "__main__":
     from falcon.mcts.utils import open_file
 
     code = open_file(file_name)
-    for action_id in [0]:
+    for action_id in [8, 9]:
         action = actions[action_id]
         code = action(
             file_name,
             code,
-            "cuda",
             "cpu",
+            "mlu",
         )
+        print("[INFO]****trans code: ", code)
     from falcon.util import get_target
 
     target, file_type = get_target(code)
