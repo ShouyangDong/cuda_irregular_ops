@@ -45,7 +45,7 @@ def perf_function(file_name):
     #include <stdio.h>
     #include <immintrin.h>
     #include <stdint.h>
-
+    typedef unsigned short half;
     // Original function
     ${original_function}
 
@@ -75,7 +75,7 @@ def perf_function(file_name):
     cleaned_code = re.sub(pattern, "", original_function)
     # 使用正则表达式替换所有形式的 float* 和 int*
     called_param_list = re.sub(
-        r"\s*\*\s*|\s*(?:float|int|double)\s*\*", "", param_list
+        r"\s*\*\s*|\s*(?:float|int|double|half)\s*\*", "", param_list
     )
 
     # 动态替换模板

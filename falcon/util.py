@@ -177,7 +177,7 @@ def get_target(code, target=None):
         target, file_type = "mlu", ".mlu"
     elif target == "hip" and ("__global__" in code or "threadIdx.x" in code):
         target, file_type = "hip", ".hip"
-    elif "__global__" in code or "threadIdx.x" in code:
+    elif "__global__" in code or "threadIdx.x" in code or "wmma" in code:
         target, file_type = "cuda", ".cu"
     else:
         target, file_type = "cpu", ".cpp"
