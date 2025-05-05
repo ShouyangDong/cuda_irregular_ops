@@ -441,6 +441,6 @@ if __name__ == "__main__":
         required=True,
         help="Path to the input CUDA file to benchmark"
     )
-    rgs = parser.parse_args()
+    args = parser.parse_args()
     execution_time = benchmark(file_name=args.file_name)
     print(f"Execution time: {execution_time:.4f} ms")

@@ -171,7 +171,7 @@ Application Scenario:
 """
 
 TENSORIZATION_MLU_DEMO = """
-Usage Examples1:
+Usage Examples 1:
 // before:
 #pragma operation(memory(input[output_nram], output[output]))
 for (int i = 0; i < 512; ++i) {
@@ -183,7 +183,7 @@ for (int i = 0; i < 512; ++i) {
 // after:
 __memcpy(output, output_nram, 512 * 512 * 4, NRAM2GDRAM);
 
-Usage Examples:
+Usage Examples 2:
 // before:
 #pragma operation(memory(input[output], output[output_nram]))
 for (int i = 0; i < 512; ++i) {
@@ -212,7 +212,7 @@ DOUBLE_BUFFER_DEMO = """
 Usage Examples:
 input
 ```
-__mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
+__mlu_global__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
     __nram__ float INPUT0_N[64];
     __nram__ float INPUT1_N[64];
     __nram__ float OUTPUT_N[64];
@@ -228,7 +228,7 @@ __mlu_entry__ void add(float* INPUT0, float* INPUT1, float* OUTPUT) {
 
 output
 ```
-__mlu_entry__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*OUTPUT) {
+__mlu_global__ void fvec_add_double_bufferingfloat* INPUT0, float* INPUT1, float*OUTPUT) {
     __nram__ float INPUT0_N[128];
     __nram__ float INPUT1_N[128];
     __nram__ float OUTPUT_N[128];
