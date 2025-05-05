@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export OPENAI_API_KEY="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" # <- replace with your OpenAI API key or export OPENAI_API_KEY
-
 TRANSLATOR_PY="falcon/mcts/transcompile.py"
 BENCH_DIR="benchmark/data"
 

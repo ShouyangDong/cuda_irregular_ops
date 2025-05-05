@@ -74,11 +74,11 @@ def matmul(N, L, M):
                     scope="nram",
                 )
                 tcps.memcpy(
-                    filter_block, filters[:, m * 64 * M_i: (m + 1) * 64 * M_i]
+                    filter_block, filters[:, m * 64 * M_i : (m + 1) * 64 * M_i]
                 )
                 tcps.dense(output_block, data_block, filter_block, 0)
                 tcps.memcpy(
-                    output[no * N_i + ni, m * 64 * M_i: (m + 1) * 64 * M_i],
+                    output[no * N_i + ni, m * 64 * M_i : (m + 1) * 64 * M_i],
                     output_block.reshape(
                         [
                             64 * M_i,

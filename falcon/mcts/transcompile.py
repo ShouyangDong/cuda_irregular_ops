@@ -34,21 +34,21 @@ flags.DEFINE_integer("seed", 42, "Random seed.")
 flags.DEFINE_integer("num_simulations", 512, "Number of simulations.")
 flags.DEFINE_integer(
     "max_num_considered_actions",
-    16,
+    13,
     "The maximum number of actions expanded at the root.",
 )
-flags.DEFINE_integer("max_depth", 16, "The maximum search depth.")
+flags.DEFINE_integer("max_depth", 13, "The maximum search depth.")
 flags.DEFINE_string(
     "output_file",
     "./tvm_search_tree.png",
     "The output file for the visualization.",
 )
 
-flags.DEFINE_string("source", "cpu", "Source platform identifier.")
-flags.DEFINE_string("target", "cuda", "Destination platform identifier.")
+flags.DEFINE_string("source", "cuda", "Source platform identifier.")
+flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
     "file_name",
-    "benchmark/data/dlboost_code_test/add_3_3_256.cpp",
+    "benchmark/data/cuda_code_test/bmm_4_128_128_128.cu",
     "Path to the input kernel file.",
 )
 jax.config.update("jax_disable_jit", True)
@@ -105,7 +105,7 @@ class FalconGo:
         self.target_platform = target_platform
         self.action_len = action_len
         self.optimizer_len = optimizer_len
-        self.best_reward = 0.01
+        self.best_reward = 0.0001
         self.best_optimizer_ids = None
         self.iteration = 0
         self.best_actions = None

@@ -71,7 +71,7 @@ hipEventDestroy(stop);
                 modified_kernel = (
                     modified_kernel[:last_brace_index]
                     + "return milliseconds;\n}"
-                    + modified_kernel[last_brace_index + 1:]
+                    + modified_kernel[last_brace_index + 1 :]
                 )
         else:
             print("未找到主函数定义。请检查函数名和签名。")

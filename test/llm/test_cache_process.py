@@ -11,7 +11,8 @@ from falcon.src.post_processing.post_processing_prompt import (
 from falcon.src.prompt.prompt import SYSTEM_PROMPT
 
 model_name = """gpt-4-turbo"""
-openai.api_key = "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"
+import os
+api_key = os.getenv("OPENAI_API_KEY")
 
 
 def get_intrinsic_content(code):

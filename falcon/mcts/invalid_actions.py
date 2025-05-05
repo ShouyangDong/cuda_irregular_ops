@@ -56,7 +56,11 @@ def get_invalid_actions(code, source_platform, target_platform):
         invalid_mask[8] = 1
         invalid_mask[10] = 1
 
-    if "coreId" not in code and "threadIdx." not in code:
+    if (
+        "coreId" not in code
+        and "threadIdx." not in code
+        and "blockIdx.x" not in code
+    ):
         invalid_mask[0] = 1
     return invalid_mask
 

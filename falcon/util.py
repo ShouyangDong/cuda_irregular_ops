@@ -116,6 +116,10 @@ def remove_target_prefix(code, target=None):
             r"(\1)(\2)",
         ),
         (r"reinterpret_cast<\s*([^>]+?)\s*>\s*\(([^)]+?)\)", r"(\1)(\2)"),
+        # 处理 wmma 命名空间的类型（模板语法 -> C struct 类型）
+        (r"wmma::fragment<[^>]+?>", "wmma_fragment"),
+        # 处理 wmma::前缀函数调用（如 wmma::load_matrix_sync）
+        (r"\bwmma::(\w+)", r"wmma_\1"),
     ]
 
     # 遍历模式列表，应用替换
@@ -124,15 +128,40 @@ def remove_target_prefix(code, target=None):
             pattern, replacement, code, flags=flags[0] if flags else 0
         )
 
-    needs_header = any(
-        kw in code for kw in ("int8_t", "int32_t", "__m128i", "_mm_")
+    headers = [
+        {
+            "header": '#include "stdint.h"',
+            "trigger_keywords": ["int8_t", "int32_t"],
+        },
+        {
+            "header": '#include "simd.h"',
+            "trigger_keywords": ["__m128i", "_mm_"],
+        },
+        {
+            "header": '#include "simd_cuda.h"',
+            "trigger_keywords": [
+                "wmma_fragment",
+                "wmma_fill_fragment",
+                "wmma_load_matrix_sync",
+                "wmma_mma_sync",
+                "wmma_store_matrix_sync",
+            ],
+        },
+    ]
+    lines = code.splitlines()
+    existing_includes = set(
+        line.strip() for line in lines if line.strip().startswith("#include")
     )
-    has_stdint = '#include "stdint.h"' in code
-    has_simd = '#include "simd.h"' in code
 
-    if needs_header and not (has_stdint and has_simd):
-        header = '#include "stdint.h"\n#include "simd.h"\n\n'
-        return header + code
+    added_headers = []
+    for h in headers:
+        needs = any(kw in code for kw in h["trigger_keywords"])
+        has_header = h["header"] in existing_includes
+        if needs and not has_header:
+            added_headers.append(h["header"])
+
+    if added_headers:
+        return "\n".join(added_headers) + "\n\n" + code
     else:
         return code
 

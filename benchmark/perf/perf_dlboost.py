@@ -97,6 +97,7 @@ def perf_pipeline(file_name):
     backup_file_name = file_name.replace(".cpp", "_bak.cpp")
     so_name = file_name.replace(".cpp", ".so")
     success, output = run_compilation(so_name, backup_file_name)
+    print("[Output: ]", output)
 
 
 def perf_unary(shape, function, dtype="float32"):

@@ -1,6 +1,5 @@
-import csv
+import argparse
 import ctypes
-import glob
 import os
 
 import numpy as np
@@ -10,7 +9,7 @@ from benchmark.template.mlu_evaluate_template import create_bang_perf_func
 from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_mlu_compilation as run_compilation
 from benchmark.utils import sumpool_np
-import argparse
+
 
 def perf_unary(shape, function, dtype="float32"):
     # 定义函数参数和返回类型
@@ -437,9 +436,10 @@ if __name__ == "__main__":
         description="Run the CUDA→MLU transcompile benchmark"
     )
     parser.add_argument(
-        "--file_name", "-f",
+        "--file_name",
+        "-f",
         required=True,
-        help="Path to the input CUDA file to benchmark"
+        help="Path to the input CUDA file to benchmark",
     )
     args = parser.parse_args()
     execution_time = benchmark(file_name=args.file_name)

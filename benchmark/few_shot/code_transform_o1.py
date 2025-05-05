@@ -108,7 +108,6 @@ def main():
     with open(args.source_file, "r", encoding="utf-8") as f:
         input_code = f.read()
 
-    
     if args.source_platform in ["cuda", "hip"]:
         input_code = input_code.split("extern")[0]
 

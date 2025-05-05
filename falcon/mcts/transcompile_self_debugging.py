@@ -97,7 +97,7 @@ class FalconGo:
         self.target_platform = target_platform
         self.action_len = action_len
         self.optimizer_len = optimizer_len
-        self.best_reward = 0.01
+        self.best_reward = 0.0001
         self.best_optimizer_ids = None
         self.iteration = 0
         self.best_actions = None
