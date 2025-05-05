@@ -10,7 +10,7 @@ from benchmark.template.mlu_evaluate_template import create_bang_perf_func
 from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_mlu_compilation as run_compilation
 from benchmark.utils import sumpool_np
-
+import argparse
 
 def perf_unary(shape, function, dtype="float32"):
     # 定义函数参数和返回类型
@@ -246,7 +246,7 @@ def perf_pipeline(file_name, op_type="ewise"):
     success, output = run_compilation(so_name, backup_file_name)
 
 
-def benchmark(file_name):
+def benchmark(file_name=None):
     execution_time = 0
     base_name = os.path.basename(file_name)
     name = base_name.split("_")[0]
@@ -433,27 +433,14 @@ def benchmark(file_name):
 
 
 if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/mlu_code_test/*.mlu")
+    parser = argparse.ArgumentParser(
+        description="Run the CUDA→MLU transcompile benchmark"
     )
-
-    table = []
-    times = []
-    table.append(files)
-    for file in files:
-        execution_time = benchmark(file)
-        times.append(execution_time)
-
-    table.append(times)
-
-    # 转置数据
-    transposed_data = list(zip(*table))
-
-    # 添加标题行
-    header = ["file", "time(ms)"]
-    transposed_data.insert(0, header)
-
-    # 保存为CSV文件
-    with open("benchmark/perf/bang_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    parser.add_argument(
+        "--file_name", "-f",
+        required=True,
+        help="Path to the input CUDA file to benchmark"
+    )
+    rgs = parser.parse_args()
+    execution_time = benchmark(file_name=args.file_name)
+    print(f"Execution time: {execution_time:.4f} ms")

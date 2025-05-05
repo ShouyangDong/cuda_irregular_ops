@@ -159,7 +159,14 @@ During execution, you’ll see log messages such as:
 Step: 12	Action: [8, 7]	Reward: 0.8930	Best Reward: 0.9435	Best action: [7]
 ```
 Once complete, the transcompiled code will be available in the ``cuda_mlu`` directory.
-
+You can then evaluate its performance by running:
+```
+python benchmark/perf/perf_mlu.py  --file_name ./cuda_mlu/bmm_4_128_128_128.mlu
+```
+This will output the performance result, for example:
+```
+Execution time:  0.0062 ms
+```
 **Comlplete evaluation**
 For complete evaluation, please run the corresponding scripts. For example, to evaluate code from CUDA C to BANG C shown in Figure 7, please use the following commands:
 ```
