@@ -10,7 +10,7 @@ import torch
 
 from benchmark.utils import conv2d_nchw, maxpool_np
 from benchmark.utils import run_dlboost_compilation as run_compilation
-
+import argparse
 
 def perf_function(file_name):
     with open(file_name, "r") as f:
@@ -97,7 +97,6 @@ def perf_pipeline(file_name):
     backup_file_name = file_name.replace(".cpp", "_bak.cpp")
     so_name = file_name.replace(".cpp", ".so")
     success, output = run_compilation(so_name, backup_file_name)
-    print("[Output: ]", output)
 
 
 def perf_unary(shape, function, dtype="float32"):
@@ -431,27 +430,15 @@ def benchmark(file_name):
 
 
 if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/dlboost_code_test/*.cpp")
+    parser = argparse.ArgumentParser(
+        description="Run the transcompile benchmark"
     )
-
-    table = []
-    times = []
-    table.append(files)
-    for file in files:
-        execution_time = benchmark(file)
-        times.append(execution_time)
-
-    table.append(times)
-
-    # 转置数据
-    transposed_data = list(zip(*table))
-
-    # 添加标题行
-    header = ["file", "time(us)"]
-    transposed_data.insert(0, header)
-
-    # 保存为CSV文件
-    with open("benchmark/perf/dlboost_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    parser.add_argument(
+        "--file_name",
+        "-f",
+        required=True,
+        help="Path to the input DLboost file to benchmark",
+    )
+    args = parser.parse_args()
+    execution_time = benchmark(file_name=args.file_name)
+    print(f"Execution time: {execution_time:.4f} ms")

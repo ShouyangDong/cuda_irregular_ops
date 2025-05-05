@@ -10,7 +10,7 @@ from benchmark.template.cuda_evaluate_template import create_cuda_perf_func
 from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_cuda_compilation as run_compilation
 from benchmark.utils import sumpool_np
-
+import argparse
 
 def perf_unary(shape, function, dtype="float32"):
     # 定义函数参数和返回类型
@@ -465,27 +465,15 @@ def benchmark(file_name):
 
 
 if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/cuda_code_test/avg*.cu")
+    parser = argparse.ArgumentParser(
+        description="Run the transcompile benchmark"
     )
-    table = []
-    times = []
-    table.append(files)
-    for file in files:
-        execution_time = benchmark(file)
-        print("[INFO]***************execution_time: ", execution_time)
-        times.append(execution_time)
-
-    table.append(times)
-
-    # 转置数据
-    transposed_data = list(zip(*table))
-
-    # 添加标题行
-    header = ["file", "time(ms)"]
-    transposed_data.insert(0, header)
-
-    # 保存为CSV文件
-    with open("benchmark/perf/cuda_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    parser.add_argument(
+        "--file_name",
+        "-f",
+        required=True,
+        help="Path to the input CUDA file to benchmark",
+    )
+    args = parser.parse_args()
+    execution_time = benchmark(file_name=args.file_name)
+    print(f"Execution time: {execution_time:.4f} ms")

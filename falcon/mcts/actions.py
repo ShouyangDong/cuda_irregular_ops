@@ -175,7 +175,7 @@ actions = [
 ]
 
 if __name__ == "__main__":
-    file_name = "benchmark/data/cuda_code_test/bmm_4_128_128_128.cu"
+    file_name = "benchmark/data/cpp_code_test/bmm_4_128_128_128.cpp"
     from falcon.mcts.utils import open_file
 
     code = open_file(file_name)
@@ -190,7 +190,9 @@ if __name__ == "__main__":
     from falcon.util import get_target
 
     target, file_type = get_target(code)
-    if target == "cuda":
+    if target == "mlu":
+        new_file = "./tmp/bmm_4_128_128_128.mlu"
+    elif target == "cuda":
         new_file = "./tmp/bmm_4_128_128_128.cu"
     else:
         new_file = "./tmp/bmm_4_128_128_128.cpp"

@@ -433,13 +433,13 @@ def benchmark(file_name=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Run the CUDA→MLU transcompile benchmark"
+        description="Run the transcompile benchmark"
     )
     parser.add_argument(
         "--file_name",
         "-f",
         required=True,
-        help="Path to the input CUDA file to benchmark",
+        help="Path to the input MLU file to benchmark",
     )
     args = parser.parse_args()
     execution_time = benchmark(file_name=args.file_name)
