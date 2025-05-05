@@ -1,6 +1,5 @@
-import csv
+import argparse
 import ctypes
-import glob
 import os
 
 import numpy as np
@@ -463,27 +462,15 @@ def benchmark(file_name):
 
 
 if __name__ == "__main__":
-    files = glob.glob(
-        os.path.join(os.getcwd(), "benchmark/data/hip_code_test/avg*.hip")
+    parser = argparse.ArgumentParser(
+        description="Run the transcompile benchmark"
     )
-    table = []
-    times = []
-    table.append(files)
-    for file in files:
-        execution_time = benchmark(file)
-        print("[INFO]***************execution_time: ", execution_time)
-        times.append(execution_time)
-
-    table.append(times)
-
-    # 转置数据
-    transposed_data = list(zip(*table))
-
-    # 添加标题行
-    header = ["file", "time(ms)"]
-    transposed_data.insert(0, header)
-
-    # 保存为CSV文件
-    with open("benchmark/perf/hip_output.csv", "w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerows(transposed_data)
+    parser.add_argument(
+        "--file_name",
+        "-f",
+        required=True,
+        help="Path to the input HIP file to benchmark",
+    )
+    args = parser.parse_args()
+    execution_time = benchmark(file_name=args.file_name)
+    print(f"Execution time: {execution_time:.4f} ms")

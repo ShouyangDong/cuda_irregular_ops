@@ -188,34 +188,16 @@ if __name__ == "__main__":
             "cpu",
         )
     from falcon.util import get_target
+
     target, file_type = get_target(code)
     if target == "cuda":
         new_file = "./tmp/bmm_4_128_128_128.cu"
     else:
         new_file = "./tmp/bmm_4_128_128_128.cpp"
-    print('[INFO]**********code: ', code) 
+    print("[INFO]**********code: ", code)
     with open(new_file, "w", encoding="utf-8") as f:
         f.write(code)
     from falcon.mcts.transcompile import objective
+
     score = objective(new_file, target)
     print(score)
-    # file_name = "benchmark/data/dlboost_code_test/add_3_3_256.cpp"
-    # from falcon.mcts.utils import open_file
-    # code = open_file(file_name)
-    # for action_id in [1]:
-    #     action = actions[action_id]
-    #     code = action(
-    #         file_name,
-    #         code,
-    #         "cpu",
-    #         "cuda",
-    #     )
-    #     print("[INFO]**********code: ", code)
-
-    # new_file = "./tmp/add_3_3_256.cpp"
-    # from falcon.mcts.transcompile import objective
-    # with open(new_file, "w", encoding="utf-8") as f:
-    #     f.write(code)
-    # target = "cuda"
-    # score = objective(new_file, target)
-    # print(score)
