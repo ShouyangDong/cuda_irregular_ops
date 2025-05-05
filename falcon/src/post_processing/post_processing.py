@@ -288,8 +288,6 @@ def run_tensorization(code, target):
 
                 [in] dir: The copy direction.
 
-                [in] id_dst_cluster: Destination cluster ID.
-
                 Usage Examples 1:
                 // before:
                 #pragma operation(memory(input[output_nram], output[output]))
@@ -313,7 +311,7 @@ def run_tensorization(code, target):
                 }
 
                 // after:
-                __memcpy(output_nram, output, 512 * 512 * 4, NRAM2GDRAM);
+                __memcpy(output_nram, output, 512 * 512 * 4, GDRAM2NRAM);
 
                 Usage Examples 3:
                 __nram__ half output_nram[512 * 512];
@@ -326,7 +324,20 @@ def run_tensorization(code, target):
                 }
 
                 // after:
-                __memcpy(output_nram, output, 512 * 512 * 2, NRAM2GDRAM);
+                __memcpy(output_nram, output, 512 * 512 * 2, GDRAM2NRAM);
+
+                 Usage Examples 4:
+                // before:
+                #pragma operation(memory(input[output], output[output_wram]))
+                for (int i = 0; i < 512; ++i) {
+                    for (int j = 0; j < 512; ++j) {
+                        output_wram[i * 512 + j] = output[i * 512 + j];
+                    }
+                }
+
+                // after:
+                __memcpy(output_wram, output, 512 * 512 * 4, GDRAM2WRAM);
+
                 """
             else:
                 op_document = op_dict[op]
