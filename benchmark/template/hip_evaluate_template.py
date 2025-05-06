@@ -143,6 +143,27 @@ def create_hip_perf_func(file_name, op_type="ewise"):
         # Copy back
         name = params[-1].split("*")[1]
         memcpy_back = f"hipMemcpy({name}, {name}_hip, size1 * sizeof(float), hipMemcpyDeviceToHost);\n"
+    elif op_type == "deformable":
+        size = ["size1", "size2", "size3", "size4", "size5"]
+        print("[INFO]params: ", params)
+        for i, param in enumerate(params):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            device_memory_alloc.append(param + "_hip;\n")
+            device_memory_alloc.append(
+                f"hipMalloc((void**)&{name}_hip, {size[i]} * sizeof({dtype}));\n"
+            )
+
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            memcpy.append(
+                f"hipMemcpy({name}_hip, {name}, {size[i]} * sizeof({dtype}), hipMemcpyHostToDevice);\n"
+            )
+        # Copy back
+        name = params[-1].split("*")[1]
+        dtype = params[-1].split("*")[0]
+        memcpy_back = f"hipMemcpy({name}, {name}_hip, size3 * sizeof({dtype}), hipMemcpyDeviceToHost);\n"
 
     # Infer grid dimensions from kernel code
     original_function = original_function.replace('extern "C"', "")

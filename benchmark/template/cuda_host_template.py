@@ -143,6 +143,27 @@ def create_cuda_func(file_name, op_type="ewise"):
         # Copy back
         name = params[-1].split("*")[1]
         memcpy_back = f"cudaMemcpy({name}, {name}_cuda, size1 * sizeof(float), cudaMemcpyDeviceToHost);\n"
+    elif op_type == "deformable":
+        size = ["size1", "size2", "size3", "size4", "size5"]
+        print("[INFO]params: ", params)
+        for i, param in enumerate(params):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            device_memory_alloc.append(param + "_cuda;\n")
+            device_memory_alloc.append(
+                f"cudaMalloc((void**)&{name}_cuda, {size[i]} * sizeof({dtype}));\n"
+            )
+
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            memcpy.append(
+                f"cudaMemcpy({name}_cuda, {name}, {size[i]} * sizeof({dtype}), cudaMemcpyHostToDevice);\n"
+            )
+        # Copy back
+        name = params[-1].split("*")[1]
+        dtype = params[-1].split("*")[0]
+        memcpy_back = f"cudaMemcpy({name}, {name}_cuda, size3 * sizeof({dtype}), cudaMemcpyDeviceToHost);\n"
 
     original_function = original_function.replace('extern "C"', "")
     # Infer grid dimensions from kernel code
