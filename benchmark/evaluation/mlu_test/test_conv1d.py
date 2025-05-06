@@ -38,7 +38,7 @@ if __name__ == "__main__":
     output_np = ref_program(input_array, kernel)
     # Load the shared library with the batch matrix multiplication function
     so_name = args.file.replace(".mlu", ".so")
-    file_name = create_mlu_func(file, op_type="matmul")
+    file_name = create_mlu_func(args.file, op_type="matmul")
     success, output = run_compilation(so_name, file_name)
     os.remove(file_name)
 
