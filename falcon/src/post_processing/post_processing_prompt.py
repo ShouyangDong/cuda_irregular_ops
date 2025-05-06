@@ -404,7 +404,7 @@ Input CUDA/NPU C++ Code:
 ```cpp
 for (int i = 0; i < 32; i++) {
     for (int j = 0; j < 1024; j++) {
-        C[i][j] = A[i][j] + B[i][j];
+        C[i * 1024 + j] = A[i * 1024 + j] + B[i * 1024 + j];
     }
 }
 ```
@@ -413,7 +413,7 @@ Desired Output Code with Thread/Cluster Binding:
 ```cpp
 if (blockIdx.x < 32) {
     if (threadIdx.x < 1024) {
-        C[blockIdx.x][threadIdx.x] = A[blockIdx.x][threadIdx.x] + B[blockIdx.x][threadIdx.x];
+        C[blockIdx.x * 1024 + threadIdx.x] = A[blockIdx.x * 1024 + threadIdx.x] + B[blockIdx.x * 1024 + threadIdx.x];
     }
 }
 ```

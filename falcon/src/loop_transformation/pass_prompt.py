@@ -87,7 +87,7 @@ Example：
 ```cpp
 for (int i = 0; i < N; i++) {
     for (int j = 0; j < M; j++) {
-        C[i][j] = A[i][j] + B[i][j];
+        C[i * M + j] = A[i * M + j] + B[i * M + j];
     }
 }
 ```
@@ -96,7 +96,7 @@ for (int i = 0; i < N; i++) {
 ```cpp
 for (int j = 0; j < M; j++) {
     for (int i = 0; i < N; i++) {
-        C[i][j] = A[i][j] + B[i][j];
+        C[i * M + j] = A[i * M + j] + B[i * M + j];
     }
 }
 ```

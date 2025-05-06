@@ -28,7 +28,6 @@ Return the full C++ code, with the appropriate #pragma loop_split(...) inserted 
 """
 
 SPLIT_PRAGMA_DEMO = """
-DEMO
 
 ### Example 1:
 Input code:
@@ -57,7 +56,7 @@ Input code:
 void add(float* A, float* B, float* C, int N, int M) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < M; j++) {
-            C[i][j] = A[i][j] + B[i][j];
+            C[i * M + j] = A[i * M + j] + B[i * M + j];
         }
     }
 }
@@ -69,7 +68,7 @@ void add(float* A, float* B, float* C, int N, int M) {
     for (int i = 0; i < N; i++) {
         #pragma loop_split(factor)
         for (int j = 0; j < M; j++) {
-            C[i][j] = A[i][j] + B[i][j];
+            C[i * M + j] = A[i * M + j] + B[i * M + j];
         }
     }
 }
