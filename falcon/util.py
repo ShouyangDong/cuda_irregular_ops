@@ -163,6 +163,8 @@ def remove_target_prefix(code, target=None):
     if added_headers:
         return "\n".join(added_headers) + "\n\n" + code
     else:
+        if "half" in code:
+            code =  '#include "stdhalf.h"' + "\n\n" + code
         return code
 
 

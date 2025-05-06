@@ -77,7 +77,7 @@ def detensorization(op, code, document):
 
     {code}
 
-    accordingt to the description of tinstruction.
+    accordingt to the description of instruction {op} as follows:
 
     {document}
 
@@ -112,6 +112,22 @@ def extract_bang_instructions(code):
     instructions = re.findall(pattern, code)
     return instructions
 
+def extract_cuda_instructions(code):
+    body = code.split('{', 1)[1]
+
+    # 2) Find all identifier( patterns in the body
+    all_calls = re.findall(r'\b([A-Za-z_]\w*)\s*\(', body)
+
+    # 3) Filter out C/C++ keywords and types
+    exclude = {
+        'for','if','while','switch','return',
+        'int','float','half','void'
+    }
+    func_calls = [name for name in all_calls if name not in exclude]
+
+    # 4) Dedupe and sort
+    unique_funcs = sorted(set(func_calls))
+    return unique_funcs
 
 def run_detensorization(code, target):
     if target == "mlu":
@@ -125,7 +141,16 @@ def run_detensorization(code, target):
         if instructions is not None:
             for inst in instructions:
                 code = detensorization(inst, code, op_dict[inst])
+    elif target == "cuda":
+        op_dict = json.load(
+            open("./falcon/documents/cuda_op_tensorization.json", "r")
+        )
 
+        instructions = extract_cuda_instructions(code)
+        if instructions is not None:
+            for inst in instructions:
+                code = detensorization(inst, code, op_dict[inst])
+ 
     code = simplify_code(code)
     code = ast_stmt_simplification(code)
     code = ast_buffer_inline(code)

@@ -1,9 +1,6 @@
 {
-    "wmma_load_matrix_sync" : void wmma_load_matrix_sync(half* a, half* b, int c) {
-        for(int i = 0; i < 16;++i) {
-            for (int j = 0; j < 16; ++j) {
-                a[i * 16 + j] = b[i * c + j];
-            }
-        }
-    }
+    "fill_fragment" : "void fill_fragment(float* c_frag, float val) {for (int i = 0; i < 16; ++i) {for (int j = 0; j < 16; ++j) {c_frag[i * 16 + j] = val;}}}",
+    "load_matrix_sync":"void load_matrix_sync(half* a_frag, half *src, int stride) {for (int i = 0; i < 16; ++i) {for (int k = 0; k < 16; ++k) {a_frag[i * 16 + k] = src[i * stride + k];}}",
+    "mma_sync" :"void mma_sync(float* c_frag, half* a_frag, half* b_frag) {for (int i = 0; i < 16; ++i) {for (int j = 0; j < 16; ++j) {float sum = c_frag[i * 16 + j];for (int k = 0; k < 16; ++k) {sum += (float)a_frag[i * 16 + k] * (float)b_frag[k * 16 + j];}c_frag[i* 16 + j] = sum;}}}",
+    "store_matrix_sync" : "void store_matrix_sync(float *dst, float* c_frag, int stride) {for (int i = 0; i < 16; ++i) {for (int j = 0; j < 16; ++j) {dst[i * stride + j] = c_frag[i * 16 + j];}}}"
 }
