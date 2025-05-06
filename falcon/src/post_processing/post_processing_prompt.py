@@ -438,82 +438,181 @@ The input is a C++ code snippet containing for loops with element-wise or matrix
 ### Output:
 The transformed C++ code with the `#pragma operation( )` directives inserted before the detected operations and arguments inside loops, which marks them for SIMD vectorization.
 
-### Example:
+Here’s the same example rewritten as a **one‑to‑one mapping** of each input loop to its corresponding output (pragma + loop):
 
-#### Input C++ Code:
-```cpp
-for (int i = 0; i < 64; i++) {
-    C[i] = A[i] + B[i];
-}
+---
 
-for (int i = 0; i < 64; i++) {
-    C[i] = C[i] * D[i];
-}
+1. **Element‑wise add**
 
-for (int i = 0; i < 64; i++) {
-    for (int j = 0; j < 128; j++) {
-        E[i*128+j] = C[i*128+j] - D[i*128+j];
-    }
-}
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       C[i] = A[i] + B[i];
+   }
+   ```
 
-for (int i = 0; i < 512; i++) {
-    A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
-}
+   **Output:**
+   ```cpp
+   #pragma operation(add(input[A, B], output[C]))
+   for (int i = 0; i < 64; i++) {
+       C[i] = A[i] + B[i];
+   }
+   ```
 
-for (int col = 0; col < 64; col++) {
-    C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
-}
+---
 
-for (int i = 0; i < 64; i++) {
-  for (int j = 0; j < 64; j++) {
-    for (int k = 0; k < 64; k++) {
-      C[i * 64 + k] = A[i * 64 +j] * B[j * 64 + k];
-    }
-  }
-}
-```
+2. **Element‑wise multiply**
 
-#### Desired Output C++ Code with Pragmas for SIMD Preparation:
-```cpp
-#pragma operation(add(input[A, B], output[C]))
-for (int i = 0; i < 64; i++) {
-    C[i] = A[i] + B[i];
-}
-#pragma operation(mul(input[C, D], output[C]))
-for (int i = 0; i < 64; i++) {
-    C[i] = C[i] * D[i];
-}
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       C[i] = C[i] * D[i];
+   }
+   ```
 
-for (int i = 0; i < 64; i++) {
-    #pragma operation(sub(input[C, D], output[E]))
-    for (int j = 0; j < 128; j++) {
-        E[i*128+j] = C[i*128+j] - D[i*128+j];
-    }
-}
+   **Output:**
+   ```cpp
+   #pragma operation(mul(input[C, D], output[C]))
+   for (int i = 0; i < 64; i++) {
+       C[i] = C[i] * D[i];
+   }
+   ```
 
-#pragma operation(memory(input[A], output[A_nram]))
-for (int i = 0; i < 512; i++) {
-    A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
-}
+---
 
-#pragma operation(memory(input[C_nram], output[C]))
-for (int col = 0; col < 64; col++) {
-    C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
-}
+3. **Subtraction inside a nested loop**
 
-#pragma operation(matmul(input[A, B], output[C]))
-for (int i = 0; i < 64; i++) {
-  for (int j = 0; j < 64; j++) {
-    for (int k = 0; k < 64; k++) {
-      C[i * 64 + k] = A[i * 64 +j] * B[j * 64 + k];
-    }
-  }
-}
-```
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       for (int j = 0; j < 128; j++) {
+           E[i*128+j] = C[i*128+j] - D[i*128+j];
+       }
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       #pragma operation(sub(input[C, D], output[E]))
+       for (int j = 0; j < 128; j++) {
+           E[i*128+j] = C[i*128+j] - D[i*128+j];
+       }
+   }
+   ```
+
+---
+
+4. **Memory copy into NRAM**
+
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 512; i++) {
+       A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   #pragma operation(memory(input[A], output[A_nram]))
+   for (int i = 0; i < 512; i++) {
+       A_nram[i] = A[(clusterId * 4 + coreId) * 512 + i];
+   }
+   ```
+
+---
+
+5. **Memory copy out of WRAM**
+
+   **Input:**
+   ```cpp
+   for (int col = 0; col < 64; col++) {
+       C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   #pragma operation(memory(input[C_nram], output[C]))
+   for (int col = 0; col < 64; col++) {
+       C[(clusterId * 4 + coreId) * 64 + col] = C_wram[col];
+   }
+   ```
+
+---
+
+6. **Matrix multiply (GEMM) tile**
+
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       for (int j = 0; j < 64; j++) {
+           for (int k = 0; k < 64; k++) {
+               C[i * 64 + k] = A[i * 64 + j] * B[j * 64 + k];
+           }
+       }
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   #pragma operation(matmul(input[A, B], output[C]))
+   for (int i = 0; i < 64; i++) {
+       for (int j = 0; j < 64; j++) {
+           for (int k = 0; k < 64; k++) {
+               C[i * 64 + k] = A[i * 64 + j] * B[j * 64 + k];
+           }
+       }
+   }
+   ```
+
+---
+
+7. **Zero‑initialize buffer**
+
+   **Input:**
+   ```cpp
+   for (int col = 0; col < 64; col++) {
+       C_nram[col] = 0;
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   #pragma operation(write(output[C_nram]))
+   for (int col = 0; col < 64; col++) {
+       C_nram[col] = 0;
+   }
+   ```
+---
+8. **Matrix multiply (GEMM) tile**
+
+   **Input:**
+   ```cpp
+   for (int i = 0; i < 64; i++) {
+       for (int j = 0; j < 64; j++) {
+           for (int k = 0; k < 64; k++) {
+               C[i * 64 + k] += A[i * 64 + j] * B[j * 64 + k];
+           }
+       }
+   }
+   ```
+
+   **Output:**
+   ```cpp
+   #pragma operation(matmul(input[A, B], output[C]))
+   for (int i = 0; i < 64; i++) {
+       for (int j = 0; j < 64; j++) {
+           for (int k = 0; k < 64; k++) {
+               C[i * 64 + k] += A[i * 64 + j] * B[j * 64 + k];
+           }
+       }
+   }
+   ```
 
 ### Steps for Insertion:
 1. Identify element-wise or matrix multiplication arithmetic operations inside the for loop such as addition (`+`), subtraction (`-`), multiplication (`*`), and division (`/`).
-2. Insert the corresponding `#pragma operation( )` directive directly above each identified operation, specifying the operation type in parentheses (e.g., `#pragma operation(add)` for addition).
+2. Insert the corresponding `#pragma operation( )` directive directly above for loop of each identified operation, specifying the operation type in parentheses (e.g., `#pragma operation(add)` for addition).
 3. Focus only on the operations inside loops, as these are the target for SIMD tensorization.
 4. Ensure that the structure and logic of the code are not altered, and only relevant element-wise or matrix multiplication operations are annotated.
 
@@ -537,4 +636,5 @@ Please transform the following C++ code by inserting `#pragma operation( )` dire
 - The operation_type must be one of: add, sub, mul, div, or memory depending on the operation used in the loop.
 - input[...] and output[...] must refer to the actual variable names used in the operation.
 - This pragma is used in a later SIMD vectorization stage and MUST be preserved as-is.
+- The pragma directive must be placed directly above its corresponding for loop.
 """

@@ -8,5 +8,6 @@
     "maxpool": "#pragma intrinsic(__bang_maxpool(input[Nram], output[Nram]))",
     "sumpool": "#pragma intrinsic(__bang_sumpool(input[Nram], output[Nram]))",
     "avgpool": "#pragma intrinsic(__bang_avgpool(input[Nram], output[Nram]))",
-    "minpool": "#pragma intrinsic(__bang_minpool(input[Nram], output[Nram]))"
+    "minpool": "#pragma intrinsic(__bang_minpool(input[Nram], output[Nram]))",
+    "write": "#pragma operation(write(output[C_nram]))"
 }
