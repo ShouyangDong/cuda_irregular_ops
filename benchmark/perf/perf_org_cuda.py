@@ -463,7 +463,6 @@ def perf_pipeline(cuda_file):
     backup_cuda_file = cuda_file.replace(".cu", "_bak.cu")
     so_name = cuda_file.replace(".cu", ".so")
     success, output = run_compilation(so_name, backup_cuda_file)
-    print(output)
 
 
 def benchmark(cuda_file):

@@ -1,6 +1,5 @@
-import csv
+import argparse
 import ctypes
-import glob
 import os
 import re
 from string import Template
@@ -10,7 +9,7 @@ import torch
 
 from benchmark.utils import conv2d_nchw, maxpool_np
 from benchmark.utils import run_dlboost_compilation as run_compilation
-import argparse
+
 
 def perf_function(file_name):
     with open(file_name, "r") as f:

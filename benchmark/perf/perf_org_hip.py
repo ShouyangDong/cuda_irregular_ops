@@ -463,7 +463,6 @@ def perf_pipeline(hip_file):
     backup_hip_file = hip_file.replace(".hip", "_bak.hip")
     so_name = hip_file.replace(".hip", ".so")
     success, output = run_compilation(so_name, backup_hip_file)
-    print(output)
 
 
 def benchmark(hip_file):

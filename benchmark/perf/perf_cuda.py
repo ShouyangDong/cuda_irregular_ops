@@ -1,6 +1,5 @@
-import csv
+import argparse
 import ctypes
-import glob
 import os
 
 import numpy as np
@@ -10,7 +9,7 @@ from benchmark.template.cuda_evaluate_template import create_cuda_perf_func
 from benchmark.utils import avgpool_np, conv2d_nchw, maxpool_np, minpool_np
 from benchmark.utils import run_cuda_compilation as run_compilation
 from benchmark.utils import sumpool_np
-import argparse
+
 
 def perf_unary(shape, function, dtype="float32"):
     # 定义函数参数和返回类型

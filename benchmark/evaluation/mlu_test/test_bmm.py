@@ -37,7 +37,6 @@ if __name__ == "__main__":
     file_name = create_mlu_func(args.file, op_type="matmul")
     # Load the shared library with the batch matrix multiplication function
     success, output = run_compilation(so_name, file_name)
-    print(output)
     os.remove(file_name)
 
     lib = ctypes.CDLL(os.path.join(os.getcwd(), so_name))
