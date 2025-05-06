@@ -129,6 +129,27 @@ def create_mlu_func(file_name, op_type="ewise"):
         # copy back
         name = params[-1].split("*")[1]
         memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size1 * sizeof(float), cnrtMemcpyDevToHost));\n"
+    elif op_type == "deformable":
+        size = ["size1", "size2", "size3", "size4", "size5"]
+        for i, param in enumerate(params):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            device_memory_alloc.append(param + "_mlu;\n")
+            device_memory_alloc.append(
+                f"CNRT_CHECK(cnrtMalloc((void**)&{name}_mlu, {size[i]} * sizeof({dtype})));\n"
+            )
+
+        for i, param in enumerate(params[:-1]):
+            name = param.split("*")[1]
+            dtype = param.split("*")[0]
+            memcpy.append(
+                f"CNRT_CHECK(cnrtMemcpy({name}_mlu, {name}, {size[i]} * sizeof({dtype}), cnrtMemcpyHostToDev));\n"
+            )
+        # copy back
+        name = params[-1].split("*")[1]
+        dtype = params[-1].split("*")[0]
+        memcpy_back = f"CNRT_CHECK(cnrtMemcpy({name}, {name}_mlu, size5 * sizeof({dtype}), cnrtMemcpyDevToHost));\n"
+
     memory_free = []
     for param in params:
         name = param.split("*")[1]
@@ -191,7 +212,7 @@ def create_mlu_func(file_name, op_type="ewise"):
         memory_free=memory_free_list,
         size_list=size_list,
     )
-
+    print("[INFO]**********new_code: ", new_code)
     # 保存生成的 C++ 文件
     output_file = file_name.replace(".mlu", "_bak.mlu")
     with open(output_file, "w") as f:

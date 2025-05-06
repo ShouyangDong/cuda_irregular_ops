@@ -139,6 +139,11 @@ def perf_deformable(shape, function):
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
         ctypes.POINTER(ctypes.c_float),
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
+        ctypes.c_int,
     ]
     function.restype = ctypes.c_float
 
@@ -171,6 +176,11 @@ def perf_deformable(shape, function):
         sampling_locations_ptr,
         attention_weights_ptr,
         output_ptr,
+        np.prod(value.shape),
+        np.prod(shapes.shape),
+        np.prod(sampling_locations.shape),
+        np.prod(attention_weights.shape),
+        np.prod(output_array.shape),
     )
     return elapsed_time
 
@@ -398,13 +408,13 @@ def benchmark(file_name=None):
             name, shape, kernel_shape, output_shape, function
         )
 
-    # elif name == "deformable":
-    #     perf_pipeline(file_name, "matmul")
-    #     lib = ctypes.CDLL(file_name.replace(".mlu", "mlu.so"))
-    #     function = getattr(lib, "timed_" + name + "_kernel")
-    #     shapes = base_name.split(".")[0]
-    #     shape = [int(intg) for intg in shapes.split("_")[1:]]
-    #     execution_time = perf_deformable(shape, function)
+    elif name == "deformable":
+        perf_pipeline(file_name, "deformable")
+        lib = ctypes.CDLL(file_name.replace(".mlu", "mlu.so"))
+        function = getattr(lib, "timed_" + name + "_kernel")
+        shapes = base_name.split(".")[0]
+        shape = [int(intg) for intg in shapes.split("_")[1:]]
+        execution_time = perf_deformable(shape, function)
 
     elif name == "mha":
         perf_pipeline(file_name, "ewise")
