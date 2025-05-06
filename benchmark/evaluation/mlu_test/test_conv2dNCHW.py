@@ -65,7 +65,7 @@ if __name__ == "__main__":
     kernel_ptr = kernel_np.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )
-    result_ctypes = torch.zeros(result_cpu.shape, dtype=np.float32)
+    result_ctypes = torch.zeros(result_cpu.shape, dtype=torch.float32)
     output_ptr = result_ctypes.numpy().ctypes.data_as(
         ctypes.POINTER(ctypes.c_float)
     )

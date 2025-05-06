@@ -1,10 +1,7 @@
 
 
-extern "C" __mlu_global__ void mha(float *Q,     
-                                   float *K,     
-                                   float *V,     
-                                   float *output 
-) {
+extern "C" __mlu_global__ void mha(float *Q, float *K, float *V,
+                                   float *output) {
   __nram__ float score[6 * 6];
   __nram__ float dinominator[6];
   __nram__ float dinominator_temp[6];
