@@ -92,6 +92,33 @@ def add_parallel_variable_prefix(code):
     code = re.sub(r"blockIdxx", "blockIdx.x", code)
     code = re.sub(r"blockIdxy", "blockIdx.y", code)
     code = re.sub(r"blockIdxz", "blockIdx.z", code)
+    # 1) Restore the three fragment types by name
+    code = re.sub(
+        r"\bwmma_fragment\s+a_frag\b",
+        "wmma::fragment<wmma::matrix_a,16,16,16,half,wmma::row_major> a_frag",
+        code,
+    )
+    code = re.sub(
+        r"\bwmma_fragment\s+b_frag\b",
+        "wmma::fragment<wmma::matrix_b,16,16,16,half,wmma::col_major> b_frag",
+        code,
+    )
+    code = re.sub(
+        r"\bwmma_fragment\s+c_frag\b",
+        "wmma::fragment<wmma::accumulator,16,16,16,float> c_frag",
+        code,
+    )
+
+    # 2) Restore the function calls
+    code = re.sub(r"\bwmma_fill_fragment\b",     "wmma::fill_fragment",     code)
+    code = re.sub(r"\bwmma_load_matrix_sync\b",  "wmma::load_matrix_sync",  code)
+    code = re.sub(r"\bwmma_mma_sync\b",          "wmma::mma_sync",          code)
+    code = re.sub(r"\bwmma_store_matrix_sync\b", "wmma::store_matrix_sync", code)
+    code = re.sub(
+        r"(wmma::store_matrix_sync\s*\([^,]+,\s*[^,]+,\s*[^,]+,\s*)0(\s*\))",
+        r"\1wmma::mem_row_major\2",
+        code
+    )
     return "__global__ " + code if "__global__ " not in code else code
 
 

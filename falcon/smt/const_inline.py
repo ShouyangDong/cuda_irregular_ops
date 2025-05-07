@@ -3,51 +3,64 @@ import copy
 from pycparser import c_ast
 
 from falcon.util import NodeTransformer, generate_code, parse_code_ast
+import copy
 
 
 class ConstInlineTransformer(NodeTransformer):
     def __init__(self):
         super().__init__()
-        # 存储常量或简单表达式的映射：var_name -> AST node
-        self.constants = {}
+        self.constants = {}           # 常量记录
+        self.reassigned = set()       # 记录被重新赋值过的变量
 
     def visit_Decl(self, node):
-        # 只处理纯常量初始化（如 int dim = 3;），不内联复杂表达式
         if node.init and isinstance(node.init, c_ast.Constant):
             if isinstance(node.type, c_ast.TypeDecl):
                 tnames = node.type.type.names
                 if "int" in tnames or "float" in tnames:
-                    # 记录常量并删除声明
+                    # 首次赋值为常量，暂存
                     self.constants[node.name] = copy.deepcopy(node.init)
-                    return None
+                    return node  # ⚠️注意不能删除声明，否则变量作用域会丢失
         return self.generic_visit(node)
 
     def visit_Assignment(self, node):
-        # 只记录简单赋值（如 x = CONSTANT;），不删除复杂赋值
+        # 判断赋值是否是简单常量，是否是首次赋值
         if (
-            isinstance(node.lvalue, c_ast.ID)
-            and isinstance(node.rvalue, c_ast.Constant)
-            and node.lvalue.name not in self.constants
+            isinstance(node.lvalue, c_ast.ID) and
+            isinstance(node.rvalue, c_ast.Constant)
         ):
-            self.constants[node.lvalue.name] = copy.deepcopy(node.rvalue)
-            return None
-        # 其他情况递归替换
+            varname = node.lvalue.name
+            if varname not in self.constants and varname not in self.reassigned:
+                self.constants[varname] = copy.deepcopy(node.rvalue)
+                return node
+
+        # 否则，说明该变量被写入了多次，不应替换
+        if isinstance(node.lvalue, c_ast.ID):
+            self.reassigned.add(node.lvalue.name)
+
         node.lvalue = self.visit(node.lvalue)
         node.rvalue = self.visit(node.rvalue)
         return node
 
-    def visit_For(self, node):
-        # 处理 For 循环的初始化、条件和步进
-        node.init = self.visit(node.init) if node.init else None
-        node.cond = self.visit(node.cond) if node.cond else None
-        node.next = self.visit(node.next) if node.next else None
-        node.stmt = self.visit(node.stmt)
+    def visit_ID(self, node):
+        if node.name in self.constants and node.name not in self.reassigned:
+            return copy.deepcopy(self.constants[node.name])
         return node
 
-    def visit_ID(self, node):
-        # 用常量表达式替换 ID
-        if node.name in self.constants:
-            return copy.deepcopy(self.constants[node.name])
+    def visit_For(self, node):
+        node.init = self.visit(node.init) if node.init else None
+        node.cond = self.visit(node.cond) if node.cond else None
+        node.stmt = self.visit(node.stmt)
+
+        if node.next is None:
+            loop_var = None
+            if isinstance(node.cond, c_ast.BinaryOp) and isinstance(node.cond.left, c_ast.ID):
+                loop_var = node.cond.left.name
+            if loop_var:
+                node.next = c_ast.Assignment(
+                    op="+=",
+                    lvalue=c_ast.ID(loop_var),
+                    rvalue=c_ast.Constant("int", "1"),
+                )
         return node
 
     def visit_BinaryOp(self, node):
@@ -60,22 +73,16 @@ class ConstInlineTransformer(NodeTransformer):
         return node
 
     def visit_ArrayRef(self, node):
-        # 处理 array[index] 中的索引表达式
         node.name = self.visit(node.name)
         node.subscript = self.visit(node.subscript)
         return node
 
     def visit_DeclList(self, node):
-        # 清理空声明列表
         node.decls = [d for d in node.decls if d is not None]
-        if not node.decls:
-            return None
-        return node
+        return node if node.decls else None
 
     def visit_FuncDef(self, node):
-        # 先递归替换函数体内部节点
         self.generic_visit(node)
-        # 清理因删除声明产生的空语句
         if node.body and node.body.block_items:
             node.body.block_items = [
                 stmt for stmt in node.body.block_items if stmt is not None
@@ -96,9 +103,6 @@ if __name__ == "__main__":
     code = """
     void add_kernel(float *input1, float *input2, float *output)
     {
-    float input1_Nram[size];
-    float input2_Nram[size];
-    float C_Nram[size];
     int dim1 = 4;
     int dim2 = 4;
     int dim3 = 4;
