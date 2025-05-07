@@ -38,7 +38,7 @@ def create_hip_func(file_name, op_type="ewise"):
     function_signature_pattern = r"__global__ void\s*(?:__launch_bounds__\((\d+)(?:,\s*\d+)?\))?\s*(\w+)\(([^)]*)\)"
     match = re.search(function_signature_pattern, original_function, re.DOTALL)
     if not match:
-        raise ValueError("Could not find CUDA kernel signature.")
+        raise ValueError("Could not find HIP kernel signature.")
 
     thread_num = match.group(1)
     kernel_name = match.group(2)

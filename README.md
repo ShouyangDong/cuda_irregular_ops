@@ -13,10 +13,16 @@ This repository streamlines the translation process across different processor a
 # Install
 To optimize the MCTS algorithm, the following Python packages are necessary:
 ```
-pip install chex jax mctx
+pip install chex jax mctx openai==0.28 tiktoken
 ```
 
-# Language reference
-Still in progress.
+## 📦 Artifact Instructions
 
-See test cases and tutorials.
+If you’d like to reproduce our results, follow the detailed steps in [`artifact.md`](artifact.md).
+
+This covers:
+
+- Environment setup  
+- How to run transcompilation  
+- Accuracy & performance evaluation  
+- Expected outputs
