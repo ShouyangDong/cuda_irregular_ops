@@ -27,15 +27,10 @@ flags.DEFINE_integer("seed", 42, "Random seed.")
 flags.DEFINE_integer("num_simulations", 512, "Number of simulations.")
 flags.DEFINE_integer(
     "max_num_considered_actions",
-    16,
+    13,
     "The maximum number of actions expanded at the root.",
 )
-flags.DEFINE_integer("max_depth", 16, "The maximum search depth.")
-flags.DEFINE_string(
-    "output_file",
-    "./tvm_search_tree.png",
-    "The output file for the visualization.",
-)
+flags.DEFINE_integer("max_depth", 13, "The maximum search depth.")
 flags.DEFINE_string("source", "mlu", "Source platform identifier.")
 flags.DEFINE_string("target", "cpu", "Destination platform identifier.")
 flags.DEFINE_string(
@@ -65,17 +60,8 @@ def objective(file_name, target):
             time_ms = perf_hip.benchmark(file_name)
         return GFLOPS / (time_ms / 1e3)
     except Exception:
+        logging.info(e)
         return 0.0
-
-
-# 使用一个辅助函数选择对应的 Action
-def get_action_from_space(action_id):
-    return ActionSpace[action_id]  # 通过索引获取相应的 Action
-
-
-# 使用 vmap 或 lax.map 实现映射
-def dynamic_action_selection(cur_action_ids):
-    return jax.vmap(get_action_from_space)(cur_action_ids)
 
 
 class FalconGo:
@@ -108,6 +94,11 @@ class FalconGo:
         The function returns a new `ProgramState` object, which represents the new program
         state after applying the action."""
         code = open_file(self.file_name)
+        code = (
+            code.split("extern")[0]
+            if self.source_platform in ["cuda", "hip"]
+            else code
+        )
         for action in actions:
             code = action(
                 self.file_name,
@@ -115,7 +106,7 @@ class FalconGo:
                 self.source_platform,
                 self.target_platform,
             )
-        print("[INFO]*******actions: ", actions)
+
         target, file_type = get_target(code, self.target_platform)
         os.makedirs("tmp", exist_ok=True)
         # Extract base name and replace extension
@@ -125,6 +116,8 @@ class FalconGo:
         with open(new_file, "w", encoding="utf-8") as f:
             f.write(code)
         score = objective(new_file, target)
+        if target != self.target_platform:
+            score = 0.0
         return code, score
 
     @jit
@@ -143,12 +136,14 @@ class FalconGo:
         if reward > self.best_reward:
             self.best_reward = reward
             self.best_actions = cur_action_list
-
-        # except Exception:
-        #     tvm_module = None
-        #     reward = -10000
-        #     print(f"Invalid action: {cur_action_ids.val[0].tolist()}")
-
+            # save the file into success transcompiled folder
+            # Extract base name and replace extension
+            base_name = os.path.basename(self.file_name)
+            name_no_ext, _ = os.path.splitext(base_name)
+            target, file_type = get_target(code, self.target_platform)
+            new_file = os.path.join(self.output_dir, name_no_ext + file_type)
+            with open(new_file, "w", encoding="utf-8") as f:
+                f.write(code)
         print(
             f"Step: {self.iteration}\t"
             f"Action: {cur_action_ids.val[0].tolist()}\t"
@@ -274,6 +269,11 @@ def _run_demo(env, rng_key):
     key, logits_rng = jax.random.split(key)
     rng_key, logits_rng, q_rng, search_rng = jax.random.split(key, 4)
     code = open_file(env.file_name)
+    code = (
+        code.split("extern")[0]
+        if env.source_platform in ["cuda", "hip"]
+        else code
+    )
     invalid_actions = jnp.array(
         get_invalid_actions(code, env.source_platform, env.target_platform)
     ).reshape(1, -1)

@@ -38,12 +38,6 @@ flags.DEFINE_integer(
     "The maximum number of actions expanded at the root.",
 )
 flags.DEFINE_integer("max_depth", 13, "The maximum search depth.")
-flags.DEFINE_string(
-    "output_file",
-    "./tvm_search_tree.png",
-    "The output file for the visualization.",
-)
-
 flags.DEFINE_string("source", "cpu", "Source platform identifier.")
 flags.DEFINE_string("target", "mlu", "Destination platform identifier.")
 flags.DEFINE_string(
@@ -75,16 +69,6 @@ def objective(file_name, target):
     except Exception as e:
         logging.info(e)
         return 0.0
-
-
-# 使用一个辅助函数选择对应的 Action
-def get_action_from_space(action_id):
-    return ActionSpace[action_id]  # 通过索引获取相应的 Action
-
-
-# 使用 vmap 或 lax.map 实现映射
-def dynamic_action_selection(cur_action_ids):
-    return jax.vmap(get_action_from_space)(cur_action_ids)
 
 
 class FalconGo:

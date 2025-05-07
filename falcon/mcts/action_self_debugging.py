@@ -1,43 +1,26 @@
 import json
 import random
 
-from falcon.smt.auto_cache import ast_auto_cache
-from falcon.smt.loop_transformation.loop_contraction import \
-    ast_loop_contraction
-from falcon.smt.loop_transformation.loop_fusion import ast_loop_fusion
-from falcon.smt.loop_transformation.loop_recovery import ast_loop_recovery
-from falcon.smt.loop_transformation.loop_reorder import ast_loop_reorder
-from falcon.smt.loop_transformation.loop_split import ast_loop_split
-from falcon.smt.software_pipeline import smt_double_buffer
 from falcon.smt.stmt_split import ast_stmt_split
-from falcon.smt.tensorization.detensorization import ast_detensorization
-from falcon.smt.tensorization.tensorization import ast_tensorization
-from falcon.smt.thread_binding import ast_thread_binding
 from falcon.src.loop_transformation.loop_transformation import (
-    run_apply_split, run_loop_contraction, run_loop_fusion, run_loop_reorder,
-    run_split_annotation)
+    run_loop_contraction,
+    run_loop_fusion,
+    run_loop_reorder,
+    run_split_annotation,
+)
 from falcon.src.post_processing.post_processing import (
-    replace_operation_with_intrinsic, run_cache_process, run_code_decoration,
-    run_double_buffer, run_tensorization, run_thread_binding)
-from falcon.src.pre_processing.preprocessing import (run_detensorization,
-                                                     run_loop_recovery)
+    replace_operation_with_intrinsic,
+    run_cache_process,
+    run_code_decoration,
+    run_double_buffer,
+    run_tensorization,
+    run_thread_binding,
+)
+from falcon.src.pre_processing.preprocessing import (
+    run_detensorization,
+    run_loop_recovery,
+)
 from falcon.unit_test import unit_test
-
-# Compile Script
-compile_script = {
-    "cpu": "benchmark/evaluation/dlboost_test/compilation.py",
-    "MLU": "benchmark/evaluation/mlu_test/compilation.py",
-    "cuda": "benchmark/evaluation/cuda_test/compilation.py"
-    "hip": "benchmark/evaluation/hip_test/compilation.py"
-}
-
-# Test Script
-test_script = {
-    "cpu": "benchmark/evaluation/dlboost_test/result_test.py"
-    "MLU": "benchmark/evaluation/mlu_test/result_test.py"
-    "cuda": "benchmark/evaluation/cuda_test/result_test.py"
-    "hip": "benchmark/evaluation/hip_test/result_test.py"
-}
 
 
 def fix_computation_code(source_code, error_code, error_output):
