@@ -76,7 +76,8 @@ def unit_test(file_name, code):
     tmp_file_name = os.path.join(tmp_dir, os.path.basename(filename))
     with open(tmp_file_name, mode="w") as f:
         f.write(code)
-
+    if target == "cpu":
+        target = "dlboost"
     test_file = test_file_map.get(op_name, "").format(target=target)
 
     # 运行测试

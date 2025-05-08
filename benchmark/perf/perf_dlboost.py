@@ -45,6 +45,7 @@ def perf_function(file_name):
     #include <immintrin.h>
     #include <stdint.h>
     typedef unsigned short half;
+
     // Original function
     ${original_function}
 

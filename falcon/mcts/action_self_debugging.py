@@ -1,6 +1,6 @@
 import json
 import random
-
+import openai
 from falcon.smt.stmt_split import ast_stmt_split
 from falcon.src.loop_transformation.loop_transformation import (
     run_loop_contraction,
@@ -21,7 +21,7 @@ from falcon.src.pre_processing.preprocessing import (
     run_loop_recovery,
 )
 from falcon.unit_test import unit_test
-
+import re
 
 def fix_computation_code(source_code, error_code, error_output):
     prompt = f"""The error code is originally translated from given code with the same functionality.
@@ -38,13 +38,17 @@ def fix_computation_code(source_code, error_code, error_output):
     response = openai.ChatCompletion.create(
         model="gpt-4-turbo",
         messages=[
-            {"role": "system", "content": question_system_prompt},
+            {"role": "system"},
             {"role": "user", "content": prompt},
         ],
         temperature=0.2,
     )
     output = response["choices"][0]["message"]["content"]
-    return re.search(r"```(?:cpp)?\s*(.*?)```", output, re.DOTALL)
+    match = re.search(r"```(?:cpp)?\s*(.*?)```", output, re.DOTALL)
+    if match:
+        code_content = match.group(1).strip()
+        return code_content
+    return None        
 
 
 def loop_recovery(file_name, code, source_platform, target_platform):
@@ -169,15 +173,15 @@ def auto_cache(file_name, code, source_platform, target_platform):
         return code
 
     cache_code = run_cache_process(code, space_maps, target_platform)
-    success, output = unit_test(file_name, final_code)
+    success, output = unit_test(file_name, cache_code)
     if success:
-        return final_code
+        return cache_code
 
     for i in range(5):
-        final_code = fix_computation_code(code, final_code, output)
-        success, output = unit_test(file_name, final_code)
+        cache_code = fix_computation_code(code, cache_code, output)
+        success, output = unit_test(file_name, cache_code)
         if success:
-            return final_code
+            return cache_code
     return cache_code
 
 

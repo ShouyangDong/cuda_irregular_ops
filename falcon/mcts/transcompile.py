@@ -141,23 +141,23 @@ class FalconGo:
         cur_action_list = jax.device_get(cur_action_ids.val[0]).tolist()
         cur_actions = [ActionSpace[_i] for _i in cur_action_list]
 
-        # try:
-        code, reward = self.perform_action(cur_actions)
-        if reward > self.best_reward:
-            self.best_reward = reward
-            self.best_actions = cur_action_list
-            # save the file into success transcompiled folder
-            # Extract base name and replace extension
-            base_name = os.path.basename(self.file_name)
-            name_no_ext, _ = os.path.splitext(base_name)
-            target, file_type = get_target(code, self.target_platform)
-            new_file = os.path.join(self.output_dir, name_no_ext + file_type)
-            with open(new_file, "w", encoding="utf-8") as f:
-                f.write(code)
-        # except Exception:
-        #     tvm_module = None
-        #     reward = -10000
-        #     print(f"Invalid action: {cur_action_ids.val[0].tolist()}")
+        try:
+            code, reward = self.perform_action(cur_actions)
+            if reward > self.best_reward:
+                self.best_reward = reward
+                self.best_actions = cur_action_list
+                # save the file into success transcompiled folder
+                # Extract base name and replace extension
+                base_name = os.path.basename(self.file_name)
+                name_no_ext, _ = os.path.splitext(base_name)
+                target, file_type = get_target(code, self.target_platform)
+                new_file = os.path.join(self.output_dir, name_no_ext + file_type)
+                with open(new_file, "w", encoding="utf-8") as f:
+                    f.write(code)
+        except Exception:
+            code = ""
+            reward = -10000
+            print(f"Invalid action: {cur_action_ids.val[0].tolist()}")
 
         print(
             f"Step: {self.iteration}\t"
