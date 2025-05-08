@@ -39,7 +39,7 @@ for dir_pair in "${DIRECTIONS[@]}"; do
 
 	i=0
 	for src_file in "$src_dir"/*; do
-		((i++))
+		((i+=1))
 		filename=$(basename "$src_file")
 
 		printf "   Translating %-20s [%3d/%3d]\r" \

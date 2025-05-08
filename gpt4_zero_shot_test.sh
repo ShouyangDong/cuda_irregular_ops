@@ -8,16 +8,16 @@ BENCH_DIR="benchmark/data"
 DIRECTIONS=(
 	"mlu:cpu"
 	"cpu:mlu"
-	"mlu:hip"
+	# "mlu:hip"
 	"mlu:cuda"
-	"cpu:hip"
+	# "cpu:hip"
 	"cpu:cuda"
 	"cuda:mlu"
-	"cuda:hip"
+	# "cuda:hip"
 	"cuda:cpu"
-	"hip:mlu"
-	"hip:cuda"
-	"hip:cpu"
+	# "hip:mlu"
+	# "hip:cuda"
+	# "hip:cpu"
 )
 
 # 编译脚本映射
@@ -59,7 +59,7 @@ for dir_pair in "${DIRECTIONS[@]}"; do
 
 	i=0
 	for src_file in "${files[@]}"; do
-		((i++))
+		((i+=1))
 		filename=$(basename "$src_file")
 		dst_file="$out_dir/$filename"
 
