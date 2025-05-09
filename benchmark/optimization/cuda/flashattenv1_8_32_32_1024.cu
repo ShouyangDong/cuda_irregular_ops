@@ -3,7 +3,7 @@ __global__ void flashattenv1(const float* Q,const float* K,const float* V, float
 
     int bid_x = blockIdx.x;
     int bid_y = blockIdx.y;
-    if (tid < 32 && bid_x < 1 && bid_y < 16) {
+    if (tid < 32 && bid_x < 8 && bid_y < 32) {
         
 
     int qkv_offset = (bid_x * gridDim.y * 32 * 1024) + (bid_y * 32 * 1024);
