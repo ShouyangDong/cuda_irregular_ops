@@ -1,0 +1,5 @@
+chex 
+jax 
+mctx 
+openai==0.28 
+tiktoken
