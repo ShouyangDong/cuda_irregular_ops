@@ -1,0 +1,1120 @@
+INFO:2025-05-12 22:41:20,091:jax._src.xla_bridge:924: Unable to initialize backend 'cuda': 
+I0512 22:41:20.091784 140231075395392 xla_bridge.py:924] Unable to initialize backend 'cuda': 
+INFO:2025-05-12 22:41:20,092:jax._src.xla_bridge:924: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+I0512 22:41:20.092714 140231075395392 xla_bridge.py:924] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+INFO:2025-05-12 22:41:20,096:jax._src.xla_bridge:924: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I0512 22:41:20.096812 140231075395392 xla_bridge.py:924] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+WARNING:2025-05-12 22:41:20,097:jax._src.xla_bridge:966: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+W0512 22:41:20.097575 140231075395392 xla_bridge.py:966] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+Time taken for add:  6.089547 ms
+Step: 1	Action: [1]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Invalid action: [8]
+Step: 2	Action: [8]	Reward: -10000.0000	Best Reward: 0.0001	Best action: None	
+Time taken for add:  6.051676 ms
+Step: 3	Action: [6]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Time taken for add:  6.129344 ms
+Step: 4	Action: [10]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Invalid action: [7]
+Step: 5	Action: [7]	Reward: -10000.0000	Best Reward: 0.0001	Best action: None	
+Time taken for add:  6.177313 ms
+Step: 6	Action: [9]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Time taken for add:  6.751600 ms
+Step: 7	Action: [5]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Invalid action: [3]
+Step: 8	Action: [3]	Reward: -10000.0000	Best Reward: 0.0001	Best action: None	
+Time taken for add:  5.170926 ms
+Step: 9	Action: [4]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Total Time: 0.004 ms
+Step: 10	Action: [1, 7]	Reward: 38.1862	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [6, 7]
+Step: 11	Action: [6, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [10, 7]
+Step: 12	Action: [10, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [9, 7]
+Step: 13	Action: [9, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 7]
+Step: 14	Action: [8, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [5, 7]
+Step: 15	Action: [5, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [4, 7]
+Step: 16	Action: [4, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 7]
+Step: 17	Action: [7, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 7]
+Step: 18	Action: [3, 7]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.241741 ms
+Step: 19	Action: [1, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.171802 ms
+Step: 20	Action: [6, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.175451 ms
+Step: 21	Action: [10, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 0]
+Step: 22	Action: [8, 0]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.200763 ms
+Step: 23	Action: [9, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.160414 ms
+Step: 24	Action: [5, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 0]
+Step: 25	Action: [7, 0]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.925745 ms
+Step: 26	Action: [4, 0]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 0]
+Step: 27	Action: [3, 0]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.145995 ms
+Step: 28	Action: [1, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.125572 ms
+Step: 29	Action: [6, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.136082 ms
+Step: 30	Action: [10, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 1]
+Step: 31	Action: [8, 1]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.229776 ms
+Step: 32	Action: [9, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.245749 ms
+Step: 33	Action: [5, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.168921 ms
+Step: 34	Action: [4, 1]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 1]
+Step: 35	Action: [7, 1]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 1]
+Step: 36	Action: [3, 1]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Total Time: 0.004 ms
+Step: 37	Action: [1, 7, 7]	Reward: 37.9147	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [6, 2]
+Step: 38	Action: [6, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [10, 2]
+Step: 39	Action: [10, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [9, 2]
+Step: 40	Action: [9, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 2]
+Step: 41	Action: [8, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [5, 2]
+Step: 42	Action: [5, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [4, 2]
+Step: 43	Action: [4, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 2]
+Step: 44	Action: [7, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 2]
+Step: 45	Action: [3, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [1, 2]
+Step: 46	Action: [1, 2]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [6, 3]
+Step: 47	Action: [6, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [10, 3]
+Step: 48	Action: [10, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [9, 3]
+Step: 49	Action: [9, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 3]
+Step: 50	Action: [8, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [5, 3]
+Step: 51	Action: [5, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [4, 3]
+Step: 52	Action: [4, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 3]
+Step: 53	Action: [7, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 3]
+Step: 54	Action: [3, 3]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.931899 ms
+I0512 22:45:50.506722 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 55	Action: [1, 3]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.966293 ms
+Step: 56	Action: [6, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.218278 ms
+Step: 57	Action: [10, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 4]
+Step: 58	Action: [8, 4]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.953008 ms
+Step: 59	Action: [9, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  5.120382 ms
+Step: 60	Action: [5, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.018682 ms
+Step: 61	Action: [4, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 4]
+Step: 62	Action: [7, 4]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 4]
+Step: 63	Action: [3, 4]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.269412 ms
+Step: 64	Action: [1, 4]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.365014 ms
+Step: 65	Action: [6, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.384140 ms
+Step: 66	Action: [10, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  4.403620 ms
+Step: 67	Action: [9, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 5]
+Step: 68	Action: [8, 5]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.969020 ms
+Step: 69	Action: [5, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.853696 ms
+Step: 70	Action: [4, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 5]
+Step: 71	Action: [7, 5]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 5]
+Step: 72	Action: [3, 5]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.571798 ms
+Step: 73	Action: [1, 5]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.672856 ms
+Step: 74	Action: [6, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.811662 ms
+Step: 75	Action: [10, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.598331 ms
+Step: 76	Action: [9, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 6]
+Step: 77	Action: [8, 6]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.603508 ms
+Step: 78	Action: [5, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.608814 ms
+Step: 79	Action: [4, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 6]
+Step: 80	Action: [7, 6]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 6]
+Step: 81	Action: [3, 6]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.590646 ms
+Step: 82	Action: [1, 6]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [6, 8]
+Step: 83	Action: [6, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [10, 8]
+Step: 84	Action: [10, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [9, 8]
+Step: 85	Action: [9, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 8]
+Step: 86	Action: [8, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [5, 8]
+Step: 87	Action: [5, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [4, 8]
+Step: 88	Action: [4, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 8]
+Step: 89	Action: [7, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 8]
+Step: 90	Action: [3, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [1, 8]
+Step: 91	Action: [1, 8]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.889426 ms
+Step: 92	Action: [6, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.542792 ms
+Step: 93	Action: [10, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.595617 ms
+Step: 94	Action: [9, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 9]
+Step: 95	Action: [8, 9]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.567359 ms
+Step: 96	Action: [5, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.795166 ms
+Step: 97	Action: [4, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 9]
+Step: 98	Action: [7, 9]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 9]
+Step: 99	Action: [3, 9]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.800426 ms
+Step: 100	Action: [1, 9]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.644081 ms
+Step: 101	Action: [6, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.617002 ms
+Step: 102	Action: [10, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.586311 ms
+Step: 103	Action: [9, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [8, 10]
+Step: 104	Action: [8, 10]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.275363 ms
+Step: 105	Action: [5, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.183537 ms
+Step: 106	Action: [4, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [7, 10]
+Step: 107	Action: [7, 10]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Invalid action: [3, 10]
+Step: 108	Action: [3, 10]	Reward: -10000.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Time taken for add:  3.058335 ms
+Step: 109	Action: [1, 10]	Reward: 0.0000	Best Reward: 38.1862	Best action: [1, 7]	
+Total Time: 0.004 ms
+Step: 110	Action: [6, 0, 7]	Reward: 37.8251	Best Reward: 38.1862	Best action: [1, 7]	
+Total Time: 0.004 ms
+Step: 111	Action: [10, 0, 7]	Reward: 46.2428	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 112	Action: [9, 0, 7]	Reward: 37.7358	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 113	Action: [5, 0, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [8, 7, 7]
+Step: 114	Action: [8, 7, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 115	Action: [4, 0, 7]	Reward: 37.4707	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [7, 7, 7]
+Step: 116	Action: [7, 7, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+
+
+Invalid action: [3, 7, 7]
+Step: 117	Action: [3, 7, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 118	Action: [1, 0, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 119	Action: [6, 1, 7]	Reward: 37.7358	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 120	Action: [10, 1, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 121	Action: [9, 1, 7]	Reward: 37.7358	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 122	Action: [5, 1, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [8, 0, 7]
+Step: 123	Action: [8, 0, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 124	Action: [4, 1, 7]	Reward: 37.9147	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [7, 0, 7]
+Step: 125	Action: [7, 0, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [3, 0, 7]
+Step: 126	Action: [3, 0, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 127	Action: [1, 1, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 4, 7]
+Step: 128	Action: [6, 4, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 4, 7]
+Step: 129	Action: [10, 4, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 4, 7]
+Step: 130	Action: [9, 4, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+I0512 22:51:17.446295 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 131	Action: [1, 3, 7]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 5, 7]
+Step: 132	Action: [6, 5, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 5, 7]
+Step: 133	Action: [10, 5, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 5, 7]
+Step: 134	Action: [9, 5, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 135	Action: [1, 4, 7]	Reward: 38.0048	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 6, 7]
+Step: 136	Action: [6, 6, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 6, 7]
+Step: 137	Action: [10, 6, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 6, 7]
+Step: 138	Action: [9, 6, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 139	Action: [1, 5, 7]	Reward: 37.9147	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 9, 7]
+Step: 140	Action: [6, 9, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 9, 7]
+Step: 141	Action: [10, 9, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 9, 7]
+Step: 142	Action: [9, 9, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 143	Action: [1, 6, 7]	Reward: 36.8664	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 10, 7]
+Step: 144	Action: [6, 10, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 10, 7]
+Step: 145	Action: [10, 10, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 10, 7]
+Step: 146	Action: [9, 10, 7]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 147	Action: [1, 9, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.043444 ms
+Step: 148	Action: [6, 0, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.932503 ms
+Step: 149	Action: [10, 0, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.999873 ms
+Step: 150	Action: [9, 0, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 151	Action: [1, 10, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.286524 ms
+Step: 152	Action: [6, 1, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.127557 ms
+Step: 153	Action: [10, 1, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.469447 ms
+Step: 154	Action: [9, 1, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.199972 ms
+I0512 22:52:44.880511 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 155	Action: [1, 7, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.106382 ms
+Step: 156	Action: [6, 0, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.059942 ms
+Step: 157	Action: [10, 0, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.084580 ms
+Step: 158	Action: [9, 0, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.145346 ms
+Step: 159	Action: [1, 4, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.085659 ms
+Step: 160	Action: [6, 1, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.091996 ms
+Step: 161	Action: [10, 1, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.886441 ms
+Step: 162	Action: [9, 1, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.909395 ms
+Step: 163	Action: [1, 5, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 164	Action: [6, 0, 7, 7]	Reward: 37.4707	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 165	Action: [10, 0, 7, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 166	Action: [9, 0, 7, 7]	Reward: 37.4707	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.573281 ms
+Step: 167	Action: [1, 0, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 168	Action: [6, 1, 7, 7]	Reward: 37.5587	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 169	Action: [10, 1, 7, 7]	Reward: 37.7358	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 170	Action: [9, 1, 7, 7]	Reward: 37.4707	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.737720 ms
+Step: 171	Action: [1, 9, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 0, 2]
+Step: 172	Action: [6, 0, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 0, 2]
+Step: 173	Action: [10, 0, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 0, 2]
+Step: 174	Action: [9, 0, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.668287 ms
+Step: 175	Action: [1, 1, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 1, 2]
+Step: 176	Action: [6, 1, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 1, 2]
+Step: 177	Action: [10, 1, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 1, 2]
+Step: 178	Action: [9, 1, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.570389 ms
+Step: 179	Action: [1, 10, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.749098 ms
+I0512 22:54:33.118008 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 180	Action: [6, 0, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.586888 ms
+I0512 22:54:38.122047 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 181	Action: [10, 0, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.601363 ms
+I0512 22:54:43.122728 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 182	Action: [9, 0, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.642679 ms
+Step: 183	Action: [1, 6, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.608230 ms
+I0512 22:54:53.262866 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 184	Action: [6, 1, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.698352 ms
+I0512 22:54:58.259820 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 185	Action: [10, 1, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.585159 ms
+I0512 22:55:03.140834 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 186	Action: [9, 1, 3]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.613075 ms
+I0512 22:55:12.844895 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 187	Action: [1, 3, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.640825 ms
+Step: 188	Action: [6, 0, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.666698 ms
+Step: 189	Action: [10, 0, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.588580 ms
+Step: 190	Action: [9, 0, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 191	Action: [1, 7, 1]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.958478 ms
+Step: 192	Action: [6, 1, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.662685 ms
+Step: 193	Action: [10, 1, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.433839 ms
+Step: 194	Action: [9, 1, 4]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.432258 ms
+Step: 195	Action: [1, 4, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.844794 ms
+Step: 196	Action: [6, 4, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.564887 ms
+Step: 197	Action: [10, 4, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.407390 ms
+Step: 198	Action: [9, 4, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.622169 ms
+Step: 199	Action: [1, 5, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.868266 ms
+Step: 200	Action: [6, 4, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.696143 ms
+Step: 201	Action: [10, 4, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.655430 ms
+Step: 202	Action: [9, 4, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.691885 ms
+Step: 203	Action: [1, 0, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 4, 2]
+Step: 204	Action: [6, 4, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 4, 2]
+Step: 205	Action: [10, 4, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 4, 2]
+Step: 206	Action: [9, 4, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.650701 ms
+Step: 207	Action: [1, 9, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.621636 ms
+Step: 208	Action: [6, 0, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.838880 ms
+Step: 209	Action: [10, 0, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  4.284020 ms
+Step: 210	Action: [9, 0, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  3.561173 ms
+Step: 211	Action: [1, 1, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.665125 ms
+Step: 212	Action: [6, 1, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.633193 ms
+Step: 213	Action: [10, 1, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.669219 ms
+Step: 214	Action: [9, 1, 5]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.553027 ms
+Step: 215	Action: [1, 10, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.658257 ms
+Step: 216	Action: [6, 5, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.599599 ms
+Step: 217	Action: [10, 5, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.677609 ms
+Step: 218	Action: [9, 5, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.681811 ms
+Step: 219	Action: [1, 6, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.602172 ms
+Step: 220	Action: [6, 5, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.565217 ms
+Step: 221	Action: [10, 5, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.576760 ms
+Step: 222	Action: [9, 5, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.604902 ms
+I0512 22:58:16.339040 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 223	Action: [1, 3, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 5, 2]
+Step: 224	Action: [6, 5, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 5, 2]
+Step: 225	Action: [10, 5, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 5, 2]
+Step: 226	Action: [9, 5, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [1, 7, 2]
+Step: 227	Action: [1, 7, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.643414 ms
+Step: 228	Action: [6, 0, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.620352 ms
+Step: 229	Action: [10, 0, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.639885 ms
+Step: 230	Action: [9, 0, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 231	Action: [1, 4, 7, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.634098 ms
+Step: 232	Action: [6, 1, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.619411 ms
+Step: 233	Action: [10, 1, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.608118 ms
+Step: 234	Action: [9, 1, 6]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 235	Action: [1, 5, 7, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 0, 8]
+Step: 236	Action: [6, 0, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 0, 8]
+Step: 237	Action: [10, 0, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 0, 8]
+Step: 238	Action: [9, 0, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 239	Action: [1, 0, 7, 7]	Reward: 37.8251	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 1, 8]
+Step: 240	Action: [6, 1, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 1, 8]
+Step: 241	Action: [10, 1, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 1, 8]
+Step: 242	Action: [9, 1, 8]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 243	Action: [1, 9, 7, 7]	Reward: 37.5587	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.736018 ms
+Step: 244	Action: [6, 6, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.620820 ms
+Step: 245	Action: [10, 6, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.700213 ms
+Step: 246	Action: [9, 6, 0]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 247	Action: [1, 1, 7, 7]	Reward: 37.4707	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.641464 ms
+Step: 248	Action: [6, 6, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.713085 ms
+Step: 249	Action: [10, 6, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Time taken for add:  2.653954 ms
+Step: 250	Action: [9, 6, 1]	Reward: 0.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.004 ms
+Step: 251	Action: [1, 10, 7, 7]	Reward: 37.6471	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [6, 6, 2]
+Step: 252	Action: [6, 6, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [10, 6, 2]
+Step: 253	Action: [10, 6, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Invalid action: [9, 6, 2]
+Step: 254	Action: [9, 6, 2]	Reward: -10000.0000	Best Reward: 46.2428	Best action: [10, 0, 7]	
+Total Time: 0.003 ms
+Step: 255	Action: [1, 6, 7, 7]	Reward: 48.4848	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.587535 ms
+Step: 256	Action: [6, 9, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 3, 2]
+Step: 257	Action: [1, 3, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.659278 ms
+Step: 258	Action: [6, 9, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 6, 2]
+Step: 259	Action: [1, 6, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [6, 9, 2]
+Step: 260	Action: [6, 9, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 5, 2]
+Step: 261	Action: [1, 5, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.613455 ms
+Step: 262	Action: [6, 10, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 4, 2]
+Step: 263	Action: [1, 4, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.599597 ms
+Step: 264	Action: [6, 10, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 0, 2]
+Step: 265	Action: [1, 0, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [6, 10, 2]
+Step: 266	Action: [6, 10, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 9, 2]
+Step: 267	Action: [1, 9, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.656875 ms
+Step: 268	Action: [6, 0, 9]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 10, 2]
+Step: 269	Action: [1, 10, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.584411 ms
+Step: 270	Action: [6, 1, 9]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 1, 2]
+Step: 271	Action: [1, 1, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.637188 ms
+Step: 272	Action: [6, 0, 10]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+I0512 23:01:19.582666 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 273	Action: [1, 7, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.568149 ms
+Step: 274	Action: [6, 1, 10]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+I0512 23:01:26.517239 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 275	Action: [1, 7, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 276	Action: [6, 0, 0, 7]	Reward: 37.4707	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+I0512 23:01:32.187608 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 277	Action: [1, 7, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 278	Action: [6, 1, 0, 7]	Reward: 37.7358	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+I0512 23:01:37.808757 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 279	Action: [1, 7, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 280	Action: [6, 1, 1, 7]	Reward: 37.9147	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.610100 ms
+I0512 23:01:47.304651 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 281	Action: [1, 3, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 282	Action: [6, 0, 1, 7]	Reward: 37.9147	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.759609 ms
+I0512 23:01:56.473055 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 283	Action: [1, 6, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:01:59.205162 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 284	Action: [6, 1, 3, 7]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+
+
+Time taken for add:  2.672281 ms
+I0512 23:02:04.303757 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 285	Action: [1, 5, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:02:07.018757 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 286	Action: [6, 0, 3, 7]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 7, 8]
+Step: 287	Action: [1, 7, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 288	Action: [6, 1, 4, 7]	Reward: 37.8251	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.570288 ms
+I0512 23:02:23.938919 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 289	Action: [1, 4, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 290	Action: [6, 0, 4, 7]	Reward: 37.8251	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.637902 ms
+I0512 23:02:32.952750 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 291	Action: [1, 0, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 292	Action: [6, 1, 5, 7]	Reward: 38.0048	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.645288 ms
+I0512 23:02:41.578968 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 293	Action: [1, 9, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 294	Action: [6, 0, 5, 7]	Reward: 37.4707	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.591415 ms
+I0512 23:02:50.375560 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 295	Action: [1, 10, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 296	Action: [6, 1, 6, 7]	Reward: 37.4707	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.592777 ms
+I0512 23:02:59.176557 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 297	Action: [1, 1, 3]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 298	Action: [6, 0, 6, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.716815 ms
+I0512 23:03:08.650272 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 299	Action: [1, 3, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 300	Action: [6, 1, 9, 7]	Reward: 37.5587	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.606620 ms
+Step: 301	Action: [1, 6, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 302	Action: [6, 0, 9, 7]	Reward: 37.8251	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.607751 ms
+Step: 303	Action: [1, 5, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 304	Action: [6, 1, 10, 7]	Reward: 37.7358	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.641534 ms
+Step: 305	Action: [1, 4, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 306	Action: [6, 0, 10, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.712728 ms
+Step: 307	Action: [1, 0, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.744667 ms
+I0512 23:03:49.767446 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 308	Action: [6, 1, 7, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.691571 ms
+Step: 309	Action: [1, 9, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.640441 ms
+I0512 23:04:00.325306 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 310	Action: [6, 0, 7, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.639561 ms
+Step: 311	Action: [1, 10, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.708088 ms
+Step: 312	Action: [6, 1, 5, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.685469 ms
+Step: 313	Action: [1, 1, 4]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.704452 ms
+Step: 314	Action: [6, 0, 1, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.729809 ms
+I0512 23:04:27.457067 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 315	Action: [1, 3, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.668257 ms
+Step: 316	Action: [6, 1, 1, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.616382 ms
+Step: 317	Action: [1, 6, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.648965 ms
+Step: 318	Action: [6, 0, 4, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.655815 ms
+Step: 319	Action: [1, 5, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.677420 ms
+Step: 320	Action: [6, 1, 4, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.709313 ms
+Step: 321	Action: [1, 4, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.856304 ms
+Step: 322	Action: [6, 0, 9, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.737759 ms
+Step: 323	Action: [1, 0, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.739024 ms
+Step: 324	Action: [6, 1, 0, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.763643 ms
+Step: 325	Action: [1, 9, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.620990 ms
+Step: 326	Action: [6, 0, 6, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.671966 ms
+Step: 327	Action: [1, 10, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.637776 ms
+Step: 328	Action: [6, 1, 10, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.632931 ms
+Step: 329	Action: [1, 1, 5]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.682199 ms
+Step: 330	Action: [6, 0, 10, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.686105 ms
+I0512 23:06:00.006185 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 331	Action: [1, 3, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.672865 ms
+Step: 332	Action: [6, 1, 9, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.587982 ms
+Step: 333	Action: [1, 6, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.585440 ms
+Step: 334	Action: [6, 0, 0, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.708986 ms
+Step: 335	Action: [1, 5, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.631045 ms
+Step: 336	Action: [6, 1, 6, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.761036 ms
+Step: 337	Action: [1, 4, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.721916 ms
+Step: 338	Action: [6, 0, 5, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.631651 ms
+Step: 339	Action: [1, 0, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  3.350038 ms
+I0512 23:06:50.077453 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 340	Action: [6, 1, 3, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  3.051361 ms
+Step: 341	Action: [1, 9, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  3.304351 ms
+I0512 23:07:02.169368 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 342	Action: [6, 0, 3, 0]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.892146 ms
+Step: 343	Action: [1, 10, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 344	Action: [6, 1, 7, 1]	Reward: 37.3832	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.631015 ms
+Step: 345	Action: [1, 1, 6]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 346	Action: [6, 0, 7, 1]	Reward: 37.4707	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 3, 8]
+Step: 347	Action: [1, 3, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.631593 ms
+Step: 348	Action: [6, 1, 5, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 6, 8]
+Step: 349	Action: [1, 6, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.621893 ms
+Step: 350	Action: [6, 0, 1, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 5, 8]
+Step: 351	Action: [1, 5, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.684451 ms
+Step: 352	Action: [6, 1, 1, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 4, 8]
+Step: 353	Action: [1, 4, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.699137 ms
+Step: 354	Action: [6, 0, 4, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 0, 8]
+Step: 355	Action: [1, 0, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.875342 ms
+Step: 356	Action: [6, 1, 4, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 9, 8]
+Step: 357	Action: [1, 9, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+
+
+
+Time taken for add:  2.630988 ms
+Step: 358	Action: [6, 0, 9, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 10, 8]
+Step: 359	Action: [1, 10, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.700325 ms
+Step: 360	Action: [6, 1, 0, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [1, 1, 8]
+Step: 361	Action: [1, 1, 8]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.716693 ms
+Step: 362	Action: [6, 0, 6, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+I0512 23:08:31.022324 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 363	Action: [1, 7, 9]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.678598 ms
+Step: 364	Action: [6, 1, 10, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 365	Action: [1, 7, 10]	Reward: 37.7358	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.729301 ms
+Step: 366	Action: [6, 0, 10, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 367	Action: [1, 7, 7, 7]	Reward: 37.2960	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.612346 ms
+Step: 368	Action: [6, 1, 9, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 369	Action: [1, 7, 1, 7]	Reward: 37.7358	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.692353 ms
+Step: 370	Action: [6, 0, 0, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 371	Action: [1, 7, 10, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.583012 ms
+Step: 372	Action: [6, 1, 6, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 373	Action: [1, 7, 0, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.618959 ms
+Step: 374	Action: [6, 0, 5, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 375	Action: [1, 7, 3, 7]	Reward: 37.5587	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.586163 ms
+I0512 23:09:30.964476 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 376	Action: [6, 1, 3, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 377	Action: [1, 7, 4, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.715635 ms
+I0512 23:09:40.734428 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 378	Action: [6, 0, 3, 1]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 379	Action: [1, 7, 5, 7]	Reward: 37.6471	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [6, 1, 7, 2]
+Step: 380	Action: [6, 1, 7, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 381	Action: [1, 7, 6, 7]	Reward: 37.9147	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Invalid action: [6, 0, 7, 2]
+Step: 382	Action: [6, 0, 7, 2]	Reward: -10000.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 383	Action: [1, 7, 9, 7]	Reward: 37.2960	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.004 ms
+Step: 384	Action: [6, 1, 5, 7, 7]	Reward: 37.4707	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Time taken for add:  2.581668 ms
+I0512 23:10:13.734333 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 385	Action: [1, 3, 9]	Reward: 0.0000	Best Reward: 48.4848	Best action: [1, 6, 7, 7]	
+Total Time: 0.003 ms
+Step: 386	Action: [6, 0, 1, 7, 7]	Reward: 58.8235	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.660005 ms
+Step: 387	Action: [1, 6, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 388	Action: [6, 0, 4, 7, 7]	Reward: 37.3832	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.619166 ms
+Step: 389	Action: [1, 5, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 390	Action: [6, 1, 1, 7, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.721019 ms
+Step: 391	Action: [1, 4, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 392	Action: [6, 0, 9, 7, 7]	Reward: 37.7358	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.725412 ms
+Step: 393	Action: [1, 0, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 394	Action: [6, 1, 4, 7, 7]	Reward: 37.7358	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.598954 ms
+Step: 395	Action: [1, 9, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 396	Action: [6, 0, 6, 7, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.614777 ms
+Step: 397	Action: [1, 10, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 398	Action: [6, 1, 0, 7, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.613161 ms
+Step: 399	Action: [1, 1, 9]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 400	Action: [6, 0, 10, 7, 7]	Reward: 37.6471	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.639966 ms
+I0512 23:11:27.202839 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 401	Action: [1, 3, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 402	Action: [6, 1, 10, 7, 7]	Reward: 37.8251	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.604809 ms
+I0512 23:11:36.290768 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 403	Action: [1, 7, 7, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 404	Action: [6, 0, 0, 7, 7]	Reward: 37.9147	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.632540 ms
+Step: 405	Action: [1, 6, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 406	Action: [6, 1, 9, 7, 7]	Reward: 37.7358	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.436037 ms
+Step: 407	Action: [1, 5, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 408	Action: [6, 0, 5, 7, 7]	Reward: 37.4707	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.552584 ms
+Step: 409	Action: [1, 4, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 410	Action: [6, 1, 6, 7, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.632612 ms
+Step: 411	Action: [1, 0, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 3, 2]
+Step: 412	Action: [6, 0, 3, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.616099 ms
+Step: 413	Action: [1, 9, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 3, 2]
+Step: 414	Action: [6, 1, 3, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.563482 ms
+Step: 415	Action: [1, 10, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 1, 2]
+Step: 416	Action: [6, 0, 1, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.400621 ms
+Step: 417	Action: [1, 1, 10]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 5, 2]
+Step: 418	Action: [6, 1, 5, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:12:47.124487 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 419	Action: [1, 3, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 9, 2]
+Step: 420	Action: [6, 0, 9, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.633533 ms
+I0512 23:12:54.838147 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 421	Action: [1, 7, 1, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 4, 2]
+Step: 422	Action: [6, 1, 4, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 423	Action: [1, 6, 0, 7]	Reward: 37.6471	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 0, 2]
+Step: 424	Action: [6, 0, 0, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 425	Action: [1, 5, 0, 7]	Reward: 37.3832	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 1, 2]
+Step: 426	Action: [6, 1, 1, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 427	Action: [1, 4, 0, 7]	Reward: 37.4707	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 4, 3]
+Step: 428	Action: [6, 4, 3]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 429	Action: [1, 0, 0, 7]	Reward: 38.0048	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 4, 2]
+Step: 430	Action: [6, 0, 4, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 431	Action: [1, 9, 0, 7]	Reward: 37.9147	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 10, 2]
+Step: 432	Action: [6, 1, 10, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 433	Action: [1, 10, 0, 7]	Reward: 37.8251	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 5, 3]
+Step: 434	Action: [6, 5, 3]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 435	Action: [1, 1, 0, 7]	Reward: 37.7358	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 10, 2]
+Step: 436	Action: [6, 0, 10, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:13:42.073660 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 437	Action: [1, 3, 0, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 0, 2]
+Step: 438	Action: [6, 1, 0, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.656610 ms
+I0512 23:13:49.962323 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 439	Action: [1, 7, 10, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 6, 2]
+Step: 440	Action: [6, 0, 6, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 441	Action: [1, 6, 1, 7]	Reward: 37.6471	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 9, 2]
+Step: 442	Action: [6, 1, 9, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 443	Action: [1, 0, 1, 7]	Reward: 37.7358	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 6, 3]
+Step: 444	Action: [6, 6, 3]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 445	Action: [1, 9, 1, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 5, 2]
+Step: 446	Action: [6, 0, 5, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 447	Action: [1, 4, 1, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 1, 6, 2]
+Step: 448	Action: [6, 1, 6, 2]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 449	Action: [1, 5, 1, 7]	Reward: 38.0952	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 9, 3]
+Step: 450	Action: [6, 9, 3]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 451	Action: [1, 10, 1, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:14:37.435035 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 452	Action: [6, 0, 7, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+Step: 453	Action: [1, 1, 1, 7]	Reward: 37.5587	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:14:43.616883 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 454	Action: [6, 0, 7, 4]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:14:46.456041 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 455	Action: [1, 3, 1, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:14:48.766100 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 456	Action: [6, 0, 7, 5]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.690730 ms
+I0512 23:14:54.246826 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 457	Action: [1, 7, 6, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:14:56.613013 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 458	Action: [6, 0, 7, 6]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:14:59.436073 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 459	Action: [1, 6, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.591014 ms
+I0512 23:15:04.733590 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 460	Action: [6, 0, 3, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:15:07.588886 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 461	Action: [1, 0, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.657479 ms
+I0512 23:15:13.410832 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 462	Action: [6, 0, 1, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.003 ms
+I0512 23:15:16.187956 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 463	Action: [1, 5, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.605211 ms
+I0512 23:15:21.511166 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 464	Action: [6, 0, 9, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:15:24.178711 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 465	Action: [1, 9, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 7, 8]
+Step: 466	Action: [6, 7, 7, 8]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]
+I0512 23:16:46.456041 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 467	Action: [1, 3, 1, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:16:48.766100 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 468	Action: [6, 7, 7, 5]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.690730 ms
+I0512 23:16:54.246826 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 469	Action: [1, 7, 8, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:16:56.613013 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 470	Action: [6, 0, 7, 6]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:16:59.436073 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 471	Action: [1, 7, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.591014 ms
+I0512 23:17:04.733590 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 472	Action: [6, 7, 3, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:17:07.588886 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 473	Action: [1, 7, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.657479 ms
+I0512 23:15:13.410832 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 474	Action: [6, 0, 1, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.003 ms
+I0512 23:17:16.187956 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 475	Action: [1, 5, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.605211 ms
+I0512 23:17:21.511166 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 476	Action: [6, 7, 9, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:17:24.178711 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 477	Action: [1, 7, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 7, 8]
+Step: 478	Action: [6, 7, 7, 8]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]
+I0512 23:17:46.456041 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 479	Action: [1, 1, 1, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:17:48.766100 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 480	Action: [6, 0, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.690730 ms
+I0512 23:17:54.246826 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 481	Action: [1, 7, 6, 1]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:17:56.613013 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 482	Action: [6, 0, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:17:59.436073 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 483	Action: [1, 6, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.591014 ms
+I0512 23:18:04.733590 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 484	Action: [6, 0, 7, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:18:07.588886 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 485	Action: [1, 0, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.657479 ms
+I0512 23:18:13.410832 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 486	Action: [6, 0, 1, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.003 ms
+I0512 23:18:16.187956 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 487	Action: [1, 7, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.605211 ms
+I0512 23:18:21.511166 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 488	Action: [6, 1, 9, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:18:24.178711 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 489	Action: [1, 8, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 7, 8]
+Step: 490	Action: [6, 0, 7, 8]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]
+I0512 23:19:46.456041 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 491	Action: [1, 3, 1, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:19:48.766100 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 492	Action: [6, 0, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.690730 ms
+I0512 23:19:54.246826 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 493	Action: [1, 7, 7, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:19:56.613013 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 494	Action: [6, 0, 7, 6]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:19:59.436073 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 495	Action: [1, 7, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.591014 ms
+I0512 23:20:04.733590 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 496	Action: [6, 7, 3, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:20:07.588886 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 497	Action: [1, 1, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.657479 ms
+I0512 23:20:13.410832 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 498	Action: [6, 0, 1, 5]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.003 ms
+I0512 23:20:16.187956 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 499	Action: [1, 5, 2, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.605211 ms
+I0512 23:20:21.511166 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 500	Action: [6, 0, 8, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:20:24.178711 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 501	Action: [1, 9, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Invalid action: [6, 0, 6, 8]
+Step: 502	Action: [6, 0, 7, 8]	Reward: -10000.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]
+Step: 503	Action: [6, 0, 6, 5]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.690730 ms
+I0512 23:21:54.246826 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 504	Action: [1, 7, 4, 0]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+I0512 23:21:56.613013 140231075395392 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 505	Action: [6, 0, 6, 6]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:21:59.436073 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 506	Action: [1, 6, 7, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.591014 ms
+I0512 23:22:04.733590 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 507	Action: [6, 0, 8, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:22:07.588886 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 508	Action: [1, 0, 4, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.657479 ms
+I0512 23:22:13.410832 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 509	Action: [6, 1, 1, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.003 ms
+I0512 23:22:16.187956 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 510	Action: [1, 4, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Time taken for add:  2.605211 ms
+I0512 23:22:21.511166 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024.so'
+Step: 511	Action: [6, 1, 9, 3]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+Total Time: 0.004 ms
+I0512 23:22:24.178711 140231075395392 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/add_100_2_10_1024cuda.so'
+Step: 512	Action: [1, 8, 3, 7]	Reward: 0.0000	Best Reward: 58.8235	Best action: [6, 0, 1, 7, 7]	
+
+Selected action: 5
+Selected action Q-value: 326.3511280175411
+[INFO]searching time: 73.711226463318 s

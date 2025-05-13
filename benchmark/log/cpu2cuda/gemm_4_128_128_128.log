@@ -1,0 +1,1128 @@
+INFO:2025-05-12 21:25:17,346:jax._src.xla_bridge:924: Unable to initialize backend 'cuda': 
+I0512 21:25:17.346147 140588351481664 xla_bridge.py:924] Unable to initialize backend 'cuda': 
+INFO:2025-05-12 21:25:17,346:jax._src.xla_bridge:924: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+I0512 21:25:17.346844 140588351481664 xla_bridge.py:924] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+INFO:2025-05-12 21:25:17,349:jax._src.xla_bridge:924: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+I0512 21:25:17.349975 140588351481664 xla_bridge.py:924] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+WARNING:2025-05-12 21:25:17,350:jax._src.xla_bridge:966: An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+W0512 21:25:17.350548 140588351481664 xla_bridge.py:966] An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+Invalid action: [8]
+Step: 1	Action: [8]	Reward: -10000.0000	Best Reward: 0.0001	Best action: None	
+Time taken for bmm: 12.140103 ms
+Step: 2	Action: [6]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Time taken for bmm: 12.121477 ms
+Step: 3	Action: [10]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Total Time: 0.004 ms
+Step: 4	Action: [7]	Reward: 43.0108	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.581904 ms
+Step: 5	Action: [9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.082682 ms
+Step: 6	Action: [5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.551120 ms
+I0512 21:26:54.559259 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 7	Action: [3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.018950 ms
+Step: 8	Action: [4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 9	Action: [6, 7]	Reward: 30.8285	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 10	Action: [10, 7]	Reward: 35.3982	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 11	Action: [7, 7]	Reward: 36.8664	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 12	Action: [9, 7]	Reward: 35.7143	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 7]
+Step: 13	Action: [8, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 14	Action: [5, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+I0512 21:27:41.297128 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 15	Action: [3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 16	Action: [4, 7]	Reward: 35.7942	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.345015 ms
+Step: 17	Action: [6, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.699529 ms
+Step: 18	Action: [10, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.091754 ms
+I0512 21:28:34.202366 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 19	Action: [7, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.239316 ms
+Step: 20	Action: [9, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 0]
+Step: 21	Action: [8, 0]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.091220 ms
+Step: 22	Action: [5, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 13.437654 ms
+I0512 21:29:25.719599 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 23	Action: [3, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.983382 ms
+Step: 24	Action: [4, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.489979 ms
+Step: 25	Action: [6, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.103090 ms
+Step: 26	Action: [10, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 27	Action: [7, 1]	Reward: 38.3693	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.636876 ms
+Step: 28	Action: [9, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 1]
+Step: 29	Action: [8, 1]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.310444 ms
+Step: 30	Action: [5, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.322866 ms
+I0512 21:31:09.614708 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 31	Action: [3, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.440305 ms
+Step: 32	Action: [4, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 33	Action: [6, 7, 7]	Reward: 38.4615	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 34	Action: [10, 7, 7]	Reward: 38.3693	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [7, 2]
+Step: 35	Action: [7, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 36	Action: [9, 7, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 37	Action: [5, 7, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 2]
+Step: 38	Action: [8, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [3, 2]
+Step: 39	Action: [3, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 40	Action: [4, 7, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [6, 2]
+Step: 41	Action: [6, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [10, 2]
+Step: 42	Action: [10, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [9, 2]
+Step: 43	Action: [9, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+I0512 21:32:00.866414 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 44	Action: [7, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [5, 2]
+Step: 45	Action: [5, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 3]
+Step: 46	Action: [8, 3]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [4, 2]
+Step: 47	Action: [4, 2]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.391254 ms
+I0512 21:32:22.380690 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 48	Action: [3, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.489131 ms
+I0512 21:32:36.506367 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 49	Action: [6, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.332835 ms
+I0512 21:32:50.335753 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 50	Action: [10, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+I0512 21:32:52.232118 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 51	Action: [7, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.772182 ms
+I0512 21:33:06.455111 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 52	Action: [9, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.313830 ms
+I0512 21:33:20.394408 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 53	Action: [5, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 4]
+Step: 54	Action: [8, 4]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.359982 ms
+I0512 21:33:35.921404 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 55	Action: [3, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.424588 ms
+I0512 21:33:52.830640 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 56	Action: [4, 3]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.367661 ms
+Step: 57	Action: [6, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.617665 ms
+Step: 58	Action: [10, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+I0512 21:34:23.157900 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 59	Action: [7, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.444057 ms
+Step: 60	Action: [9, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.424738 ms
+Step: 61	Action: [5, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 5]
+Step: 62	Action: [8, 5]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.444922 ms
+I0512 21:35:07.958754 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 63	Action: [3, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.659885 ms
+Step: 64	Action: [4, 4]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.394918 ms
+Step: 65	Action: [6, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.452404 ms
+Step: 66	Action: [10, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+I0512 21:35:55.426497 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 67	Action: [7, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.614006 ms
+Step: 68	Action: [9, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.840720 ms
+Step: 69	Action: [5, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 6]
+Step: 70	Action: [8, 6]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.861302 ms
+I0512 21:36:40.327482 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 71	Action: [3, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+
+
+
+
+Time taken for bmm: 11.250483 ms
+Step: 72	Action: [4, 5]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.655376 ms
+Step: 73	Action: [6, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.326899 ms
+Step: 74	Action: [10, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [7, 8]
+Step: 75	Action: [7, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.356833 ms
+Step: 76	Action: [9, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.311180 ms
+Step: 77	Action: [5, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [3, 8]
+Step: 78	Action: [3, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.184011 ms
+Step: 79	Action: [4, 6]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 8]
+Step: 80	Action: [8, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+
+
+Invalid action: [6, 8]
+Step: 81	Action: [6, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [10, 8]
+Step: 82	Action: [10, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+I0512 21:38:16.886597 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 83	Action: [7, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [9, 8]
+Step: 84	Action: [9, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [5, 8]
+Step: 85	Action: [5, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [4, 8]
+Step: 86	Action: [4, 8]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.557977 ms
+I0512 21:38:35.980519 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 87	Action: [3, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 9]
+Step: 88	Action: [8, 9]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.991252 ms
+Step: 89	Action: [6, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.340052 ms
+Step: 90	Action: [10, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 91	Action: [7, 10]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.273082 ms
+Step: 92	Action: [9, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+
+Time taken for bmm: 11.258683 ms
+Step: 93	Action: [5, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.171492 ms
+I0512 21:39:53.738614 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 94	Action: [3, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.521155 ms
+Step: 95	Action: [4, 9]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 10]
+Step: 96	Action: [8, 10]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.723799 ms
+Step: 97	Action: [6, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.955423 ms
+Step: 98	Action: [10, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 99	Action: [7, 7, 7]	Reward: 38.3693	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.179913 ms
+Step: 100	Action: [9, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.094762 ms
+Step: 101	Action: [5, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:41:11.582538 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 102	Action: [3, 7, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.589719 ms
+Step: 103	Action: [4, 10]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 7, 7]
+Step: 104	Action: [8, 7, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 105	Action: [6, 0, 7]	Reward: 35.8744	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 106	Action: [10, 0, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 107	Action: [7, 1, 7]	Reward: 38.3693	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 108	Action: [9, 0, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 109	Action: [5, 0, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:41:51.136849 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 110	Action: [3, 0, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 111	Action: [4, 0, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 0, 7]
+Step: 112	Action: [8, 0, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 113	Action: [6, 1, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 114	Action: [10, 1, 7]	Reward: 32.7869	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 115	Action: [7, 10, 7]	Reward: 37.3832	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 116	Action: [9, 1, 7]	Reward: 38.2775	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 117	Action: [5, 1, 7]	Reward: 33.8266	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:15.637372 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 118	Action: [3, 1, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.005 ms
+Step: 119	Action: [4, 1, 7]	Reward: 34.2612	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 1, 7]
+Step: 120	Action: [8, 1, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:23.477282 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 121	Action: [6, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:29.406363 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 122	Action: [10, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 123	Action: [7, 0, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:35.171266 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 124	Action: [9, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:37.543398 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 125	Action: [5, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:39.993168 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 126	Action: [3, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:42:42.447913 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 127	Action: [4, 3, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 2, 7]
+Step: 128	Action: [8, 2, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 129	Action: [6, 4, 7]	Reward: 37.7358	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 130	Action: [10, 4, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 131	Action: [7, 3, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 132	Action: [9, 4, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 133	Action: [5, 4, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:43:04.301730 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 134	Action: [3, 4, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 135	Action: [4, 4, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 3, 7]
+Step: 136	Action: [8, 3, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 137	Action: [6, 5, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 138	Action: [10, 5, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 139	Action: [7, 4, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 140	Action: [9, 5, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.052 ms
+Step: 141	Action: [5, 5, 7]	Reward: 3.1790	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:43:32.747941 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 142	Action: [3, 5, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 143	Action: [4, 5, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 4, 7]
+Step: 144	Action: [8, 4, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 145	Action: [6, 6, 7]	Reward: 37.9147	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 146	Action: [10, 6, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 147	Action: [7, 5, 7]	Reward: 37.7358	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 148	Action: [9, 6, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 149	Action: [5, 6, 7]	Reward: 37.8251	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:43:57.842610 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 150	Action: [3, 6, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 151	Action: [4, 6, 7]	Reward: 37.6471	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 5, 7]
+Step: 152	Action: [8, 5, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 153	Action: [6, 9, 7]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 154	Action: [10, 9, 7]	Reward: 38.2775	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 155	Action: [7, 6, 7]	Reward: 38.2775	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 156	Action: [9, 9, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 157	Action: [5, 9, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:44:23.466162 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 158	Action: [3, 9, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 159	Action: [4, 9, 7]	Reward: 37.8251	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 6, 7]
+Step: 160	Action: [8, 6, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 161	Action: [6, 10, 7]	Reward: 38.0048	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 162	Action: [10, 10, 7]	Reward: 37.8251	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 163	Action: [7, 9, 7]	Reward: 37.7358	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 164	Action: [9, 10, 7]	Reward: 37.7358	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 165	Action: [5, 10, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+I0512 21:44:52.238664 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 166	Action: [3, 10, 7]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 167	Action: [4, 10, 7]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Invalid action: [8, 8, 7]
+Step: 168	Action: [8, 8, 7]	Reward: -10000.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.574721 ms
+I0512 21:45:11.413615 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 169	Action: [6, 7, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.252520 ms
+I0512 21:45:25.381174 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 170	Action: [10, 7, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.326758 ms
+I0512 21:45:39.159077 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 171	Action: [7, 7, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.169760 ms
+I0512 21:45:52.823806 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 172	Action: [9, 7, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.338435 ms
+Step: 173	Action: [6, 1, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.166506 ms
+Step: 174	Action: [10, 9, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.606375 ms
+I0512 21:46:35.779121 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 175	Action: [7, 1, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.349006 ms
+Step: 176	Action: [9, 1, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.407530 ms
+Step: 177	Action: [6, 5, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.160303 ms
+Step: 178	Action: [10, 0, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.149858 ms
+I0512 21:47:31.939966 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 179	Action: [7, 10, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.304127 ms
+Step: 180	Action: [9, 6, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.190751 ms
+Step: 181	Action: [6, 9, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.284751 ms
+Step: 182	Action: [10, 4, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.554681 ms
+I0512 21:48:34.298694 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 183	Action: [7, 6, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.185512 ms
+Step: 184	Action: [9, 9, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.268847 ms
+Step: 185	Action: [6, 10, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.553017 ms
+Step: 186	Action: [10, 5, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.467457 ms
+I0512 21:49:30.835154 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 187	Action: [7, 0, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.645910 ms
+Step: 188	Action: [9, 0, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.123442 ms
+Step: 189	Action: [6, 6, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.289518 ms
+Step: 190	Action: [10, 6, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.349476 ms
+I0512 21:50:27.390950 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 191	Action: [7, 3, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.144820 ms
+Step: 192	Action: [9, 4, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.394958 ms
+Step: 193	Action: [6, 4, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.116136 ms
+Step: 194	Action: [10, 10, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.154390 ms
+I0512 21:51:23.101408 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 195	Action: [7, 4, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 12.254950 ms
+Step: 196	Action: [9, 5, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.273832 ms
+Step: 197	Action: [6, 0, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.164986 ms
+Step: 198	Action: [10, 1, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.165284 ms
+I0512 21:52:20.146383 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 199	Action: [7, 5, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.174302 ms
+Step: 200	Action: [9, 10, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.152626 ms
+I0512 21:52:48.046758 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 201	Action: [6, 3, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.134577 ms
+I0512 21:53:01.836921 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 202	Action: [10, 3, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.647891 ms
+I0512 21:53:16.145761 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 203	Action: [7, 9, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.838101 ms
+I0512 21:53:31.167727 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 204	Action: [9, 3, 0]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 205	Action: [6, 7, 1]	Reward: 37.8251	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 206	Action: [10, 7, 1]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 207	Action: [7, 7, 1]	Reward: 37.9147	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 208	Action: [9, 7, 1]	Reward: 38.0952	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.720366 ms
+Step: 209	Action: [6, 1, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.677627 ms
+Step: 210	Action: [10, 9, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 211	Action: [7, 1, 1]	Reward: 38.1862	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.748581 ms
+Step: 212	Action: [9, 1, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.990460 ms
+Step: 213	Action: [6, 5, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Time taken for bmm: 11.364916 ms
+Step: 214	Action: [10, 0, 1]	Reward: 0.0000	Best Reward: 43.0108	Best action: [7]	
+Total Time: 0.004 ms
+Step: 215	Action: [7, 10, 1]	Reward: 43.5967	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.279000 ms
+Step: 216	Action: [9, 6, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.185108 ms
+Step: 217	Action: [6, 9, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.127885 ms
+Step: 218	Action: [10, 4, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 219	Action: [7, 6, 1]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.119658 ms
+Step: 220	Action: [9, 9, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.172428 ms
+Step: 221	Action: [6, 10, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.137518 ms
+Step: 222	Action: [10, 5, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.152407 ms
+I0512 21:57:02.016895 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 223	Action: [7, 0, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.117555 ms
+Step: 224	Action: [9, 0, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.137661 ms
+Step: 225	Action: [6, 6, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.127152 ms
+Step: 226	Action: [10, 6, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 227	Action: [7, 3, 1]	Reward: 38.2775	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.293899 ms
+Step: 228	Action: [9, 4, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.169048 ms
+Step: 229	Action: [6, 4, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.121516 ms
+Step: 230	Action: [10, 10, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 231	Action: [7, 4, 1]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.270177 ms
+Step: 232	Action: [9, 5, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.322432 ms
+Step: 233	Action: [6, 0, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.530329 ms
+Step: 234	Action: [10, 1, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 235	Action: [7, 5, 1]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.172771 ms
+Step: 236	Action: [9, 10, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.165422 ms
+I0512 21:59:55.514379 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 237	Action: [6, 3, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.169077 ms
+I0512 22:00:09.353090 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 238	Action: [10, 3, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 239	Action: [7, 9, 1]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.461127 ms
+I0512 22:00:28.109236 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 240	Action: [9, 3, 1]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 7, 2]
+Step: 241	Action: [6, 7, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 7, 2]
+Step: 242	Action: [10, 7, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 7, 2]
+Step: 243	Action: [7, 7, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 7, 2]
+Step: 244	Action: [9, 7, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 245	Action: [6, 1, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 246	Action: [10, 9, 7, 7]	Reward: 38.2775	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 10, 2]
+Step: 247	Action: [7, 10, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 248	Action: [9, 1, 7, 7]	Reward: 37.8251	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 249	Action: [6, 5, 7, 7]	Reward: 37.8251	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 250	Action: [10, 0, 7, 7]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 1, 2]
+Step: 251	Action: [7, 1, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 252	Action: [9, 6, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 253	Action: [6, 9, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 254	Action: [10, 4, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 6, 2]
+Step: 255	Action: [7, 6, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 256	Action: [9, 9, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 257	Action: [6, 10, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 258	Action: [10, 5, 7, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 259	Action: [9, 0, 7, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 3, 2]
+Step: 260	Action: [7, 3, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 261	Action: [6, 6, 7, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 262	Action: [10, 6, 7, 7]	Reward: 38.2775	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 263	Action: [9, 4, 7, 7]	Reward: 38.3693	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 4, 2]
+Step: 264	Action: [7, 4, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 265	Action: [6, 4, 7, 7]	Reward: 38.3693	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 266	Action: [10, 10, 7, 7]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 267	Action: [9, 5, 7, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 9, 2]
+Step: 268	Action: [7, 9, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 269	Action: [6, 0, 7, 7]	Reward: 38.2775	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 270	Action: [10, 1, 7, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 271	Action: [9, 10, 7, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 5, 2]
+Step: 272	Action: [7, 5, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 3, 2]
+Step: 273	Action: [6, 3, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 3, 2]
+Step: 274	Action: [10, 3, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 3, 2]
+Step: 275	Action: [9, 3, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 276	Action: [7, 0, 7, 7]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 1, 2]
+Step: 277	Action: [6, 1, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 9, 2]
+Step: 278	Action: [10, 9, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 4, 2]
+Step: 279	Action: [9, 4, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 0, 2]
+Step: 280	Action: [7, 0, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 9, 2]
+Step: 281	Action: [6, 9, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 0, 2]
+Step: 282	Action: [10, 0, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 5, 2]
+Step: 283	Action: [9, 5, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+
+
+
+I0512 22:03:03.022554 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 284	Action: [7, 7, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 10, 2]
+Step: 285	Action: [6, 10, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 6, 2]
+Step: 286	Action: [10, 6, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 6, 2]
+Step: 287	Action: [9, 6, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:11.170928 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 288	Action: [7, 7, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 4, 2]
+Step: 289	Action: [6, 4, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 4, 2]
+Step: 290	Action: [10, 4, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 9, 2]
+Step: 291	Action: [9, 9, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:19.331092 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 292	Action: [7, 7, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 5, 2]
+Step: 293	Action: [6, 5, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 5, 2]
+Step: 294	Action: [10, 5, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 1, 2]
+Step: 295	Action: [9, 1, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:27.653359 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 296	Action: [7, 10, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 6, 2]
+Step: 297	Action: [6, 6, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 10, 2]
+Step: 298	Action: [10, 10, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:33.960782 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 299	Action: [7, 1, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 0, 2]
+Step: 300	Action: [9, 0, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 0, 2]
+Step: 301	Action: [6, 0, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 1, 2]
+Step: 302	Action: [10, 1, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:42.444411 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 303	Action: [7, 7, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 10, 2]
+Step: 304	Action: [9, 10, 2]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:46.652647 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 305	Action: [6, 7, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:48.659988 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 306	Action: [10, 7, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:50.753740 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 307	Action: [7, 6, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:52.905844 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 308	Action: [9, 7, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:55.060221 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 309	Action: [6, 7, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:57.081429 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 310	Action: [10, 7, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:03:59.182988 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 311	Action: [7, 3, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:01.193694 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 312	Action: [9, 7, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:13.751751 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 313	Action: [6, 7, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:15.805283 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 314	Action: [10, 7, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:17.870558 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 315	Action: [7, 4, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:19.936728 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 316	Action: [9, 7, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:22.104602 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 317	Action: [6, 7, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:24.182013 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 318	Action: [10, 7, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:26.241604 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 319	Action: [7, 9, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:28.326120 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 320	Action: [9, 7, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.256515 ms
+I0512 22:04:42.395548 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 321	Action: [6, 3, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.256681 ms
+I0512 22:04:56.466719 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 322	Action: [10, 3, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:04:58.585678 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 323	Action: [7, 5, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.157669 ms
+I0512 22:05:12.475193 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 324	Action: [9, 3, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.156098 ms
+I0512 22:05:26.430320 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 325	Action: [6, 1, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.420537 ms
+I0512 22:05:40.540734 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 326	Action: [10, 9, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:05:42.696073 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 327	Action: [7, 10, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.440699 ms
+I0512 22:05:56.868367 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 328	Action: [9, 4, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.219486 ms
+I0512 22:06:10.995153 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 329	Action: [6, 9, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.199273 ms
+I0512 22:06:25.019453 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 330	Action: [10, 0, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:06:27.179221 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 331	Action: [7, 1, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.439716 ms
+I0512 22:06:41.315151 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 332	Action: [9, 5, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 7, 8]
+Step: 333	Action: [6, 7, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 7, 8]
+Step: 334	Action: [10, 7, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [7, 7, 8]
+Step: 335	Action: [7, 7, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [9, 7, 8]
+Step: 336	Action: [9, 7, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.335895 ms
+I0512 22:07:03.694785 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 337	Action: [6, 10, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.819711 ms
+I0512 22:07:18.455247 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 338	Action: [10, 6, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.618151 ms
+I0512 22:07:32.968175 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 339	Action: [6, 4, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.224939 ms
+I0512 22:07:46.954011 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 340	Action: [10, 4, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.177359 ms
+I0512 22:08:00.978441 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 341	Action: [6, 5, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.122998 ms
+I0512 22:08:14.892081 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 342	Action: [10, 5, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.660738 ms
+I0512 22:08:29.408914 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 343	Action: [6, 6, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.449120 ms
+I0512 22:08:43.652265 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 344	Action: [10, 10, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.575211 ms
+I0512 22:09:09.649665 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 345	Action: [6, 0, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.206163 ms
+I0512 22:09:23.638877 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 346	Action: [10, 1, 3]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.113743 ms
+I0512 22:09:37.541082 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 347	Action: [6, 3, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.607578 ms
+I0512 22:09:51.923917 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 348	Action: [10, 3, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 12.275119 ms
+Step: 349	Action: [6, 1, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.339042 ms
+Step: 350	Action: [10, 9, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.413567 ms
+Step: 351	Action: [6, 9, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.299912 ms
+Step: 352	Action: [10, 0, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.185325 ms
+Step: 353	Action: [6, 10, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.658819 ms
+Step: 354	Action: [10, 6, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.262322 ms
+Step: 355	Action: [6, 4, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.380153 ms
+Step: 356	Action: [10, 4, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.069000 ms
+Step: 357	Action: [6, 5, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.111150 ms
+Step: 358	Action: [10, 5, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.170710 ms
+Step: 359	Action: [6, 6, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.245756 ms
+Step: 360	Action: [10, 10, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.199114 ms
+Step: 361	Action: [6, 0, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.500744 ms
+Step: 362	Action: [10, 1, 4]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.376349 ms
+I0512 22:13:26.552140 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 363	Action: [6, 3, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.329503 ms
+I0512 22:13:40.523267 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 364	Action: [10, 3, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.037221 ms
+Step: 365	Action: [6, 1, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.186833 ms
+Step: 366	Action: [10, 9, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.050665 ms
+Step: 367	Action: [6, 9, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.279436 ms
+Step: 368	Action: [10, 0, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 12.182798 ms
+Step: 369	Action: [6, 10, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.190978 ms
+Step: 370	Action: [10, 6, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.062057 ms
+Step: 371	Action: [6, 4, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.198577 ms
+Step: 372	Action: [10, 4, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.066867 ms
+Step: 373	Action: [6, 5, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 10.987186 ms
+Step: 374	Action: [10, 5, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.150698 ms
+Step: 375	Action: [6, 6, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.018080 ms
+Step: 376	Action: [10, 10, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.142488 ms
+Step: 377	Action: [6, 0, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.206650 ms
+Step: 378	Action: [10, 1, 5]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.084848 ms
+I0512 22:17:22.649559 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 379	Action: [6, 3, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.089513 ms
+I0512 22:17:36.471019 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 380	Action: [10, 3, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.172334 ms
+Step: 381	Action: [6, 1, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.172897 ms
+Step: 382	Action: [10, 9, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 12.802493 ms
+Step: 383	Action: [6, 9, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.218005 ms
+Step: 384	Action: [10, 0, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.207956 ms
+Step: 385	Action: [6, 10, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.414321 ms
+Step: 386	Action: [10, 6, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.093935 ms
+Step: 387	Action: [6, 4, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.289963 ms
+Step: 388	Action: [10, 4, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.094437 ms
+Step: 389	Action: [6, 5, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.066417 ms
+Step: 390	Action: [10, 5, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.262319 ms
+Step: 391	Action: [6, 6, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.153887 ms
+Step: 392	Action: [10, 10, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.514493 ms
+Step: 393	Action: [6, 0, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.115886 ms
+Step: 394	Action: [10, 1, 6]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 3, 8]
+Step: 395	Action: [6, 3, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 3, 8]
+Step: 396	Action: [10, 3, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 1, 8]
+Step: 397	Action: [6, 1, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 9, 8]
+Step: 398	Action: [10, 9, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 9, 8]
+Step: 399	Action: [6, 9, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 0, 8]
+Step: 400	Action: [10, 0, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 10, 8]
+Step: 401	Action: [6, 10, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 6, 8]
+Step: 402	Action: [10, 6, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 4, 8]
+Step: 403	Action: [6, 4, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 4, 8]
+Step: 404	Action: [10, 4, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 5, 8]
+Step: 405	Action: [6, 5, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 5, 8]
+Step: 406	Action: [10, 5, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 6, 8]
+Step: 407	Action: [6, 6, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 10, 8]
+Step: 408	Action: [10, 10, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [6, 0, 8]
+Step: 409	Action: [6, 0, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Invalid action: [10, 1, 8]
+Step: 410	Action: [10, 1, 8]	Reward: -10000.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:21:32.989716 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 411	Action: [6, 7, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+I0512 22:21:47.531885 140588351481664 transcompile.py:70] Could not find CUDA kernel signature.
+Step: 412	Action: [10, 7, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 413	Action: [6, 7, 10]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 414	Action: [10, 7, 10]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 415	Action: [6, 7, 7, 7]	Reward: 37.8251	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 416	Action: [10, 7, 7, 7]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 417	Action: [6, 7, 10, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 418	Action: [10, 7, 1, 7]	Reward: 37.7358	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.035 ms
+Step: 419	Action: [6, 7, 1, 7]	Reward: 4.6634	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 420	Action: [10, 7, 10, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 421	Action: [6, 7, 0, 7]	Reward: 38.0048	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 422	Action: [10, 7, 0, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 423	Action: [6, 7, 3, 7]	Reward: 38.0952	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 424	Action: [10, 7, 3, 7]	Reward: 37.8251	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 425	Action: [6, 7, 4, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 426	Action: [10, 7, 4, 7]	Reward: 37.9147	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 427	Action: [6, 7, 5, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 428	Action: [10, 7, 5, 7]	Reward: 37.5587	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 429	Action: [6, 7, 6, 7]	Reward: 37.2960	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 430	Action: [10, 7, 6, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.438792 ms
+I0512 22:23:17.377236 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 431	Action: [6, 3, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.183761 ms
+I0512 22:23:31.277086 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 432	Action: [10, 3, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.129199 ms
+Step: 433	Action: [6, 1, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 434	Action: [10, 7, 9, 7]	Reward: 38.2775	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Total Time: 0.004 ms
+Step: 435	Action: [6, 7, 9, 7]	Reward: 38.1862	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.454780 ms
+Step: 436	Action: [10, 9, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.099834 ms
+Step: 437	Action: [6, 9, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 12.211995 ms
+Step: 438	Action: [10, 0, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.145418 ms
+Step: 439	Action: [6, 10, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.057858 ms
+Step: 440	Action: [10, 6, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.172092 ms
+Step: 441	Action: [6, 4, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.192637 ms
+Step: 442	Action: [10, 4, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.385051 ms
+Step: 443	Action: [6, 5, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 12.423692 ms
+Step: 444	Action: [10, 5, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.070916 ms
+Step: 445	Action: [6, 6, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.876570 ms
+Step: 446	Action: [10, 10, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.715118 ms
+Step: 447	Action: [6, 0, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.221215 ms
+Step: 448	Action: [10, 1, 9]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.200778 ms
+I0512 22:27:28.488863 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 449	Action: [6, 3, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.589306 ms
+I0512 22:27:42.766071 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 450	Action: [10, 3, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.201848 ms
+Step: 451	Action: [6, 1, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.725206 ms
+I0512 22:28:11.518928 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 452	Action: [10, 7, 7, 0]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.182340 ms
+I0512 22:28:25.777398 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 453	Action: [6, 7, 7, 0]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.558234 ms
+Step: 454	Action: [10, 9, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.174144 ms
+Step: 455	Action: [6, 9, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.567522 ms
+Step: 456	Action: [10, 0, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.320463 ms
+Step: 457	Action: [6, 10, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.077426 ms
+Step: 458	Action: [10, 6, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.136363 ms
+Step: 459	Action: [6, 4, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.337543 ms
+Step: 460	Action: [10, 4, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.386089 ms
+Step: 461	Action: [6, 5, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.354861 ms
+Step: 462	Action: [10, 5, 10]	Reward: 0.0000	Best Reward: 43.5967	Best action: [7, 10, 1]	
+Time taken for bmm: 11.210596 ms
+Step: 463	Action: [7, 5, 3, 1]	Reward: 396.5217	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.680315 ms
+Step: 464	Action: [7, 5, 10, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.140868 ms
+Step: 465	Action: [7, 6, 0, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 3, 1]	
+Time taken for bmm: 11.046330 ms
+Step: 466	Action: [7, 10, 1, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Total Time: 0.004 ms
+I0512 22:31:33.847720 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128cuda.so'
+Step: 467	Action: [7, 6, 3, 7, 7]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Step: 468	Action: [7, 6, 5, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 12.423692 ms
+Step: 469	Action: [7, 10, 5, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.070916 ms
+Step: 470	Action: [7, 6, 6, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.876570 ms
+Step: 471	Action: [7, 10, 10, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.715118 ms
+Step: 472	Action: [7, 6, 0, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.221215 ms
+Step: 473	Action: [7, 10, 1, 9]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.200778 ms
+I0512 22:47:28.488863 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 474	Action: [7, 6, 3, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.589306 ms
+I0512 22:48:42.766071 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 475	Action: [7, 10, 3, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.201848 ms
+Step: 476	Action: [7, 6, 1, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.725206 ms
+I0512 22:50:11.518928 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 477	Action: [7, 10, 7, 7, 0]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.182340 ms
+I0512 22:28:25.777398 140588351481664 transcompile.py:70] [Errno 2] No such file or directory: '/projs/AE/dongshouyang/cuda_irregular_ops/tmp/bmm_4_128_128_128.so'
+Step: 478	Action: [7, 6, 7, 7, 0]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.558234 ms
+Step: 479	Action: [7, 10, 9, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.174144 ms
+Step: 480	Action: [7, 6, 9, 10]	Reward: 0.0000	Best Reward: 396.5217	Best action: [7, 5, 3, 1]	
+Time taken for bmm: 11.567522 ms
+Step: 481	Action: [7, 5, 4, 3, 1]	Reward: 3767.2343	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.320463 ms
+Step: 482	Action: [7, 7, 6, 10, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.077426 ms
+Step: 483	Action: [7, 7, 10, 6, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.136363 ms
+Step: 484	Action: [7, 7, 6, 4, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.337543 ms
+Step: 485	Action: [7, 7, 10, 4, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.386089 ms
+Step: 486	Action: [7, 7, 6, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.354861 ms
+Step: 487	Action: [7, 7, 10, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.210596 ms
+Step: 488	Action: [7, 7, 6, 6, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.680315 ms
+Step: 489	Action: [7, 7, 10, 10, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.140868 ms
+Step: 490	Action: [7, 7, 6, 0, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.046330 ms
+Step: 491	Action: [7, 7, 10, 1, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Total Time: 0.004 ms
+Step: 492	Action: [7, 7, 6, 3, 7, 7]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]
+Step: 493	Action: [7, 7, 10, 9, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.174144 ms
+Step: 494	Action: [7, 7, 6, 9, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.567522 ms
+Step: 495	Action: [7, 7, 10, 0, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.320463 ms
+Step: 496	Action: [7, 7, 6, 10, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.077426 ms
+Step: 497	Action: [7, 7, 10, 6, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.136363 ms
+Step: 498	Action: [7, 7, 6, 4, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.337543 ms
+Step: 499	Action: [7, 7, 10, 4, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.386089 ms
+Step: 500	Action: [7, 7, 6, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.354861 ms
+Step: 501	Action: [7, 7, 10, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.210596 ms
+Step: 502	Action: [7, 7, 6, 6, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.680315 ms
+Step: 503	Action: [7, 7, 10, 10, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.140868 ms
+Step: 504	Action: [7, 7, 6, 0, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.046330 ms
+Step: 505	Action: [7, 7, 10, 1, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Total Time: 0.004 ms
+Step: 506	Action: [7, 7, 6, 3, 7, 7]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]
+Step: 507	Action: [7, 7, 6, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.354861 ms
+Step: 508	Action: [7, 7, 10, 5, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.210596 ms
+Step: 509	Action: [7, 7, 6, 6, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.680315 ms
+Step: 510	Action: [7, 7, 10, 10, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.140868 ms
+Step: 511	Action: [7, 7, 6, 0, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Time taken for bmm: 11.046330 ms
+Step: 512	Action: [7, 7, 10, 1, 10]	Reward: 0.0000	Best Reward: 3767.2343	Best action: [7, 5, 4, 3, 1]	
+Total Time: 0.004 ms
+Selected action: 5
+Selected action Q-value: 326.3511280175411
+[INFO]searching time: 290.711226463318 s
