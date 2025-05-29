@@ -14,7 +14,7 @@ from falcon.unit_test import unit_test
 
 def falcon_postprocess_pipeline(code, file_name, target):
     final_code = run_thread_binding(code, target)
-    if not unit_test(file_name, final_code):
+    if not unit_test(file_name, final_code)[0]:
         final_code = ast_thread_binding(code, target)
     print("[INFO] final_code: ", final_code)
     # when target is "mlu" or "DLBOOST", insert tensorization process.
@@ -38,7 +38,7 @@ def falcon_postprocess_pipeline(code, file_name, target):
         code = run_code_decoration(cache_code)
         print("[INFO] tensor_decorate code: ", code)
         final_code = run_tensorization(code, target)
-        if not unit_test(file_name, final_code):
+        if not unit_test(file_name, final_code)[0]:
             final_code = ast_auto_cache(code, space_maps)
     return final_code
 

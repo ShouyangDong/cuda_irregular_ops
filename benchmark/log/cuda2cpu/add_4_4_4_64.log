@@ -1,0 +1,741 @@
+Step: 1	Action: [6]	Reward: 0.0000	Best Reward: 0.0001	Best action: None	
+Step: 2	Action: [0]	Reward: 0.4527	Best Reward: 0.4527	Best action: [0]	
+Step: 3	Action: [9]	Reward: 0.0000	Best Reward: 0.4527	Best action: [0]	
+Invalid action: [5]
+Step: 4	Action: [5]	Reward: -10000.0000	Best Reward: 0.4527	Best action: [0]	
+Step: 5	Action: [3]	Reward: 0.0000	Best Reward: 0.4527	Best action: [0]	
+Step: 6	Action: [4]	Reward: 0.0000	Best Reward: 0.4527	Best action: [0]	
+Step: 7	Action: [6, 0]	Reward: 0.4901	Best Reward: 0.4901	Best action: [6, 0]	
+Step: 8	Action: [0, 0]	Reward: 0.5052	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 9	Action: [9, 0]	Reward: 0.4945	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 10	Action: [3, 0]	Reward: 0.3685	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 11	Action: [4, 0]	Reward: 0.2555	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 12	Action: [5, 0]	Reward: 0.2996	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 13	Action: [6, 1]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 14	Action: [0, 1]	Reward: 0.4559	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 15	Action: [9, 1]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 16	Action: [3, 1]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 17	Action: [4, 1]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Invalid action: [5, 1]
+Step: 18	Action: [5, 1]	Reward: -10000.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 19	Action: [6, 2]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 20	Action: [0, 0, 0]	Reward: 0.3427	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 21	Action: [9, 2]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 22	Action: [3, 2]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 23	Action: [4, 2]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 24	Action: [5, 2]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 25	Action: [6, 0, 0]	Reward: 0.4840	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 26	Action: [0, 2]	Reward: 0.3100	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 27	Action: [9, 0, 0]	Reward: 0.4488	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 28	Action: [3, 0, 0]	Reward: 0.3680	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 29	Action: [4, 0, 0]	Reward: 0.3770	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 30	Action: [5, 3]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 31	Action: [6, 3]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 32	Action: [0, 3]	Reward: 0.4706	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 33	Action: [9, 3]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 34	Action: [3, 3]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 35	Action: [4, 3]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 36	Action: [5, 4]	Reward: 0.3122	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 37	Action: [6, 0, 1]	Reward: 0.4098	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 38	Action: [0, 4]	Reward: 0.4815	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 39	Action: [9, 0, 1]	Reward: 0.4749	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 40	Action: [3, 0, 1]	Reward: 0.5025	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 41	Action: [4, 0, 1]	Reward: 0.4300	Best Reward: 0.5052	Best action: [0, 0]	
+Invalid action: [5, 5]
+Step: 42	Action: [5, 5]	Reward: -10000.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 43	Action: [6, 4]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 44	Action: [0, 5]	Reward: 0.3690	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 45	Action: [9, 4]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 46	Action: [3, 4]	Reward: 0.3129	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 47	Action: [4, 4]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 48	Action: [5, 6]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 49	Action: [6, 0, 0, 0]	Reward: 0.3056	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 50	Action: [0, 6]	Reward: 0.4651	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 51	Action: [9, 0, 2]	Reward: 0.3169	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 52	Action: [3, 5]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 53	Action: [4, 0, 2]	Reward: 0.4118	Best Reward: 0.5052	Best action: [0, 0]	
+Invalid action: [5, 7]
+Step: 54	Action: [5, 7]	Reward: -10000.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 55	Action: [6, 0, 2]	Reward: 0.4811	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 56	Action: [0, 7]	Reward: 0.2930	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 57	Action: [9, 0, 3]	Reward: 0.4058	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 58	Action: [3, 0, 1, 0]	Reward: 0.4779	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 59	Action: [4, 0, 1, 0]	Reward: 0.3816	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 60	Action: [5, 0, 0]	Reward: 0.3702	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 61	Action: [6, 5]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 62	Action: [0, 0, 1]	Reward: 0.4561	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 63	Action: [9, 5]	Reward: 0.0000	Best Reward: 0.5052	Best action: [0, 0]	
+Step: 64	Action: [3, 0, 2]	Reward: 0.5058	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 65	Action: [4, 5]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 66	Action: [5, 8]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 67	Action: [6, 0, 3]	Reward: 0.3334	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 68	Action: [0, 0, 1, 0]	Reward: 0.4336	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 69	Action: [9, 0, 4]	Reward: 0.4544	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 70	Action: [3, 6]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 71	Action: [4, 0, 3]	Reward: 0.3766	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 72	Action: [5, 9]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 73	Action: [6, 0, 4]	Reward: 0.5055	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 74	Action: [0, 0, 2]	Reward: 0.5021	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 75	Action: [9, 0, 5]	Reward: 0.3964	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 76	Action: [3, 0, 3]	Reward: 0.4961	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 77	Action: [4, 0, 1, 1]	Reward: 0.2956	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 78	Action: [5, 10]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 79	Action: [6, 0, 5]	Reward: 0.4349	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 80	Action: [0, 8]	Reward: 0.4513	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 81	Action: [9, 0, 6]	Reward: 0.4607	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 82	Action: [3, 0, 4]	Reward: 0.4820	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 83	Action: [4, 0, 4]	Reward: 0.5038	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 84	Action: [5, 4, 0]	Reward: 0.4995	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 85	Action: [6, 6]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 86	Action: [0, 9]	Reward: 0.4556	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 87	Action: [9, 6]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 88	Action: [3, 0, 5]	Reward: 0.4186	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 89	Action: [4, 6]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 90	Action: [5, 2, 0]	Reward: 0.5050	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 91	Action: [6, 0, 6]	Reward: 0.4113	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 92	Action: [0, 0, 3]	Reward: 0.3147	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 93	Action: [9, 0, 7]	Reward: 0.3744	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 94	Action: [3, 7]	Reward: 0.0000	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 95	Action: [4, 0, 4, 0]	Reward: 0.4880	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 96	Action: [5, 3, 0]	Reward: 0.4907	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 97	Action: [6, 0, 7]	Reward: 0.3771	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 98	Action: [0, 10]	Reward: 0.3945	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 99	Action: [9, 0, 8]	Reward: 0.4840	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 100	Action: [3, 0, 6]	Reward: 0.4695	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 101	Action: [4, 0, 4, 1]	Reward: 0.5013	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 102	Action: [5, 6, 0]	Reward: 0.4010	Best Reward: 0.5058	Best action: [3, 0, 2]	
+Step: 103	Action: [6, 0, 4, 0]	Reward: 0.5059	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 104	Action: [0, 0, 4]	Reward: 0.3171	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 105	Action: [9, 0, 8, 0]	Reward: 0.4865	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 106	Action: [3, 0, 1, 1]	Reward: 0.4401	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 107	Action: [4, 0, 4, 2]	Reward: 0.5032	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Invalid action: [5, 8, 0]
+Step: 108	Action: [5, 8, 0]	Reward: -10000.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 109	Action: [6, 0, 4, 1]	Reward: 0.4789	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 110	Action: [0, 0, 5]	Reward: 0.4279	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Invalid action: [9, 0, 8, 1]
+Step: 111	Action: [9, 0, 8, 1]	Reward: -10000.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 112	Action: [3, 0, 7]	Reward: 0.3283	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 113	Action: [4, 0, 5]	Reward: 0.4573	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 114	Action: [5, 9, 0]	Reward: 0.4984	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 115	Action: [6, 0, 4, 0, 0]	Reward: 0.4651	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 116	Action: [0, 4, 0]	Reward: 0.4017	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 117	Action: [9, 7]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 118	Action: [3, 0, 8]	Reward: 0.5023	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 119	Action: [4, 0, 4, 3]	Reward: 0.5057	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 120	Action: [5, 10, 0]	Reward: 0.4547	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 121	Action: [6, 0, 8]	Reward: 0.3842	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 122	Action: [0, 4, 1]	Reward: 0.4755	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 123	Action: [9, 8]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 124	Action: [3, 0, 9]	Reward: 0.4930	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 125	Action: [4, 0, 6]	Reward: 0.3815	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 126	Action: [5, 0, 1]	Reward: 0.3549	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 127	Action: [6, 0, 4, 0, 1]	Reward: 0.3515	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 128	Action: [0, 4, 1, 0]	Reward: 0.4311	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 129	Action: [9, 9]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 130	Action: [3, 0, 10]	Reward: 0.3873	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 131	Action: [4, 0, 4, 3, 0]	Reward: 0.3998	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 132	Action: [5, 4, 1]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 133	Action: [6, 0, 4, 2]	Reward: 0.4430	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 134	Action: [0, 4, 2]	Reward: 0.4697	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 135	Action: [9, 10]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 136	Action: [3, 0, 1, 0, 0]	Reward: 0.4556	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 137	Action: [4, 0, 4, 3, 1]	Reward: 0.3644	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Invalid action: [5, 2, 1]
+Step: 138	Action: [5, 2, 1]	Reward: -10000.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 139	Action: [6, 0, 9]	Reward: 0.3641	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 140	Action: [0, 4, 3]	Reward: 0.3715	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 141	Action: [9, 1, 0]	Reward: 0.4528	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 142	Action: [3, 0, 1, 2]	Reward: 0.4015	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 143	Action: [4, 0, 4, 4]	Reward: 0.4268	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 144	Action: [5, 0, 0, 0]	Reward: 0.3048	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 145	Action: [6, 0, 4, 3]	Reward: 0.4592	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 146	Action: [0, 4, 4]	Reward: 0.5053	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 147	Action: [9, 2, 0]	Reward: 0.4903	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 148	Action: [3, 0, 2, 0]	Reward: 0.4904	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 149	Action: [4, 0, 7]	Reward: 0.4004	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 150	Action: [5, 9, 1]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 151	Action: [6, 0, 10]	Reward: 0.2871	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 152	Action: [0, 3, 0]	Reward: 0.4398	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 153	Action: [9, 3, 0]	Reward: 0.4948	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Total Time: 0.006 ms
+Time taken for add:  0.361880 ms
+Total Time: 0.009 ms
+Total Time: 0.007 ms
+Time taken for add:  0.334319 ms
+Time taken for add:  0.324298 ms
+Time taken for add:  0.331313 ms
+Time taken for add:  0.444646 ms
+Time taken for add:  0.641270 ms
+Time taken for add:  0.546865 ms
+Total Time: 0.005 ms
+Time taken for add:  0.359360 ms
+Total Time: 0.006 ms
+Total Time: 0.005 ms
+Total Time: 0.005 ms
+Total Time: 0.005 ms
+Time taken for add:  0.478115 ms
+Total Time: 0.005 ms
+Total Time: 0.007 ms
+Total Time: 0.006 ms
+Total Time: 0.005 ms
+Time taken for add:  0.338519 ms
+Time taken for add:  0.528475 ms
+Time taken for add:  0.365027 ms
+Time taken for add:  0.445227 ms
+Time taken for add:  0.434558 ms
+Time taken for add:  0.348187 ms
+Time taken for add:  0.524741 ms
+Time taken for add:  0.399840 ms
+Time taken for add:  0.340300 ms
+Time taken for add:  0.344972 ms
+Time taken for add:  0.326053 ms
+Time taken for add:  0.381040 ms
+Time taken for add:  0.444006 ms
+Time taken for add:  0.523605 ms
+Total Time: 0.006 ms
+Time taken for add:  0.536059 ms
+Time taken for add:  0.352306 ms
+Time taken for add:  0.517050 ms
+Time taken for add:  0.397859 ms
+Time taken for add:  0.340566 ms
+Time taken for add:  0.559137 ms
+Time taken for add:  0.403717 ms
+Time taken for add:  0.342822 ms
+Time taken for add:  0.429298 ms
+Time taken for add:  0.442547 ms
+Total Time: 0.005 ms
+Time taken for add:  0.359218 ms
+Total Time: 0.008 ms
+Time taken for add:  0.323921 ms
+Total Time: 0.007 ms
+Time taken for add:  0.491477 ms
+Time taken for add:  0.377871 ms
+Time taken for add:  0.360564 ms
+Total Time: 0.005 ms
+Time taken for add:  0.435051 ms
+Total Time: 0.007 ms
+Time taken for add:  0.324134 ms
+Time taken for add:  0.326323 ms
+Time taken for add:  0.413341 ms
+Time taken for add:  0.330264 ms
+Time taken for add:  0.554274 ms
+Total Time: 0.005 ms
+Time taken for add:  0.376724 ms
+Time taken for add:  0.363064 ms
+Time taken for add:  0.355664 ms
+Time taken for add:  0.339943 ms
+Time taken for add:  0.325203 ms
+Time taken for add:  0.328027 ms
+Total Time: 0.005 ms
+Time taken for add:  0.359632 ms
+Total Time: 0.005 ms
+Time taken for add:  0.391382 ms
+Total Time: 0.005 ms
+Time taken for add:  0.324443 ms
+Time taken for add:  0.398338 ms
+Time taken for add:  0.520541 ms
+Time taken for add:  0.437586 ms
+Time taken for add:  0.335734 ms
+Time taken for add:  0.333893 ms
+Time taken for add:  0.434441 ms
+Time taken for add:  0.415356 ms
+Time taken for add:  0.338489 ms
+Time taken for add:  0.348996 ms
+Time taken for add:  0.326808 ms
+Time taken for add:  0.408580 ms
+Time taken for add:  0.323859 ms
+Time taken for add:  0.516669 ms
+Time taken for add:  0.336798 ms
+Time taken for add:  0.372253 ms
+Time taken for add:  0.325602 ms
+Time taken for add:  0.342091 ms
+Time taken for add:  0.382891 ms
+Time taken for add:  0.499066 ms
+Time taken for add:  0.358244 ms
+Time taken for add:  0.328760 ms
+Time taken for add:  0.352293 ms
+Time taken for add:  0.407818 ms
+Total Time: 0.005 ms
+Time taken for add:  0.326180 ms
+Time taken for add:  0.324001 ms
+Time taken for add:  0.360363 ms
+Time taken for add:  0.426483 ms
+Time taken for add:  0.344576 ms
+Time taken for add:  0.332356 ms
+Time taken for add:  0.429426 ms
+Time taken for add:  0.461666 ms
+Time taken for add:  0.466084 ms
+Time taken for add:  0.380054 ms
+Total Time: 0.005 ms
+Time taken for add:  0.423045 ms
+Time taken for add:  0.409850 ms
+Total Time: 0.005 ms
+Time taken for add:  0.369843 ms
+Time taken for add:  0.348814 ms
+Total Time: 0.007 ms
+Time taken for add:  0.359593 ms
+Time taken for add:  0.449655 ms
+Time taken for add:  0.450040 ms
+Time taken for add:  0.441053 ms
+Time taken for add:  0.361842 ms
+Time taken for add:  0.408023 ms
+Time taken for add:  0.383915 ms
+Time taken for add:  0.537553 ms
+Time taken for add:  0.356802 ms
+Time taken for add:  0.324224 ms
+Time taken for add:  0.334134 ms
+Time taken for add:  0.334078 ms
+Time taken for add:  0.409222 ms
+Total Time: 0.006 ms
+Time taken for add:  0.570610 ms
+Time taken for add:  0.372530 ms
+Time taken for add:  0.331145 ms
+Time taken for add:  0.350581 mStep: 154	Action: [3, 0, 2, 1]	Reward: 0.4673	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 155	Action: [4, 0, 4, 5]	Reward: 0.5042	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 156	Action: [5, 3, 1]	Reward: 0.0000	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 157	Action: [6, 0, 0, 1]	Reward: 0.4956	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 158	Action: [0, 3, 1]	Reward: 0.4122	Best Reward: 0.5059	Best action: [6, 0, 4, 0]	
+Step: 159	Action: [9, 4, 0]	Reward: 0.5065	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 160	Action: [3, 0, 2, 0, 0]	Reward: 0.3341	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 161	Action: [4, 0, 4, 6]	Reward: 0.5062	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 162	Action: [5, 10, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 163	Action: [6, 0, 0, 2]	Reward: 0.5049	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 164	Action: [0, 3, 0, 0]	Reward: 0.4838	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Invalid action: [9, 5, 0]
+Step: 165	Action: [9, 5, 0]	Reward: -10000.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 166	Action: [3, 0, 2, 2]	Reward: 0.3875	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 167	Action: [4, 0, 4, 7]	Reward: 0.4537	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 168	Action: [5, 6, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 169	Action: [6, 0, 0, 3]	Reward: 0.4786	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 170	Action: [0, 3, 2]	Reward: 0.4475	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 171	Action: [9, 6, 0]	Reward: 0.3807	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 172	Action: [6, 0, 0, 4]	Reward: 0.4055	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 173	Action: [0, 3, 0, 1]	Reward: 0.4356	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 174	Action: [9, 7, 0]	Reward: 0.4210	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 175	Action: [6, 0, 4, 0, 0, 0]	Reward: 0.3524	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 176	Action: [0, 3, 3]	Reward: 0.3834	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 177	Action: [9, 8, 0]	Reward: 0.3458	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 178	Action: [6, 0, 4, 4]	Reward: 0.3540	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 179	Action: [0, 3, 4]	Reward: 0.4844	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 180	Action: [9, 9, 0]	Reward: 0.3728	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 181	Action: [6, 0, 2, 0]	Reward: 0.3508	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 182	Action: [0, 6, 0]	Reward: 0.4039	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 183	Action: [9, 10, 0]	Reward: 0.4324	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 184	Action: [6, 0, 4, 5]	Reward: 0.3551	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 185	Action: [0, 6, 1]	Reward: 0.5050	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 186	Action: [9, 4, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 187	Action: [6, 0, 0, 5]	Reward: 0.3756	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 188	Action: [0, 6, 1, 0]	Reward: 0.4720	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 189	Action: [9, 3, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 190	Action: [6, 0, 2, 1]	Reward: 0.4544	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 191	Action: [0, 6, 2]	Reward: 0.3708	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 192	Action: [9, 2, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 193	Action: [6, 0, 2, 1, 0]	Reward: 0.4866	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 194	Action: [0, 6, 3]	Reward: 0.5060	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 195	Action: [9, 1, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 196	Action: [6, 0, 2, 2]	Reward: 0.5051	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 197	Action: [0, 6, 4]	Reward: 0.5061	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 198	Action: [9, 10, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 199	Action: [6, 0, 2, 3]	Reward: 0.3465	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 200	Action: [0, 6, 5]	Reward: 0.3879	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 201	Action: [9, 7, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 202	Action: [6, 0, 4, 6]	Reward: 0.5065	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 203	Action: [0, 1, 0]	Reward: 0.4061	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 204	Action: [9, 6, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 205	Action: [6, 0, 2, 4]	Reward: 0.3851	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 206	Action: [0, 1, 1]	Reward: 0.4608	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 207	Action: [9, 9, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 208	Action: [6, 0, 4, 7]	Reward: 0.4215	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 209	Action: [0, 1, 1, 0]	Reward: 0.3439	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 210	Action: [9, 8, 1]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 211	Action: [6, 0, 0, 6]	Reward: 0.3166	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 212	Action: [0, 1, 2]	Reward: 0.4474	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 213	Action: [9, 4, 2]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 214	Action: [6, 0, 4, 0, 2]	Reward: 0.4155	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 215	Action: [0, 1, 3]	Reward: 0.4386	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 216	Action: [9, 3, 2]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 217	Action: [6, 0, 4, 8]	Reward: 0.5052	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 218	Action: [0, 9, 0]	Reward: 0.5047	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 219	Action: [9, 2, 2]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 220	Action: [6, 0, 4, 0, 3]	Reward: 0.4981	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 221	Action: [0, 9, 1]	Reward: 0.3443	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 222	Action: [9, 1, 2]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 223	Action: [6, 0, 4, 9]	Reward: 0.3540	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 224	Action: [0, 9, 0, 0]	Reward: 0.3647	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 225	Action: [9, 10, 2]	Reward: 0.0000	Best Reward: 0.5065	Best action: [9, 4, 0]	
+Step: 226	Action: [6, 0, 2, 5]	Reward: 0.5078	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 227	Action: [0, 9, 2]	Reward: 0.4076	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 228	Action: [9, 7, 2]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 229	Action: [6, 0, 4, 0, 4]	Reward: 0.3633	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 230	Action: [0, 9, 3]	Reward: 0.3284	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 231	Action: [9, 6, 2]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 232	Action: [6, 0, 4, 0, 5]	Reward: 0.5046	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 233	Action: [0, 4, 5]	Reward: 0.4466	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 234	Action: [9, 9, 2]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 235	Action: [6, 0, 4, 0, 6]	Reward: 0.5018	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 236	Action: [0, 0, 6]	Reward: 0.4841	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 237	Action: [9, 8, 2]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 238	Action: [6, 0, 4, 0, 7]	Reward: 0.3204	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 239	Action: [0, 3, 5]	Reward: 0.5053	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 240	Action: [9, 4, 0, 0]	Reward: 0.3691	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 241	Action: [6, 0, 4, 10]	Reward: 0.4425	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 242	Action: [0, 0, 7]	Reward: 0.4091	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 243	Action: [9, 3, 0, 0]	Reward: 0.4236	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 244	Action: [6, 0, 4, 0, 8]	Reward: 0.4891	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 245	Action: [0, 3, 6]	Reward: 0.4463	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 246	Action: [9, 2, 0, 0]	Reward: 0.4416	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 247	Action: [6, 0, 4, 0, 9]	Reward: 0.4438	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 248	Action: [0, 1, 1, 1]	Reward: 0.5074	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 249	Action: [9, 1, 0, 0]	Reward: 0.4525	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 250	Action: [6, 0, 4, 0, 0, 1]	Reward: 0.4504	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 251	Action: [0, 1, 4]	Reward: 0.4883	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 252	Action: [9, 10, 0, 0]	Reward: 0.4080	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 253	Action: [6, 0, 4, 0, 0, 1, 0]	Reward: 0.5036	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 254	Action: [0, 1, 5]	Reward: 0.5044	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 255	Action: [9, 7, 0, 0]	Reward: 0.4739	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 256	Action: [6, 0, 4, 0, 0, 2]	Reward: 0.4151	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 257	Action: [0, 1, 6]	Reward: 0.4061	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 258	Action: [9, 6, 0, 0]	Reward: 0.4578	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 259	Action: [6, 0, 4, 0, 0, 3]	Reward: 0.3513	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 260	Action: [0, 4, 6]	Reward: 0.3617	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 261	Action: [9, 9, 0, 0]	Reward: 0.4836	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 262	Action: [6, 0, 4, 0, 10]	Reward: 0.5068	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 263	Action: [0, 6, 1, 1]	Reward: 0.4488	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 264	Action: [9, 8, 0, 0]	Reward: 0.4376	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 265	Action: [6, 0, 4, 0, 0, 4]	Reward: 0.3504	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 266	Action: [0, 6, 6]	Reward: 0.4884	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 267	Action: [9, 2, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 268	Action: [6, 0, 4, 0, 10, 0]	Reward: 0.4448	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 269	Action: [0, 6, 7]	Reward: 0.3849	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 270	Action: [9, 3, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 271	Action: [6, 0, 4, 0, 10, 1]	Reward: 0.3489	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 272	Action: [0, 0, 8]	Reward: 0.4916	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 273	Action: [9, 1, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 274	Action: [6, 0, 4, 0, 10, 0, 0]	Reward: 0.3701	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 275	Action: [0, 3, 0, 0, 0]	Reward: 0.3536	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 276	Action: [9, 4, 3]	Reward: 0.4873	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 277	Action: [6, 0, 4, 0, 10, 2]	Reward: 0.4427	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 278	Action: [0, 3, 0, 2]	Reward: 0.3874	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 279	Action: [9, 7, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 280	Action: [6, 0, 4, 0, 10, 3]	Reward: 0.5042	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 281	Action: [0, 3, 7]	Reward: 0.4903	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 282	Action: [9, 10, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 283	Action: [6, 0, 4, 0, 5, 0]	Reward: 0.5048	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 284	Action: [0, 3, 8]	Reward: 0.4220	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 285	Action: [9, 9, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 286	Action: [6, 0, 4, 0, 5, 1]	Reward: 0.3352	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 287	Action: [0, 0, 9]	Reward: 0.4609	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 288	Action: [9, 6, 3]	Reward: 0.0000	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 289	Action: [6, 0, 4, 0, 5, 0, 0]	Reward: 0.4165	Best Reward: 0.5078	Best action: [6, 0, 2, 5]	
+Step: 290	Action: [0, 8, 0]	Reward: 0.5083	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 291	Action: [9, 8, 3]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 292	Action: [6, 0, 4, 0, 5, 2]	Reward: 0.5060	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 293	Action: [0, 8, 1]	Reward: 0.4079	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 294	Action: [9, 4, 4]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 295	Action: [6, 0, 4, 0, 5, 3]	Reward: 0.5057	Best Reward: 0.5083	Best action: [0, 8, 0]	
+s
+Time taken for add:  0.324966 ms
+Total Time: 0.005 ms
+Time taken for add:  0.330595 ms
+Time taken for add:  0.397438 ms
+Time taken for add:  0.323485 ms
+Time taken for add:  0.490389 ms
+Time taken for add:  0.323656 ms
+Total Time: 0.006 ms
+Time taken for add:  0.324524 ms
+Time taken for add:  0.338673 ms
+Time taken for add:  0.422854 ms
+Time taken for add:  0.361148 ms
+Total Time: 0.006 ms
+Time taken for add:  0.342360 ms
+Time taken for add:  0.366120 ms
+Time taken for add:  0.430317 ms
+Time taken for add:  0.404044 ms
+Time taken for add:  0.376084 ms
+Time taken for add:  0.389136 ms
+Time taken for add:  0.464888 ms
+Time taken for add:  0.427360 ms
+Time taken for add:  0.473732 ms
+Time taken for add:  0.462872 ms
+Time taken for add:  0.338199 ms
+Time taken for add:  0.439444 ms
+Time taken for add:  0.467000 ms
+Time taken for add:  0.405633 ms
+Time taken for add:  0.378896 ms
+Time taken for add:  0.461348 ms
+Time taken for add:  0.324464 ms
+Total Time: 0.013 ms
+Time taken for add:  0.436178 ms
+Time taken for add:  0.347147 ms
+Total Time: 0.005 ms
+Time taken for add:  0.360596 ms
+Time taken for add:  0.441859 ms
+Total Time: 0.005 ms
+Time taken for add:  0.336681 ms
+Time taken for add:  0.323785 ms
+Total Time: 0.005 ms
+Time taken for add:  0.324365 ms
+Time taken for add:  0.323746 ms
+Total Time: 0.006 ms
+Time taken for add:  0.472791 ms
+Time taken for add:  0.422385 ms
+Total Time: 0.006 ms
+Time taken for add:  0.323502 ms
+Time taken for add:  0.403442 ms
+Total Time: 0.005 ms
+Time taken for add:  0.425483 ms
+Time taken for add:  0.355576 ms
+Total Time: 0.005 ms
+Time taken for add:  0.388690 ms
+Time taken for add:  0.476422 ms
+Total Time: 0.005 ms
+Time taken for add:  0.517439 ms
+Time taken for add:  0.366198 ms
+Total Time: 0.005 ms
+Time taken for add:  0.394321 ms
+Time taken for add:  0.373594 ms
+Total Time: 0.005 ms
+Time taken for add:  0.324316 ms
+Time taken for add:  0.324656 ms
+Total Time: 0.005 ms
+Time taken for add:  0.328927 ms
+Time taken for add:  0.475893 ms
+Total Time: 0.005 ms
+Time taken for add:  0.462844 ms
+Time taken for add:  0.449288 ms
+Total Time: 0.010 ms
+Time taken for add:  0.322628 ms
+Time taken for add:  0.401927 ms
+Total Time: 0.006 ms
+Time taken for add:  0.450975 ms
+Time taken for add:  0.498954 ms
+Total Time: 0.006 ms
+Time taken for add:  0.324682 ms
+Time taken for add:  0.366889 ms
+Total Time: 0.006 ms
+Time taken for add:  0.326507 ms
+Time taken for add:  0.338409 ms
+Total Time: 0.005 ms
+Time taken for add:  0.511376 ms
+Time taken for add:  0.324272 ms
+Time taken for add:  0.443937 ms
+Time taken for add:  0.370234 ms
+Time taken for add:  0.400478 ms
+Time taken for add:  0.386763 ms
+Time taken for add:  0.334957 ms
+Time taken for add:  0.367127 ms
+Time taken for add:  0.371052 ms
+Time taken for add:  0.369148 ms
+Time taken for add:  0.322887 ms
+Time taken for add:  0.362046 ms
+Time taken for add:  0.363755 ms
+Time taken for add:  0.335533 ms
+Time taken for add:  0.401601 ms
+Time taken for add:  0.325328 ms
+Time taken for add:  0.324823 ms
+Time taken for add:  0.345738 ms
+Time taken for add:  0.394743 ms
+Time taken for add:  0.403407 ms
+Time taken for add:  0.357917 ms
+Time taken for add:  0.466410 ms
+Time taken for add:  0.452980 ms
+Time taken for add:  0.338773 ms
+Time taken for add:  0.323287 ms
+Time taken for add:  0.365053 ms
+Time taken for add:  0.374398 ms
+Time taken for add:  0.467514 ms
+Time taken for add:  0.335455 ms
+Time taken for add:  0.368319 ms
+Time taken for add:  0.425712 ms
+Time taken for add:  0.469544 ms
+Time taken for add:  0.333302 ms
+Time taken for add:  0.442723 ms
+Time taken for add:  0.463305 ms
+Time taken for add:  0.336190 ms
+Time taken for add:  0.370128 ms
+Time taken for add:  0.422950 ms
+Time taken for add:  0.324967 ms
+Time taken for add:  0.334162 ms
+Time taken for add:  0.324550 ms
+Time taken for add:  0.388212 ms
+Time taken for add:  0.488726 ms
+Time taken for add:  0.355475 ms
+Time taken for add:  0.393381 ms
+Time taken for add:  0.322334 ms
+Time taken for add:  0.323772 ms
+Time taken for add:  0.401698 ms
+Time taken for add:  0.323958 ms
+Time taken for add:  0.Step: 296	Action: [0, 8, 0, 0]	Reward: 0.4985	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 297	Action: [9, 2, 0, 1]	Reward: 0.4571	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 298	Action: [6, 0, 4, 0, 5, 4]	Reward: 0.3135	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 299	Action: [0, 8, 2]	Reward: 0.3850	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 300	Action: [9, 3, 0, 1]	Reward: 0.4529	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 301	Action: [6, 0, 4, 0, 6, 0]	Reward: 0.5052	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 302	Action: [0, 8, 3]	Reward: 0.4910	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 303	Action: [9, 1, 0, 1]	Reward: 0.4039	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 304	Action: [6, 0, 4, 0, 6, 1]	Reward: 0.5067	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 305	Action: [0, 8, 0, 1]	Reward: 0.3975	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 306	Action: [9, 7, 0, 1]	Reward: 0.2809	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 307	Action: [6, 0, 4, 0, 6, 0, 0]	Reward: 0.4953	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 308	Action: [0, 8, 4]	Reward: 0.3236	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 309	Action: [9, 10, 0, 1]	Reward: 0.4937	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 310	Action: [6, 0, 4, 0, 6, 2]	Reward: 0.3366	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 311	Action: [0, 8, 5]	Reward: 0.3292	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 312	Action: [9, 9, 0, 1]	Reward: 0.5033	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 313	Action: [6, 0, 4, 0, 6, 3]	Reward: 0.3631	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 314	Action: [0, 1, 1, 1, 0]	Reward: 0.4834	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 315	Action: [9, 6, 0, 1]	Reward: 0.4904	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 316	Action: [6, 0, 4, 0, 6, 4]	Reward: 0.3836	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 317	Action: [0, 1, 7]	Reward: 0.3758	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 318	Action: [9, 8, 0, 1]	Reward: 0.4402	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 319	Action: [6, 0, 4, 0, 3, 0]	Reward: 0.4031	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 320	Action: [0, 1, 8]	Reward: 0.5045	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 321	Action: [9, 2, 4]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 322	Action: [6, 0, 4, 0, 3, 1]	Reward: 0.4354	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 323	Action: [0, 1, 1, 2]	Reward: 0.4792	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 324	Action: [9, 3, 4]	Reward: 0.4436	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 325	Action: [6, 0, 4, 0, 3, 2]	Reward: 0.4855	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 326	Action: [0, 1, 9]	Reward: 0.3067	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Invalid action: [9, 10, 4]
+Step: 327	Action: [9, 10, 4]	Reward: -10000.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 328	Action: [6, 0, 4, 0, 3, 2, 0]	Reward: 0.3274	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 329	Action: [0, 3, 0, 3]	Reward: 0.4564	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 330	Action: [9, 1, 4]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 331	Action: [6, 0, 4, 0, 3, 3]	Reward: 0.3950	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 332	Action: [0, 3, 0, 0, 1]	Reward: 0.3654	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 333	Action: [9, 9, 4]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 334	Action: [6, 0, 4, 0, 10, 4]	Reward: 0.4326	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 335	Action: [0, 3, 0, 4]	Reward: 0.3573	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 336	Action: [9, 6, 4]	Reward: 0.0000	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 337	Action: [6, 0, 4, 0, 8, 0]	Reward: 0.3403	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 338	Action: [0, 3, 9]	Reward: 0.4590	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 339	Action: [6, 0, 4, 0, 5, 5]	Reward: 0.4746	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 340	Action: [0, 3, 0, 5]	Reward: 0.4367	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 341	Action: [6, 0, 4, 0, 6, 0, 1]	Reward: 0.3467	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 342	Action: [0, 3, 0, 0, 2]	Reward: 0.2754	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 343	Action: [6, 0, 4, 0, 6, 5]	Reward: 0.3890	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 344	Action: [0, 3, 0, 6]	Reward: 0.3293	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 345	Action: [6, 0, 4, 0, 3, 2, 1]	Reward: 0.4760	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 346	Action: [0, 3, 10]	Reward: 0.5063	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 347	Action: [6, 0, 4, 0, 3, 4]	Reward: 0.3208	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 348	Action: [0, 6, 1, 0, 0]	Reward: 0.4781	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 349	Action: [6, 0, 4, 0, 10, 5]	Reward: 0.4273	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 350	Action: [0, 6, 8]	Reward: 0.4533	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 351	Action: [6, 0, 4, 0, 0, 1, 1]	Reward: 0.4511	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 352	Action: [0, 6, 1, 2]	Reward: 0.3791	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 353	Action: [6, 0, 4, 0, 0, 5]	Reward: 0.4337	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 354	Action: [0, 6, 9]	Reward: 0.3996	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 355	Action: [6, 0, 4, 0, 0, 1, 0, 0]	Reward: 0.4739	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 356	Action: [0, 6, 1, 3]	Reward: 0.4592	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 357	Action: [6, 0, 4, 0, 0, 6]	Reward: 0.3544	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 358	Action: [0, 6, 10]	Reward: 0.4409	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 359	Action: [6, 0, 4, 0, 0, 1, 2]	Reward: 0.4594	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 360	Action: [0, 3, 0, 7]	Reward: 0.4407	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 361	Action: [6, 0, 4, 0, 0, 7]	Reward: 0.4901	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 362	Action: [0, 3, 0, 8]	Reward: 0.3819	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 363	Action: [6, 0, 4, 0, 0, 1, 0, 1]	Reward: 0.3570	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 364	Action: [0, 3, 0, 0, 3]	Reward: 0.4688	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 365	Action: [6, 0, 4, 0, 0, 8]	Reward: 0.4041	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 366	Action: [0, 3, 0, 0, 3, 0]	Reward: 0.4565	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 367	Action: [6, 0, 4, 0, 0, 1, 3]	Reward: 0.4137	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 368	Action: [0, 3, 0, 0, 4]	Reward: 0.4289	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 369	Action: [6, 0, 4, 0, 0, 9]	Reward: 0.5057	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 370	Action: [0, 3, 0, 0, 5]	Reward: 0.3876	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 371	Action: [6, 0, 4, 0, 0, 10]	Reward: 0.5051	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 372	Action: [0, 3, 0, 9]	Reward: 0.3544	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 373	Action: [6, 0, 4, 0, 0, 1, 4]	Reward: 0.3037	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 374	Action: [0, 3, 0, 0, 6]	Reward: 0.4173	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 375	Action: [6, 0, 4, 0, 5, 6]	Reward: 0.3503	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 376	Action: [0, 3, 0, 0, 7]	Reward: 0.4102	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 377	Action: [6, 0, 4, 0, 0, 9, 0]	Reward: 0.3686	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 378	Action: [0, 3, 0, 0, 3, 1]	Reward: 0.3797	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 379	Action: [6, 0, 4, 0, 0, 9, 1]	Reward: 0.4074	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 380	Action: [0, 3, 0, 0, 8]	Reward: 0.3509	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 381	Action: [6, 0, 4, 0, 0, 9, 1, 0]	Reward: 0.3943	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 382	Action: [0, 3, 0, 0, 9]	Reward: 0.4509	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 383	Action: [6, 0, 4, 0, 0, 9, 2]	Reward: 0.5077	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 384	Action: [0, 3, 0, 0, 10]	Reward: 0.3789	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 385	Action: [6, 0, 4, 0, 0, 9, 2, 0]	Reward: 0.3639	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 386	Action: [0, 3, 0, 0, 3, 0, 0]	Reward: 0.4278	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 387	Action: [6, 0, 4, 0, 0, 9, 3]	Reward: 0.5035	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 388	Action: [0, 3, 0, 0, 3, 2]	Reward: 0.3838	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 389	Action: [6, 0, 4, 0, 0, 9, 4]	Reward: 0.3618	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 390	Action: [0, 3, 0, 0, 3, 0, 1]	Reward: 0.3367	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 391	Action: [6, 0, 4, 0, 0, 9, 5]	Reward: 0.5073	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 392	Action: [0, 3, 0, 0, 3, 3]	Reward: 0.3717	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 393	Action: [6, 0, 4, 0, 0, 9, 6]	Reward: 0.4077	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 394	Action: [0, 3, 0, 0, 9, 0]	Reward: 0.4903	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 395	Action: [6, 0, 4, 0, 0, 10, 0]	Reward: 0.3909	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 396	Action: [0, 3, 0, 0, 9, 1]	Reward: 0.4676	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 397	Action: [6, 0, 4, 0, 0, 10, 1]	Reward: 0.3999	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 398	Action: [0, 3, 0, 0, 9, 0, 0]	Reward: 0.3137	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 399	Action: [6, 0, 4, 0, 0, 10, 2]	Reward: 0.3690	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 400	Action: [0, 3, 0, 0, 9, 2]	Reward: 0.3548	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 401	Action: [6, 0, 4, 0, 0, 1, 5]	Reward: 0.3872	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 402	Action: [0, 3, 0, 0, 9, 3]	Reward: 0.4815	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 403	Action: [6, 0, 4, 0, 0, 9, 7]	Reward: 0.3764	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 404	Action: [0, 3, 0, 0, 9, 4]	Reward: 0.4651	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 405	Action: [6, 0, 4, 0, 0, 10, 1, 0]	Reward: 0.4905	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 406	Action: [0, 3, 0, 0, 3, 0, 0, 0]	Reward: 0.5039	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 407	Action: [6, 0, 4, 0, 0, 10, 3]	Reward: 0.4199	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 408	Action: [0, 3, 0, 0, 3, 4]	Reward: 0.3785	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 409	Action: [6, 0, 4, 0, 0, 10, 4]	Reward: 0.3417	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 410	Action: [0, 3, 0, 0, 3, 0, 2]	Reward: 0.5048	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 411	Action: [6, 0, 4, 0, 0, 10, 5]	Reward: 0.3615	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 412	Action: [0, 3, 0, 0, 3, 5]	Reward: 0.4567	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 413	Action: [6, 0, 4, 0, 0, 9, 2, 1]	Reward: 0.4716	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 414	Action: [0, 3, 0, 0, 3, 0, 3]	Reward: 0.5067	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 415	Action: [6, 0, 4, 0, 0, 9, 2, 1, 0]	Reward: 0.5066	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 416	Action: [0, 3, 0, 0, 3, 6]	Reward: 0.4131	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 417	Action: [6, 0, 4, 0, 0, 9, 2, 2]	Reward: 0.4793	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 418	Action: [0, 3, 0, 0, 4, 0]	Reward: 0.3960	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 419	Action: [6, 0, 4, 0, 0, 9, 8]	Reward: 0.4504	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 420	Action: [0, 3, 0, 0, 4, 1]	Reward: 0.3194	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 421	Action: [6, 0, 4, 0, 0, 9, 2, 3]	Reward: 0.4037	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 422	Action: [0, 3, 0, 0, 3, 0, 4]	Reward: 0.3738	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 423	Action: [6, 0, 4, 0, 0, 9, 9]	Reward: 0.4701	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 424	Action: [0, 3, 0, 0, 3, 0, 5]	Reward: 0.4087	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 425	Action: [6, 0, 4, 0, 0, 9, 10]	Reward: 0.3288	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 426	Action: [0, 3, 0, 0, 3, 0, 0, 1]	Reward: 0.3788	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 427	Action: [6, 0, 4, 0, 0, 9, 2, 4]	Reward: 0.3904	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 428	Action: [0, 3, 0, 0, 3, 0, 6]	Reward: 0.3980	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 429	Action: [6, 0, 4, 0, 0, 9, 5, 0]	Reward: 0.3649	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 430	Action: [0, 3, 0, 0, 3, 0, 7]	Reward: 0.3942	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 431	Action: [6, 0, 4, 0, 0, 9, 3, 0]	Reward: 0.3336	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 432	Action: [0, 3, 0, 0, 3, 7]	Reward: 0.4726	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 433	Action: [6, 0, 4, 0, 0, 9, 5, 1]	Reward: 0.4905	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 434	Action: [0, 3, 0, 0, 3, 0, 0, 0, 0]	Reward: 0.4181	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 435	Action: [6, 0, 4, 0, 0, 9, 5, 1, 0]	Reward: 0.4909	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 436	Action: [0, 3, 0, 0, 3, 0, 0, 2]	Reward: 0.3216	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 437	Action: [6, 0, 4, 0, 0, 9, 5, 2]	Reward: 0.5077	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 438	Action: [0, 3, 0, 0, 3, 0, 8]	Reward: 0.4571	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 439	Action: [6, 0, 4, 0, 0, 9, 5, 3]	Reward: 0.3310	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 440	Action: [0, 3, 0, 0, 3, 0, 9]	Reward: 0.3934	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 441	Action: [6, 0, 4, 0, 0, 9, 5, 4]	Reward: 0.3234	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 442	Action: [0, 3, 0, 0, 3, 0, 0, 3]	Reward: 0.4019	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 443	Action: [6, 0, 4, 0, 0, 9, 2, 1, 1]	Reward: 0.4731	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 444	Action: [0, 3, 0, 0, 3, 0, 0, 0, 1]	Reward: 0.5066	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 445	Action: [6, 0, 4, 0, 0, 9, 2, 5]	Reward: 0.5027	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 446	Action: [0, 3, 0, 0, 3, 0, 0, 4]	Reward: 0.3784	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 447	Action: [6, 0, 4, 0, 0, 9, 2, 6]	Reward: 0.4882	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 448	Action: [0, 3, 0, 0, 3, 0, 10]	Reward: 0.4186	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 449	Action: [6, 0, 4, 0, 0, 9, 3, 1]	Reward: 0.3612	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 450	Action: [0, 3, 0, 0, 3, 0, 0, 0, 1, 0]	Reward: 0.5053	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 451	Action: [6, 0, 4, 0, 0, 9, 2, 7]	Reward: 0.4876	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 452	Action: [0, 3, 0, 0, 3, 0, 0, 5]	Reward: 0.3275	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 453	Action: [6, 0, 4, 0, 0, 9, 5, 5]	Reward: 0.4042	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 454	Action: [0, 3, 0, 0, 3, 0, 0, 0, 2]	Reward: 0.3948	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 455	Action: [6, 0, 4, 0, 0, 9, 2, 8]	Reward: 0.3992	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 456	Action: [0, 3, 0, 0, 3, 0, 0, 0, 3]	Reward: 0.4850	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 457	Action: [6, 0, 4, 0, 0, 9, 9, 0]	Reward: 0.3076	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 458	Action: [0, 3, 0, 0, 3, 0, 0, 6]	Reward: 0.4474	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 459	Action: [6, 0, 4, 0, 0, 9, 2, 1, 0, 0]	Reward: 0.4888	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 460	Action: [0, 3, 0, 0, 3, 0, 0, 0, 4]	Reward: 0.5065	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 461	Action: [6, 0, 4, 0, 0, 9, 2, 1, 2]	Reward: 0.4610	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 462	Action: [0, 3, 0, 0, 3, 0, 0, 7]	Reward: 0.4899	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 463	Action: [6, 0, 4, 0, 0, 9, 2, 9]	Reward: 0.4137	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 464	Action: [0, 3, 0, 0, 3, 0, 0, 0, 5]	Reward: 0.3598	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 465	Action: [6, 0, 4, 0, 0, 9, 2, 1, 0, 1]	Reward: 0.4446	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 466	Action: [0, 3, 0, 0, 3, 0, 0, 8]	Reward: 0.5068	Best Reward: 0.5083	Best action: [0, 8, 0]	
+Step: 467	Action: [6, 0, 4, 0, 0, 9, 2, 1, 3]	Reward: 0.4704	Best Reward: 0.5083	Best action: [0, 8, 0]	
