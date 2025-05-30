@@ -5,7 +5,7 @@ from pycparser import c_ast
 
 from falcon.util import (
     NodeTransformer,
-    add_memory_prefix,
+    make_full_func,
     generate_code,
     parse_code_ast,
 )
@@ -212,9 +212,7 @@ def ast_tensorization(code, target="mlu"):
 
     # 输出修改后的代码
     tensorized_code = generate_code(ast)
-    if target == "mlu":
-        return add_memory_prefix(tensorized_code)
-    return tensorized_code
+    return make_full_func(tensorized_code, target)
 
 
 if __name__ == "__main__":

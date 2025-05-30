@@ -2,7 +2,7 @@ from pycparser import c_ast
 
 from falcon.util import (
     NodeTransformer,
-    add_memory_prefix,
+    make_full_func,
     add_parallel_variable_prefix,
     generate_code,
     parse_code_ast,
@@ -120,11 +120,7 @@ def ast_thread_binding(code, target="mlu"):
     # 输出修改后的代码
     binding_code = generate_code(ast)
 
-    if target == "mlu":
-        return add_memory_prefix(binding_code)
-    else:
-        return add_parallel_variable_prefix(binding_code)
-
+    return make_full_func(binding_code, target)
 
 if __name__ == "__main__":
     # 示例代码

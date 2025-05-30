@@ -37,13 +37,13 @@ def create_bang_perf_func(file_name, op_type="ewise"):
     func_type = None
     if "clusterId" in original_function:
         dim = "cnrtDim3_t dim = {32, 1, 1};"
-        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION8;"
+        func_type = "cnrtFunctionType_t ktype = cnrtFuncTypeUnion8;"
     elif "coreId" in original_function:
         dim = "cnrtDim3_t dim = {4, 1, 1};"
-        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_UNION1;"
+        func_type = "cnrtFunctionType_t ktype = cnrtFuncTypeUnion1;"
     else:
         dim = "cnrtDim3_t dim = {1, 1, 1};"
-        func_type = "cnrtFunctionType_t ktype = CNRT_FUNC_TYPE_BLOCK;"
+        func_type = "cnrtFunctionType_t ktype = cnrtFuncTypeBlock;"
     # 构造新的计时函数模板
     device_memory_alloc = []
     memcpy = []
@@ -132,7 +132,7 @@ def create_bang_perf_func(file_name, op_type="ewise"):
     elif op_type == "deformable":
         size = ["size1", "size2", "size3", "size4", "size5"]
         for i, param in enumerate(params):
-            print("[INFO]**********params: ", param)
+
             name = param.split("*")[1]
             dtype = param.split("*")[0]
             device_memory_alloc.append(param + "_mlu;\n")

@@ -255,7 +255,7 @@ def tensorization(op, code, document):
     match = re.search(r"```[a-zA-Z]*\n(.*?)```", content, re.S)
     if match:
         code_content = match.group(1).strip()
-        return code_content
+        return make_full_func(code_content)
     return None
 
 
