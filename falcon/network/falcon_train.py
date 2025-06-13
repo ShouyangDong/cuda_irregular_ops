@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import pickle
 import time
@@ -9,18 +10,23 @@ import haiku as hk
 import jax
 import jax.numpy as jnp
 import mctx
+import numpy as np
 import optax
 import pgx
 import pgx.core as core
 import tiktoken
 from jax import jit, vmap
+from jax.experimental import io_callback
 from network import CodeAZNet
 from omegaconf import OmegaConf
 from pgx._src.struct import dataclass
 from pgx._src.types import Array
 from pydantic import BaseModel
 
+from benchmark.perf import perf_cuda, perf_dlboost, perf_hip, perf_mlu
+from falcon.mcts.actions import actions as ActionSpace
 from falcon.mcts.utils import open_file
+from falcon.util import get_target
 
 GFLOPS = 64 * 1280 * 2 / 1e9
 
@@ -28,13 +34,37 @@ encoder = tiktoken.encoding_for_model("gpt-4o")
 devices = jax.local_devices()
 num_devices = len(devices)
 
+logging.basicConfig(
+    level=logging.INFO,  # 设置日志级别
+    format="%(asctime)s - %(levelname)s - %(message)s",  # 设置日志格式
+)
+
+
+def objective(file_name, target):
+    """We design an objective function. If compile and runtime error happens,
+    then the score is zero.
+    """
+    try:
+        time_ms = 1000000
+        if target == "cuda":
+            time_ms = perf_cuda.benchmark(file_name)
+        elif target == "mlu":
+            time_ms = perf_mlu.benchmark(file_name)
+        elif target == "cpu":
+            time_ms = perf_dlboost.benchmark(file_name)
+        elif target == "hip":
+            time_ms = perf_hip.benchmark(file_name)
+        return GFLOPS / (time_ms / 1e3)
+    except Exception as e:
+        logging.info(e)
+        return 0.0
+
 
 class Config(BaseModel):
     seed: int = 0
     max_num_iters: int = 400
     # network params
-    num_channels: int = 128
-    num_layers: int = 6
+    max_sequence_length: int = 128
     resnet_v2: bool = True
     # selfplay params
     selfplay_batch_size: int = 2
@@ -134,25 +164,26 @@ class FalconGo:
         score = objective(new_file, target)
         if target != self.target_platform:
             score = 0
-        return code, score
+        return code, np.float32(score)
 
-    @partial(jax.jit, static_argnums=(0,))
-    def step(self, state: State, action_id: int) -> State:
-        try:
-            # 模拟执行 action（注意：这里的 perform_action 等函数不能依赖 Python 逻辑）
-            action = ActionSpace[action_id]  # 静态列表或 dict
-            code, reward = perform_action_stub(action)  # 替换为纯函数模拟器
+    def perform_action_py(self, action_ids: jnp.ndarray) -> float:
+        # 这是普通Python函数，必须用numpy的tolist()转换动作id
+        action_list = [ActionSpace[action_ids]]
+        _, reward = self.perform_action(action_list)
+        return reward
 
-            terminated = (reward <= -10000) | (state.iteration >= MAX_ITER)
-            new_obs = encode_code_to_array(code)
-
-            best_reward = jnp.maximum(state.best_reward, reward)
-
-        except BaseException:
-            reward = -10000
-            terminated = True
-            new_obs = state.observation
-            best_reward = state.best_reward
+    def step(self, state: State, action_ids: jnp.ndarray) -> State:
+        # 使用 pure_callback异步调用纯 Python 函数获取 reward
+        reward = io_callback(
+            self.perform_action_py,
+            jax.ShapeDtypeStruct((), jnp.float32),
+            action_ids,
+        )
+        terminated = (reward <= -10000) | (
+            state.iteration >= config.max_num_iters
+        )
+        new_obs = state.observation
+        best_reward = jnp.maximum(state.best_reward, reward)
 
         return State(
             observation=new_obs,
@@ -383,7 +414,6 @@ def train(model, opt_state, data: Sample):
 
 @jax.pmap
 def evaluate(rng_key, model):
-    """评估模型在环境中的表现"""
     model_params, model_state = model
     batch_size = config.selfplay_batch_size // num_devices
     keys = jax.random.split(rng_key, batch_size)
@@ -405,14 +435,12 @@ def evaluate(rng_key, model):
 
         # 选择动作（这里使用argmax代替采样）
         actions = jnp.argmax(logits, axis=-1)
-
         # 执行动作
         next_states = jax.vmap(env.step)(states, actions)
         # next_states = jax.vmap(env.step, in_axes=(0, 0))(states, actions)
 
         # 更新最佳奖励
         new_best = jnp.maximum(best_rewards, next_states.rewards)
-
         return (keys, next_states, new_best)
 
     # 运行整个episode
@@ -477,7 +505,6 @@ if __name__ == "__main__":
                     "eval/max_reward": max_reward,
                     "eval/min_reward": min_reward,
                     "eval/best_reward": best_reward,
-                    "eval/success_rate": success_rate,
                 }
             )
 
