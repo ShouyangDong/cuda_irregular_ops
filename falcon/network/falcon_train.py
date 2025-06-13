@@ -57,21 +57,21 @@ def objective(file_name, target):
         return GFLOPS / (time_ms / 1e3)
     except Exception as e:
         logging.info(e)
-        return 0.0
+        return -10000.0
 
 
 class Config(BaseModel):
     seed: int = 0
-    max_num_iters: int = 400
+    max_num_iters: int = 13
     # network params
-    max_sequence_length: int = 128
-    resnet_v2: bool = True
+    max_sequence_length: int = 10
     # selfplay params
-    selfplay_batch_size: int = 2
-    num_simulations: int = 32
-    max_num_steps: int = 256
+    selfplay_batch_size: int = 1
+    num_simulations: int = 400
+    # Tree depth
+    max_num_steps: int = 10
     # training params
-    training_batch_size: int = 2
+    training_batch_size: int = 1
     learning_rate: float = 0.001
     # eval params
     eval_interval: int = 5
@@ -179,9 +179,10 @@ class FalconGo:
             jax.ShapeDtypeStruct((), jnp.float32),
             action_ids,
         )
-        terminated = (reward <= -10000) | (
+        terminated = (reward == -10000.0) | (
             state.iteration >= config.max_num_iters
         )
+
         new_obs = state.observation
         best_reward = jnp.maximum(state.best_reward, reward)
 
@@ -433,11 +434,9 @@ def evaluate(rng_key, model):
             model_params, model_state, states.observation, is_eval=True
         )
 
-        # 选择动作（这里使用argmax代替采样）
         actions = jnp.argmax(logits, axis=-1)
         # 执行动作
         next_states = jax.vmap(env.step)(states, actions)
-        # next_states = jax.vmap(env.step, in_axes=(0, 0))(states, actions)
 
         # 更新最佳奖励
         new_best = jnp.maximum(best_rewards, next_states.rewards)
